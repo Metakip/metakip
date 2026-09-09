@@ -15,6 +15,8 @@ import { DOCS_ORIGIN, SITE_ORIGIN } from '../data/siteConfig';
 // biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
 const CLI_GUIDE = `${DOCS_ORIGIN}/agents/markdawn-cli/`;
 // biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
+const MCP_GUIDE = `${DOCS_ORIGIN}/agents/mcp/`;
+// biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
 const INSTALL_COMMANDS = [
   {
     label: 'Linux / macOS',
@@ -28,7 +30,7 @@ const INSTALL_COMMANDS = [
   },
 ];
 const PAGE_DESCRIPTION =
-  'The collaborative knowledge base for humans and agents. Write, organize, and share knowledge in the browser, then let terminals and AI agents work with the same pages.';
+  'A shared knowledge base for humans and agents. The same information exposed through the browser, MCP, CLI, or API.';
 // biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
 const STRUCTURED_DATA = {
   '@context': 'https://schema.org',
@@ -434,7 +436,7 @@ const STRUCTURED_DATA = {
               aria-haspopup="dialog"
               aria-expanded="false"
               data-cli-trigger
-            >CLI &amp; Agents</a>
+            >CLI</a>
 
             <div class="cli-popover" role="dialog" aria-label="Install the CLI" hidden data-cli-popover>
               <div class="cli-popover-title">
@@ -470,6 +472,8 @@ const STRUCTURED_DATA = {
               ))}
             </div>
           </div>
+
+          <a class="action-button" href={MCP_GUIDE} target="_blank" rel="noopener noreferrer">MCP</a>
 
         </div>
       </main>

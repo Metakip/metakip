@@ -1,7 +1,7 @@
 import { APP_ORIGIN, DOCS_ORIGIN, GITHUB_URL, SITE_ORIGIN } from './siteConfig';
 
 export const PRODUCT_SUMMARY =
-  'Write, organize, and share knowledge in the browser. Let your terminal and AI agents read and update the same pages through the CLI and API.';
+  'A shared knowledge base for humans and agents. The same information exposed through the browser, MCP, CLI, or API.';
 
 export const PRODUCT_ORGANIZATION = {
   '@type': 'Organization',
