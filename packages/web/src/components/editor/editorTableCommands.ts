@@ -2,6 +2,7 @@ import type { Editor } from '@milkdown/core';
 import { commandsCtx, editorViewCtx } from '@milkdown/core';
 import type { EditorView } from '@milkdown/kit/prose/view';
 import { insertTableCommand } from '@milkdown/preset-gfm';
+import { TextSelection } from 'prosemirror-state';
 import {
   addColumnAfter,
   addColumnBefore,
@@ -32,6 +33,41 @@ export type EditorTableCommands = {
   handleDeleteCol: () => void;
   handleDeleteTable: () => void;
 };
+
+export type TableEdgeAction = 'column' | 'row';
+
+function getLastTableCell(table: HTMLTableElement): HTMLTableCellElement | null {
+  const lastRow = table.rows.item(table.rows.length - 1);
+  return lastRow?.cells.item(lastRow.cells.length - 1) ?? null;
+}
+
+export function addTableEdge(
+  editor: Editor | null,
+  table: HTMLTableElement,
+  action: TableEdgeAction,
+): boolean {
+  if (!editor || !table.isConnected) return false;
+
+  let added = false;
+  editor.action((ctx) => {
+    const view = ctx.get(editorViewCtx) as EditorView | undefined;
+    const lastCell = getLastTableCell(table);
+    if (!view?.editable || !lastCell) return;
+
+    const cellPosition = view.posAtDOM(lastCell, 0);
+    const resolvedPosition = view.state.doc.resolve(cellPosition);
+    view.dispatch(view.state.tr.setSelection(TextSelection.near(resolvedPosition)));
+
+    added =
+      action === 'column'
+        ? addColumnAfter(view.state, view.dispatch)
+        : addRowAfter(view.state, view.dispatch);
+
+    if (added) view.focus();
+  });
+
+  return added;
+}
 
 export function createEditorTableCommands(
   editor: Editor | null,

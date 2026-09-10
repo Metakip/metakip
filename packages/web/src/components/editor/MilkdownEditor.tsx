@@ -28,6 +28,7 @@ import { createEditorFormattingCommands } from './editorFormattingCommands';
 import { createEditorTableCommands } from './editorTableCommands';
 import { FloatingToolbar } from './FloatingToolbar';
 import { SlashMenu } from './SlashMenu';
+import { TableEdgeControls } from './TableEdgeControls';
 import { useEditorShortcuts } from './useEditorShortcuts';
 import { WikiLinkSuggestions } from './WikiLinkSuggestions';
 
@@ -56,6 +57,7 @@ export function MilkdownEditor({
   onPermissionSnapshot,
 }: MilkdownEditorProps) {
   const editorRef = useRef<Editor | null>(null);
+  const editorWrapperRef = useRef<HTMLDivElement>(null);
   const [initialContentReadyEditor, setInitialContentReadyEditor] = useState<Editor | null>(null);
   const [initialSyncError, setInitialSyncError] = useState(false);
   const [initialSyncAttempt, setInitialSyncAttempt] = useState(0);
@@ -298,6 +300,7 @@ export function MilkdownEditor({
 
   return (
     <div
+      ref={editorWrapperRef}
       className={`editor-wrapper min-h-[500px] relative ${isReadOnly ? '' : 'editor-scroll-past-end'} ${isEditorReady ? '' : 'flex items-center justify-center'}`}
     >
       {editorLoadState.status === 'error' ? (
@@ -368,6 +371,11 @@ export function MilkdownEditor({
         </>
       )}
       <div ref={setContainer} className={`milkdown-editor ${isEditorReady ? '' : 'invisible'}`} />
+      <TableEdgeControls
+        editor={editor}
+        enabled={!isReadOnly && isEditorReady}
+        wrapperRef={editorWrapperRef}
+      />
     </div>
   );
 }
