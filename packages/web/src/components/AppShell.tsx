@@ -116,7 +116,7 @@ function AppShellContent({ contentState }: { contentState: AppShellContentState 
         <section
           aria-label="Sidebar"
           className={clsx(
-            'fixed left-0 top-0 bottom-0 z-[51] w-[min(80vw,252px)] flex-col flex-shrink-0 items-center p-3 gap-3',
+            'fixed left-0 top-0 bottom-0 z-[51] w-[min(80vw,252px)] flex-col flex-shrink-0 items-center p-3 gap-2',
             'md:z-40 md:flex md:w-[252px] md:pl-3 md:py-3 md:pr-0 md:transition-all md:duration-500 md:ease-[cubic-bezier(0.16,1,0.3,1)]',
             isMobileMenuOpen ? 'flex animate-slide-right' : 'hidden',
             collapsed
@@ -162,7 +162,7 @@ function AppShellContent({ contentState }: { contentState: AppShellContentState 
         <div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto scroll-smooth pb-8">
           <div
             className={clsx(
-              'mx-auto w-full min-w-0 max-w-4xl',
+              'app-content-shell mx-auto w-full min-w-0 max-w-4xl',
               isLoading
                 ? isAnonymous
                   ? 'flex min-h-[100dvh] flex-col p-6 md:p-12'
