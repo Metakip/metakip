@@ -1,146 +1,46 @@
 import clsx from 'clsx';
-import { useEffect, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
+import type { EditorHeading } from '../../editor/codemirror/headings';
 
-export interface HeadingNode {
-  id: string;
-  text: string;
-  level: number;
+interface HeadingNode extends EditorHeading {
   children?: HeadingNode[];
 }
 
 interface TableOfContentsProps {
-  editorElement: HTMLElement | null;
+  headings: readonly EditorHeading[];
+  activeHeadingId: string;
+  onHeadingSelect: (heading: EditorHeading) => void;
 }
 
-export function TableOfContents({ editorElement }: TableOfContentsProps) {
-  const [headings, setHeadings] = useState<HeadingNode[]>([]);
+export function TableOfContents({
+  headings,
+  activeHeadingId,
+  onHeadingSelect,
+}: TableOfContentsProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const [activeHeadingId, setActiveHeadingId] = useState<string>('');
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!editorElement) {
-      setHeadings([]);
-      return;
+  const headingTree = useMemo(() => {
+    const roots: HeadingNode[] = [];
+    const stack: HeadingNode[] = [];
+    for (const heading of headings) {
+      const node: HeadingNode = { ...heading, children: [] };
+      while ((stack.at(-1)?.level ?? 0) >= node.level) stack.pop();
+      const parent = stack.at(-1);
+      if (parent) parent.children?.push(node);
+      else roots.push(node);
+      stack.push(node);
     }
-
-    const extractHeadings = () => {
-      const headingElements = editorElement.querySelectorAll('h1, h2, h3, h4, h5, h6');
-      const extractedHeadings: HeadingNode[] = [];
-      const stack: { level: number; node: HeadingNode }[] = [];
-
-      for (const el of headingElements) {
-        const level = Number.parseInt(el.tagName[1] ?? '1', 10);
-        const text = el.textContent?.trim() || '';
-        let id = el.id;
-
-        if (!id) {
-          // The heading schema's toDOM already generates DOM ids at render
-          // time (id: node.attrs.id || getId(node)), so we don't need to
-          // mutate the DOM here. Setting el.id would trigger this component's
-          // own MutationObserver, causing a re-render cascade.
-          id = text
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/^-|-$/g, '');
-        }
-
-        const node: HeadingNode = { id, text, level, children: [] };
-
-        while (stack.length > 0) {
-          const top = stack[stack.length - 1];
-          if (!top || top.level < level) break;
-          stack.pop();
-        }
-
-        if (stack.length > 0) {
-          const top = stack[stack.length - 1];
-          if (top) {
-            top.node.children?.push(node);
-          }
-        } else {
-          extractedHeadings.push(node);
-        }
-
-        stack.push({ level, node });
-      }
-
-      setHeadings(extractedHeadings);
-    };
-
-    extractHeadings();
-
-    const timeoutId = setTimeout(extractHeadings, 100);
-
-    const mutationObserver = new MutationObserver(() => {
-      extractHeadings();
-    });
-
-    mutationObserver.observe(editorElement, {
-      childList: true,
-      subtree: true,
-      characterData: true,
-      attributes: true,
-    });
-
-    return () => {
-      clearTimeout(timeoutId);
-      mutationObserver.disconnect();
-    };
-  }, [editorElement]);
-
-  useEffect(() => {
-    if (!editorElement || headings.length === 0) {
-      observerRef.current?.disconnect();
-      return;
-    }
-
-    const headingElements = editorElement.querySelectorAll('h1, h2, h3, h4, h5, h6');
-
-    observerRef.current = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            const id = entry.target.id;
-            if (id) {
-              setActiveHeadingId(id);
-            }
-          }
-        }
-      },
-      {
-        rootMargin: '-20% 0px -80% 0px',
-        threshold: 0,
-      },
-    );
-
-    for (const el of headingElements) {
-      observerRef.current?.observe(el);
-    }
-
-    return () => {
-      observerRef.current?.disconnect();
-    };
-  }, [editorElement, headings]);
-
-  const scrollToHeading = (headingId: string) => {
-    if (!editorElement) return;
-    const element = editorElement.querySelector(`#${CSS.escape(headingId)}`);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
+    return roots;
+  }, [headings]);
 
   const renderHeading = (heading: HeadingNode, depth = 0) => {
     const isActive = activeHeadingId === heading.id;
     const hasChildren = heading.children && heading.children.length > 0;
 
     return (
-      <div key={heading.id}>
+      <div key={`${heading.id}:${heading.from}`}>
         <button
           type="button"
-          onClick={() => scrollToHeading(heading.id)}
+          onClick={() => onHeadingSelect(heading)}
           className={clsx(
             'w-full text-left py-1.5 px-2 rounded-md transition-all duration-200',
             'text-sm truncate',
@@ -175,7 +75,7 @@ export function TableOfContents({ editorElement }: TableOfContentsProps) {
   };
 
   const renderTickMarks = () => {
-    const allHeadings = getAllHeadingsFlat(headings);
+    const allHeadings = getAllHeadingsFlat(headingTree);
     return allHeadings.map((heading) => {
       const isActive = activeHeadingId === heading.id;
       const width = Math.max(12, 24 - heading.level * 3);
@@ -183,8 +83,8 @@ export function TableOfContents({ editorElement }: TableOfContentsProps) {
       return (
         <button
           type="button"
-          key={heading.id}
-          onClick={() => scrollToHeading(heading.id)}
+          key={`${heading.id}:${heading.from}`}
+          onClick={() => onHeadingSelect(heading)}
           className={clsx(
             'w-full h-[2px] rounded-full transition-all duration-300 mb-1.5',
             isActive
@@ -202,13 +102,12 @@ export function TableOfContents({ editorElement }: TableOfContentsProps) {
     });
   };
 
-  if (headings.length === 0) {
+  if (headingTree.length === 0) {
     return null;
   }
 
   return (
     <section
-      ref={containerRef}
       aria-label="Table of contents"
       className={clsx(
         'fixed right-2 top-1/2 -translate-y-1/2 z-30',
@@ -249,7 +148,7 @@ export function TableOfContents({ editorElement }: TableOfContentsProps) {
         <div className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2 px-2">
           On this page
         </div>
-        <div className="space-y-0.5">{headings.map((heading) => renderHeading(heading))}</div>
+        <div className="space-y-0.5">{headingTree.map((heading) => renderHeading(heading))}</div>
       </div>
     </section>
   );

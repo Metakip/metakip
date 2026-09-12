@@ -42,7 +42,7 @@ describe('useFloatingToolbar', () => {
 
   it('clones the editor selection and clears it when the selection collapses', () => {
     const editor = document.createElement('div');
-    editor.className = 'milkdown-editor';
+    editor.className = 'codemirror-editor';
     editor.dataset.floatingToolbarTest = '';
     document.body.append(editor);
     const range = selectText(editor);
@@ -66,7 +66,7 @@ describe('useFloatingToolbar', () => {
 
   it('clears the stored range when selection moves outside the editor', () => {
     const editor = document.createElement('div');
-    editor.className = 'milkdown-editor';
+    editor.className = 'codemirror-editor';
     editor.dataset.floatingToolbarTest = '';
     const outside = document.createElement('div');
     document.body.append(editor, outside);

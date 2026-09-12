@@ -81,10 +81,10 @@ vi.mock('../components/editor/PropertiesPanel', () => ({
     return <div data-testid="properties" data-read-only={String(readOnly)} />;
   },
 }));
-vi.mock('../components/editor/MilkdownEditor', async () => {
+vi.mock('../components/editor/CodeMirrorEditor', async () => {
   const { useEffect } = await import('react');
   return {
-    MilkdownEditor: ({
+    CodeMirrorEditor: ({
       onPermissionSnapshot,
       onStatusChange,
       onWikiLinkClick,

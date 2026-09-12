@@ -36,6 +36,7 @@ export type EditorCommandId =
   | 'italic'
   | 'strikethrough'
   | 'code'
+  | 'code-block'
   | 'blockquote'
   | 'link'
   | 'bullet-list'
@@ -144,11 +145,20 @@ const definitions: CommandDefinition[] = [
     run: (actions) => actions.handleStrike(),
   },
   {
+    id: 'code-block',
+    label: 'Code block',
+    hint: 'Block',
+    shortcutKeys: [],
+    keywords: ['codeblock', 'fenced', 'block'],
+    icon: createElement(IconCode, { size: 16 }),
+    run: (actions) => actions.runBlockCommand('code_block'),
+  },
+  {
     id: 'code',
     label: 'Code',
     hint: 'Code',
     shortcutKeys: [SHORTCUT_PATTERNS.code],
-    keywords: ['code', 'inline', 'block', 'fenced'],
+    keywords: ['code', 'inline'],
     icon: createElement(IconCode, { size: 16 }),
     run: (actions) => actions.handleCode(),
   },
@@ -166,8 +176,8 @@ const definitions: CommandDefinition[] = [
     label: 'Link',
     hint: 'Link',
     shortcutKeys: [SHORTCUT_PATTERNS.link],
-    requiresSelection: true,
     keywords: ['link', 'url'],
+    requiresSelection: true,
     icon: createElement(IconLink, { size: 16 }),
     run: (actions) => actions.handleLink(),
   },

@@ -17,6 +17,38 @@ export function normalizeWikiLinkLookupKey(value: string): string {
     .toLowerCase();
 }
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export type ParsedWikiLinkTarget = {
+  authoredTarget: string;
+  targetId: string | null;
+  page: string;
+  heading: string;
+  alias: string;
+};
+
+/** Parse the contents between `[[` and `]]` using the canonical wiki-link rules. */
+export function parseWikiLinkTarget(source: string): ParsedWikiLinkTarget | null {
+  if (source.includes('\n') || source.includes('\r')) return null;
+  const separator = source.indexOf('|');
+  const authoredTarget = (separator === -1 ? source : source.slice(0, separator)).trim();
+  if (!authoredTarget) return null;
+
+  const alias = separator === -1 ? '' : source.slice(separator + 1).trim();
+  const hashIndex = authoredTarget.indexOf('#');
+  const page = (hashIndex === -1 ? authoredTarget : authoredTarget.slice(0, hashIndex)).trim();
+  if (!page) return null;
+  const heading = hashIndex === -1 ? '' : authoredTarget.slice(hashIndex + 1).trim();
+  const idCandidate = page.startsWith('id:') ? page.slice(3) : '';
+  return {
+    authoredTarget,
+    targetId: UUID_PATTERN.test(idCandidate) ? idCandidate.toLowerCase() : null,
+    page,
+    heading,
+    alias,
+  };
+}
+
 export type WikiLinkLookupRow = {
   pageId: string;
   title: string;

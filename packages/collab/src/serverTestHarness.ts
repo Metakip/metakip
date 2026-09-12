@@ -218,13 +218,10 @@ export function appendWikiLink(
   document: Y.Doc,
   { path, label, targetId }: { path: string; label: string; targetId?: string | undefined },
 ): void {
-  const paragraph = new Y.XmlElement('paragraph');
-  const link = new Y.XmlElement('wikiLink');
-  link.setAttribute('path', path);
-  link.setAttribute('label', label);
-  if (targetId) link.setAttribute('targetId', targetId);
-  paragraph.push([link]);
-  document.getXmlFragment('prosemirror').push([paragraph]);
+  const content = document.getText('content');
+  const target = targetId ? `id:${targetId}` : path;
+  const markdown = `[[${target}${label ? `|${label}` : ''}]]`;
+  content.insert(content.length, `${content.length > 0 ? '\n\n' : ''}${markdown}`);
 }
 
 export function createAuthenticatePayload(

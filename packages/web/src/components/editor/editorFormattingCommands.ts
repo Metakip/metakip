@@ -1,16 +1,15 @@
-import type { Editor } from '@milkdown/core';
-import { editorViewCtx } from '@milkdown/core';
-import { setBlockType, toggleMark } from 'prosemirror-commands';
-import type { MarkType, NodeType } from 'prosemirror-model';
-import { toggleBlockquote } from '../../editor/utils/blockquote';
+import { syntaxTree } from '@codemirror/language';
+import type { ChangeSpec } from '@codemirror/state';
+import type { EditorView } from '@codemirror/view';
+import { linkMarkdown, newLinkTarget } from '../../editor/codemirror/visualEditorTargets';
 import { showInfoToast } from '../../utils/toast';
 import { ensureAbsoluteUrl } from '../../utils/url';
-import { createDividerTransaction } from './dividerCommands';
-import { getClosestListType, switchListType, unwrapList, wrapBlocksInList } from './listCommands';
-import { hasBlockType } from './useEditorActiveStates';
+import { selectedCodeBlock, toggleCodeBlock } from './codeBlockCommands';
+import { toggleInlineFormatting } from './inlineFormattingCommands';
+import { toggleMarkdownList } from './markdownListTransforms';
 
 interface EditorFormattingCommandOptions {
-  editor: Editor | null;
+  editor: EditorView | null;
   identityLifecycle: { isActive(): boolean };
   isAnonymous: boolean;
   keepVisible(): void;
@@ -41,6 +40,147 @@ export interface EditorFormattingCommands {
   runBlockCommand(nodeName: string, attrs?: Record<string, unknown>): void;
 }
 
+function replaceSelection(view: EditorView, insert: string, cursorOffset = insert.length): void {
+  const { from, to } = view.state.selection.main;
+  view.dispatch({
+    changes: { from, to, insert },
+    selection: { anchor: from + cursorOffset },
+    scrollIntoView: true,
+    userEvent: 'input',
+  });
+}
+
+function selectedLineRange(view: EditorView): { from: number; to: number; text: string } {
+  const selection = view.state.selection.main;
+  const first = view.state.doc.lineAt(selection.from);
+  const selectedThrough =
+    selection.to > selection.from && view.state.doc.lineAt(selection.to).from === selection.to
+      ? selection.to - 1
+      : selection.to;
+  const last = view.state.doc.lineAt(selectedThrough);
+  return { from: first.from, to: last.to, text: view.state.sliceDoc(first.from, last.to) };
+}
+
+function replaceSelectedLines(view: EditorView, transform: (lines: string[]) => string[]): void {
+  const selection = view.state.selection.main;
+  const range = selectedLineRange(view);
+  const insert = transform(range.text.split('\n')).join('\n');
+  const selectionSpec = selection.empty
+    ? {
+        anchor: Math.max(
+          range.from,
+          Math.min(range.from + insert.length, selection.head + insert.length - range.text.length),
+        ),
+      }
+    : { anchor: range.from, head: range.from + insert.length };
+  view.dispatch({
+    changes: { from: range.from, to: range.to, insert },
+    selection: selectionSpec,
+    scrollIntoView: true,
+    userEvent: 'input',
+  });
+}
+
+function convertSelectionToParagraph(view: EditorView): void {
+  const state = view.state;
+  const selected = selectedLineRange(view);
+  const changes: ChangeSpec[] = [];
+  const setextTitleLines = new Set<number>();
+
+  syntaxTree(state).iterate({
+    enter(node) {
+      if (
+        !/^SetextHeading[12]$/.test(node.name) ||
+        node.to < selected.from ||
+        node.from > selected.to
+      ) {
+        return;
+      }
+      const titleLine = state.doc.lineAt(node.from);
+      const underlineLine = state.doc.lineAt(node.to);
+      setextTitleLines.add(titleLine.number);
+      // Remove the newline and underline while leaving the title text and
+      // caret positions intact.
+      changes.push({ from: titleLine.to, to: underlineLine.to });
+    },
+  });
+
+  const firstLineNumber = state.doc.lineAt(selected.from).number;
+  const lastLineNumber = state.doc.lineAt(selected.to).number;
+  for (let lineNumber = firstLineNumber; lineNumber <= lastLineNumber; lineNumber += 1) {
+    const line = state.doc.line(lineNumber);
+    const match = line.text.match(/^#{1,6}\s+/);
+    if (match) changes.push({ from: line.from, to: line.from + match[0].length });
+  }
+
+  for (const lineNumber of setextTitleLines) {
+    const line = state.doc.line(lineNumber);
+    const match = line.text.match(/^#{1,6}\s+/);
+    if (match) changes.push({ from: line.from, to: line.from + match[0].length });
+  }
+
+  if (changes.length === 0) return;
+  const selection = state.selection.main;
+  const changeSet = state.changes(changes);
+  view.dispatch({
+    changes: changeSet,
+    selection: selection.empty
+      ? { anchor: changeSet.mapPos(selection.head, -1) }
+      : {
+          anchor: changeSet.mapPos(selection.anchor, 1),
+          head: changeSet.mapPos(selection.head, -1),
+        },
+    scrollIntoView: true,
+    userEvent: 'input',
+  });
+}
+
+function escapeImageAltText(filename: string): string {
+  return filename
+    .replace(/\\/g, '\\\\')
+    .replace(/\[/g, '\\[')
+    .replace(/\]/g, '\\]')
+    .replace(/[*_~`]/g, '\\$&')
+    .replace(/[\r\n]+/g, ' ');
+}
+
+function toggleBlockquote(view: EditorView): void {
+  const { state } = view;
+  const selection = state.selection.main;
+  let node = syntaxTree(state).resolveInner(selection.from, 1);
+  while (node.name !== 'Blockquote' && node.parent) node = node.parent;
+  const quote = node.name === 'Blockquote' && node.to >= selection.to ? node : null;
+  const range = quote ?? selectedLineRange(view);
+  const firstLine = state.doc.lineAt(range.from).number;
+  const lastLine = state.doc.lineAt(range.to).number;
+  const lines = Array.from({ length: lastLine - firstLine + 1 }, (_, index) =>
+    state.doc.line(firstLine + index),
+  );
+  const pattern = /^( {0,3})>[ \t]?/;
+  const remove = quote !== null || lines.every((line) => pattern.test(line.text));
+  const edits: ChangeSpec[] = [];
+  for (const line of lines) {
+    const match = line.text.match(pattern);
+    if (remove && match)
+      edits.push({ from: line.from + (match[1]?.length ?? 0), to: line.from + match[0].length });
+    else if (!remove && !match) edits.push({ from: line.from, insert: '> ' });
+  }
+  if (!edits.length) return;
+  const changes = state.changes(edits);
+  const from = changes.mapPos(selection.from, 1);
+  const to = changes.mapPos(selection.to, -1);
+  view.dispatch({
+    changes,
+    selection: selection.empty
+      ? { anchor: from }
+      : selection.anchor <= selection.head
+        ? { anchor: from, head: to }
+        : { anchor: to, head: from },
+    scrollIntoView: true,
+    userEvent: 'input',
+  });
+}
+
 export function createEditorFormattingCommands({
   editor,
   identityLifecycle,
@@ -50,156 +190,47 @@ export function createEditorFormattingCommands({
   reposition,
   updateActiveStates,
 }: EditorFormattingCommandOptions): EditorFormattingCommands {
-  const runMarkCommand = (markName: string, attrs?: Record<string, unknown>) => {
-    if (!editor) return;
+  const updateSoon = () => {
+    window.setTimeout(updateActiveStates, 0);
+    window.setTimeout(reposition, 0);
+  };
+  const run = (command: (view: EditorView) => void) => {
+    if (!editor || editor.state.readOnly) return;
     keepVisible();
-    editor.action((ctx) => {
-      const view = ctx.get(editorViewCtx);
-      if (!view) return;
-      const marks = (view.state.schema as unknown as { marks: Record<string, unknown> }).marks;
-      const markType = marks[markName];
-      if (markType) toggleMark(markType as never, attrs)(view.state, view.dispatch);
-    });
+    command(editor);
+    editor.focus();
+    updateSoon();
   };
 
   const runBlockCommand = (nodeName: string, attrs?: Record<string, unknown>) => {
-    if (!editor) return;
-    keepVisible();
-    editor.action((ctx) => {
-      const view = ctx.get(editorViewCtx);
-      if (!view) return;
-      const { state, dispatch } = view;
-      const nodes = (state.schema as unknown as { nodes: Record<string, unknown> }).nodes;
-      const nodeType = nodes[nodeName];
-      const paragraphType = nodes.paragraph;
-      if (!nodeType || !paragraphType) return;
-
-      let currentLevel: number | null = null;
-      for (let depth = state.selection.$from.depth; depth > 0; depth -= 1) {
-        const node = state.selection.$from.node(depth);
-        if (node.type === nodeType && 'level' in node.attrs) {
-          currentLevel = node.attrs.level;
-          break;
-        }
-      }
-      const targetLevel = attrs?.level as number | undefined;
-      const command =
-        Number(currentLevel) === Number(targetLevel)
-          ? setBlockType(paragraphType as never)
-          : setBlockType(nodeType as never, attrs);
-      command(state, dispatch);
-      setTimeout(reposition, 0);
-    });
-  };
-
-  const runCodeCommand = () => {
-    if (!editor) return;
-    keepVisible();
-    editor.action((ctx) => {
-      const view = ctx.get(editorViewCtx);
-      if (!view) return;
-      const { state, dispatch } = view;
-      const nodes = (state.schema as unknown as { nodes: Record<string, NodeType> }).nodes;
-      const marks = (state.schema as unknown as { marks: Record<string, MarkType> }).marks;
-      const codeBlockType = nodes.code_block;
-      const paragraphType = nodes.paragraph;
-      const inlineCodeMark = marks.inlineCode;
-
-      if (!codeBlockType || !paragraphType) {
-        if (inlineCodeMark) toggleMark(inlineCodeMark as never)(state, dispatch);
-        return;
-      }
-      if (hasBlockType(state, codeBlockType)) {
-        const { $from } = state.selection;
-        const blockStart = $from.before($from.depth);
-        const blockEnd = $from.after($from.depth);
-        const codeBlock = state.doc.nodeAt(blockStart);
-        if (codeBlock?.type === codeBlockType) {
-          const lines = codeBlock.textContent
-            .split('\n')
-            .filter((line, index, allLines) => line.length > 0 || index < allLines.length - 1);
-          dispatch(
-            state.tr.replaceWith(
-              blockStart,
-              blockEnd,
-              lines.map((line) => paragraphType.create(null, state.schema.text(line))),
-            ),
-          );
-        }
-        return;
-      }
-
-      const { from, to } = state.selection;
-      const selectedText = state.doc.textBetween(from, to, '\n', '\n');
-      const isMultiline =
-        from !== to &&
-        (selectedText.includes('\n') ||
-          state.selection.$from.start() !== state.selection.$to.start());
-      if (isMultiline) {
-        dispatch(
-          state.tr.replaceSelectionWith(
-            codeBlockType.create({ language: '' }, state.schema.text(selectedText)),
-          ),
-        );
-      } else if (inlineCodeMark) {
-        toggleMark(inlineCodeMark as never)(state, dispatch);
-      }
-    });
-  };
-
-  const updateSoon = () => setTimeout(updateActiveStates, 0);
-  const handleBold = () => {
-    runMarkCommand('strong');
-    updateSoon();
-  };
-  const handleItalic = () => {
-    runMarkCommand('emphasis');
-    updateSoon();
-  };
-  const handleStrike = () => {
-    runMarkCommand('strike_through');
-    updateSoon();
-  };
-  const handleCode = () => {
-    runCodeCommand();
-    updateSoon();
-  };
-  const handleLink = () => {
-    const url = prompt('Enter link URL:');
-    if (!url || !editor) return;
-    const safeUrl = ensureAbsoluteUrl(url);
-    if (!safeUrl) {
-      showInfoToast('Enter a safe HTTP, HTTPS, email, phone, or relative link');
+    if (nodeName === 'code_block') {
+      run(toggleCodeBlock);
       return;
     }
-    keepVisible();
-    editor.action((ctx) => {
-      const view = ctx.get(editorViewCtx);
-      const linkMark = view?.state.schema.marks.link;
-      if (!view || !linkMark) return;
-      view.dispatch(
-        view.state.tr.addMark(
-          view.state.selection.from,
-          view.state.selection.to,
-          linkMark.create({ href: safeUrl }),
-        ),
-      );
-    });
-    updateSoon();
-  };
-  const handleBlockquote = () => {
-    if (!editor) return;
-    keepVisible();
-    editor.action((ctx) => {
-      const view = ctx.get(editorViewCtx);
-      if (!view) return;
-      toggleBlockquote(view.state, view.dispatch);
-    });
-    updateSoon();
+    if (nodeName === 'paragraph') {
+      run((view) => {
+        if (selectedCodeBlock(view.state)) toggleCodeBlock(view);
+        else convertSelectionToParagraph(view);
+      });
+      return;
+    }
+    if (nodeName === 'heading') {
+      const level = Number(attrs?.level ?? 1);
+      run((view) => {
+        const prefix = `${'#'.repeat(Math.min(6, Math.max(1, level)))} `;
+        const lines = selectedLineRange(view).text.split('\n');
+        const allActive = lines.every((line) => line.startsWith(prefix));
+        replaceSelectedLines(view, (selected) =>
+          selected.map((line) =>
+            allActive ? line.slice(prefix.length) : `${prefix}${line.replace(/^#{1,6}\s+/, '')}`,
+          ),
+        );
+      });
+    }
   };
 
   const handleImageUpload = async (file: File) => {
-    if (isAnonymous || !identityLifecycle.isActive()) return;
+    if (!editor || isAnonymous || !identityLifecycle.isActive()) return;
     const formData = new FormData();
     formData.append('file', file);
     formData.append('pageId', pageId);
@@ -210,35 +241,18 @@ export function createEditorFormattingCommands({
         credentials: 'include',
       });
       if (!identityLifecycle.isActive()) return;
+      const body: unknown = await response.json();
       if (!response.ok) {
-        const errorBody: unknown = await response.json();
-        if (!identityLifecycle.isActive()) return;
         const message =
-          errorBody && typeof errorBody === 'object' && 'message' in errorBody
-            ? String(errorBody.message)
+          body && typeof body === 'object' && 'message' in body
+            ? String(body.message)
             : 'Upload failed';
         throw new Error(message);
       }
-      const data: unknown = await response.json();
-      if (!identityLifecycle.isActive()) return;
-      if (!data || typeof data !== 'object' || !('url' in data) || typeof data.url !== 'string') {
+      if (!body || typeof body !== 'object' || !('url' in body) || typeof body.url !== 'string') {
         throw new Error('Upload returned an invalid image URL');
       }
-      if (!editor) return;
-      keepVisible();
-      editor.action((ctx) => {
-        const view = ctx.get(editorViewCtx);
-        if (!view) return;
-        const imageNode = view.state.schema.nodes.image;
-        const node = imageNode?.create({ src: data.url, alt: file.name });
-        const transaction = node
-          ? view.state.tr.insert(view.state.selection.from, node)
-          : view.state.tr.insert(
-              view.state.selection.from,
-              view.state.schema.text(`![${file.name}](${data.url})`),
-            );
-        view.dispatch(transaction);
-      });
+      run((view) => replaceSelection(view, `![${escapeImageAltText(file.name)}](${body.url})`));
     } catch (error) {
       if (identityLifecycle.isActive()) alert(`Upload failed: ${(error as Error).message}`);
     }
@@ -250,137 +264,57 @@ export function createEditorFormattingCommands({
     input.type = 'file';
     input.accept = 'image/*';
     input.onchange = (event) => {
-      if (!identityLifecycle.isActive()) return;
       const file = (event.target as HTMLInputElement).files?.[0];
       if (file) void handleImageUpload(file);
     };
     input.click();
   };
 
-  const handleInsertDivider = () => {
-    if (!editor) return;
-    editor.action((ctx) => {
-      const view = ctx.get(editorViewCtx);
-      if (!view) return;
-      const transaction = createDividerTransaction(view.state);
-      if (transaction) view.dispatch(transaction.scrollIntoView());
+  const handleLink = () => {
+    if (!editor || editor.state.readOnly || editor.state.selection.main.empty) return;
+    const url = prompt('Enter link URL:');
+    if (!url) return;
+    const safeUrl = ensureAbsoluteUrl(url);
+    if (!safeUrl) {
+      showInfoToast('Enter a safe HTTP, HTTPS, email, phone, or relative link');
+      return;
+    }
+    run((view) => {
+      const target = newLinkTarget(view.state);
+      if (target) replaceSelection(view, linkMarkdown(target, target.text, safeUrl));
     });
   };
 
-  const handleInsertTag = () => {
-    if (!editor) return;
-    editor.action((ctx) => {
-      const view = ctx.get(editorViewCtx);
-      if (!view) return;
-      view.dispatch(view.state.tr.insertText('#tag ', view.state.selection.$from.pos));
+  const handleCode = () =>
+    run((view) => {
+      const selection = view.state.selection.main;
+      const selected = view.state.sliceDoc(selection.from, selection.to);
+      if (selectedCodeBlock(view.state) || selected.includes('\n')) toggleCodeBlock(view);
+      else toggleInlineFormatting(view, 'code');
     });
-  };
-
-  const handleHeading = (level: number) => {
-    runBlockCommand('heading', { level });
-    updateSoon();
-  };
-  const restoreFocus = () => {
-    setTimeout(() => {
-      editor?.action((ctx) => {
-        const view = ctx.get(editorViewCtx);
-        if (view && !view.hasFocus()) view.focus();
-      });
-    }, 0);
-    updateSoon();
-    setTimeout(reposition, 0);
-  };
-
-  const handleBulletList = () => {
-    if (!editor) return;
-    keepVisible();
-    editor.action((ctx) => {
-      const view = ctx.get(editorViewCtx);
-      const bulletListType = view?.state.schema.nodes.bullet_list;
-      if (!view?.dispatch || !bulletListType) return;
-      const closestType = getClosestListType(view.state);
-      if (closestType === 'task') switchListType(view.state, bulletListType, view.dispatch, {});
-      else if (closestType === 'bullet') unwrapList(view.state, view.dispatch);
-      else if (closestType === 'ordered') switchListType(view.state, bulletListType, view.dispatch);
-      else wrapBlocksInList(view.state, bulletListType, view.dispatch);
-    });
-    restoreFocus();
-  };
-  const handleOrderedList = () => {
-    if (!editor) return;
-    keepVisible();
-    editor.action((ctx) => {
-      const view = ctx.get(editorViewCtx);
-      const orderedListType = view?.state.schema.nodes.ordered_list;
-      if (!view?.dispatch || !orderedListType) return;
-      const closestType = getClosestListType(view.state);
-      if (closestType === 'ordered') {
-        const { from, to } = view.state.selection;
-        const listItemType = view.state.schema.nodes.list_item;
-        let hasNonList = false;
-        if (from !== to) {
-          view.state.doc.nodesBetween(from, to, (node, position) => {
-            if (!node.isBlock || node.type.name === 'doc') return;
-            const resolved = view.state.doc.resolve(position);
-            if (
-              resolved.depth <= 1 &&
-              node.type !== listItemType &&
-              node.type !== orderedListType
-            ) {
-              hasNonList = true;
-            }
-          });
-        }
-        if (hasNonList) wrapBlocksInList(view.state, orderedListType, view.dispatch);
-        else unwrapList(view.state, view.dispatch);
-      } else if (closestType === 'task') {
-        switchListType(view.state, orderedListType, view.dispatch, {});
-      } else if (closestType === 'bullet') {
-        switchListType(view.state, orderedListType, view.dispatch);
-      } else {
-        wrapBlocksInList(view.state, orderedListType, view.dispatch);
-      }
-    });
-    restoreFocus();
-  };
-  const handleTaskList = () => {
-    if (!editor) return;
-    keepVisible();
-    editor.action((ctx) => {
-      const view = ctx.get(editorViewCtx);
-      const bulletListType = view?.state.schema.nodes.bullet_list;
-      const listItemType = view?.state.schema.nodes.list_item;
-      if (!view?.dispatch || !bulletListType || !listItemType) return;
-      const closestType = getClosestListType(view.state);
-      if (closestType === 'task') unwrapList(view.state, view.dispatch);
-      else if (closestType === 'bullet' || closestType === 'ordered') {
-        switchListType(view.state, bulletListType, view.dispatch, { checked: false });
-      } else {
-        wrapBlocksInList(view.state, bulletListType, view.dispatch, { checked: false });
-      }
-    });
-    restoreFocus();
-  };
 
   return {
-    handleBlockquote,
-    handleBold,
-    handleBulletList,
+    handleBlockquote: () => run(toggleBlockquote),
+    handleBold: () => run((view) => toggleInlineFormatting(view, 'bold')),
+    handleBulletList: () =>
+      run((view) => replaceSelectedLines(view, (lines) => toggleMarkdownList(lines, 'bullet'))),
     handleCode,
-    handleH1: () => handleHeading(1),
-    handleH2: () => handleHeading(2),
-    handleH3: () => handleHeading(3),
-    handleH4: () => handleHeading(4),
-    handleH5: () => handleHeading(5),
-    handleH6: () => handleHeading(6),
+    handleH1: () => runBlockCommand('heading', { level: 1 }),
+    handleH2: () => runBlockCommand('heading', { level: 2 }),
+    handleH3: () => runBlockCommand('heading', { level: 3 }),
+    handleH4: () => runBlockCommand('heading', { level: 4 }),
+    handleH5: () => runBlockCommand('heading', { level: 5 }),
+    handleH6: () => runBlockCommand('heading', { level: 6 }),
     handleImageUploadFromSlash,
-    handleInsertDivider,
-    handleInsertTag,
-    handleItalic,
+    handleInsertDivider: () => run((view) => replaceSelection(view, '\n---\n')),
+    handleInsertTag: () => run((view) => replaceSelection(view, '#tag ')),
+    handleItalic: () => run((view) => toggleInlineFormatting(view, 'italic')),
     handleLink,
-    handleOrderedList,
-    handleStrike,
-    handleTaskList,
+    handleOrderedList: () =>
+      run((view) => replaceSelectedLines(view, (lines) => toggleMarkdownList(lines, 'ordered'))),
+    handleStrike: () => run((view) => toggleInlineFormatting(view, 'strike')),
+    handleTaskList: () =>
+      run((view) => replaceSelectedLines(view, (lines) => toggleMarkdownList(lines, 'task'))),
     runBlockCommand,
   };
 }

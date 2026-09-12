@@ -1,7 +1,6 @@
-import type { Editor } from '@milkdown/core';
-import { editorViewCtx } from '@milkdown/core';
-import { Selection } from 'prosemirror-state';
+import type { EditorView } from '@codemirror/view';
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { getEditorSuggestionTrigger } from '../editor/codemirror/suggestionTriggers';
 import { useCreatePage, usePages } from './use-pages';
 import { useAuth } from './useAuth';
 
@@ -11,14 +10,6 @@ type WikiLinkPage = {
   icon: string | null;
 };
 
-export function createBoundWikiLinkAttributes(targetId: string): {
-  targetId: string;
-  path: string;
-  label: string;
-} {
-  return { targetId, path: '', label: '' };
-}
-
 interface SuggestionsState {
   isOpen: boolean;
   query: string;
@@ -27,7 +18,7 @@ interface SuggestionsState {
 }
 
 export function useWikiLinkSuggestions(
-  editorRef: React.RefObject<Editor | null>,
+  editorRef: React.RefObject<EditorView | null>,
   sourcePageId: string,
 ) {
   const createPageMutation = useCreatePage();
@@ -78,37 +69,16 @@ export function useWikiLinkSuggestions(
       const editor = editorRef.current;
       if (!editor) return;
       try {
-        editor.action((ctx) => {
-          const view = ctx.get(editorViewCtx);
-          if (!view) return;
-          const { state, dispatch } = view;
-          const { selection } = state;
-          const { $from } = selection;
-
-          const textBefore = $from.parent.textBetween(0, $from.parentOffset, undefined, '\ufffc');
-          const match = textBefore.match(/\[\[([^\]]*)$/);
-
-          if (match) {
-            const start = $from.pos - match[0].length;
-            const end = $from.pos;
-
-            const wikiLinkNode = state.schema.nodes.wikiLink;
-            if (wikiLinkNode) {
-              const tr = state.tr.replaceWith(
-                start,
-                end,
-                wikiLinkNode.create(createBoundWikiLinkAttributes(page.id)),
-              );
-
-              const nextPos = start + 1;
-              const $pos = tr.doc.resolve(nextPos);
-              tr.setSelection(Selection.near($pos));
-
-              dispatch(tr);
-              view.focus();
-            }
-          }
-        });
+        const trigger = getEditorSuggestionTrigger(editor.state);
+        if (trigger?.kind === 'wiki-link') {
+          const insert = `[[id:${page.id}]]`;
+          editor.dispatch({
+            changes: { from: trigger.from, to: trigger.to, insert },
+            selection: { anchor: trigger.from + insert.length },
+            scrollIntoView: true,
+          });
+          editor.focus();
+        }
       } catch {
         // Editor may have been destroyed
       }

@@ -12,9 +12,9 @@ test.describe('Page creation', () => {
     await page.waitForURL(/\/untitled-/);
 
     // A new page should have an empty editor
-    await expect(page.locator('.ProseMirror')).toBeVisible();
+    await expect(page.locator('.codemirror-editor .cm-content')).toBeVisible();
     // The editor should contain a paragraph with a trailing break (empty state)
-    await expect(page.locator('.ProseMirror p')).toBeVisible();
+    await expect(page.locator('.codemirror-editor .cm-line')).toBeVisible();
   });
 
   test('create page via sidebar "Create note" button', async ({ page }) => {

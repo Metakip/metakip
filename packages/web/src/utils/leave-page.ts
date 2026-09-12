@@ -4,7 +4,7 @@
  * When a user removes a shared page from their view, the mutation fires POST /leave
  * which notifies the collab server via pg_notify. Moving an owned page to Trash
  * produces a similar terminal collaboration event.
- * The collab server then sends a revoke event over WebSocket, which MilkdownEditor
+ * The collab server then sends a revoke event over WebSocket, which CodeMirrorEditor
  * handles by showing a toast + navigating away.
  *
  * Without coordination, the user would see TWO toasts:
@@ -12,11 +12,11 @@
  *   2. Item-specific feedback from the mutation onSuccess
  *
  * This module lets the entity deletion action signal that a leave or deletion
- * was self-initiated, so MilkdownEditor can skip its duplicate toast (the
+ * was self-initiated, so CodeMirrorEditor can skip its duplicate toast (the
  * mutation handles feedback).
  *
  * For admin-initiated revokes (admin removes your access while you're on the page),
- * no flag is set, so MilkdownEditor shows its toast as before.
+ * no flag is set, so CodeMirrorEditor shows its toast as before.
  */
 
 const SELF_LEAVE_WINDOW_MS = 5_000;

@@ -87,6 +87,10 @@ beforeAll(() => {
     },
   } as unknown as typeof DOMRect;
 
+  // CodeMirror measures text ranges during animation-frame layout passes.
+  window.Range.prototype.getClientRects = vi.fn(() => [] as unknown as DOMRectList);
+  window.Range.prototype.getBoundingClientRect = vi.fn(() => DOMRect.fromRect());
+
   // Mock navigator.clipboard (configurable so @testing-library/user-event can replace it)
   Object.defineProperty(navigator, 'clipboard', {
     value: {

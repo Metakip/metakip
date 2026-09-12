@@ -93,6 +93,11 @@ export const verifications = pgTable('verifications', {
 // App Tables
 // ======================
 
+export const dataMigrations = pgTable('data_migrations', {
+  name: text('name').primaryKey(),
+  completedAt: timestamp('completed_at').defaultNow().notNull(),
+});
+
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
   email: text('email').notNull().unique(),

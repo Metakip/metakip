@@ -8,6 +8,7 @@ import { CollabAccessError, CollabProtocolDeniedError } from './collabErrors';
 import {
   getProtocolMessageType,
   getYjsWriteUpdate,
+  yjsUpdateTouchesRootType,
   yjsUpdateTouchesTitle,
 } from './collaborationProtocol';
 import {
@@ -186,7 +187,7 @@ async function verifyPageMessage(
       const effectivePermission = getCurrentPermission(session);
       if (writeUpdate && effectivePermission !== 'edit' && effectivePermission !== 'admin') {
         await transaction.rollback();
-        // Keep the verified read-only subscription alive. Milkdown and other
+        // Keep the verified read-only subscription alive. CodeMirror and other
         // Yjs bindings may emit normalization updates while mounting even
         // when their UI is non-editable. Hocuspocus's read-only message path
         // rejects the update and sends a failed sync acknowledgement without
@@ -319,6 +320,12 @@ export function createProtocolMessageHandler(options: MessageHandlerOptions) {
       }
       if (awarenessDisposition === 'ignore') options.ignoreMessage(update);
       return;
+    }
+    if (writeUpdate && yjsUpdateTouchesRootType(document, writeUpdate, 'prosemirror')) {
+      options.ignoreMessage(update);
+      rejectConnectionTraffic(session);
+      connection.close({ code: 4403, reason: 'Unsupported editor format' });
+      throw new CollabProtocolDeniedError('Unsupported editor format');
     }
     if (!isSyncMessage && !isAwarenessMessage && !writeUpdate) return;
     await verifyPageMessage(payload, session, writeUpdate ?? undefined, options);

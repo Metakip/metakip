@@ -13,7 +13,7 @@ test.describe('Command palette', () => {
     await newPageAction.click();
 
     await page.waitForURL(/\/untitled-/);
-    await expect(page.locator('.ProseMirror')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.codemirror-editor .cm-content')).toBeVisible({ timeout: 10000 });
   });
 
   test('quick action "Go to Trash" navigates to trash', async ({ page }) => {

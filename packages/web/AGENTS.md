@@ -30,19 +30,18 @@ const { isMounted, refs, floatingStyles, transitionStyles, ... } = useKebabMenu(
 
 This defers visibility by one `requestAnimationFrame` so the element is positioned before it becomes visible. The original `isPositioned` + `visibility: hidden` approach doesn't work because `FloatingPortal` does two-pass rendering.
 
-## Milkdown Editor
+## CodeMirror Editor
 
 ### Wiki Links
 
-Wiki links are atomic nodes. Bound links store a target page ID but not its
-title. The server returns a requester-scoped presentation; clients must not
-guess destinations or reveal authored labels when that presentation is
-restricted or unavailable.
+Inactive wiki links are atomic Live Preview widgets. Bound links store a target
+page ID but not its title. The server returns a requester-scoped presentation;
+clients must not guess destinations or reveal authored labels when that
+presentation is restricted or unavailable.
 
 ```typescript
 {
-  type: "wikiLink",
-  attrs: { targetId, path: "", label: customAliasOrEmpty, heading }
+[[id:550e8400-e29b-41d4-a716-446655440000#heading|custom alias]]
 }
 ```
 
@@ -50,7 +49,7 @@ restricted or unavailable.
 
 - HocuspocusProvider handles real-time sync AND persistence automatically
 - **No manual save needed**
-- Undo/redo may behave unexpectedly with collaboration enabled
+- Collaborative undo/redo is owned by the Yjs `UndoManager`, not CodeMirror history
 
 ### TypeScript
 

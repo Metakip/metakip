@@ -5,15 +5,15 @@ import { describe, expect, it } from 'vitest';
 import * as Y from 'yjs';
 
 describe('replaceMarkdownBody', () => {
-  it('preserves unchanged top-level Yjs nodes', () => {
+  it('preserves unchanged text through a minimal Y.Text edit', () => {
     const document = new Y.Doc();
     Y.applyUpdate(
       document,
       createYjsDocWithTitle('Page title', '## Notes\n\nFirst paragraph.\n\nSecond paragraph.\n'),
     );
-    const fragment = document.getXmlFragment('prosemirror');
-    const heading = fragment.get(0);
-    const firstParagraph = fragment.get(1);
+    const content = document.getText('content');
+    const deltas: Array<Y.YTextEvent['delta']> = [];
+    content.observe((event) => deltas.push(event.delta));
 
     replaceMarkdownBody(
       document,
@@ -21,10 +21,10 @@ describe('replaceMarkdownBody', () => {
       '## Notes\n\nFirst paragraph.\n\nRevised paragraph.\n',
     );
 
-    expect(fragment.get(0)).toBe(heading);
-    expect(fragment.get(1)).toBe(firstParagraph);
+    expect(deltas).toHaveLength(1);
+    expect(deltas[0]?.[0]).toEqual({ retain: 28 });
     expect(yDocToMarkdown(Y.encodeStateAsUpdate(document))).toBe(
-      '## Notes\n\nFirst paragraph.\n\nRevised paragraph.\n\n',
+      '## Notes\n\nFirst paragraph.\n\nRevised paragraph.\n',
     );
   });
 });

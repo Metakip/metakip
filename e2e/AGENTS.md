@@ -114,28 +114,27 @@ import { createNewPage, focusEditor } from '../fixtures';
 
 test('my test', async ({ page }) => {
   await createNewPage(page);   // navigates to app, creates a new page
-  await focusEditor(page);     // clicks on ProseMirror editor
+  await focusEditor(page);     // clicks on the CodeMirror content DOM
   // ...interact with editor...
-  await expect(page.locator('.ProseMirror h1')).toBeVisible();
+  await expect(page.locator('.cm-md-heading-1')).toBeVisible();
 });
 ```
 
 ### Selectors
 
-- Editor content: `.ProseMirror`
+- Editor content: `.codemirror-editor .cm-content`
 - Slash menu: `[data-testid="slash-menu"]`
 - Wiki link suggestions: `[data-testid="wikilink-suggestions"]`
 - Floating toolbar buttons: `.floating-toolbar button[title="..."]`
 - Page title input: `input[data-testid="page-title"]`
-- Headings: `.ProseMirror h1`, `.ProseMirror h2`, etc.
-- Bold: `.ProseMirror strong`
-- Italic: `.ProseMirror em`
-- Blockquote: `.ProseMirror blockquote`
-- Bullet list: `.ProseMirror ul`
-- Ordered list: `.ProseMirror ol`
-- Task list: `.ProseMirror li[data-item-type="task"]`
-- Table: `.ProseMirror table`
-- Divider: `.ProseMirror hr`
+- Headings: `.cm-md-heading-1` through `.cm-md-heading-6`
+- Bold: `.cm-md-strong`
+- Italic: `.cm-md-emphasis`
+- Blockquote: `.cm-md-blockquote`
+- Lists: `.cm-md-list-marker`
+- Task list: `.cm-md-task-checkbox`
+- Table: `.cm-md-table`
+- Divider: `.cm-md-divider`
 
 ### Slash Menu Specifics
 

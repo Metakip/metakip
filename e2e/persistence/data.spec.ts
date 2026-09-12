@@ -9,8 +9,8 @@ test.describe('Data persistence', () => {
 
     await page.reload();
     await expect(page).toHaveURL(/\/[^/]+$/);
-    await expect(page.locator('.ProseMirror')).toBeVisible({ timeout: 10_000 });
-    await expect(page.locator('.ProseMirror')).toContainText('hello world');
+    await expect(page.locator('.codemirror-editor .cm-content')).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('.codemirror-editor .cm-content')).toContainText('hello world');
   });
 
   test('title and content both persist after reload', async ({ page }) => {
@@ -21,10 +21,12 @@ test.describe('Data persistence', () => {
 
     await page.reload();
     await expect(page).toHaveURL(/\/[^/]+$/);
-    await expect(page.locator('.ProseMirror')).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('.codemirror-editor .cm-content')).toBeVisible({ timeout: 10_000 });
 
     await expect(page.locator('input[data-testid="page-title"]')).toHaveValue('Full Test Page');
-    await expect(page.locator('.ProseMirror')).toContainText('This is some sample content.');
+    await expect(page.locator('.codemirror-editor .cm-content')).toContainText(
+      'This is some sample content.',
+    );
   });
 
   test('deleted content stays deleted after reload', async ({ page }) => {
@@ -38,10 +40,12 @@ test.describe('Data persistence', () => {
 
     await page.reload();
     await expect(page).toHaveURL(/\/[^/]+$/);
-    await expect(page.locator('.ProseMirror')).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('.codemirror-editor .cm-content')).toBeVisible({ timeout: 10_000 });
 
     // After deleting and reloading, the deleted text should not appear
-    await expect(page.locator('.ProseMirror')).not.toContainText('Temporary content');
+    await expect(page.locator('.codemirror-editor .cm-content')).not.toContainText(
+      'Temporary content',
+    );
   });
 
   test('content survives after closing and reopening the browser tab', async ({
@@ -59,8 +63,10 @@ test.describe('Data persistence', () => {
     await newPage.goto(url);
     await expect(newPage).toHaveURL(/\/[^/]+$/);
 
-    await expect(newPage.locator('.ProseMirror')).toBeVisible({ timeout: 10_000 });
-    await expect(newPage.locator('.ProseMirror')).toContainText('Tab close test');
+    await expect(newPage.locator('.codemirror-editor .cm-content')).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(newPage.locator('.codemirror-editor .cm-content')).toContainText('Tab close test');
     await newPage.close();
   });
 });

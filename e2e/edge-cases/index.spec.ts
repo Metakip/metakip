@@ -9,7 +9,7 @@ test.describe('Edge cases', () => {
     // Type a long sentence quickly
     const text = 'The quick brown fox jumps over the lazy dog. '.repeat(10);
     await page.keyboard.type(text, { delay: 10 });
-    await expect(page.locator('.ProseMirror')).toContainText('quick brown fox', {
+    await expect(page.locator('.codemirror-editor .cm-content')).toContainText('quick brown fox', {
       timeout: 10_000,
     });
   });
@@ -19,14 +19,14 @@ test.describe('Edge cases', () => {
     await focusEditor(page);
     // Create an h1
     await page.keyboard.type('# Heading');
-    await expect(page.locator('.ProseMirror h1')).toBeVisible({ timeout: 5_000 });
+    await expect(page.locator('.cm-md-heading-1')).toBeVisible({ timeout: 5_000 });
     // Downgrade to h2 by typing ## and pressing Enter
     // First go to the end of the line
     await page.keyboard.press('End');
     await page.keyboard.press('Enter');
     // Type ## - should make it an h2
     await page.keyboard.type('## Subheading');
-    await expect(page.locator('.ProseMirror h2')).toBeVisible({ timeout: 5_000 });
+    await expect(page.locator('.cm-md-heading-2')).toBeVisible({ timeout: 5_000 });
   });
 
   test('backtick code block does not cause hang', async ({ page }) => {
@@ -34,7 +34,7 @@ test.describe('Edge cases', () => {
     await focusEditor(page);
     await page.keyboard.type('```');
     await page.keyboard.press('Enter');
-    await expect(page.locator('.ProseMirror pre')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('.cm-md-code-block')).toBeVisible({ timeout: 5000 });
   });
 
   test('Enter twice exits a code block', async ({ page }) => {
@@ -47,13 +47,16 @@ test.describe('Edge cases', () => {
     await page.keyboard.type('const second = 2;');
     await page.keyboard.press('Enter');
 
-    const codeBlock = page.locator('.ProseMirror pre');
-    await expect.poll(() => codeBlock.textContent()).toBe('const first = 1;\nconst second = 2;\n');
+    const codeBlockLines = page.locator('.cm-md-code-block');
+    await expect(codeBlockLines.filter({ hasText: 'const first = 1;' })).toBeVisible();
+    await expect(codeBlockLines.filter({ hasText: 'const second = 2;' })).toBeVisible();
 
     await page.keyboard.press('Enter');
     await page.keyboard.type('Outside the code block');
 
-    await expect.poll(() => codeBlock.textContent()).toBe('const first = 1;\nconst second = 2;');
-    await expect(page.locator('.ProseMirror > p')).toHaveText('Outside the code block');
+    await expect(codeBlockLines.filter({ hasText: 'Outside the code block' })).toHaveCount(0);
+    await expect(page.locator('.codemirror-editor .cm-content')).toContainText(
+      'Outside the code block',
+    );
   });
 });

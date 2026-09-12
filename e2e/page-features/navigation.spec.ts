@@ -14,6 +14,6 @@ test.describe('Table of Contents', () => {
     await createNewPage(page);
     await focusEditor(page);
     await page.keyboard.type('## Section A');
-    await expect(page.locator('.ProseMirror h2')).toBeVisible({ timeout: 5000 });
+    await expect(page.locator('.cm-md-heading-2')).toBeVisible({ timeout: 5000 });
   });
 });

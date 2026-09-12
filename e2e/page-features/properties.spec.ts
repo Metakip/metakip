@@ -3,14 +3,20 @@ import { createNewPage, focusEditor } from '../fixtures';
 
 async function createAnotherPage(page: Page): Promise<void> {
   const currentUrl = page.url();
-  const previousEditor = await page.locator('.ProseMirror').first().elementHandle();
+  const previousEditor = await page
+    .locator('.codemirror-editor .cm-content')
+    .first()
+    .elementHandle();
 
   await page.getByRole('button', { name: /create note/i }).click();
   await page.waitForURL((url) => url.toString() !== currentUrl);
   if (previousEditor) {
     await page.waitForFunction((editor) => !editor.isConnected, previousEditor);
   }
-  await page.locator('.ProseMirror').first().waitFor({ state: 'visible', timeout: 15000 });
+  await page
+    .locator('.codemirror-editor .cm-content')
+    .first()
+    .waitFor({ state: 'visible', timeout: 15000 });
 }
 
 async function responseIncludesTag(response: Response, tagName: string): Promise<boolean> {
@@ -197,7 +203,7 @@ test.describe('Properties panel', () => {
     await page.waitForTimeout(500);
 
     await page.reload();
-    await page.waitForSelector('.ProseMirror', { timeout: 15000 });
+    await page.waitForSelector('.codemirror-editor .cm-content', { timeout: 15000 });
 
     await expect(page.getByTestId('add-property')).toBeVisible();
   });
@@ -248,7 +254,7 @@ test.describe('Properties panel', () => {
     await page.waitForTimeout(1500);
 
     await page.reload();
-    await page.waitForSelector('.ProseMirror', { timeout: 15000 });
+    await page.waitForSelector('.codemirror-editor .cm-content', { timeout: 15000 });
 
     await expect(page.locator('[data-property-key="persistkey"]')).toBeVisible();
     await expect(page.getByText('persistval')).toBeVisible();
@@ -350,7 +356,10 @@ test.describe('Properties panel', () => {
     // property update is still settling. Reload so this document starts from a
     // canonical tree containing the other page's properties.
     await page.reload({ waitUntil: 'networkidle' });
-    await page.locator('.ProseMirror').first().waitFor({ state: 'visible', timeout: 15_000 });
+    await page
+      .locator('.codemirror-editor .cm-content')
+      .first()
+      .waitFor({ state: 'visible', timeout: 15_000 });
     await page.getByTestId('add-property').click();
     await page.getByTestId('key-input').fill('tags');
     await page.getByTestId('key-input').press('Enter');

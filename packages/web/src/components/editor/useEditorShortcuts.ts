@@ -1,34 +1,19 @@
-import type { Editor } from '@milkdown/core';
-import { editorViewCtx } from '@milkdown/core';
+import type { EditorView } from '@codemirror/view';
 import { type ShortcutDefinition, useShortcuts } from '../../contexts/KeyboardShortcutContext';
 import type { EditorCommand, EditorCommandRegistry } from './editorCommandRegistry';
 
 export function useEditorShortcuts(
-  editor: Editor | null,
+  editor: EditorView | null,
   isReadOnly: boolean,
   commands: EditorCommandRegistry,
 ): void {
   const editorHasFocus = (): boolean => {
-    if (!editor) return false;
-    let focused = false;
-    try {
-      editor.action((ctx) => {
-        const view = ctx.get(editorViewCtx);
-        if (view) focused = view.hasFocus();
-      });
-    } catch {
-      // The editor may have been destroyed while a shortcut event was queued.
-    }
-    return focused;
+    return editor?.hasFocus ?? false;
   };
   const editorAction = (command: EditorCommand) => (): boolean => {
     if (isReadOnly || !editorHasFocus()) return false;
     if (command.requiresSelection) {
-      let hasSelection = false;
-      editor?.action((ctx) => {
-        const view = ctx.get(editorViewCtx);
-        hasSelection = view?.state.selection.from !== view?.state.selection.to;
-      });
+      const hasSelection = editor ? !editor.state.selection.main.empty : false;
       if (!hasSelection) return false;
     }
     command.execute();

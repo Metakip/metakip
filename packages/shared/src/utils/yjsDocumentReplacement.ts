@@ -1,57 +1,50 @@
-import * as Y from 'yjs';
-import { createYjsDocWithTitle } from './markdownToYjs.js';
+import type * as Y from 'yjs';
+import {
+  COLLABORATIVE_CONTENT_FIELD,
+  normalizeCollaborativeMarkdown,
+} from './collaborativeMarkdown.js';
 
-function childSignature(child: Y.XmlElement | Y.XmlText): string {
-  return child.toString();
+function commonPrefixLength(left: string, right: string): number {
+  const limit = Math.min(left.length, right.length);
+  let index = 0;
+  while (index < limit && left.charCodeAt(index) === right.charCodeAt(index)) index += 1;
+  // Do not split a UTF-16 surrogate pair at the preserved boundary.
+  if (index > 0 && index < limit && /[\uD800-\uDBFF]/.test(left[index - 1] ?? '')) index -= 1;
+  return index;
+}
+function commonSuffixLength(left: string, right: string, prefix: number): number {
+  const limit = Math.min(left.length, right.length) - prefix;
+  let length = 0;
+  while (
+    length < limit &&
+    left.charCodeAt(left.length - 1 - length) === right.charCodeAt(right.length - 1 - length)
+  ) {
+    length += 1;
+  }
+  const leftBoundary = left.length - length;
+  if (length > 0 && /[\uDC00-\uDFFF]/.test(left[leftBoundary] ?? '')) length -= 1;
+  return length;
 }
 
-/** Reconcile changed top-level blocks while preserving unrelated Yjs node identities. */
+/** Reconcile a Markdown body while preserving unchanged Y.Text identities. */
 export function replaceMarkdownBody(
   document: Y.Doc,
-  title: string,
+  _title: string,
   markdown: string,
   origin: unknown = 'markdawn-rest-edit',
 ): void {
-  const candidate = new Y.Doc();
-  try {
-    Y.applyUpdate(candidate, createYjsDocWithTitle(title, markdown));
-    const current = document.getXmlFragment('prosemirror');
-    const next = candidate.getXmlFragment('prosemirror');
-    const currentChildren = current.toArray();
-    const nextChildren = next.toArray();
+  const content = document.getText(COLLABORATIVE_CONTENT_FIELD);
+  const current = content.toString();
+  const next = normalizeCollaborativeMarkdown(markdown);
+  if (current === next) return;
 
-    let prefix = 0;
-    while (
-      prefix < currentChildren.length &&
-      prefix < nextChildren.length &&
-      childSignature(currentChildren[prefix] as Y.XmlElement | Y.XmlText) ===
-        childSignature(nextChildren[prefix] as Y.XmlElement | Y.XmlText)
-    ) {
-      prefix += 1;
-    }
+  const prefix = commonPrefixLength(current, next);
+  const suffix = commonSuffixLength(current, next, prefix);
+  const deleteLength = current.length - prefix - suffix;
+  const insert = next.slice(prefix, next.length - suffix);
 
-    let suffix = 0;
-    while (
-      suffix < currentChildren.length - prefix &&
-      suffix < nextChildren.length - prefix &&
-      childSignature(
-        currentChildren[currentChildren.length - 1 - suffix] as Y.XmlElement | Y.XmlText,
-      ) ===
-        childSignature(nextChildren[nextChildren.length - 1 - suffix] as Y.XmlElement | Y.XmlText)
-    ) {
-      suffix += 1;
-    }
-
-    const deleteCount = currentChildren.length - prefix - suffix;
-    const insertChildren = nextChildren
-      .slice(prefix, nextChildren.length - suffix)
-      .map((child) => child.clone() as Y.XmlElement | Y.XmlText);
-    if (deleteCount === 0 && insertChildren.length === 0) return;
-    document.transact(() => {
-      if (deleteCount > 0) current.delete(prefix, deleteCount);
-      if (insertChildren.length > 0) current.insert(prefix, insertChildren);
-    }, origin);
-  } finally {
-    candidate.destroy();
-  }
+  document.transact(() => {
+    if (deleteLength > 0) content.delete(prefix, deleteLength);
+    if (insert) content.insert(prefix, insert);
+  }, origin);
 }

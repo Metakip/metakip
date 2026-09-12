@@ -4,7 +4,7 @@ import type { Logger } from '@logtape/logtape';
 import { composePageMarkdown } from '@markdawn/shared';
 import { bindWikiLinkTargets, createYjsDocWithTitle } from '@markdawn/shared/markdown-yjs';
 import { replaceMarkdownBody } from '@markdawn/shared/yjs-document-replacement';
-import { yDocToMarkdown } from '@markdawn/shared/yjs-helpers';
+import { extractWikiLinkTargetIds, yDocToMarkdown } from '@markdawn/shared/yjs-helpers';
 import type { Pool } from 'pg';
 import { describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
@@ -22,16 +22,7 @@ describe('withAuthorizedPageDocument', () => {
   }
 
   function extractBoundTargetId(document: Y.Doc): string | undefined {
-    const visit = (element: Y.XmlFragment | Y.XmlElement): string | undefined => {
-      for (const item of element.toArray()) {
-        if (!(item instanceof Y.XmlElement)) continue;
-        if (item.nodeName === 'wikiLink') return item.getAttribute('targetId');
-        const nested = visit(item);
-        if (nested) return nested;
-      }
-      return undefined;
-    };
-    return visit(document.getXmlFragment('prosemirror'));
+    return extractWikiLinkTargetIds(Y.encodeStateAsUpdate(document))[0];
   }
 
   type WikiLinkRow = { pageId: string; title: string; pagePath: string | null };
@@ -309,8 +300,8 @@ describe('withAuthorizedPageDocument', () => {
   });
 
   it.each([
-    ['append', 'Existing\n\nAdded\n\n'] as const,
-    ['prepend', 'Added\n\nExisting\n\n'] as const,
+    ['append', 'Existing\n\nAdded'] as const,
+    ['prepend', 'Added\n\nExisting'] as const,
   ])('applies %s against the latest document and stores its idempotent response', async (operation, expected) => {
     const harness = mutationHarness('Existing');
     const response = await withAuthorizedPageDocument(
@@ -350,7 +341,7 @@ describe('withAuthorizedPageDocument', () => {
       command: { id: 'append', operation: 'append', content: 'Added' },
     });
 
-    expect(yDocToMarkdown(harness.committedState())).toBe('Browser change\n\nAdded\n\n');
+    expect(yDocToMarkdown(harness.committedState())).toBe('Browser change\n\nAdded');
     harness.document.destroy();
   });
 
@@ -408,7 +399,7 @@ describe('withAuthorizedPageDocument', () => {
       accessible.principal,
       { action: 'read-markdown' },
     );
-    expect(accessibleResponse).toMatchObject({ markdown: '[[Renamed target]]\n\n' });
+    expect(accessibleResponse).toMatchObject({ markdown: '[[Renamed target]]' });
     accessible.document.destroy();
 
     const restricted = mutationHarness('');
@@ -425,7 +416,7 @@ describe('withAuthorizedPageDocument', () => {
       restricted.principal,
       { action: 'read-markdown' },
     );
-    expect(restrictedResponse).toMatchObject({ markdown: 'Restricted page\n\n' });
+    expect(restrictedResponse).toMatchObject({ markdown: 'Restricted page' });
     restricted.document.destroy();
   });
 
@@ -449,11 +440,7 @@ describe('withAuthorizedPageDocument', () => {
           };
 
     await withAuthorizedPageDocument(harness.options, harness.pageId, harness.principal, command);
-    const paragraph = harness.document.getXmlFragment('prosemirror').get(0);
-    if (!(paragraph instanceof Y.XmlElement)) throw new Error('Expected a paragraph');
-    const link = paragraph.get(0);
-    expect(link).toBeInstanceOf(Y.XmlElement);
-    expect((link as Y.XmlElement).getAttribute('targetId')).toBe(targetId);
+    expect(extractBoundTargetId(harness.document)).toBe(targetId);
 
     target.title = 'Renamed target';
     const readResponse = await withAuthorizedPageDocument(
@@ -462,7 +449,7 @@ describe('withAuthorizedPageDocument', () => {
       harness.principal,
       { action: 'read-markdown' },
     );
-    expect(readResponse).toMatchObject({ markdown: '[[Renamed target]]\n\n' });
+    expect(readResponse).toMatchObject({ markdown: '[[Renamed target]]' });
     harness.document.destroy();
   });
 

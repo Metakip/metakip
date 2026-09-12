@@ -65,8 +65,8 @@ describe('collab server wiki-link persistence', () => {
 
     const result = await pool.query<{ target_id: string | null }>(
       `SELECT target_id FROM connections
-         WHERE source_id = $1 AND target_slug = 'missing-in-source-workspace'`,
-      [source.id],
+         WHERE source_id = $1 AND target_slug = $2`,
+      [source.id, `id:${externalTarget.id}`],
     );
     expect(result.rows[0]?.target_id).toBeNull();
   });
@@ -140,8 +140,8 @@ describe('collab server wiki-link persistence', () => {
     }>(
       `select target_id, target_label, link_text
          from connections
-         where source_id = $1 and target_slug = 'authored-unresolved-path'`,
-      [source.id],
+         where source_id = $1 and target_slug = $2`,
+      [source.id, `id:${hiddenTarget.id}`],
     );
     expect(result.rows[0]).toEqual({
       target_id: hiddenTarget.id,
@@ -521,8 +521,8 @@ describe('collab server wiki-link persistence', () => {
 
     const result = await pool.query<{ target_id: string | null }>(
       `SELECT target_id FROM connections
-         WHERE source_id = $1 AND target_slug = 'roadmap'`,
-      [source.id],
+         WHERE source_id = $1 AND target_slug = $2`,
+      [source.id, `id:${target.id}`],
     );
     expect(result.rows[0]?.target_id).toBe(target.id);
   });
@@ -595,8 +595,8 @@ describe('collab server wiki-link persistence', () => {
       const addedVersion = viewerMeta.getMap<number>('backlinksVersion').get(target.id);
       if (addedVersion === undefined) throw new Error('Missing added backlink version');
 
-      const fragment = document.getXmlFragment('prosemirror');
-      fragment.delete(0, fragment.length);
+      const content = document.getText('content');
+      content.delete(0, content.length);
       await server.hocuspocus.hooks('onStoreDocument', payload);
 
       expect(ownerMeta.getMap('backlinksVersion').get(target.id)).toEqual(expect.any(Number));
