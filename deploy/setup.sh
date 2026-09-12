@@ -46,6 +46,8 @@ cd "$REPO_DIR"
 . "$REPO_DIR/deploy/collaboration-secret.sh"
 # shellcheck source=migrate-hosted-environment.sh
 . "$REPO_DIR/deploy/migrate-hosted-environment.sh"
+# shellcheck source=migrate-editor-content.sh
+. "$REPO_DIR/deploy/migrate-editor-content.sh"
 # shellcheck source=mcp-api-secret.sh
 . "$REPO_DIR/deploy/mcp-api-secret.sh"
 # shellcheck source=mcp-public-url.sh
@@ -134,6 +136,7 @@ done
 
 echo -e "${YELLOW}[SCHEMA] Running db:migrate to initialize database...${NC}"
 pnpm --filter @markdawn/api db:migrate
+migrateEditorContent "$REPO_DIR"
 
 systemctl --user start markdawn-api.service markdawn-mcp.service markdawn-collab.service
 

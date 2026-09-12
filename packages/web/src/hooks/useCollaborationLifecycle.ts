@@ -1,6 +1,6 @@
+import type { EditorView } from '@codemirror/view';
 import { HocuspocusProvider, type WebSocketStatus } from '@hocuspocus/provider';
 import type { SharePermission } from '@markdawn/shared';
-import type { Editor } from '@milkdown/core';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
 import * as Y from 'yjs';
@@ -22,7 +22,7 @@ type MutableValue<T> = { current: T };
 
 type PageCollaborationOptions = {
   pageId: string;
-  editorRef: MutableValue<Editor | null>;
+  editorRef: MutableValue<EditorView | null>;
   isAnonymous: boolean;
   currentUserId: string | null;
   onStatusChange?: (status: WebSocketStatus) => void;
@@ -97,9 +97,14 @@ function useProviderDisposal(provider: HocuspocusProvider, doc: Y.Doc): void {
     const capturedDoc = doc;
     return () => {
       if (latestProviderRef.current !== capturedProvider || latestDocRef.current !== capturedDoc) {
-        capturedProvider.forceSync();
-        capturedProvider.destroy();
-        capturedDoc.destroy();
+        // Let the editor's effect cleanup run before destroying the Yjs
+        // document. Otherwise y-codemirror can observe a destroyed document
+        // while the editor is being replaced during page navigation.
+        window.setTimeout(() => {
+          capturedProvider.forceSync();
+          capturedProvider.destroy();
+          capturedDoc.destroy();
+        }, 0);
         return;
       }
       setTimeout(() => {

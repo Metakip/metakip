@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-  formatProseMirrorShortcut,
+  formatEditorShortcut,
   formatShortcut,
   SHORTCUT_PATTERNS,
 } from '../../utils/keyboardShortcuts';
@@ -69,8 +69,8 @@ describe('editor command shortcuts', () => {
     expect(formatShortcut('Option+N')).toBe('⌥+N');
   });
 
-  it('formats the canonical blockquote shortcut for ProseMirror', () => {
-    expect(formatProseMirrorShortcut(SHORTCUT_PATTERNS.blockquote)).toBe('Mod-Shift-b');
+  it('formats the canonical editor blockquote shortcut', () => {
+    expect(formatEditorShortcut(SHORTCUT_PATTERNS.blockquote)).toBe('Mod-Shift-b');
   });
 
   it('uses the new contiguous list and code shortcut families', () => {
@@ -106,5 +106,14 @@ describe('editor command shortcuts', () => {
     expect(shortcutKeys).not.toContain('mod+shift+8');
     expect(shortcutKeys).not.toContain('mod+shift+[');
     expect(shortcutKeys).not.toContain('mod+`');
+  });
+
+  it('provides an explicit slash command for a fenced code block', () => {
+    const actions = createActions();
+    const registry = createEditorCommandRegistry(actions, false);
+    expect(registry.command('code-block').showInSlashMenu).toBe(true);
+    registry.command('code-block').execute();
+    expect(actions.runBlockCommand).toHaveBeenCalledWith('code_block');
+    expect(actions.handleCode).not.toHaveBeenCalled();
   });
 });

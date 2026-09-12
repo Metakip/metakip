@@ -1,6 +1,4 @@
-import type { Editor } from '@milkdown/core';
-import { editorViewCtx } from '@milkdown/core';
-import { TextSelection } from 'prosemirror-state';
+import type { EditorView } from '@codemirror/view';
 import { type MutableRefObject, useCallback, useRef, useState } from 'react';
 import type { EditorCommandRegistry } from '../components/editor/editorCommandRegistry';
 
@@ -16,7 +14,7 @@ interface UseSlashMenuOptions {
 }
 
 export function useSlashMenu(
-  editorRef: MutableRefObject<Editor | null>,
+  editorRef: MutableRefObject<EditorView | null>,
   { commands }: UseSlashMenuOptions,
 ) {
   const [slashMenuState, setSlashMenuState] = useState<SlashMenuState>({
@@ -49,15 +47,9 @@ export function useSlashMenu(
     const range = rangeRef.current;
     const editor = editorRef.current;
     if (!editor || !range) return;
-    editor.action((ctx) => {
-      const view = ctx.get(editorViewCtx);
-      if (!view) return;
-      const { state, dispatch } = view;
-      const { from, to } = range;
-      const tr = state.tr.delete(from, to);
-      const cursorPos = from;
-      tr.setSelection(TextSelection.near(tr.doc.resolve(cursorPos)));
-      dispatch(tr);
+    editor.dispatch({
+      changes: { from: range.from, to: range.to },
+      selection: { anchor: range.from },
     });
   };
 
@@ -67,14 +59,7 @@ export function useSlashMenu(
     setTimeout(() => {
       action();
       const editor = editorRef.current;
-      if (editor) {
-        editor.action((ctx) => {
-          const view = ctx.get(editorViewCtx);
-          if (view) {
-            view.focus();
-          }
-        });
-      }
+      editor?.focus();
     }, 0);
   };
 

@@ -19,7 +19,7 @@ test.describe('Markdown import', () => {
       buffer: Buffer.from('# Imported Title\n\nHello from imported file.'),
     });
 
-    await expect(page.locator('.ProseMirror')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('.codemirror-editor .cm-content')).toBeVisible({ timeout: 15000 });
     await expect(page.locator('input[data-testid="page-title"]')).toHaveValue('Imported Title');
   });
 });

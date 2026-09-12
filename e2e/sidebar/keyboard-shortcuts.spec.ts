@@ -17,13 +17,13 @@ test.describe('Keyboard shortcuts', () => {
       await expect(page.locator('[data-testid="sidebar"]')).toBeVisible({ timeout: 5000 });
     });
 
-    test('toggles sidebar when ProseMirror editor is focused (contenteditable)', async ({
+    test('toggles sidebar when CodeMirror editor is focused (contenteditable)', async ({
       page,
     }) => {
       await createNewPage(page);
       await focusEditor(page);
 
-      await expect(page.locator('.ProseMirror')).toBeFocused();
+      await expect(page.locator('.codemirror-editor .cm-content')).toBeFocused();
 
       await page.keyboard.press('Control+/');
       await expect(page.locator('[data-testid="sidebar-collapsed"]')).toBeVisible({
@@ -149,7 +149,7 @@ test.describe('Keyboard shortcuts', () => {
 
       await page.keyboard.type('insert link here');
 
-      await page.locator('.ProseMirror').click();
+      await page.locator('.codemirror-editor .cm-content').click();
       await page.keyboard.press('Control+a');
 
       const dialogPromise = page.waitForEvent('dialog', { timeout: 5000 });
@@ -228,7 +228,7 @@ test.describe('Keyboard shortcuts', () => {
 
       await page.keyboard.press('Control+b');
 
-      await expect(page.locator('.ProseMirror strong')).toHaveText('bold text');
+      await expect(page.locator('.cm-md-strong')).toContainText('bold text');
     });
 
     test('Ctrl+I makes selected text italic', async ({ page }) => {
@@ -240,7 +240,7 @@ test.describe('Keyboard shortcuts', () => {
 
       await page.keyboard.press('Control+i');
 
-      await expect(page.locator('.ProseMirror em')).toHaveText('italic text');
+      await expect(page.locator('.cm-md-emphasis')).toContainText('italic text');
     });
 
     test('Ctrl+Shift+B toggles a blockquote with the cursor', async ({ page }) => {
@@ -250,10 +250,10 @@ test.describe('Keyboard shortcuts', () => {
       await page.keyboard.type('quoted text');
       await page.keyboard.press('Control+Shift+b');
 
-      await expect(page.locator('.ProseMirror blockquote')).toHaveText('quoted text');
+      await expect(page.locator('.cm-md-blockquote')).toContainText('quoted text');
 
       await page.keyboard.press('Control+Shift+b');
-      await expect(page.locator('.ProseMirror blockquote')).toHaveCount(0);
+      await expect(page.locator('.cm-md-blockquote')).toHaveCount(0);
     });
 
     test('Ctrl+Shift+B toggles multiple selected blocks', async ({ page }) => {
@@ -266,10 +266,10 @@ test.describe('Keyboard shortcuts', () => {
       await page.keyboard.press('Control+a');
       await page.keyboard.press('Control+Shift+b');
 
-      await expect(page.locator('.ProseMirror blockquote p')).toHaveCount(2);
+      await expect(page.locator('.cm-md-blockquote')).toHaveCount(2);
 
       await page.keyboard.press('Control+Shift+b');
-      await expect(page.locator('.ProseMirror blockquote')).toHaveCount(0);
+      await expect(page.locator('.cm-md-blockquote')).toHaveCount(0);
     });
 
     test('Ctrl+Shift+F makes selected text inline code', async ({ page }) => {
@@ -281,7 +281,7 @@ test.describe('Keyboard shortcuts', () => {
 
       await page.keyboard.press('Control+Shift+f');
 
-      await expect(page.locator('.ProseMirror code')).toHaveText('code text');
+      await expect(page.locator('.cm-md-inline-code')).toContainText('code text');
     });
   });
 
@@ -294,7 +294,7 @@ test.describe('Keyboard shortcuts', () => {
 
       await page.keyboard.press('Control+Alt+8');
 
-      await expect(page.locator('.ProseMirror ul')).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('.cm-md-list-marker')).toHaveText('•', { timeout: 5000 });
     });
 
     test('Ctrl+Alt+7 inserts an ordered list', async ({ page }) => {
@@ -305,7 +305,7 @@ test.describe('Keyboard shortcuts', () => {
 
       await page.keyboard.press('Control+Alt+7');
 
-      await expect(page.locator('.ProseMirror ol')).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('.cm-md-list-marker')).toHaveText('1.', { timeout: 5000 });
     });
 
     test('Ctrl+Alt+9 inserts a task list', async ({ page }) => {
@@ -316,7 +316,7 @@ test.describe('Keyboard shortcuts', () => {
 
       await page.keyboard.press('Control+Alt+9');
 
-      await expect(page.locator('.ProseMirror li[data-item-type="task"]')).toBeVisible({
+      await expect(page.locator('.cm-md-task-checkbox')).toBeVisible({
         timeout: 5000,
       });
     });
@@ -331,7 +331,7 @@ test.describe('Keyboard shortcuts', () => {
 
       await page.keyboard.press('Control+Alt+1');
 
-      await expect(page.locator('.ProseMirror h1')).toHaveText('Main heading');
+      await expect(page.locator('.cm-md-heading-1')).toContainText('Main heading');
     });
   });
 
@@ -348,7 +348,7 @@ test.describe('Keyboard shortcuts', () => {
 
       // Editor should still be usable
       await page.keyboard.type('still works');
-      await expect(page.locator('.ProseMirror')).toContainText('still works');
+      await expect(page.locator('.codemirror-editor .cm-content')).toContainText('still works');
     });
   });
 
@@ -383,7 +383,7 @@ test.describe('Keyboard shortcuts', () => {
 
       await page.keyboard.type('The quick brown fox jumps over the lazy dog.');
 
-      await expect(page.locator('.ProseMirror p')).toContainText(
+      await expect(page.locator('.codemirror-editor .cm-content')).toContainText(
         'The quick brown fox jumps over the lazy dog.',
         { timeout: 5000 },
       );

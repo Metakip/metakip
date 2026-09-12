@@ -134,7 +134,7 @@ test.describe('sharing realtime propagation', () => {
       const initialContent = `PRIMITIVE-CONTENT-${sharedPage.id.slice(0, 8)}`;
 
       await ownerPage.goto(`/page-${sharedPage.id}`);
-      const ownerEditor = ownerPage.locator('.ProseMirror');
+      const ownerEditor = ownerPage.locator('.codemirror-editor .cm-content');
       await expect(ownerEditor).toHaveAttribute('contenteditable', 'true');
       await ownerEditor.click();
       await ownerPage.keyboard.type(initialContent);
@@ -142,9 +142,12 @@ test.describe('sharing realtime propagation', () => {
       // PostgreSQL before any permission transition is attempted.
       await waitForPersistedMarkdown(ownerApi, sharedPage.id, initialContent);
       await ownerPage.reload();
-      await expect(ownerPage.locator('.ProseMirror')).toContainText(initialContent, {
-        timeout: 15_000,
-      });
+      await expect(ownerPage.locator('.codemirror-editor .cm-content')).toContainText(
+        initialContent,
+        {
+          timeout: 15_000,
+        },
+      );
 
       expect(
         (
@@ -169,7 +172,7 @@ test.describe('sharing realtime propagation', () => {
       ).toBeTruthy();
 
       await recipientPage.goto(`/page-${sharedPage.id}`);
-      const recipientEditor = recipientPage.locator('.ProseMirror');
+      const recipientEditor = recipientPage.locator('.codemirror-editor .cm-content');
       await expect(recipientEditor).toContainText(initialContent, { timeout: 15_000 });
       await expect(recipientEditor).toHaveAttribute('contenteditable', 'true');
 
@@ -227,9 +230,11 @@ test.describe('sharing realtime propagation', () => {
 
       // A view-only peer leaving must not evict or blank the owner's room.
       await recipientPage.goto('/');
-      await expect(ownerPage.locator('.ProseMirror')).toContainText(initialContent);
+      await expect(ownerPage.locator('.codemirror-editor .cm-content')).toContainText(
+        initialContent,
+      );
       const postDisconnectContent = '-OWNER-AFTER-VIEWER-LEFT';
-      await ownerPage.locator('.ProseMirror').click();
+      await ownerPage.locator('.codemirror-editor .cm-content').click();
       await ownerPage.keyboard.press('End');
       await ownerPage.keyboard.type(postDisconnectContent);
       await waitForPersistedMarkdown(
@@ -238,7 +243,7 @@ test.describe('sharing realtime propagation', () => {
         `${initialContent}${postDisconnectContent}`,
       );
       await ownerPage.reload();
-      await expect(ownerPage.locator('.ProseMirror')).toContainText(
+      await expect(ownerPage.locator('.codemirror-editor .cm-content')).toContainText(
         `${initialContent}${postDisconnectContent}`,
         { timeout: 15_000 },
       );
@@ -252,11 +257,11 @@ test.describe('sharing realtime propagation', () => {
         ).ok(),
       ).toBeTruthy();
       await recipientPage.goto(`/page-${sharedPage.id}`);
-      await expect(recipientPage.locator('.ProseMirror')).toHaveAttribute(
+      await expect(recipientPage.locator('.codemirror-editor .cm-content')).toHaveAttribute(
         'contenteditable',
         'true',
       );
-      await expect(recipientPage.locator('.ProseMirror')).toContainText(
+      await expect(recipientPage.locator('.codemirror-editor .cm-content')).toContainText(
         `${initialContent}${postDisconnectContent}`,
       );
     } finally {
@@ -376,7 +381,7 @@ test.describe('sharing realtime propagation', () => {
         data: { email: recipientEmail, permission: 'edit' },
       });
       await recipientPage.goto(`/page-${fallbackPage.id}`);
-      const fallbackEditor = recipientPage.locator('.ProseMirror');
+      const fallbackEditor = recipientPage.locator('.codemirror-editor .cm-content');
       await expect(fallbackEditor).toHaveAttribute('contenteditable', 'true');
       const fallbackGrantId = await getDirectGrantId(
         ownerApi,
@@ -401,7 +406,7 @@ test.describe('sharing realtime propagation', () => {
         data: { email: recipientEmail, permission: 'view' },
       });
       await recipientPage.goto(`/page-${child.id}`);
-      const inheritedEditor = recipientPage.locator('.ProseMirror');
+      const inheritedEditor = recipientPage.locator('.codemirror-editor .cm-content');
       await expect(inheritedEditor).toHaveAttribute('contenteditable', 'true');
       expect(
         (
@@ -427,7 +432,9 @@ test.describe('sharing realtime propagation', () => {
       expect((await ownerApi.delete(`/api/shares/grants/${childGrantId}`)).ok()).toBeTruthy();
       const folderGrantId = await getDirectGrantId(ownerApi, 'folder', folder.id, recipient.userId);
       expect((await ownerApi.delete(`/api/shares/grants/${folderGrantId}`)).ok()).toBeTruthy();
-      await expect(recipientPage.locator('.ProseMirror')).toHaveCount(0, { timeout: 10_000 });
+      await expect(recipientPage.locator('.codemirror-editor .cm-content')).toHaveCount(0, {
+        timeout: 10_000,
+      });
       await expect
         .poll(async () => {
           const redirected = /\/$/.test(new URL(recipientPage.url()).pathname);
@@ -485,7 +492,7 @@ test.describe('sharing realtime propagation', () => {
 
       const anonymousPage = await anonymousContext.newPage();
       await anonymousPage.goto(`/page-${publicPage.id}`);
-      const anonymousEditor = anonymousPage.locator('.ProseMirror');
+      const anonymousEditor = anonymousPage.locator('.codemirror-editor .cm-content');
       await expect(anonymousPage.locator('[data-testid="page-title"]')).toHaveValue(
         confidentialTitle,
       );
@@ -566,7 +573,7 @@ test.describe('sharing realtime propagation', () => {
       await ownerPage.goto(`/page-${publicPage.id}`);
       await anonymousPage.goto(`/page-${publicPage.id}`);
       await anonymousPage.bringToFront();
-      await expect(anonymousPage.locator('.ProseMirror')).toHaveAttribute(
+      await expect(anonymousPage.locator('.codemirror-editor .cm-content')).toHaveAttribute(
         'contenteditable',
         'true',
       );
@@ -592,8 +599,12 @@ test.describe('sharing realtime propagation', () => {
       expect(
         (await ownerApi.delete(`/api/folders/${deletedFolder.id}?force=true`)).ok(),
       ).toBeTruthy();
-      await expect(ownerPage.locator('.ProseMirror')).toHaveCount(0, { timeout: 10_000 });
-      await expect(anonymousPage.locator('.ProseMirror')).toHaveCount(0, { timeout: 10_000 });
+      await expect(ownerPage.locator('.codemirror-editor .cm-content')).toHaveCount(0, {
+        timeout: 10_000,
+      });
+      await expect(anonymousPage.locator('.codemirror-editor .cm-content')).toHaveCount(0, {
+        timeout: 10_000,
+      });
       await expect
         .poll(async () => {
           const redirected = /\/$/.test(new URL(ownerPage.url()).pathname);

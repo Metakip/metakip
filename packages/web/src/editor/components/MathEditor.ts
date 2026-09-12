@@ -1,4 +1,4 @@
-import type { EditorView } from '@milkdown/kit/prose/view';
+import type { EditorView } from '@codemirror/view';
 
 export type MathDisplayMode = 'inline' | 'block';
 
@@ -11,6 +11,7 @@ interface MathEditorOptions {
 
 export class MathEditor {
   private popup: HTMLDivElement | null = null;
+  private cleanup: (() => void) | null = null;
 
   open(view: EditorView, anchorElement: HTMLElement, options: MathEditorOptions): void {
     this.close();
@@ -24,6 +25,8 @@ export class MathEditor {
   }
 
   close(): void {
+    this.cleanup?.();
+    this.cleanup = null;
     if (this.popup) {
       this.popup.remove();
       this.popup = null;
@@ -148,8 +151,9 @@ export class MathEditor {
       }
     };
     setTimeout(() => {
-      document.addEventListener('mousedown', handleClickOutside);
+      if (this.popup) document.addEventListener('mousedown', handleClickOutside);
     }, 0);
+    this.cleanup = () => document.removeEventListener('mousedown', handleClickOutside);
   }
 
   private focusEditor(): void {

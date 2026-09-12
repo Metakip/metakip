@@ -17,19 +17,9 @@ describe('connection index repository', () => {
     const source = await createTestPage(pool, owner.id, 'Source');
     const target = await createTestPage(pool, owner.id, 'Target');
     const document = new Y.Doc();
-    const paragraph = new Y.XmlElement('paragraph');
-    const link = new Y.XmlElement('wikiLink');
-    link.setAttribute('path', 'Target');
-    link.setAttribute('label', 'Target');
-    link.setAttribute('targetId', target.id);
-    paragraph.push([link]);
-    const secondParagraph = new Y.XmlElement('paragraph');
-    const secondLink = new Y.XmlElement('wikiLink');
-    secondLink.setAttribute('path', 'Target');
-    secondLink.setAttribute('label', 'Second target reference');
-    secondLink.setAttribute('targetId', target.id);
-    secondParagraph.push([secondLink]);
-    document.getXmlFragment('prosemirror').push([paragraph, secondParagraph]);
+    document
+      .getText('content')
+      .insert(0, `[[id:${target.id}|Target]]\n\n[[id:${target.id}|Second target reference]]`);
 
     const client = await pool.connect();
     try {

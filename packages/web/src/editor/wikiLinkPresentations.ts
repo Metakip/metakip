@@ -4,7 +4,6 @@ import {
   type WikiLinkPresentation,
   type WikiLinkPresentationResponse,
 } from '@markdawn/shared';
-import type { EditorView } from '@milkdown/kit/prose/view';
 import { getLogger } from '../logger-init';
 
 export type WikiLinkReference = { targetId?: string; path?: string };
@@ -41,9 +40,11 @@ type PresentationCoordinator = {
   retryTimer: ReturnType<typeof setTimeout> | null;
 };
 
-const coordinators = new WeakMap<EditorView, PresentationCoordinator>();
+type PresentationHost = object;
 
-function getCoordinator(view: EditorView): PresentationCoordinator {
+const coordinators = new WeakMap<PresentationHost, PresentationCoordinator>();
+
+function getCoordinator(view: PresentationHost): PresentationCoordinator {
   const existing = coordinators.get(view);
   if (existing) return existing;
   const coordinator: PresentationCoordinator = {
@@ -173,7 +174,7 @@ function scheduleResolution(coordinator: PresentationCoordinator): void {
 }
 
 export function registerWikiLinkPresentationResolver(
-  view: EditorView,
+  view: PresentationHost,
   resolver: PresentationResolver,
 ): () => void {
   const coordinator = getCoordinator(view);
@@ -196,7 +197,7 @@ export function registerWikiLinkPresentationResolver(
 }
 
 export function subscribeToWikiLinkPresentation(
-  view: EditorView,
+  view: PresentationHost,
   reference: WikiLinkReference,
   listener: PresentationListener,
 ): () => void {
@@ -232,7 +233,7 @@ export function subscribeToWikiLinkPresentation(
 }
 
 export function refreshWikiLinkPresentations(
-  view: EditorView,
+  view: PresentationHost,
   targetIds?: readonly string[],
 ): void {
   const coordinator = getCoordinator(view);

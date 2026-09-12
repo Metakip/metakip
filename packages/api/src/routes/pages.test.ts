@@ -1,9 +1,9 @@
 import { MAX_PAGE_TITLE_LENGTH } from '@markdawn/shared';
+import { markdownToYjsState } from '@markdawn/shared/markdown-yjs';
 import { extractConnectionsFromYDoc } from '@markdawn/shared/yjs-helpers';
 import { sql } from 'drizzle-orm';
 import { Client } from 'pg';
 import { describe, expect, it } from 'vitest';
-import * as Y from 'yjs';
 import { db } from '../db/connection';
 import { executeQuery } from '../db/query';
 import { testQuery as query } from '../db/testQuery';
@@ -71,15 +71,7 @@ function guestCookie(id = crypto.randomUUID()): string {
 }
 
 function createBoundWikiLinkYdoc(targetId: string, label = ''): Buffer {
-  const doc = new Y.Doc();
-  const paragraph = new Y.XmlElement('paragraph');
-  const link = new Y.XmlElement('wikiLink');
-  link.setAttribute('targetId', targetId);
-  link.setAttribute('path', '');
-  link.setAttribute('label', label);
-  paragraph.push([link]);
-  doc.getXmlFragment('prosemirror').push([paragraph]);
-  return Buffer.from(Y.encodeStateAsUpdate(doc));
+  return Buffer.from(markdownToYjsState(`[[id:${targetId}${label ? `|${label}` : ''}]]`));
 }
 
 type ShareEventNotification = {
@@ -2565,14 +2557,8 @@ describe('pages API', () => {
       const user = await createTestUser();
       const session = await createTestSession(user.id);
       const page = await createTestPage(user.id);
-      const doc = new Y.Doc();
-      const paragraph = new Y.XmlElement('paragraph');
-      const inlineTag = new Y.XmlElement('tag');
-      inlineTag.setAttribute('name', 'inline');
-      paragraph.push([inlineTag]);
-      doc.getXmlFragment('prosemirror').push([paragraph]);
       await query('update pages set ydoc = $1 where id = $2', [
-        Buffer.from(Y.encodeStateAsUpdate(doc)),
+        Buffer.from(markdownToYjsState('#inline')),
         page.id,
       ]);
 

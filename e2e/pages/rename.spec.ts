@@ -14,7 +14,7 @@ test.describe('Page renaming', () => {
 
     await page.reload();
     await expect(page).toHaveURL(/\/[^/]+$/);
-    await expect(page.locator('.ProseMirror')).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('.codemirror-editor .cm-content')).toBeVisible({ timeout: 10_000 });
     await expect(page.locator('input[data-testid="page-title"]')).toHaveValue('Persistent Title');
   });
 });

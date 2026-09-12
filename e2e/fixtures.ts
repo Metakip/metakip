@@ -5,7 +5,7 @@ export const WEB_URL = process.env.BASE_URL ?? 'http://localhost:5173';
 export const WEB_HOSTNAME = new URL(WEB_URL).hostname;
 
 export async function focusEditor(page: Page): Promise<void> {
-  const editor = page.locator('.ProseMirror').first();
+  const editor = page.locator('.codemirror-editor .cm-content').first();
   await editor.waitFor({ state: 'visible' });
 
   // The editor becomes visible before the collaboration provider has applied
@@ -27,7 +27,7 @@ export async function focusEditor(page: Page): Promise<void> {
           (element) =>
             element.isConnected &&
             element.getAttribute('contenteditable') === 'true' &&
-            document.querySelector('.ProseMirror') === element,
+            document.querySelector('.codemirror-editor .cm-content') === element,
         );
       },
       { timeout: 15_000 },
@@ -44,7 +44,7 @@ export async function createNewPage(page: Page): Promise<string> {
     .getByRole('button', { name: /new page/i })
     .first()
     .click();
-  await page.waitForSelector('.ProseMirror', { timeout: 15000 });
+  await page.waitForSelector('.codemirror-editor .cm-content', { timeout: 15000 });
   return page.url();
 }
 
@@ -69,7 +69,7 @@ export async function pasteClipboardData(
   page: Page,
   values: Record<string, string>,
 ): Promise<void> {
-  await page.locator('.ProseMirror').evaluate((editor, clipboard) => {
+  await page.locator('.codemirror-editor .cm-content').evaluate((editor, clipboard) => {
     const clipboardData = new DataTransfer();
     for (const [mimeType, text] of Object.entries(clipboard)) {
       clipboardData.setData(mimeType, text);
@@ -85,20 +85,14 @@ export async function pasteClipboardData(
 }
 
 export async function selectEditorContents(page: Page): Promise<void> {
-  await page.locator('.ProseMirror').evaluate((editor) => {
-    const selection = window.getSelection();
-    const range = document.createRange();
-    range.selectNodeContents(editor);
-    selection?.removeAllRanges();
-    selection?.addRange(range);
-    document.dispatchEvent(new Event('selectionchange'));
-  });
+  await page.locator('.codemirror-editor .cm-content').click();
+  await page.keyboard.press('Control+a');
   await page.waitForTimeout(50);
 }
 
 export async function copyEditorText(page: Page): Promise<string> {
   for (let attempt = 0; attempt < 5; attempt++) {
-    const text = await page.locator('.ProseMirror').evaluate(
+    const text = await page.locator('.codemirror-editor .cm-content').evaluate(
       (editor) =>
         new Promise<string>((resolve, reject) => {
           const handleCopy = (event: Event) => {

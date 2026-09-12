@@ -72,7 +72,7 @@ export function formatShortcut(pattern: string): string {
   return [...modifiers, displayKey].join('+');
 }
 
-export function formatProseMirrorShortcut(pattern: string): string {
+export function formatEditorShortcut(pattern: string): string {
   const { modifiers, key } = parseShortcutPattern(pattern);
   const modifierNames: Record<string, string> = {
     alt: 'Alt',

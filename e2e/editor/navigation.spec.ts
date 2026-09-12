@@ -18,6 +18,6 @@ test.describe('Navigation between pages', () => {
     await page.waitForURL(/\/untitled-/);
     await focusEditor(page);
     await page.keyboard.type('Page two content');
-    await expect(page.locator('.ProseMirror')).toContainText('Page two content');
+    await expect(page.locator('.codemirror-editor .cm-content')).toContainText('Page two content');
   });
 });

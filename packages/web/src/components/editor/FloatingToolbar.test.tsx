@@ -77,7 +77,7 @@ function getSelection(): Selection {
 
 function selectEditorText(): HTMLElement {
   const editor = document.createElement('div');
-  editor.className = 'milkdown-editor';
+  editor.className = 'codemirror-editor';
   editor.dataset.floatingToolbarTest = '';
   const text = document.createTextNode('Selected text');
   editor.append(text);
@@ -150,6 +150,54 @@ describe('FloatingToolbar', () => {
     rerender(<FloatingToolbar {...props} />);
 
     expect(screen.getByTitle('Bold (Ctrl+B)').parentElement).not.toHaveClass('invisible');
+  });
+
+  it('shows controls for a collapsed table caret without expanding the selection', () => {
+    vi.useFakeTimers();
+    floatingMocks.isPositioned = true;
+    const editor = selectEditorText();
+    const table = document.createElement('div');
+    table.className = 'cm-md-table';
+    const row = document.createElement('div');
+    row.className = 'cm-line';
+    const cell = document.createElement('span');
+    cell.className = 'cm-md-table-cell';
+    cell.textContent = '\u00a0';
+    row.append(cell);
+    table.append(row);
+    editor.replaceChildren(table);
+    const range = document.createRange();
+    // Empty widgets can leave the DOM caret anchored on the row, not the cell.
+    range.setStart(row, 0);
+    range.collapse(true);
+    getSelection().removeAllRanges();
+    getSelection().addRange(range);
+    render(<FloatingToolbarHarness onBold={vi.fn()} />);
+
+    act(() => {
+      document.dispatchEvent(new Event('selectionchange'));
+      vi.advanceTimersByTime(100);
+    });
+
+    expect(screen.getByTitle('Bold (Ctrl+B)').parentElement).not.toHaveClass('invisible');
+    expect(getSelection().isCollapsed).toBe(true);
+    expect(getSelection().anchorNode).toBe(row);
+
+    const paragraph = document.createTextNode('Outside table');
+    editor.append(paragraph);
+    getSelection().collapse(paragraph, 0);
+    act(() => {
+      document.dispatchEvent(new Event('selectionchange'));
+      vi.advanceTimersByTime(100);
+    });
+    expect(screen.getByTitle('Bold (Ctrl+B)').parentElement).toHaveClass('invisible');
+  });
+
+  it('prevents mouse presses from taking the editor selection', () => {
+    render(<FloatingToolbar {...createProps({ isInTableActive: true })} />);
+    const event = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
+    fireEvent(screen.getByTitle('Add Row Above'), event);
+    expect(event.defaultPrevented).toBe(true);
   });
 
   it('runs a formatting command after selection collapses during a slow button press', () => {

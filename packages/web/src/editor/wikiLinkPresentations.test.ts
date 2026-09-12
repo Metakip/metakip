@@ -1,4 +1,3 @@
-import type { EditorView } from '@milkdown/kit/prose/view';
 import { describe, expect, it, vi } from 'vitest';
 import {
   registerWikiLinkPresentationResolver,
@@ -7,7 +6,7 @@ import {
 
 describe('wiki-link presentation lifecycle', () => {
   it('discards cached entries after their last listener unsubscribes', async () => {
-    const view = {} as EditorView;
+    const view = {};
     const resolver = vi.fn(async (requests: Array<{ key: string }>) =>
       requests.map(({ key }) => ({
         key,

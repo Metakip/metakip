@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
 import { createAuth } from './auth';
 import { testQuery } from './db/testQuery';
-import { WELCOME_PAGE_TITLE } from './utils/welcomePage';
+import { WELCOME_PAGE_CONTENT, WELCOME_PAGE_TITLE } from './utils/welcomePage';
 
 const FRONTEND_URL = process.env.FRONTEND_URL ?? 'http://localhost:5173';
 
@@ -134,9 +134,11 @@ describe('Better Auth welcome page hook', () => {
 
     const document = new Y.Doc();
     Y.applyUpdate(document, page.ydoc);
-    const content = document.getXmlFragment('prosemirror').toString();
+    const content = document.getText('content').toString();
+    expect(content).toBe(WELCOME_PAGE_CONTENT);
     expect(content).toContain("I'm Atharva, the sole developer behind Markdawn");
     expect(content).toContain('Toggle sidebar');
+    document.destroy();
 
     const metadata = await testQuery<{
       favorites: number;

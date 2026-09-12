@@ -1,3 +1,4 @@
+import type { EditorView } from '@codemirror/view';
 import {
   type HocuspocusProvider,
   type onAuthenticationFailedParameters,
@@ -13,8 +14,6 @@ import {
   type SharePermission,
   shouldApplyPermissionSnapshot,
 } from '@markdawn/shared';
-import type { Editor } from '@milkdown/core';
-import { editorViewCtx } from '@milkdown/core';
 import type { QueryClient } from '@tanstack/react-query';
 import type * as Y from 'yjs';
 import { refreshWikiLinkPresentations } from '../editor/wikiLinkPresentations';
@@ -41,7 +40,7 @@ export type CollaborationLifecycleControllerOptions = {
   provider: HocuspocusProvider;
   doc: Y.Doc;
   pageId: string;
-  editorRef: { current: Editor | null };
+  editorRef: { current: EditorView | null };
   eventBridge: CollaborationEventBridge;
   isIdentityActive: () => boolean;
   getLatestOptions: () => LatestLifecycleOptions;
@@ -370,9 +369,8 @@ export class CollaborationLifecycleController {
 
   private refreshWikiLinks(targetIds?: string[]): void {
     try {
-      this.options.editorRef.current?.action((ctx) => {
-        refreshWikiLinkPresentations(ctx.get(editorViewCtx), targetIds);
-      });
+      const view = this.options.editorRef.current;
+      if (view) refreshWikiLinkPresentations(view, targetIds);
     } catch {
       // The editor may have been destroyed while reconnecting.
     }

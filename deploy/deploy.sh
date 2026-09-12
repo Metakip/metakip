@@ -74,6 +74,8 @@ git pull origin master
 . "$REPO_DIR/deploy/collaboration-secret.sh"
 # shellcheck source=migrate-hosted-environment.sh
 . "$REPO_DIR/deploy/migrate-hosted-environment.sh"
+# shellcheck source=migrate-editor-content.sh
+. "$REPO_DIR/deploy/migrate-editor-content.sh"
 # shellcheck source=mcp-api-secret.sh
 . "$REPO_DIR/deploy/mcp-api-secret.sh"
 # shellcheck source=mcp-public-url.sh
@@ -93,7 +95,9 @@ ensureMcpPublicUrl .env
 
 echo -e "${YELLOW}[STEP 3/9] Building web packages...${NC}"
 pnpm --filter @markdawn/shared build
-pnpm --filter @markdawn/web build
+rm -rf "$REPO_DIR/packages/web/dist.next"
+pnpm --filter @markdawn/web exec tsc --project tsconfig.build.json
+pnpm --filter @markdawn/web exec vite build --outDir dist.next
 
 echo -e "${YELLOW}[STEP 4/9] Updating Podman Quadlet units...${NC}"
 podman volume create postgres-data 2>/dev/null || true
@@ -141,6 +145,20 @@ fi
 
 echo -e "${YELLOW}[STEP 8/9] Running database migrations...${NC}"
 pnpm --filter @markdawn/api db:migrate
+migrateEditorContent "$REPO_DIR"
+
+# Keep the old editor bundle live until every page has been converted. This
+# prevents old XML clients and the new Markdown client from overlapping during
+# the one-way editor migration.
+rm -rf "$REPO_DIR/packages/web/dist.previous"
+if [ -d "$REPO_DIR/packages/web/dist" ]; then
+    mv "$REPO_DIR/packages/web/dist" "$REPO_DIR/packages/web/dist.previous"
+fi
+mv "$REPO_DIR/packages/web/dist.next" "$REPO_DIR/packages/web/dist"
+if command -v restorecon &>/dev/null; then
+    sudo restorecon -R "$REPO_DIR/packages/web/dist"
+fi
+rm -rf "$REPO_DIR/packages/web/dist.previous"
 
 echo -e "${YELLOW}[STEP 9/9] Starting application services...${NC}"
 systemctl --user start markdawn-api.service markdawn-mcp.service markdawn-collab.service

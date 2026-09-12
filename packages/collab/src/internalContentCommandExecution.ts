@@ -16,7 +16,7 @@ import {
   normalizeWikiLinkLookupKey,
   parsePageMarkdown,
 } from '@markdawn/shared';
-import { bindWikiLinkTargets } from '@markdawn/shared/markdown-yjs';
+import { bindWikiLinkTargetsInDocument } from '@markdawn/shared/markdown-yjs';
 import { replaceMarkdownBody } from '@markdawn/shared/yjs-document-replacement';
 import { extractWikiLinkTargetIds, yDocToMarkdown } from '@markdawn/shared/yjs-helpers';
 import type { Pool } from 'pg';
@@ -144,8 +144,7 @@ function replaceAndBindMarkdownBody(
 ): void {
   // Content commands persist explicitly; do not enqueue Hocuspocus storage.
   replaceMarkdownBody(document, title, body, SKIP_STORE_LOCAL_ORIGIN);
-  const boundState = bindWikiLinkTargets(Y.encodeStateAsUpdate(document), pageLookup);
-  Y.applyUpdate(document, boundState, SKIP_STORE_LOCAL_ORIGIN);
+  bindWikiLinkTargetsInDocument(document, pageLookup, SKIP_STORE_LOCAL_ORIGIN);
 }
 
 function joinMarkdown(before: string, after: string): string {

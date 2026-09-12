@@ -1,4 +1,4 @@
-import type { EditorView } from '@milkdown/kit/prose/view';
+import type { EditorView } from '@codemirror/view';
 import { ensureAbsoluteUrl } from '../../utils/url';
 
 export interface LinkEditorOptions {
@@ -345,7 +345,7 @@ export class LinkEditor {
     };
 
     setTimeout(() => {
-      document.addEventListener('mousedown', handleClickOutside);
+      if (this.popup) document.addEventListener('mousedown', handleClickOutside);
     }, 0);
 
     this.cleanupHandlers.push(() => {

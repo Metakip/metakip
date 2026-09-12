@@ -53,19 +53,14 @@ describe('document size validation', () => {
   it('preserves stable wiki-link targets when copying canonical state', () => {
     const targetId = '11111111-1111-1111-1111-111111111111';
     const source = new Y.Doc();
-    const link = new Y.XmlElement('wikiLink');
-    link.setAttribute('targetId', targetId);
-    link.setAttribute('path', '');
-    source.getXmlFragment('prosemirror').push([link]);
+    source.getText('content').insert(0, `[[id:${targetId}]]`);
 
     const copied = prepareCopiedYdoc(Y.encodeStateAsUpdate(source), 'Copy');
 
     expect(copied).not.toBeNull();
     const copiedDocument = new Y.Doc();
     Y.applyUpdate(copiedDocument, new Uint8Array(copied ?? []));
-    const copiedLink = copiedDocument.getXmlFragment('prosemirror').get(0) as Y.XmlElement;
-    expect(copiedLink.getAttribute('targetId')).toBe(targetId);
-    expect(copiedLink.getAttribute('path')).toBe('');
+    expect(copiedDocument.getText('content').toString()).toBe(`[[id:${targetId}]]`);
     expect(Buffer.from(copied ?? []).includes(Buffer.from(targetId))).toBe(true);
   });
 

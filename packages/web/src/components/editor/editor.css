@@ -1,319 +1,154 @@
-.milkdown-editor {
+.codemirror-editor {
   min-height: 500px;
   padding: 1rem;
 }
 
-.milkdown-editor-view {
-  outline: none;
+.codemirror-editor .cm-editor {
   min-height: 500px;
-  border: none;
-  box-shadow: none;
+  color: #27272a;
+  background: transparent;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
 }
 
-.ProseMirror {
-  border: none;
-  outline: none;
-  box-shadow: none;
-}
-
-.milkdown-editor-view .ProseMirror {
-  outline: none;
-  min-height: 460px;
+.dark .codemirror-editor .cm-editor {
   color: #e4e4e7;
-  caret-color: #fafafa;
+}
+.codemirror-editor .cm-editor.cm-focused {
+  outline: none;
 }
 
-/* Visual writing room only; this space is not persisted in the document. */
-.editor-wrapper.editor-scroll-past-end::after {
-  content: "";
-  display: block;
-  height: 40vh;
-  pointer-events: none;
+.codemirror-editor .cm-scroller {
+  overflow: visible;
+  font-family: inherit;
+  line-height: inherit;
 }
 
-.milkdown-editor-view p {
-  margin-bottom: 1rem;
+.codemirror-editor .cm-content {
+  min-height: 460px;
+  padding: 0;
+  caret-color: currentColor;
 }
 
-.milkdown-editor-view h1,
-.milkdown-editor-view h2,
-.milkdown-editor-view h3,
-.milkdown-editor-view h4,
-.milkdown-editor-view h5,
-.milkdown-editor-view h6 {
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
+/* The text caret indicates focus; don't apply the global control focus ring. */
+.codemirror-editor .cm-content:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* The drag-and-drop cursor is border-based; normal caret/selection stay native. */
+.codemirror-editor .cm-dropCursor {
+  border-left-color: currentColor;
+}
+
+.codemirror-editor .cm-line {
+  padding: 0;
+}
+
+.codemirror-editor .cm-md-heading {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
   font-weight: 600;
-  /* Keep anchored headings below Page's sticky breadcrumb/action bar. */
+  line-height: 1.5;
   scroll-margin-top: 3.25rem;
 }
 
+.codemirror-editor .cm-md-heading-1 {
+  font-size: 2.25rem;
+}
+.codemirror-editor .cm-md-heading-2 {
+  font-size: 1.875rem;
+}
+.codemirror-editor .cm-md-heading-3 {
+  font-size: 1.5rem;
+}
+.codemirror-editor .cm-md-heading-4 {
+  font-size: 1.25rem;
+}
+.codemirror-editor .cm-md-heading-5 {
+  font-size: 1.125rem;
+}
+.codemirror-editor .cm-md-heading-6 {
+  font-size: 1rem;
+}
+.codemirror-editor .cm-md-setext-mark {
+  display: none;
+}
+
 @media (min-width: 768px) {
-  .milkdown-editor-view h1,
-  .milkdown-editor-view h2,
-  .milkdown-editor-view h3,
-  .milkdown-editor-view h4,
-  .milkdown-editor-view h5,
-  .milkdown-editor-view h6 {
+  .codemirror-editor .cm-md-heading {
     scroll-margin-top: 4.5rem;
   }
 }
 
-.milkdown-editor-view h1 {
-  font-size: 2.25rem;
+.codemirror-editor .cm-md-strong {
+  font-weight: 700;
 }
-.milkdown-editor-view h2 {
-  font-size: 1.875rem;
+.codemirror-editor .cm-md-emphasis {
+  font-style: italic;
 }
-.milkdown-editor-view h3 {
-  font-size: 1.5rem;
-}
-.milkdown-editor-view h4 {
-  font-size: 1.25rem;
-}
-
-.milkdown-editor-view ul {
-  list-style-type: disc;
-  padding-left: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.milkdown-editor-view ul li::marker {
-  font-size: 1.2em;
-}
-
-.milkdown-editor-view ol li::marker {
-  font-size: 1.2em;
-}
-
-.milkdown-editor-view li[data-item-type="task"] {
-  list-style: none;
-  position: relative;
-  padding-left: 0;
-}
-
-.milkdown-editor-view li[data-item-type="task"]::before {
-  content: "";
-  position: absolute;
-  left: -1.25rem;
-  top: 0.38em;
-  width: 14px;
-  height: 14px;
-  border: 1px solid #6b7280;
-  border-radius: 4px;
-  background: transparent;
-  box-sizing: border-box;
-}
-
-.milkdown-editor-view li[data-item-type="task"][data-checked="true"]::before {
-  background: #3b82f6;
-  border-color: #3b82f6;
-  box-shadow: inset 0 0 0 2px #111827;
-}
-
-.milkdown-editor-view li[data-item-type="task"][data-checked="true"] {
+.codemirror-editor .cm-md-strike {
   text-decoration: line-through;
-  opacity: 0.65;
 }
 
-.milkdown-editor-view ol {
-  list-style-type: decimal;
-  padding-left: 1.5rem;
-  margin-bottom: 1rem;
+.codemirror-editor .cm-md-inline-code,
+.codemirror-editor .cm-md-code-block {
+  background: #f4f4f5;
+  color: inherit;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.9rem;
 }
 
-.milkdown-editor-view blockquote {
-  border-left: 4px solid #e5e7eb;
-  padding-left: 1rem;
-  color: #6b7280;
-  margin-bottom: 1rem;
-}
-
-.milkdown-editor-view code {
-  background-color: #f3f4f6;
-  padding: 0.2rem 0.4rem;
-  border-radius: 0.25rem;
-  font-family: monospace;
-  font-size: 0.875em;
-}
-
-.milkdown-editor-view a {
-  color: #3b82f6;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-.milkdown-editor-view pre {
-  position: relative;
-  background-color: #f3f4f6;
-  padding: 1rem;
+.codemirror-editor .cm-md-inline-code {
   border-radius: 0.5rem;
-  overflow-x: auto;
-  margin-bottom: 1rem;
+  padding: 0.1em 0.25em;
 }
 
-.milkdown-editor-view [data-node-type="code_block"] {
-  position: relative;
+.dark .codemirror-editor .cm-md-inline-code,
+.dark .codemirror-editor .cm-md-code-block {
+  background: #18181b;
 }
 
-/* Floating code block copy button (attached to body, not inside .milkdown-editor-view) */
-.code-block-copy-btn {
-  background: rgba(255, 255, 255, 0.95);
-  color: #18181b;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-
-.milkdown-editor-view .code-block-copy-btn {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  opacity: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: rgba(17, 24, 39, 0.7);
-  color: #f9fafb;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-  cursor: pointer;
-  transition: opacity 0.15s ease;
-}
-
-.milkdown-editor-view pre:hover .code-block-copy-btn {
-  opacity: 1;
-}
-
-.milkdown-editor-view pre.ProseMirror-selectednode {
-  background: inherit;
-  outline: none;
-}
-
-.dark .milkdown-editor-view pre.ProseMirror-selectednode {
-  background-color: #111827;
-}
-
-.milkdown-editor-view pre code {
-  background-color: transparent;
-  padding: 0;
-}
-
-.dark .milkdown-editor-view blockquote {
-  border-left-color: #374151;
-  color: #9ca3af;
-}
-
-.dark .milkdown-editor-view code {
-  background-color: #374151;
-}
-
-.dark .milkdown-editor-view pre code {
-  background-color: transparent;
-  padding: 0;
-}
-
-.dark .milkdown-editor-view a {
-  color: #60a5fa;
-}
-
-.dark .milkdown-editor-view pre {
-  background-color: #111827;
-  border: 1px solid #374151;
-}
-
-.dark .milkdown-editor-view .code-block-copy-btn {
-  background: rgba(255, 255, 255, 0.1);
-  color: #e5e7eb;
-  border-color: rgba(229, 231, 235, 0.25);
-}
-
-.dark .code-block-copy-btn {
-  background: rgba(30, 30, 35, 0.85);
-  color: #e5e7eb;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-}
-
-.dark .milkdown-editor-view li[data-item-type="task"]::before {
-  border-color: #9ca3af;
-}
-
-.dark .milkdown-editor-view li[data-item-type="task"][data-checked="true"]::before {
-  background: #60a5fa;
-  border-color: #60a5fa;
-  box-shadow: inset 0 0 0 2px #0a0a0a;
-}
-
-.milkdown-editor-view table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 1rem;
-}
-
-.milkdown-editor-view th,
-.milkdown-editor-view td {
-  border: 1px solid #e5e7eb;
-  padding: 0.5rem 0.75rem;
-  text-align: left;
-}
-
-.milkdown-editor-view th {
-  background-color: #f9fafb;
-  font-weight: 600;
-}
-
-.dark .milkdown-editor-view th,
-.dark .milkdown-editor-view td {
-  border-color: #374151;
-}
-
-.dark .milkdown-editor-view th {
-  background-color: #1f2937;
-}
-
-.milkdown-editor-view .wiki-link {
-  color: #3b82f6;
+.codemirror-editor .cm-md-link,
+.codemirror-editor .cm-md-link-source,
+.codemirror-editor .cm-md-wiki-link {
+  color: #2563eb;
   text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+  text-underline-offset: 2px;
   cursor: pointer;
 }
 
-.dark .milkdown-editor-view .wiki-link {
+.dark .codemirror-editor .cm-md-link,
+.dark .codemirror-editor .cm-md-link-source,
+.dark .codemirror-editor .cm-md-wiki-link {
   color: #60a5fa;
 }
 
-.milkdown-editor-view .wiki-link-restricted,
-.milkdown-editor-view .wiki-link-unavailable {
-  color: #71717a;
-  cursor: not-allowed;
-  text-decoration: none;
+.codemirror-editor .cm-md-link-source {
+  cursor: text;
 }
 
-.milkdown-editor-view .wiki-link-restricted::before {
-  display: inline-block;
-  width: 0.85em;
-  height: 0.85em;
-  margin-right: 0.25em;
-  vertical-align: -0.08em;
+/* A decorative external-link icon; no extra text enters selections or the Markdown. */
+.codemirror-editor a.cm-md-link::after {
   content: "";
-  background-color: currentColor;
+  display: inline-block;
+  width: 0.8em;
+  height: 0.8em;
+  margin-left: 0.2em;
+  vertical-align: -0.05em;
+  background: currentColor;
   mask:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='black' d='M17 9V7a5 5 0 0 0-10 0v2H5a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2h-2Zm-8-2a3 3 0 0 1 6 0v2H9V7Zm10 13H5v-9h14v9Z'/%3E%3C/svg%3E")
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 3h6v6M10 14 21 3M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6'/%3E%3C/svg%3E")
     center / contain no-repeat;
 }
 
-.milkdown-editor-view .tag {
-  color: #3b82f6;
-  cursor: pointer;
-  font-weight: 500;
+.codemirror-editor .cm-md-wiki-link-restricted {
+  color: #71717a;
+  cursor: default;
 }
 
-.dark .milkdown-editor-view .tag {
-  color: #60a5fa;
-}
-
-/* Link Hover Tooltip */
 .link-hover-tooltip {
   position: absolute;
   z-index: 1000;
@@ -515,83 +350,6 @@
   background: #450a0a;
 }
 
-/* Slash Command Menu */
-.milkdown-slash-menu {
-  position: absolute;
-  z-index: 1000;
-  min-width: 200px;
-  max-width: 320px;
-  background: #27272a;
-  border: 1px solid #3f3f46;
-  border-radius: 8px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-  overflow: hidden;
-  font-size: 14px;
-}
-
-.milkdown-slash-menu-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  cursor: pointer;
-  color: #e4e4e7;
-  transition: background-color 0.15s ease;
-}
-
-.milkdown-slash-menu-item:hover,
-.milkdown-slash-menu-item.selected {
-  background: #3f3f46;
-}
-
-.milkdown-slash-menu-item-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  background: #52525b;
-  border-radius: 4px;
-  font-weight: 600;
-  font-size: 12px;
-}
-
-.milkdown-slash-menu-item-label {
-  flex: 1;
-}
-
-.milkdown-slash-menu-item-hint {
-  color: #71717a;
-  font-size: 12px;
-}
-
-.dark .milkdown-slash-menu {
-  background: #18181b;
-  border-color: #27272a;
-}
-
-.dark .milkdown-slash-menu-item {
-  color: #e4e4e7;
-}
-
-.dark .milkdown-slash-menu-item:hover,
-.dark .milkdown-slash-menu-item.selected {
-  background: #27272a;
-}
-
-.dark .milkdown-slash-menu-item-icon {
-  background: #3f3f46;
-}
-
-.dark .milkdown-slash-menu-item-hint {
-  color: #a1a1aa;
-}
-
-.milkdown-editor-view span[data-type="math_inline"] {
-  display: inline;
-  cursor: pointer;
-}
-
 /* Math Editor Popup - Notion Style */
 .math-editor-popup {
   animation: math-popup-fade-in 0.15s ease-out;
@@ -630,79 +388,6 @@
 
 .math-editor-popup button:active {
   transform: translateY(0);
-}
-
-.milkdown-editor-view span[data-type="math_inline"] .katex {
-  font-size: 1em;
-}
-
-.milkdown-editor-view [data-node-type="code_block"][data-language="LaTeX"],
-.milkdown-editor-view [data-node-type="code_block"][data-language="latex"] {
-  background: transparent;
-  border: none;
-}
-
-.milkdown-editor-view [data-node-type="code_block"][data-language="LaTeX"] pre,
-.milkdown-editor-view [data-node-type="code_block"][data-language="latex"] pre,
-.milkdown-editor-view [data-node-type="code_block"][data-language="LaTeX"] textarea,
-.milkdown-editor-view [data-node-type="code_block"][data-language="latex"] textarea {
-  display: none;
-}
-
-.milkdown-editor-view [data-node-type="code_block"][data-language="LaTeX"] .katex-display,
-.milkdown-editor-view [data-node-type="code_block"][data-language="latex"] .katex-display {
-  margin: 0.5em 0;
-  text-align: center;
-}
-
-.milkdown-editor-view .code-block[data-language="LaTeX"],
-.milkdown-editor-view .code-block[data-language="latex"] {
-  background: transparent;
-  border: none;
-}
-
-.milkdown-editor-view .code-block[data-language="LaTeX"] .katex-display,
-.milkdown-editor-view .code-block[data-language="latex"] .katex-display {
-  margin: 0.5em 0;
-}
-
-/* Inline LaTeX edit tooltip */
-.milkdown-latex-inline-edit {
-  background: #27272a;
-  border: 1px solid #3f3f46;
-  border-radius: 8px;
-  padding: 8px 12px;
-  min-width: 200px;
-  color: #e4e4e7;
-}
-
-.milkdown-latex-inline-edit p {
-  margin: 0;
-  outline: none;
-}
-
-.dark .milkdown-latex-inline-edit {
-  background: #18181b;
-  border-color: #27272a;
-}
-
-/* Math node hover effect */
-.milkdown-editor-view span[data-type="math_inline"]:hover {
-  background: rgba(59, 130, 246, 0.1);
-  border-radius: 2px;
-}
-
-.dark .milkdown-editor-view span[data-type="math_inline"]:hover {
-  background: rgba(96, 165, 250, 0.15);
-}
-
-/* Block math hover */
-.milkdown-editor-view .latex-block-math:hover {
-  background: rgba(59, 130, 246, 0.05);
-}
-
-.dark .milkdown-editor-view .latex-block-math:hover {
-  background: rgba(96, 165, 250, 0.1);
 }
 
 /* MathEditor Component */
@@ -832,109 +517,312 @@
   background: #1d4ed8;
 }
 
-.milkdown-editor-view .selectedCell {
-  background-color: rgba(59, 130, 246, 0.15);
-  outline: 2px solid #3b82f6;
+.codemirror-editor .cm-md-math[role="button"] {
+  cursor: pointer;
 }
 
-.dark .milkdown-editor-view .selectedCell {
-  background-color: rgba(96, 165, 250, 0.2);
-  outline: 2px solid #60a5fa;
+.codemirror-editor .cm-md-tag {
+  border-radius: 999px;
+  background: #dbeafe;
+  padding: 0.08rem 0.4rem;
+  color: #1d4ed8;
+  font-size: 0.9em;
 }
 
-.milkdown-editor-view th.selectedCell,
-.milkdown-editor-view td.selectedCell {
-  outline-offset: -2px;
+.dark .codemirror-editor .cm-md-tag {
+  background: #1e3a5f;
+  color: #93c5fd;
 }
 
-/* Collaborative Cursors */
-.ProseMirror-yjs-cursor {
+.codemirror-editor .cm-md-blockquote {
+  border-left: 3px solid #d4d4d8;
+  padding-left: 1rem;
+  color: #52525b;
+}
+
+.dark .codemirror-editor .cm-md-blockquote {
+  border-color: #52525b;
+  color: #a1a1aa;
+}
+
+.codemirror-editor .cm-md-task-checkbox {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  margin: 0 calc(1.5rem - 14px) 0 0;
+  border: 1px solid #6b7280;
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.codemirror-editor .cm-md-task-checkbox:checked {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  box-shadow: inset 0 0 0 2px #111827;
+}
+
+.dark .codemirror-editor .cm-md-task-checkbox {
+  border-color: #9ca3af;
+}
+
+.dark .codemirror-editor .cm-md-task-checkbox:checked {
+  background: #60a5fa;
+  border-color: #60a5fa;
+  box-shadow: inset 0 0 0 2px #0a0a0a;
+}
+
+.codemirror-editor .cm-md-task-checked {
+  text-decoration: line-through;
+  opacity: 0.65;
+}
+
+.codemirror-editor .cm-md-list-item {
+  padding-left: var(--cm-md-list-indent, 1.5rem);
+  text-indent: -1.5rem;
+}
+
+.codemirror-editor .cm-md-list-last {
+  padding-bottom: 1rem;
+}
+
+.codemirror-editor .cm-md-list-marker {
+  display: inline-block;
+  min-width: 1.5rem;
+  font-size: 1.2em;
+  text-indent: 0;
+  color: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.codemirror-editor .cm-md-math {
+  display: inline-block;
+  padding: 0 0.15rem;
+}
+
+.codemirror-editor .cm-md-math-block {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 0;
+  overflow-x: auto;
+  text-align: center;
+  cursor: text;
+}
+
+.codemirror-editor .cm-md-math-hidden-line:not(:has(.cm-md-math-block)) {
+  height: 0;
+  min-height: 0;
+  line-height: 0;
+}
+
+.codemirror-editor .cm-md-image {
+  display: block;
+  max-width: min(100%, 48rem);
+  max-height: 32rem;
+  margin: 0.75rem auto;
+  border-radius: 0.5rem;
+  object-fit: contain;
+}
+
+.codemirror-editor .cm-md-code-block {
+  padding: 0 3rem 0 1rem;
+}
+
+.codemirror-editor .cm-md-code-block-first {
+  position: relative;
+  padding-top: 0.75rem;
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.codemirror-editor .cm-md-code-block-last {
+  padding-bottom: 0.75rem;
+  margin-bottom: 1rem;
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+
+.codemirror-editor .cm-md-code-fence-compact {
+  font-size: 0;
+  line-height: 0;
+}
+
+/* An empty, paired block still needs enough room for the copy control. */
+.codemirror-editor .cm-md-code-block-first.cm-md-code-fence-compact:has(+ .cm-md-code-block-last) {
+  padding-top: 1.25rem;
+}
+
+.codemirror-editor .cm-md-code-copy {
   position: absolute;
+  top: 0.375rem;
+  right: 0.5rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 0;
+  border-radius: 0.3rem;
+  background: transparent;
+  padding: 0;
+  color: #71717a;
+  font-family: inherit;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.dark .codemirror-editor .cm-md-code-copy {
+  color: #a1a1aa;
+}
+
+.codemirror-editor .cm-md-code-copy:hover {
+  background: #e4e4e7;
+  color: #27272a;
+}
+
+.dark .codemirror-editor .cm-md-code-copy:hover {
+  background: #27272a;
+  color: #e4e4e7;
+}
+
+.codemirror-editor .cm-md-divider {
+  width: 100%;
+  margin: 1.25rem 0;
+  border: 0;
+  border-top: 1px solid #d4d4d8;
+}
+
+.dark .codemirror-editor .cm-md-divider {
+  border-color: #3f3f46;
+}
+
+.codemirror-editor .cm-md-table {
+  display: table;
+  width: 100%;
+  margin: 0 0 1rem;
+  border-collapse: collapse;
+  table-layout: auto;
+}
+
+.codemirror-editor .cm-md-table > .cm-line {
+  display: table-row;
+}
+
+/* Replacement placeholders must not generate anonymous cells between real cells. */
+.codemirror-editor .cm-md-table > .cm-line > .cm-widgetBuffer,
+.codemirror-editor .cm-md-table > .cm-line > span[contenteditable="false"]:empty,
+.codemirror-editor .cm-md-table > .cm-line > br {
+  display: none;
+}
+
+.codemirror-editor .cm-md-table-cell {
+  display: table-cell;
+  min-width: 5rem;
+  border: 1px solid #e5e7eb;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.codemirror-editor .cm-md-table-empty-cell {
+  cursor: text;
+}
+.codemirror-editor .cm-md-align-left {
+  text-align: left;
+}
+.codemirror-editor .cm-md-align-center {
+  text-align: center;
+}
+.codemirror-editor .cm-md-align-right {
+  text-align: right;
+}
+
+.dark .codemirror-editor .cm-md-table-cell {
+  border-color: #374151;
+}
+
+.codemirror-editor .cm-md-table > .cm-md-table-separator {
+  display: none;
+}
+
+.codemirror-editor .cm-collab-cursor {
+  position: relative;
+  display: inline-block;
+  height: 1.3em;
+  margin-left: -1px;
   border-left: 2px solid;
-  height: 1.2em;
-  word-break: normal;
-  /* Remove pointer-events: none so hover works */
-  user-select: none;
-  z-index: 5;
+  vertical-align: text-bottom;
+  pointer-events: none;
 }
 
-/* Larger invisible hitarea to make hovering easier */
-.ProseMirror-yjs-cursor-hitarea {
+.codemirror-editor .cm-collab-cursor-hitarea {
   position: absolute;
-  top: -4px;
-  left: -10px;
-  width: 20px;
-  height: calc(100% + 8px);
+  top: -0.25rem;
+  left: -0.625rem;
+  z-index: 19;
+  width: 1.25rem;
+  height: calc(100% + 0.5rem);
   background: transparent;
   pointer-events: auto;
   cursor: pointer;
-  z-index: 10;
 }
 
-.ProseMirror-yjs-cursor > .ProseMirror-yjs-cursor-pill {
+.codemirror-editor .cm-collab-cursor-pill {
   position: absolute;
-  top: -26px;
+  bottom: 100%;
   left: -2px;
-  display: inline-flex;
-  width: max-content;
-  align-items: center;
-  gap: 6px;
-  padding: 2px 10px 2px 2px;
-  border-radius: 4px;
-  color: white;
-  font-size: 11px;
-  font-weight: 600;
-  white-space: nowrap;
-  opacity: 0;
-  transform: translateY(2px);
-  transition: all 0.15s ease-out;
-  pointer-events: none;
   z-index: 20;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  display: inline-grid;
+  align-items: center;
+  grid-template-columns: 1.25rem max-content;
+  column-gap: 0.3rem;
+  width: max-content;
+  max-width: 12rem;
+  border-radius: 0.3rem 0.3rem 0.3rem 0;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.7rem;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 1;
+  text-indent: 0;
+  text-decoration: none;
+  text-transform: none;
+  letter-spacing: normal;
+  word-spacing: normal;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity 120ms ease;
+  pointer-events: none;
 }
 
-/* Reveal pill when hovering either the line or the hitarea */
-.ProseMirror-yjs-cursor:hover > .ProseMirror-yjs-cursor-pill {
+.codemirror-editor .cm-collab-cursor:hover .cm-collab-cursor-pill {
   opacity: 1;
-  transform: translateY(0);
 }
 
-/* The tiny flag/cap at the top */
-.ProseMirror-yjs-cursor::after {
-  content: "";
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  width: 6px;
-  height: 6px;
-  border-radius: 1px;
-  background-color: inherit;
-  z-index: 10;
+.codemirror-editor .cm-collab-cursor-pill img,
+.codemirror-editor .cm-collab-cursor-identity {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 999px;
 }
 
-.ProseMirror-yjs-cursor-pill img {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
+.codemirror-editor .cm-collab-cursor-pill img {
   object-fit: cover;
-  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.ProseMirror-yjs-cursor-initials {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.2);
-  display: flex;
+.codemirror-editor .cm-collab-cursor-identity {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
+  background: rgb(0 0 0 / 18%);
+  font-size: 0.65rem;
   font-weight: 700;
-  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-/* Collaborative Selection */
-.yjs-selection {
-  opacity: 0.3;
+/* Visual writing room only; this space is not persisted in the document. */
+.editor-wrapper.editor-scroll-past-end::after {
+  content: "";
+  display: block;
+  height: 40vh;
   pointer-events: none;
 }

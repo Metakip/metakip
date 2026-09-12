@@ -15,14 +15,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { BacklinksPanel } from '../components/editor/BacklinksPanel';
 import { Breadcrumbs } from '../components/editor/Breadcrumbs';
-import { MilkdownEditor } from '../components/editor/MilkdownEditor';
+import { CodeMirrorEditor } from '../components/editor/CodeMirrorEditor';
 import { PageActions } from '../components/editor/PageActions';
 import { PageIcon } from '../components/editor/PageIcon';
 import { PageLoadingState } from '../components/editor/PageLoadingState';
 import { PageStatus } from '../components/editor/PageStatus';
 import { PageTitle } from '../components/editor/PageTitle';
 import { PropertiesPanel } from '../components/editor/PropertiesPanel';
-import { TableOfContents } from '../components/editor/TableOfContents';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { EditorReadOnlyProvider } from '../contexts/EditorReadOnlyContext';
 import { useIdentityNavigate } from '../contexts/IdentityLifecycleContext';
@@ -37,7 +36,7 @@ import { type RecentPage, usePageTree } from '../hooks/use-pages';
 import { getLogger } from '../logger-init';
 import { ApiError } from '../utils/api';
 import { resetDocumentMetadata } from '../utils/documentMeta';
-import { findRenderedHeading, getMilkdownHeadingId } from '../utils/headingNavigation';
+import { getHeadingId } from '../utils/headingNavigation';
 import { buildPagePath, extractUuidFromSlug, getWorkspacePathPrefix } from '../utils/url';
 
 const API_BASE = '/api';
@@ -93,14 +92,12 @@ export default function Page() {
     }
 
     prevPageIdRef.current = pageId;
-    // Don't reset provider here — MilkdownEditor manages its own lifecycle.
-    // This effect runs AFTER MilkdownEditor's onProviderReady (child effects
+    // Don't reset provider here — CodeMirrorEditor manages its own lifecycle.
+    // This effect runs AFTER CodeMirrorEditor's onProviderReady (child effects
     // fire first), so setProvider(null) would overwrite the new provider.
     setCollabStatus(WebSocketStatus.Connecting);
     setCollabPermission(undefined);
-    setEditorElement(null);
   }, [pageId]);
-  const [editorElement, setEditorElement] = useState<HTMLElement | null>(null);
 
   const {
     data: page,
@@ -143,60 +140,14 @@ export default function Page() {
     setCapabilities(effectiveCapabilities);
   }, [page, contextAccessPermission, effectiveCapabilities, setAccessPermission, setCapabilities]);
 
-  // Find the .milkdown-editor DOM element for TableOfContents.
-  // Re-runs on page change (data load or navigation) to handle the
-  // editor mounting asynchronously after page fetch completes.
-  // Polls up to 4 times (0ms, 200ms, 600ms, 1400ms) to catch the
-  // editor regardless of page load timing.
-  useEffect(() => {
-    if (!page) return;
-    let attempts = 0;
-    const maxAttempts = 4;
-    let id: ReturnType<typeof setTimeout>;
-
-    const poll = () => {
-      const el = document.querySelector('.milkdown-editor') as HTMLElement | null;
-      if (el) {
-        setEditorElement(el);
-        return;
-      }
-      attempts++;
-      if (attempts < maxAttempts) {
-        id = setTimeout(poll, attempts * 200);
-      }
-    };
-    poll();
-    return () => clearTimeout(id);
-  }, [page]);
-
-  useEffect(() => {
-    if (!editorElement || !location.hash) return;
-    let headingId: string;
+  const requestedHeadingId = useMemo(() => {
+    if (!location.hash) return undefined;
     try {
-      headingId = decodeURIComponent(location.hash.slice(1));
+      return decodeURIComponent(location.hash.slice(1)) || undefined;
     } catch {
-      return;
+      return undefined;
     }
-    if (!headingId) return;
-
-    const scrollToHeading = (): boolean => {
-      const heading = findRenderedHeading(editorElement, headingId);
-      if (!heading) return false;
-      heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      return true;
-    };
-    if (scrollToHeading()) return;
-
-    const observer = new MutationObserver(() => {
-      if (scrollToHeading()) observer.disconnect();
-    });
-    observer.observe(editorElement, { childList: true, subtree: true, attributes: true });
-    const timeout = window.setTimeout(() => observer.disconnect(), 5_000);
-    return () => {
-      window.clearTimeout(timeout);
-      observer.disconnect();
-    };
-  }, [editorElement, location.hash]);
+  }, [location.hash]);
 
   useEffect(() => {
     if (!page || page.accessScope !== 'account' || !pageId || isAnonymous) {
@@ -359,7 +310,7 @@ export default function Page() {
   const handleWikiLinkClick = useCallback(
     (target: WikiLinkNavigationTarget) => {
       const path = buildPagePath(target.title, target.id);
-      const headingId = target.heading ? getMilkdownHeadingId(target.heading) : '';
+      const headingId = target.heading ? getHeadingId(target.heading) : '';
       navigate(headingId ? `${path}#${encodeURIComponent(headingId)}` : path);
     },
     [navigate],
@@ -486,7 +437,7 @@ export default function Page() {
           <PropertiesPanel pageId={pageId} properties={page?.properties ?? null} />
         </EditorReadOnlyProvider>
         {page && pageId ? (
-          <MilkdownEditor
+          <CodeMirrorEditor
             key={`${pageId}:${editorGeneration}`}
             pageId={pageId}
             onDocumentReloadRequired={handleDocumentReloadRequired}
@@ -494,10 +445,10 @@ export default function Page() {
             onStatusChange={handleStatusChange}
             onWikiLinkClick={handleWikiLinkClick}
             onPermissionSnapshot={setCollabPermission}
+            {...(requestedHeadingId ? { requestedHeadingId } : {})}
           />
         ) : null}
         {!isAnonymous && <BacklinksPanel pageId={pageId} />}
-        <TableOfContents editorElement={editorElement} />
       </div>
     </EditorReadOnlyProvider>
   );

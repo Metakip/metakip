@@ -17,6 +17,7 @@
     "db:check": "drizzle-kit check && vitest run --project unit src/db/migration-history.unit.test.ts",
     "db:push": "echo 'db:push is disabled. Generate a migration and run db:migrate instead.' && exit 1",
     "db:migrate": "drizzle-kit migrate",
+    "db:migrate-editor-content": "tsx --conditions=development src/scripts/migrateMilkdownDocuments.ts",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
@@ -37,6 +38,8 @@
     "marked": "^15.0.0",
     "pg": "^8.18.0",
     "remark": "^15.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
     "yjs": "^13.6.29",
     "zod": "^4.3.6"
   },

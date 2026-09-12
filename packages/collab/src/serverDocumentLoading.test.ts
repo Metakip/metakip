@@ -79,16 +79,50 @@ describe('collab server document loading', () => {
     provider.destroy();
   });
 
+  it('rejects legacy editor updates after the Markdown cutover', async () => {
+    const user = await createTestUser(pool);
+    const page = await createTestPage(pool, user.id, 'Canonical page', ydocBytes);
+    const session = await createTestSession(pool, user.id);
+    const legacyDocument = new Y.Doc();
+    const paragraph = new Y.XmlElement('paragraph');
+    legacyDocument.getXmlFragment('prosemirror').push([paragraph]);
+    paragraph.push([new Y.XmlText('Stale legacy edit')]);
+    let closeReason = '';
+    const provider = new HocuspocusProvider({
+      url: `ws://localhost:${port}`,
+      name: page.id,
+      document: legacyDocument,
+      token: session.token,
+      onClose: ({ event }) => {
+        closeReason = event.reason;
+      },
+    });
+
+    await waitFor(
+      () => closeReason === 'Unsupported editor format',
+      5_000,
+      'legacy provider to be rejected',
+    );
+    provider.destroy();
+
+    const result = await pool.query<{ ydoc: Buffer }>('select ydoc from pages where id = $1', [
+      page.id,
+    ]);
+    const storedDocument = new Y.Doc();
+    Y.applyUpdate(storedDocument, new Uint8Array(result.rows[0]?.ydoc ?? []));
+    expect(storedDocument.getText('content').toString()).toBe('Hello from DB');
+    expect(storedDocument.share.has('prosemirror')).toBe(false);
+    storedDocument.destroy();
+    legacyDocument.destroy();
+  });
+
   it('preserves wiki-link target IDs during initial sync', async () => {
     const targetId = '44444444-4444-4444-4444-444444444444';
     const user = await createTestUser(pool);
-    const legacyDocument = new Y.Doc();
-    const link = new Y.XmlElement('wikiLink');
-    link.setAttribute('targetId', targetId);
-    link.setAttribute('path', '');
-    legacyDocument.getXmlFragment('prosemirror').push([link]);
-    const legacyState = Y.encodeStateAsUpdate(legacyDocument);
-    const page = await createTestPage(pool, user.id, 'Source page', legacyState);
+    const sourceDocument = new Y.Doc();
+    sourceDocument.getText('content').insert(0, `[[id:${targetId}]]`);
+    const sourceState = Y.encodeStateAsUpdate(sourceDocument);
+    const page = await createTestPage(pool, user.id, 'Source page', sourceState);
     const loadedDocument = new Document(page.id);
 
     await server.hocuspocus.hooks('onLoadDocument', {
@@ -102,8 +136,7 @@ describe('collab server document loading', () => {
       connectionConfig: createConnectionConfig(),
     });
 
-    const loadedLink = loadedDocument.getXmlFragment('prosemirror').get(0) as Y.XmlElement;
-    expect(loadedLink.getAttribute('targetId')).toBe(targetId);
+    expect(loadedDocument.getText('content').toString()).toBe(`[[id:${targetId}]]`);
     expect(Buffer.from(Y.encodeStateAsUpdate(loadedDocument)).includes(Buffer.from(targetId))).toBe(
       true,
     );
@@ -111,6 +144,7 @@ describe('collab server document loading', () => {
       page.id,
     ]);
     expect(stored.rows[0]?.ydoc.includes(Buffer.from(targetId))).toBe(true);
+    sourceDocument.destroy();
   });
 
   it('serves the same content to two concurrent readers', async () => {

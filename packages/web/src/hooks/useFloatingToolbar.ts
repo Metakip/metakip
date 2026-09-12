@@ -33,7 +33,7 @@ export function useFloatingToolbar(): FloatingToolbarApi {
     if (!selection?.rangeCount) {
       return;
     }
-    const container = document.querySelector('.milkdown-editor');
+    const container = document.querySelector('.codemirror-editor');
     if (!container?.contains(selection.getRangeAt(0).commonAncestorContainer)) {
       return;
     }
@@ -47,26 +47,43 @@ export function useFloatingToolbar(): FloatingToolbarApi {
     let timeoutId: ReturnType<typeof setTimeout>;
 
     const handleSelectionChange = () => {
+      clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
-        if (keepVisibleRef.current) return;
-
+        const hide = () => {
+          if (!keepVisibleRef.current) setToolbarState({ visible: false, position: null });
+        };
         const selection = window.getSelection();
-        if (!selection || selection.isCollapsed || !selection.rangeCount) {
-          setToolbarState({ visible: false, position: null });
+        if (!selection?.rangeCount) {
+          hide();
           return;
         }
 
         const range = selection.getRangeAt(0);
-        const container = document.querySelector('.milkdown-editor');
+        const container = document.querySelector('.codemirror-editor');
 
         if (!container?.contains(range.commonAncestorContainer)) {
-          setToolbarState({ visible: false, position: null });
+          hide();
           return;
         }
 
+        const element =
+          range.commonAncestorContainer instanceof Element
+            ? range.commonAncestorContainer
+            : range.commonAncestorContainer.parentElement;
+        const table = element?.closest('.cm-md-table');
+        if (selection.isCollapsed && !table) {
+          hide();
+          return;
+        }
+        const position = range.cloneRange();
+        if (selection.isCollapsed && table) {
+          // An empty cell's caret may be anchored beside its widget. Position
+          // the controls on the cell/row without changing the actual selection.
+          position.selectNodeContents(element?.closest('.cm-md-table-cell, .cm-line') ?? table);
+        }
         setToolbarState({
           visible: true,
-          position: range.cloneRange(),
+          position,
         });
       }, 100);
     };

@@ -1,4 +1,4 @@
-import type { Editor } from '@milkdown/core';
+import type { EditorView } from '@codemirror/view';
 import { renderHook } from '@testing-library/react';
 import type { RefObject } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -16,9 +16,9 @@ vi.mock('./use-pages', () => ({
   useCreatePage: () => ({ mutateAsync: vi.fn() }),
 }));
 
-import { createBoundWikiLinkAttributes, useWikiLinkSuggestions } from './useWikiLinkSuggestions';
+import { useWikiLinkSuggestions } from './useWikiLinkSuggestions';
 
-const editorRef = { current: null } as RefObject<Editor | null>;
+const editorRef = { current: null } as RefObject<EditorView | null>;
 
 describe('useWikiLinkSuggestions page creation policy', () => {
   beforeEach(() => {
@@ -61,15 +61,5 @@ describe('useWikiLinkSuggestions page creation policy', () => {
     const { result } = renderHook(() => useWikiLinkSuggestions(editorRef, 'source-page'));
 
     expect(result.current.canAddPage).toBe(true);
-  });
-});
-
-describe('selected wiki-link identity', () => {
-  it('stores the stable target without copying its private title', () => {
-    expect(createBoundWikiLinkAttributes('target-page')).toEqual({
-      targetId: 'target-page',
-      path: '',
-      label: '',
-    });
   });
 });

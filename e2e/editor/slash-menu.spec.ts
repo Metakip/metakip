@@ -88,7 +88,7 @@ test.describe('Slash menu', () => {
       await page.keyboard.press('ArrowDown');
       await page.keyboard.press('Enter');
       await page.keyboard.type('Keyboard Heading');
-      await expect(page.locator('.ProseMirror h1')).toContainText('Keyboard Heading', {
+      await expect(page.locator('.cm-md-heading-1')).toContainText('Keyboard Heading', {
         timeout: 5000,
       });
     });
@@ -102,8 +102,8 @@ test.describe('Slash menu', () => {
       await expect(page.locator('[data-testid="slash-menu"]')).toBeVisible({ timeout: 5000 });
       await page.keyboard.press('Enter');
       await page.keyboard.type('Clean Text');
-      await expect(page.locator('.ProseMirror h2')).toContainText('Clean Text', { timeout: 5000 });
-      await expect(page.locator('.ProseMirror')).not.toContainText('/h2');
+      await expect(page.locator('.cm-md-heading-2')).toContainText('Clean Text', { timeout: 5000 });
+      await expect(page.locator('.codemirror-editor .cm-content')).not.toContainText('/h2');
     });
   });
 
@@ -115,7 +115,7 @@ test.describe('Slash menu', () => {
       await expect(page.locator('[data-testid="slash-menu"]')).toBeVisible({ timeout: 5000 });
       await page.keyboard.press('Enter');
       await page.keyboard.type('Main Title');
-      await expect(page.locator('.ProseMirror h1')).toContainText('Main Title', { timeout: 5000 });
+      await expect(page.locator('.cm-md-heading-1')).toContainText('Main Title', { timeout: 5000 });
     });
 
     test('inserts blockquote via /blockquote', async ({ page }) => {
@@ -125,7 +125,7 @@ test.describe('Slash menu', () => {
       await expect(page.locator('[data-testid="slash-menu"]')).toBeVisible({ timeout: 5000 });
       await page.keyboard.press('Enter');
       await page.keyboard.type('Cited text');
-      await expect(page.locator('.ProseMirror blockquote')).toContainText('Cited text', {
+      await expect(page.locator('.cm-md-blockquote')).toContainText('Cited text', {
         timeout: 5000,
       });
     });
@@ -137,7 +137,8 @@ test.describe('Slash menu', () => {
       await expect(page.locator('[data-testid="slash-menu"]')).toBeVisible({ timeout: 5000 });
       await page.keyboard.press('Enter');
       await page.keyboard.type('List item');
-      await expect(page.locator('.ProseMirror ul')).toContainText('List item', { timeout: 5000 });
+      await expect(page.locator('.cm-md-list-marker')).toHaveText('•', { timeout: 5000 });
+      await expect(page.locator('.codemirror-editor .cm-content')).toContainText('List item');
     });
 
     test('inserts ordered list via /ordered', async ({ page }) => {
@@ -147,7 +148,8 @@ test.describe('Slash menu', () => {
       await expect(page.locator('[data-testid="slash-menu"]')).toBeVisible({ timeout: 5000 });
       await page.keyboard.press('Enter');
       await page.keyboard.type('First item');
-      await expect(page.locator('.ProseMirror ol')).toContainText('First item', { timeout: 5000 });
+      await expect(page.locator('.cm-md-list-marker')).toHaveText('1.', { timeout: 5000 });
+      await expect(page.locator('.codemirror-editor .cm-content')).toContainText('First item');
     });
 
     test('inserts task list via /check', async ({ page }) => {
@@ -157,10 +159,8 @@ test.describe('Slash menu', () => {
       await expect(page.locator('[data-testid="slash-menu"]')).toBeVisible({ timeout: 5000 });
       await page.keyboard.press('Enter');
       await page.keyboard.type('Task item');
-      await expect(page.locator('.ProseMirror li[data-item-type="task"]')).toContainText(
-        'Task item',
-        { timeout: 5000 },
-      );
+      await expect(page.locator('.cm-md-task-checkbox')).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('.codemirror-editor .cm-content')).toContainText('Task item');
     });
 
     test('inserts table via /table', async ({ page }) => {
@@ -169,7 +169,7 @@ test.describe('Slash menu', () => {
       await page.keyboard.type('/table');
       await expect(page.locator('[data-testid="slash-menu"]')).toBeVisible({ timeout: 5000 });
       await page.keyboard.press('Enter');
-      await expect(page.locator('.ProseMirror table')).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('.cm-md-table')).toBeVisible({ timeout: 5000 });
     });
 
     test('inserts horizontal divider via /divider', async ({ page }) => {
@@ -178,7 +178,7 @@ test.describe('Slash menu', () => {
       await page.keyboard.type('/divider');
       await expect(page.locator('[data-testid="slash-menu"]')).toBeVisible({ timeout: 5000 });
       await page.keyboard.press('Enter');
-      await expect(page.locator('.ProseMirror hr')).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('.cm-md-divider')).toBeVisible({ timeout: 5000 });
     });
 
     test('places the caret in a new paragraph below a divider', async ({ page }) => {
@@ -189,7 +189,9 @@ test.describe('Slash menu', () => {
       await page.keyboard.press('Enter');
       await page.keyboard.type('Text below the divider');
 
-      await expect(page.locator('.ProseMirror > hr + p')).toHaveText('Text below the divider');
+      await expect(page.locator('.cm-line:has(.cm-md-divider) + .cm-line')).toHaveText(
+        'Text below the divider',
+      );
     });
 
     test('places the caret in a new paragraph below a typed divider', async ({ page }) => {
@@ -197,10 +199,12 @@ test.describe('Slash menu', () => {
       await focusEditor(page);
       await page.keyboard.type('---');
 
-      await expect(page.locator('.ProseMirror hr')).toBeVisible({ timeout: 5000 });
+      await expect(page.locator('.cm-md-divider')).toBeVisible({ timeout: 5000 });
       await page.keyboard.type('Text below the divider');
 
-      await expect(page.locator('.ProseMirror > hr + p')).toHaveText('Text below the divider');
+      await expect(page.locator('.cm-line:has(.cm-md-divider) + .cm-line')).toHaveText(
+        'Text below the divider',
+      );
     });
   });
 
@@ -213,7 +217,7 @@ test.describe('Slash menu', () => {
       await page.keyboard.press('Enter');
       await expect(page.locator('[data-testid="slash-menu"]')).not.toBeVisible({ timeout: 2000 });
       await page.keyboard.type('bold text');
-      await expect(page.locator('.ProseMirror strong')).toContainText('bold text', {
+      await expect(page.locator('.cm-md-strong')).toContainText('bold text', {
         timeout: 5000,
       });
     });
@@ -226,7 +230,7 @@ test.describe('Slash menu', () => {
       await page.keyboard.press('Enter');
       await expect(page.locator('[data-testid="slash-menu"]')).not.toBeVisible({ timeout: 2000 });
       await page.keyboard.type('italic text');
-      await expect(page.locator('.ProseMirror em')).toContainText('italic text', {
+      await expect(page.locator('.cm-md-emphasis')).toContainText('italic text', {
         timeout: 5000,
       });
     });
@@ -241,7 +245,7 @@ test.describe('Slash menu', () => {
       await expect(page.locator('[data-testid="slash-menu"]')).toBeVisible({ timeout: 5000 });
       await page.keyboard.press('Enter');
       await page.keyboard.type('First Section');
-      await expect(page.locator('.ProseMirror h1')).toContainText('First Section', {
+      await expect(page.locator('.cm-md-heading-1')).toContainText('First Section', {
         timeout: 5000,
       });
 
@@ -250,12 +254,12 @@ test.describe('Slash menu', () => {
       await expect(page.locator('[data-testid="slash-menu"]')).toBeVisible({ timeout: 5000 });
       await page.keyboard.press('Enter');
       await page.keyboard.type('Second Section');
-      await expect(page.locator('.ProseMirror h2')).toContainText('Second Section', {
+      await expect(page.locator('.cm-md-heading-2')).toContainText('Second Section', {
         timeout: 5000,
       });
 
-      await expect(page.locator('.ProseMirror h1')).toHaveCount(1);
-      await expect(page.locator('.ProseMirror h2')).toHaveCount(1);
+      await expect(page.locator('.cm-md-heading-1')).toHaveCount(1);
+      await expect(page.locator('.cm-md-heading-2')).toHaveCount(1);
     });
   });
 
@@ -274,7 +278,7 @@ test.describe('Slash menu', () => {
       await expect(page.locator('[data-testid="slash-menu"]')).toBeVisible({ timeout: 5000 });
       await page.keyboard.press('Enter');
       await page.keyboard.type('Heading from slash');
-      await expect(page.locator('.ProseMirror h2')).toContainText('Heading from slash', {
+      await expect(page.locator('.cm-md-heading-2')).toContainText('Heading from slash', {
         timeout: 5000,
       });
     });
@@ -330,7 +334,7 @@ test.describe('Slash menu', () => {
       await expect(page.locator('[data-testid="slash-menu"]')).toBeVisible({ timeout: 5000 });
       await page.keyboard.press('Enter');
       await page.keyboard.type('Still works');
-      await expect(page.locator('.ProseMirror h2')).toContainText('Still works', {
+      await expect(page.locator('.cm-md-heading-2')).toContainText('Still works', {
         timeout: 5000,
       });
     });

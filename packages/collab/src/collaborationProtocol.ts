@@ -118,6 +118,58 @@ export function yjsUpdateTouchesTitle(document: Y.Doc, update: Uint8Array): bool
   return false;
 }
 
+/** Reject updates that introduce data under a retired top-level Yjs type. */
+export function yjsUpdateTouchesRootType(
+  document: Y.Doc,
+  update: Uint8Array,
+  rootType: string,
+): boolean {
+  let decoded: DecodedYjsUpdate;
+  try {
+    decoded = Y.decodeUpdate(update);
+  } catch {
+    // Let the protocol decoder reject malformed updates through its normal
+    // admission/finalization path.
+    return false;
+  }
+
+  const decodedByClient = new Map<number, Y.AbstractStruct[]>();
+  for (const struct of decoded.structs) {
+    const clientStructs = decodedByClient.get(struct.id.client) ?? [];
+    clientStructs.push(struct);
+    decodedByClient.set(struct.id.client, clientStructs);
+  }
+  const existingRoot = document.share.get(rootType);
+  const resolveStruct = (id: Y.ID): Y.AbstractStruct | undefined =>
+    findStructContainingClock(decodedByClient.get(id.client), id.clock) ??
+    findStructContainingClock(document.store.clients.get(id.client), id.clock);
+  const visited = new Set<Y.AbstractStruct>();
+  const targetsRoot = (struct: Y.AbstractStruct | undefined): boolean => {
+    if (!struct || !(struct instanceof Y.Item) || visited.has(struct)) return false;
+    visited.add(struct);
+    const parent = struct.parent as unknown;
+    if (parent === rootType) return true;
+    if (typeof parent === 'string') return false;
+    if (parent instanceof Y.ID) {
+      const parentStruct = resolveStruct(parent);
+      return parentStruct ? targetsRoot(parentStruct) : true;
+    }
+    if (parent instanceof Y.AbstractType)
+      return existingRoot !== undefined && parent === existingRoot;
+    if (struct.origin) {
+      const origin = resolveStruct(struct.origin);
+      if (!origin || targetsRoot(origin)) return true;
+    }
+    if (struct.rightOrigin) {
+      const rightOrigin = resolveStruct(struct.rightOrigin);
+      if (!rightOrigin || targetsRoot(rightOrigin)) return true;
+    }
+    return false;
+  };
+
+  return decoded.structs.some((struct) => targetsRoot(struct));
+}
+
 export function sanitizeCanonicalYjsUpdate(update: Uint8Array): Uint8Array {
   const candidate = new Y.Doc();
   try {
