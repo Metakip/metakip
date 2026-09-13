@@ -1,4 +1,4 @@
-import type { ApiTokenScope } from '@markdawn/shared';
+import type { ApiTokenScope } from '@metakip/shared';
 import { z } from 'zod';
 
 type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete';
@@ -108,7 +108,7 @@ export function buildOpenApiPaths(
         : {}),
       responses,
       ...(contract.security ? { security: contract.security } : {}),
-      'x-markdawn-docs-slug': routeSlug,
+      'x-metakip-docs-slug': routeSlug,
       'x-required-scopes': contract.requiredScopes,
     };
     const path = paths[contract.openApiPath] ?? {};

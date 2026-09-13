@@ -2,7 +2,7 @@ import {
   applyExactEdits,
   MAX_EXACT_EDIT_REPLACEMENT_BYTES,
   PageMarkdownError,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import { describe, expect, it } from 'vitest';
 
 describe('applyExactEdits', () => {

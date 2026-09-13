@@ -3,7 +3,7 @@ import {
   extractIndexedPageConnections,
   type IndexedPageConnection,
   normalizeWikiLinkLookupKey,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import type { PoolClient } from 'pg';
 import { isUuid } from './utils';
 

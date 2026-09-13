@@ -3,7 +3,7 @@ import type {
   ShareEventPayload,
   SharePermission,
   WorkspaceNotificationPayload,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import { isUuid } from './utils';
 
 export type GrantReceivedPayload = GrantReceivedNotificationPayload;

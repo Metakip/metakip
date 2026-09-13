@@ -1,9 +1,9 @@
 ---
-title: Markdawn vs Coda (Superhuman Docs)
-description: Compare Markdawn with Coda, now Superhuman Docs, for interactive docs, tables, formulas, automation, portability, and shared knowledge.
+title: Metakip vs Coda (Superhuman Docs)
+description: Compare Metakip with Coda, now Superhuman Docs, for interactive docs, tables, formulas, automation, portability, and shared knowledge.
 ---
 
-Superhuman Docs, formerly Coda, and Markdawn both help teams organize information, but they have different content models. Superhuman Docs turns a document into an interactive workspace with tables, formulas, buttons, automations, and Packs. Markdawn keeps the content layer focused on readable pages, folders, links, markdown, and controlled access.
+Superhuman Docs, formerly Coda, and Metakip both help teams organize information, but they have different content models. Superhuman Docs turns a document into an interactive workspace with tables, formulas, buttons, automations, and Packs. Metakip keeps the content layer focused on readable pages, folders, links, markdown, and controlled access.
 
 > **Name update:** Coda became Superhuman Docs in July 2026. This page keeps “Coda” in comparison questions and source links because it remains the name many people search for, but the current product name is Superhuman Docs.
 
@@ -11,13 +11,13 @@ Superhuman Docs, formerly Coda, and Markdawn both help teams organize informatio
 
 Choose **Superhuman Docs** when a document needs to behave like an application. Superhuman Docs is a strong fit for project trackers, planning systems, dashboards, approval workflows, structured databases, formulas, and automations.
 
-Choose **Markdawn** when the main job is creating durable shared knowledge. Markdawn is a strong fit for decisions, research, meeting notes, documentation, markdown content, and pages that need to be read or managed through a browser, CLI, API, or AI assistant.
+Choose **Metakip** when the main job is creating durable shared knowledge. Metakip is a strong fit for decisions, research, meeting notes, documentation, markdown content, and pages that need to be read or managed through a browser, CLI, API, or AI assistant.
 
-Neither tool is universally better. Superhuman Docs provides more workflow machinery. Markdawn provides a smaller and more portable content model.
+Neither tool is universally better. Superhuman Docs provides more workflow machinery. Metakip provides a smaller and more portable content model.
 
 ## At A Glance
 
-| Decision area | Markdawn | Superhuman Docs (formerly Coda) |
+| Decision area | Metakip | Superhuman Docs (formerly Coda) |
 | --- | --- | --- |
 | Main job | Shared knowledge and documentation | Interactive docs and structured workflows |
 | Content model | Markdown pages, folders, links, and backlinks | Docs, pages, tables, views, formulas, and controls |
@@ -36,7 +36,7 @@ Superhuman Docs is designed for documents that combine prose with structured dat
 
 That makes Superhuman Docs a better fit for a roadmap with status logic, a project tracker with assignments, a launch checklist with buttons, an approval workflow, or a planning document that calculates values automatically.
 
-Superhuman Docs' documentation, formerly the Coda Help Center, treats tables, formulas, buttons, automations, and Packs as connected building blocks. If those building blocks are central to the workflow, Markdawn is not a like-for-like replacement.
+Superhuman Docs' documentation, formerly the Coda Help Center, treats tables, formulas, buttons, automations, and Packs as connected building blocks. If those building blocks are central to the workflow, Metakip is not a like-for-like replacement.
 
 ### Automation And Integrations
 
@@ -54,7 +54,7 @@ The current official materials do not describe a separately branded Superhuman D
 
 Superhuman Docs is stronger when the team needs data that can be filtered, calculated, summarized, and reused across views. Its formula system and table relationships can support workflows that would be awkward as ordinary markdown pages.
 
-Markdawn supports Markdown tables, page metadata, links, tags, and backlinks. Those features are useful for presenting information and connecting knowledge, but they are not intended to replace Superhuman Docs' table, formula, and application-building model.
+Metakip supports Markdown tables, page metadata, links, tags, and backlinks. Those features are useful for presenting information and connecting knowledge, but they are not intended to replace Superhuman Docs' table, formula, and application-building model.
 
 ### Superhuman Docs' Maker And Editor Model
 
@@ -62,31 +62,31 @@ Superhuman Docs' current billing model distinguishes Doc Makers from Editors. Ed
 
 This model can work well when a small group creates documents and a larger group edits or contributes to existing documents. It needs careful governance when many people need to create new pages, use AI, or build workflows.
 
-## Where Markdawn Is Better
+## Where Metakip Is Better
 
 ### Durable, Readable Knowledge
 
-Markdawn is better when the primary artifact is a page that people should be able to read, link, edit, export, and keep using without rebuilding an application model.
+Metakip is better when the primary artifact is a page that people should be able to read, link, edit, export, and keep using without rebuilding an application model.
 
 The same authored markdown can be read through the browser, CLI, and API. Pages can be organized into folders and connected with page links and backlinks. This keeps a decision record, research note, meeting note, or documentation page understandable without requiring a table schema or formula system.
 
 ### Markdown And Content Portability
 
-Markdawn is built around markdown rather than treating markdown as an import format for a richer proprietary document model. It supports Markdown files and folders, and its Obsidian vault importer can bring in notes, images, tags, folders, and backlinks.
+Metakip is built around markdown rather than treating markdown as an import format for a richer proprietary document model. It supports Markdown files and folders, and its Obsidian vault importer can bring in notes, images, tags, folders, and backlinks.
 
-Superhuman Docs supports importing Markdown, but its central value comes from the interactive doc model built around tables, formulas, and connected workflows. Moving a Superhuman Doc into Markdawn therefore requires deciding what to preserve as content and what to redesign as a page workflow.
+Superhuman Docs supports importing Markdown, but its central value comes from the interactive doc model built around tables, formulas, and connected workflows. Moving a Superhuman Doc into Metakip therefore requires deciding what to preserve as content and what to redesign as a page workflow.
 
 ### API, CLI, And AI Assistant Workflows
 
-Markdawn provides documented API and CLI workflows for reading, editing, importing, exporting, and organizing content. Its documentation also covers connecting AI assistants with controlled access to Markdawn pages.
+Metakip provides documented API and CLI workflows for reading, editing, importing, exporting, and organizing content. Its documentation also covers connecting AI assistants with controlled access to Metakip pages.
 
-Superhuman Docs also provides an API, MCP, Packs, automations, and Docs AI. The difference is the unit being automated. Superhuman Docs automates an interactive doc and its data model. Markdawn automates a shared content layer made of pages, folders, links, and markdown.
+Superhuman Docs also provides an API, MCP, Packs, automations, and Docs AI. The difference is the unit being automated. Superhuman Docs automates an interactive doc and its data model. Metakip automates a shared content layer made of pages, folders, links, and markdown.
 
-Choose Markdawn when an AI assistant or script should work with durable pages without needing to understand a large application-specific document model.
+Choose Metakip when an AI assistant or script should work with durable pages without needing to understand a large application-specific document model.
 
 ### Self-Hosting And Deployment Control
 
-Markdawn has a self-hosting path for teams that want more control over deployment and data location. Superhuman Docs is a hosted service, so teams use Superhuman's infrastructure and account model.
+Metakip has a self-hosting path for teams that want more control over deployment and data location. Superhuman Docs is a hosted service, so teams use Superhuman's infrastructure and account model.
 
 Self-hosting adds responsibility for backups, updates, security, and availability. It is useful when infrastructure ownership is part of the requirement, not a default reason to leave Superhuman Docs.
 
@@ -96,15 +96,15 @@ Superhuman Docs supports Markdown and CSV imports, PDF export for docs or pages,
 
 That distinction matters. A PDF can preserve a readable snapshot, but it does not preserve a working table, formula, button, automation, or Pack. A data export may preserve structured records without preserving the original document experience.
 
-Before moving from Superhuman Docs to Markdawn, inventory each doc:
+Before moving from Superhuman Docs to Metakip, inventory each doc:
 
-- Pages and prose that can become Markdawn pages.
+- Pages and prose that can become Metakip pages.
 - Tables that need to become ordinary Markdown tables or linked pages.
 - Formulas and calculated fields that need a new workflow.
-- Buttons, automations, and Packs that have no direct Markdawn equivalent.
+- Buttons, automations, and Packs that have no direct Metakip equivalent.
 - Permissions, embedded content, and external links that need retesting.
 
-Then keep the original Superhuman Docs unchanged, export a representative sample through the format or API path available to your workspace, convert the readable content to markdown where needed, and import that sample into Markdawn. Treat the migration as a content redesign when the source depends on formulas or automations.
+Then keep the original Superhuman Docs unchanged, export a representative sample through the format or API path available to your workspace, convert the readable content to markdown where needed, and import that sample into Metakip. Treat the migration as a content redesign when the source depends on formulas or automations.
 
 ## Performance, Limits, And Mobile Workflows
 
@@ -130,9 +130,9 @@ Superhuman Docs is a strong choice if you:
 - Have a clear governance model for Doc Makers, Editors, and AI usage.
 - Prefer a hosted service over managing deployment and backups.
 
-## Who Should Choose Markdawn?
+## Who Should Choose Metakip?
 
-Markdawn is a strong choice if you:
+Metakip is a strong choice if you:
 
 - Need shared documentation, decisions, research, or meeting knowledge.
 - Want pages and folders instead of a database-first workspace.
@@ -143,13 +143,13 @@ Markdawn is a strong choice if you:
 
 ## Questions To Answer Before Switching
 
-### Is Markdawn A Replacement For Coda Or Superhuman Docs?
+### Is Metakip A Replacement For Coda Or Superhuman Docs?
 
-Only for some workflows. Markdawn can replace Superhuman Docs as a home for shared documentation and durable knowledge. It is not a replacement for Superhuman Docs' relational tables, formulas, buttons, automations, or Packs.
+Only for some workflows. Metakip can replace Superhuman Docs as a home for shared documentation and durable knowledge. It is not a replacement for Superhuman Docs' relational tables, formulas, buttons, automations, or Packs.
 
-### Can Markdawn Replace Superhuman Docs Tables?
+### Can Metakip Replace Superhuman Docs Tables?
 
-Markdawn supports Markdown tables for readable content, but it does not provide the same formula-driven, relational workflow model. If the table is the application, keep it in Superhuman Docs or redesign the workflow before migrating.
+Metakip supports Markdown tables for readable content, but it does not provide the same formula-driven, relational workflow model. If the table is the application, keep it in Superhuman Docs or redesign the workflow before migrating.
 
 ### Does Coda Or Superhuman Docs Export To Markdown?
 
@@ -161,26 +161,26 @@ Yes. Superhuman Docs has a public REST API and an official Docs MCP server. Both
 
 ### Which Tool Is Better For AI Workflows?
 
-Superhuman Docs provides Docs AI, Packs, and automations inside its document model. Markdawn provides a markdown-centered API and CLI, plus documentation for controlled AI assistant access. Choose based on whether the AI assistant needs to operate a structured application or read and change durable pages.
+Superhuman Docs provides Docs AI, Packs, and automations inside its document model. Metakip provides a markdown-centered API and CLI, plus documentation for controlled AI assistant access. Choose based on whether the AI assistant needs to operate a structured application or read and change durable pages.
 
 ### How Does Superhuman Docs Pricing Affect Collaboration?
 
 Superhuman Docs bills for Doc Makers while Editors are free, but some editor actions can promote a user to Doc Maker. Check the current workspace settings and billing documentation before assuming that every contributor can create pages or use AI without changing the billable role mix.
 
-### Can I Import Coda Or Superhuman Docs Directly Into Markdawn?
+### Can I Import Coda Or Superhuman Docs Directly Into Metakip?
 
-Markdawn does not currently describe Coda or Superhuman Docs as a first-class native import. Export or retrieve a representative sample, convert the readable content to markdown, and verify the result before planning a full migration. Tables, formulas, automations, and Packs will need an explicit replacement decision.
+Metakip does not currently describe Coda or Superhuman Docs as a first-class native import. Export or retrieve a representative sample, convert the readable content to markdown, and verify the result before planning a full migration. Tables, formulas, automations, and Packs will need an explicit replacement decision.
 
-## Related Markdawn Guides
+## Related Metakip Guides
 
-- [Create A Page In Markdawn](/getting-started/create-your-first-page/) for browser-based writing.
+- [Create A Page In Metakip](/getting-started/create-your-first-page/) for browser-based writing.
 - [Import Markdown And Obsidian Notes](/getting-started/bring-your-notes/) for migration steps and verification.
 - [Markdown Support](/getting-started/markdown-support/) for supported syntax and page links.
-- [Organize Markdawn Pages And Folders](/getting-started/organize-pages-and-folders/) for shared knowledge structure.
-- [Share A Markdawn Page](/getting-started/share-a-page/) for view, edit, and admin access.
-- [Markdawn CLI](/agents/markdawn-cli/) for terminal workflows.
+- [Organize Metakip Pages And Folders](/getting-started/organize-pages-and-folders/) for shared knowledge structure.
+- [Share A Metakip Page](/getting-started/share-a-page/) for view, edit, and admin access.
+- [Metakip CLI](/agents/metakip-cli/) for terminal workflows.
 - [API Reference](/api-reference/endpoints/) for automation and integrations.
-- [Use Markdawn With AI Assistants](/agents/use-markdawn-with-ai-assistants/) for controlled AI assistant access.
+- [Use Metakip With AI Assistants](/agents/use-metakip-with-ai-assistants/) for controlled AI assistant access.
 
 ## Sources And Further Reading
 
@@ -213,4 +213,4 @@ Markdawn does not currently describe Coda or Superhuman Docs as a first-class na
 
 ## Verdict
 
-Choose **Superhuman Docs**, formerly Coda, when the document needs to behave like an application. Choose **Markdawn** when the document needs to remain durable knowledge that can be read, linked, edited, exported, and connected to the CLI, API, or an AI assistant.
+Choose **Superhuman Docs**, formerly Coda, when the document needs to behave like an application. Choose **Metakip** when the document needs to remain durable knowledge that can be read, linked, edited, exported, and connected to the CLI, API, or an AI assistant.

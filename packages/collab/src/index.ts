@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { getCollabLogger, requireCollaborationInternalSecret, setupLogger } from '@markdawn/shared';
+import { getCollabLogger, requireCollaborationInternalSecret, setupLogger } from '@metakip/shared';
 import { config } from 'dotenv';
 import { createCollabServer } from './server';
 import { getDbHostname } from './utils';

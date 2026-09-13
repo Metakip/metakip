@@ -38,7 +38,7 @@ func TestClientSendsAuthenticationAndUserAgent(t *testing.T) {
 		if got := request.Header.Get("Authorization"); got != "Bearer secret" {
 			t.Fatalf("unexpected authorization %q", got)
 		}
-		if got := request.Header.Get("User-Agent"); !strings.HasPrefix(got, "markdawn-cli/") {
+		if got := request.Header.Get("User-Agent"); !strings.HasPrefix(got, "metakip-cli/") {
 			t.Fatalf("unexpected user agent %q", got)
 		}
 		response.Header().Set("Content-Type", "application/json")
@@ -63,8 +63,8 @@ func TestClientRequiresHTTPSForRemoteServers(t *testing.T) {
 		baseURL string
 		valid   bool
 	}{
-		{name: "remote HTTPS", baseURL: "https://markdawn.example", valid: true},
-		{name: "remote HTTP", baseURL: "http://markdawn.example", valid: false},
+		{name: "remote HTTPS", baseURL: "https://metakip.example", valid: true},
+		{name: "remote HTTP", baseURL: "http://metakip.example", valid: false},
 		{name: "localhost HTTP", baseURL: "http://localhost:3001", valid: true},
 		{name: "absolute localhost HTTP", baseURL: "http://localhost.:3001", valid: true},
 		{name: "IPv4 loopback HTTP", baseURL: "http://127.0.0.1:3001", valid: true},
@@ -239,7 +239,7 @@ func TestHumanErrorOutputPreservesGuidanceLines(t *testing.T) {
 	var output strings.Builder
 	runtime := &runtimeState{cli: &CLI{}, stderr: &output}
 	runtime.printError(fmt.Errorf("update command failed: %w", unmanagedUpdateError()))
-	want := "Error: Cannot update this binary because it is not managed by the standalone installer.\n\nIf this was installed with Go, update it with: go install github.com/atharva-again/Markdawn/cli@latest\n\nOtherwise, reinstall it using the standalone installer.\n"
+	want := "Error: Cannot update this binary because it is not managed by the standalone installer.\n\nIf this was installed with Go, update it with: go install github.com/Metakip/metakip/cli@latest\n\nOtherwise, reinstall it using the standalone installer.\n"
 	if output.String() != want {
 		t.Fatalf("human error output = %q, want %q", output.String(), want)
 	}
@@ -254,8 +254,8 @@ func TestHumanErrorOutputPreservesDynamicTechnicalMessages(t *testing.T) {
 	}
 
 	output.Reset()
-	runtime.printError(&cliError{Code: "network_error", Message: "Could not reach Markdawn."})
-	if output.String() != "Error: Could not reach Markdawn.\n" {
+	runtime.printError(&cliError{Code: "network_error", Message: "Could not reach Metakip."})
+	if output.String() != "Error: Could not reach Metakip.\n" {
 		t.Fatalf("authored error output = %q", output.String())
 	}
 }

@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-CONTAINER_NAME="markdawn-postgres-dev"
-VOLUME_NAME="markdawn-postgres-dev-data"
+CONTAINER_NAME="metakip-postgres-dev"
+VOLUME_NAME="metakip-postgres-dev-data"
 ENV_FILE=".env"
 
 # Load credentials from .env if present (typically copied from .env.dev)
-DB_USER="markdawn"
+DB_USER="metakip"
 DB_PASSWORD="password"
-DB_NAME="markdawn"
+DB_NAME="metakip"
 
 if [ -f "$ENV_FILE" ]; then
   while IFS='=' read -r key value; do

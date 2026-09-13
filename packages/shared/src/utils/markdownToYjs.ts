@@ -69,7 +69,7 @@ export function bindWikiLinkTargets(
 export function bindWikiLinkTargetsInDocument(
   document: Y.Doc,
   pageLookup: ReadonlyMap<string, string>,
-  origin: unknown = 'markdawn-bind-wiki-links',
+  origin: unknown = 'metakip-bind-wiki-links',
 ): void {
   const text = document.getText(COLLABORATIVE_CONTENT_FIELD);
   const replacements = findMarkdownWikiLinks(text.toString()).flatMap((link) => {

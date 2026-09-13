@@ -92,7 +92,7 @@ func TestLifecycleBatchMarksUncertainMutationOutcomes(t *testing.T) {
 	}{
 		{
 			name: "network failure",
-			err:  &cliError{Code: "network_error", Message: "could not reach Markdawn"},
+			err:  &cliError{Code: "network_error", Message: "could not reach Metakip"},
 			code: "network_error",
 		},
 		{
@@ -509,7 +509,7 @@ func TestFolderLifecycleBatchBlocksDescendantAfterUncertainAncestorFailure(t *te
 
 	err := runFolderLifecycleBatch(runtime, []string{rootID, childID}, func(_ *client, folderID string) (lifecycleActionResult, error) {
 		actioned = append(actioned, folderID)
-		return lifecycleActionResult{}, &cliError{Code: "network_error", Message: "could not reach Markdawn"}
+		return lifecycleActionResult{}, &cliError{Code: "network_error", Message: "could not reach Metakip"}
 	})
 	var commandError *cliError
 	if !errors.As(err, &commandError) || commandError.Code != "lifecycle_partial_failure" {

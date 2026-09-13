@@ -1,4 +1,4 @@
-import type { FolderTreeNode, PageTreeNode, SharedNavigationItem } from '@markdawn/shared';
+import type { FolderTreeNode, PageTreeNode, SharedNavigationItem } from '@metakip/shared';
 import { act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

@@ -62,7 +62,7 @@ export function ApiTokensPanel() {
       <div>
         <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">API tokens</h2>
         <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          Create named tokens for the Markdawn CLI and local agents. New tokens are read-only by
+          Create named tokens for the Metakip CLI and local agents. New tokens are read-only by
           default.
         </p>
       </div>

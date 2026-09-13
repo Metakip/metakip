@@ -13,7 +13,7 @@ import {
 import { DOCS_ORIGIN, SITE_ORIGIN } from '../data/siteConfig';
 
 // biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
-const CLI_GUIDE = `${DOCS_ORIGIN}/agents/markdawn-cli/`;
+const CLI_GUIDE = `${DOCS_ORIGIN}/agents/metakip-cli/`;
 // biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
 const MCP_GUIDE = `${DOCS_ORIGIN}/agents/mcp/`;
 // biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
@@ -41,7 +41,7 @@ const STRUCTURED_DATA = {
       '@type': 'WebPage',
       '@id': `${SITE_ORIGIN}/#webpage`,
       url: SITE_ORIGIN,
-      name: 'Markdawn',
+      name: 'Metakip',
       description: PAGE_DESCRIPTION,
       isPartOf: { '@id': `${SITE_ORIGIN}/#website` },
       about: { '@id': `${SITE_ORIGIN}/#application` },
@@ -56,7 +56,7 @@ const STRUCTURED_DATA = {
 ---
 
 <SiteLayout
-  title="Markdawn"
+  title="Metakip"
   description={PAGE_DESCRIPTION}
   url={SITE_ORIGIN}
   structuredData={STRUCTURED_DATA}
@@ -417,10 +417,10 @@ const STRUCTURED_DATA = {
       <main class="hero">
         <div class="beta-badge">
           <span class="status-dot" aria-hidden="true"></span>
-          Markdawn is now in public beta
+          Metakip is now in public beta
         </div>
 
-        <h1>Welcome to Markdawn</h1>
+        <h1>Welcome to Metakip</h1>
 
         <p class="hero-copy">{PRODUCT_SUMMARY}</p>
 

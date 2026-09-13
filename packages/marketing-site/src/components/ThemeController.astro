@@ -1,6 +1,6 @@
 <script is:inline>
   (() => {
-    const storedTheme = localStorage.getItem('markdawn-theme');
+    const storedTheme = localStorage.getItem('metakip-theme');
     const theme = ['light', 'dark', 'system'].includes(storedTheme) ? storedTheme : 'system';
     const isDark = theme === 'dark' || (theme === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
     const themeColorMeta = document.querySelector('meta[name="theme-color"]');

@@ -127,16 +127,16 @@ function createOptionButton(
   const button = document.createElement('button');
   button.type = 'button';
   button.id = `${state.menu.id}-option-${index}`;
-  button.className = 'markdawn-openapi-picker-option';
+  button.className = 'metakip-openapi-picker-option';
   button.setAttribute('role', 'option');
   button.tabIndex = -1;
 
   const label = document.createElement('span');
-  label.className = 'markdawn-openapi-picker-option-label';
+  label.className = 'metakip-openapi-picker-option-label';
   label.textContent = option.textContent?.trim() ?? '';
 
   const check = document.createElement('span');
-  check.className = 'markdawn-openapi-picker-check';
+  check.className = 'metakip-openapi-picker-check';
   check.setAttribute('aria-hidden', 'true');
   check.textContent = '✓';
 
@@ -168,7 +168,7 @@ function createOptionButton(
 }
 
 function enhancePicker(picker: HTMLElement): void {
-  if (picker.dataset.markdawnPicker === 'true') return;
+  if (picker.dataset.metakipPicker === 'true') return;
 
   const select = picker.querySelector('select');
   const originalRoot = picker.querySelector<HTMLElement>('.sl-openapi-snippet-picker');
@@ -179,22 +179,22 @@ function enhancePicker(picker: HTMLElement): void {
 
   const trigger = document.createElement('button');
   trigger.type = 'button';
-  trigger.className = 'markdawn-openapi-picker-trigger';
+  trigger.className = 'metakip-openapi-picker-trigger';
   trigger.setAttribute('aria-haspopup', 'listbox');
   trigger.setAttribute('aria-expanded', 'false');
 
   const label = document.createElement('span');
-  label.className = 'markdawn-openapi-picker-label';
+  label.className = 'metakip-openapi-picker-label';
 
   const caret = document.createElement('span');
-  caret.className = 'markdawn-openapi-picker-caret';
+  caret.className = 'metakip-openapi-picker-caret';
   caret.setAttribute('aria-hidden', 'true');
 
   trigger.append(label, caret);
 
   const menu = document.createElement('div');
-  menu.id = `markdawn-openapi-picker-${pickerId++}`;
-  menu.className = 'markdawn-openapi-picker-menu';
+  menu.id = `metakip-openapi-picker-${pickerId++}`;
+  menu.className = 'metakip-openapi-picker-menu';
   menu.hidden = true;
   menu.setAttribute('role', 'listbox');
   menu.setAttribute('aria-label', 'Choose a code sample');
@@ -223,7 +223,7 @@ function enhancePicker(picker: HTMLElement): void {
   root.append(trigger, select);
   originalRoot.replaceWith(root);
   document.body.append(menu);
-  picker.dataset.markdawnPicker = 'true';
+  picker.dataset.metakipPicker = 'true';
 
   select.addEventListener('change', () => updateOptionState(state));
   trigger.setAttribute('aria-controls', menu.id);
@@ -272,7 +272,7 @@ export function initializeOpenAPISnippetPickers(): void {
   });
   document.addEventListener('astro:before-swap', () => {
     closePicker();
-    for (const menu of document.querySelectorAll('.markdawn-openapi-picker-menu')) menu.remove();
+    for (const menu of document.querySelectorAll('.metakip-openapi-picker-menu')) menu.remove();
   });
   document.addEventListener('astro:page-load', enhancePickers);
   window.addEventListener('resize', () => {

@@ -1,6 +1,6 @@
 import type { onLoadDocumentPayload } from '@hocuspocus/server';
 import type { Logger } from '@logtape/logtape';
-import { parsePageMetaRoomName } from '@markdawn/shared';
+import { parsePageMetaRoomName } from '@metakip/shared';
 import type { Pool, PoolClient, QueryResult } from 'pg';
 import * as Y from 'yjs';
 import type { AuthenticatedCredential } from './authenticatedCredential';

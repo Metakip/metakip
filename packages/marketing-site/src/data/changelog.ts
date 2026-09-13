@@ -3,9 +3,9 @@ import { DOCS_ORIGIN, GITHUB_URL } from './siteConfig';
 
 export const CHANGELOG_TITLE = 'Changelog';
 export const CHANGELOG_DESCRIPTION =
-  'Follow product updates across the Markdawn browser app, CLI, API, sharing, and documentation.';
+  'Follow product updates across the Metakip browser app, CLI, API, sharing, and documentation.';
 export const CHANGELOG_INTRO =
-  'Markdawn is in public beta. This changelog tracks the product updates that make the same pages more useful for people, terminals, and AI assistants.';
+  'Metakip is in public beta. This changelog tracks the product updates that make the same pages more useful for people, terminals, and AI assistants.';
 
 const changelogDateFormatter = new Intl.DateTimeFormat('en-US', {
   dateStyle: 'long',
@@ -39,16 +39,16 @@ export const CHANGELOG_ENTRIES: readonly ChangelogEntry[] = [
   {
     id: 'mcp-support',
     date: '2026-08-30',
-    title: 'Connect Markdawn through MCP',
+    title: 'Connect Metakip through MCP',
     details: [
-      'Markdawn now supports MCP through an OAuth connection to the same knowledge base available in the browser, CLI, and API.',
+      'Metakip now supports MCP through an OAuth connection to the same knowledge base available in the browser, CLI, and API.',
       'Scoped access keeps operations within the permissions granted during authorization, with read and write access handled separately.',
-      'MCP is available at `https://mcp.markdawn.space/mcp`; the MCP guide covers connection details, protocol behavior, and self-hosting configuration.',
+      'MCP is available at `https://mcp.metakip.com/mcp`; the MCP guide covers connection details, protocol behavior, and self-hosting configuration.',
     ],
     links: [
       {
         kind: 'external',
-        label: 'Read About Markdawn MCP →',
+        label: 'Read About Metakip MCP →',
         url: `${DOCS_ORIGIN}/agents/mcp/`,
       },
       pullRequestLink(152),
@@ -60,9 +60,9 @@ export const CHANGELOG_ENTRIES: readonly ChangelogEntry[] = [
     title: 'The workspace gets its own home',
     details: [
       'The browser app now has a dedicated space for signing in, creating pages, and collaborating with a workspace.',
-      'The transition from learning about Markdawn to using it is clearer: when you are ready to work, go straight to the workspace.',
+      'The transition from learning about Metakip to using it is clearer: when you are ready to work, go straight to the workspace.',
     ],
-    links: [{ kind: 'app', label: 'Open The Markdawn App →' }, pullRequestLink(149)],
+    links: [{ kind: 'app', label: 'Open The Metakip App →' }, pullRequestLink(149)],
   },
   {
     id: 'hosted-documentation',
@@ -89,13 +89,13 @@ export const CHANGELOG_ENTRIES: readonly ChangelogEntry[] = [
     links: [
       {
         kind: 'external',
-        label: 'Bring Your Notes To Markdawn →',
+        label: 'Bring Your Notes To Metakip →',
         url: `${DOCS_ORIGIN}/getting-started/bring-your-notes/`,
       },
       {
         kind: 'external',
-        label: 'Use Markdawn With AI Assistants →',
-        url: `${DOCS_ORIGIN}/agents/use-markdawn-with-ai-assistants/`,
+        label: 'Use Metakip With AI Assistants →',
+        url: `${DOCS_ORIGIN}/agents/use-metakip-with-ai-assistants/`,
       },
       pullRequestLink(141),
     ],
@@ -111,7 +111,7 @@ export const CHANGELOG_ENTRIES: readonly ChangelogEntry[] = [
     links: [
       {
         kind: 'external',
-        label: 'Bring Your Notes To Markdawn →',
+        label: 'Bring Your Notes To Metakip →',
         url: `${DOCS_ORIGIN}/getting-started/bring-your-notes/`,
       },
       pullRequestLink(140),
@@ -128,8 +128,8 @@ export const CHANGELOG_ENTRIES: readonly ChangelogEntry[] = [
     links: [
       {
         kind: 'external',
-        label: 'Read The Markdawn CLI Guide →',
-        url: `${DOCS_ORIGIN}/agents/markdawn-cli/`,
+        label: 'Read The Metakip CLI Guide →',
+        url: `${DOCS_ORIGIN}/agents/metakip-cli/`,
       },
       pullRequestLink(135),
     ],
@@ -146,8 +146,8 @@ export const CHANGELOG_ENTRIES: readonly ChangelogEntry[] = [
     links: [
       {
         kind: 'external',
-        label: 'Read The Markdawn CLI Guide →',
-        url: `${DOCS_ORIGIN}/agents/markdawn-cli/`,
+        label: 'Read The Metakip CLI Guide →',
+        url: `${DOCS_ORIGIN}/agents/metakip-cli/`,
       },
       {
         kind: 'external',
@@ -170,20 +170,20 @@ export const CHANGELOG_ENTRIES: readonly ChangelogEntry[] = [
       {
         kind: 'external',
         label: 'Learn About AI Assistant Access →',
-        url: `${DOCS_ORIGIN}/agents/use-markdawn-with-ai-assistants/`,
+        url: `${DOCS_ORIGIN}/agents/use-metakip-with-ai-assistants/`,
       },
       {
         kind: 'external',
         label: 'Read The CLI Guide →',
-        url: `${DOCS_ORIGIN}/agents/markdawn-cli/`,
+        url: `${DOCS_ORIGIN}/agents/metakip-cli/`,
       },
       pullRequestLink(123),
     ],
   },
   {
-    id: 'markdawn-cli-for-humans-and-agents',
+    id: 'metakip-cli-for-humans-and-agents',
     date: '2026-07-28',
-    title: 'The Markdawn CLI arrives',
+    title: 'The Metakip CLI arrives',
     details: [
       'The standalone CLI gives people and agents a terminal interface to the same pages they use in the browser.',
       'Authenticated workflows, safe content editing, shell completion, and platform installers make the first terminal session practical.',
@@ -192,7 +192,7 @@ export const CHANGELOG_ENTRIES: readonly ChangelogEntry[] = [
       {
         kind: 'external',
         label: 'Install And Use The CLI →',
-        url: `${DOCS_ORIGIN}/agents/markdawn-cli/`,
+        url: `${DOCS_ORIGIN}/agents/metakip-cli/`,
       },
       pullRequestLink(122),
     ],
@@ -222,7 +222,7 @@ export const CHANGELOG_ENTRIES: readonly ChangelogEntry[] = [
       'Favorite pages and folders now appear alongside the rest of the workspace on the home dashboard.',
       'Favorites keep frequently used knowledge within reach while preserving the existing access and collaboration controls.',
     ],
-    links: [{ kind: 'app', label: 'Open The Markdawn App →' }, pullRequestLink(114)],
+    links: [{ kind: 'app', label: 'Open The Metakip App →' }, pullRequestLink(114)],
   },
   {
     id: 'sharing-and-real-time-permissions',
@@ -248,7 +248,7 @@ export const CHANGELOG_ENTRIES: readonly ChangelogEntry[] = [
     title: 'A clearer path to self-hosting',
     details: [
       'Deployment checks and health reporting now make rollouts easier to verify before the application is restarted.',
-      'The deployment documentation includes a migration guide for moving a Markdawn deployment between servers.',
+      'The deployment documentation includes a migration guide for moving a Metakip deployment between servers.',
     ],
     links: [
       {
@@ -310,7 +310,7 @@ export const CHANGELOG_ENTRIES: readonly ChangelogEntry[] = [
     links: [
       {
         kind: 'external',
-        label: 'Bring Your Notes To Markdawn →',
+        label: 'Bring Your Notes To Metakip →',
         url: `${DOCS_ORIGIN}/getting-started/bring-your-notes/`,
       },
       {
@@ -343,9 +343,9 @@ export const CHANGELOG_ENTRIES: readonly ChangelogEntry[] = [
     ],
   },
   {
-    id: 'markdawn-mvp',
+    id: 'metakip-mvp',
     date: '2026-02-20',
-    title: 'The first Markdawn workspace',
+    title: 'The first Metakip workspace',
     details: [
       'The first working product brought together authentication, a browser editor, page persistence, workspace navigation, and collaboration.',
       'Import and export workflows, workspace management, member invites, search, and a deployable application established the foundation for what followed.',

@@ -5,8 +5,8 @@ import "fmt"
 func completionScript(shell string) (string, error) {
 	switch shell {
 	case "bash":
-		return `# bash completion for markdawn
-_markdawn() {
+		return `# bash completion for metakip
+_metakip() {
   local cur prev
   COMPREPLY=()
   cur="${COMP_WORDS[COMP_CWORD]}"
@@ -23,11 +23,11 @@ _markdawn() {
     COMPREPLY=( $(compgen -W "list" -- "$cur") )
   fi
 }
-complete -F _markdawn markdawn
+complete -F _metakip metakip
 `, nil
 	case "zsh":
-		return `#compdef markdawn
-_markdawn() {
+		return `#compdef metakip
+_metakip() {
   local -a commands page_commands skill_commands
   commands=(login logout whoami doctor skill update uninstall help page folder completion)
   page_commands=(list view create edit update)
@@ -46,15 +46,15 @@ _markdawn() {
     _arguments '*:argument:_files'
   fi
 }
-compdef _markdawn markdawn
+compdef _metakip metakip
 `, nil
 	case "fish":
-		return `complete -c markdawn -f
-complete -c markdawn -n '__fish_use_subcommand' -a 'login logout whoami doctor skill update uninstall help page folder completion'
-complete -c markdawn -n '__fish_seen_subcommand_from page' -a 'list view create edit update'
-complete -c markdawn -n '__fish_seen_subcommand_from page; and __fish_seen_subcommand_from edit' -a 'interactive exact replace append prepend'
-complete -c markdawn -n '__fish_seen_subcommand_from skill' -a 'install update'
-complete -c markdawn -n '__fish_seen_subcommand_from folder' -a 'list'
+		return `complete -c metakip -f
+complete -c metakip -n '__fish_use_subcommand' -a 'login logout whoami doctor skill update uninstall help page folder completion'
+complete -c metakip -n '__fish_seen_subcommand_from page' -a 'list view create edit update'
+complete -c metakip -n '__fish_seen_subcommand_from page; and __fish_seen_subcommand_from edit' -a 'interactive exact replace append prepend'
+complete -c metakip -n '__fish_seen_subcommand_from skill' -a 'install update'
+complete -c metakip -n '__fish_seen_subcommand_from folder' -a 'list'
 `, nil
 	default:
 		return "", fmt.Errorf("unsupported shell %q", shell)

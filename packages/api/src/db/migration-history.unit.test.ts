@@ -8,7 +8,7 @@ const drizzleDir = resolve(currentDir, '../../drizzle');
 const deployScriptPath = resolve(currentDir, '../../../../deploy/deploy.sh');
 const deploymentGuidePath = resolve(
   currentDir,
-  '../../../../docs/src/content/docs/self-hosting/maintain-a-self-hosted-markdawn.md',
+  '../../../../docs/src/content/docs/self-hosting/maintain-a-self-hosted-metakip.md',
 );
 const migrationDirPattern = /^\d{14}_[A-Za-z0-9_-]+$/;
 
@@ -96,8 +96,8 @@ describe('Drizzle v1 migration history', () => {
     const deployScript = readFileSync(deployScriptPath, 'utf8');
     const compatibilityCheck = deployScript.indexOf('MIGRATION_BASELINE');
     const codePull = deployScript.indexOf('git pull origin master');
-    const quadletUpdate = deployScript.indexOf('cp "$REPO_DIR/deploy/quadlet/markdawn.pod"');
-    const imageBuild = deployScript.indexOf('podman build -t localhost/markdawn-api:latest');
+    const quadletUpdate = deployScript.indexOf('cp "$REPO_DIR/deploy/quadlet/metakip.pod"');
+    const imageBuild = deployScript.indexOf('podman build -t localhost/metakip-api:latest');
     const serviceStop = deployScript.indexOf('systemctl --user stop');
 
     expect(compatibilityCheck).toBeGreaterThan(-1);
@@ -113,9 +113,9 @@ describe('Drizzle v1 migration history', () => {
     const deploymentGuide = readFileSync(deploymentGuidePath, 'utf8');
     const fetch = deploymentGuide.indexOf('git fetch origin master');
     const extractScript = deploymentGuide.indexOf(
-      'git show origin/master:deploy/deploy.sh > /tmp/markdawn-deploy.sh',
+      'git show origin/master:deploy/deploy.sh > /tmp/metakip-deploy.sh',
     );
-    const executeScript = deploymentGuide.indexOf('bash /tmp/markdawn-deploy.sh');
+    const executeScript = deploymentGuide.indexOf('bash /tmp/metakip-deploy.sh');
 
     expect(fetch).toBeGreaterThan(-1);
     expect(extractScript).toBeGreaterThan(fetch);

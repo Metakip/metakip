@@ -20,7 +20,7 @@ function createRuntimeOptions(createListenClient: (databaseUrl: string) => Clien
       warn: vi.fn(),
       error: vi.fn(),
     } as unknown as Logger,
-    databaseUrl: 'postgres://database.test/markdawn',
+    databaseUrl: 'postgres://database.test/metakip',
     permissionRevalidationMs: 0,
     publications: {
       grantReceived: vi.fn(async () => undefined),

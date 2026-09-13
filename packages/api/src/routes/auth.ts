@@ -1,4 +1,4 @@
-import { hashMcpAccessToken } from '@markdawn/shared/node/mcp-internal-auth';
+import { hashMcpAccessToken } from '@metakip/shared/node/mcp-internal-auth';
 import { verifyBearerToken } from 'better-auth/oauth2';
 import { APIError } from 'better-call';
 import { sql } from 'drizzle-orm';

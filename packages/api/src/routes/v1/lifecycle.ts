@@ -1,4 +1,4 @@
-import type { ApiTokenAuditOperation } from '@markdawn/shared';
+import type { ApiTokenAuditOperation } from '@metakip/shared';
 import { Hono } from 'hono';
 import { createMiddleware } from 'hono/factory';
 import { HTTPException } from 'hono/http-exception';
@@ -299,7 +299,7 @@ lifecycleRoute.get(
       buffer.byteOffset + buffer.byteLength,
     ) as ArrayBuffer;
     c.header('Content-Type', 'application/zip');
-    c.header('Content-Disposition', 'attachment; filename="markdawn-export.zip"');
+    c.header('Content-Disposition', 'attachment; filename="metakip-export.zip"');
     return c.newResponse(arrayBuffer, 200);
   },
 );

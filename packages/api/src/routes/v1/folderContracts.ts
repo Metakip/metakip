@@ -3,7 +3,7 @@ import {
   v1FolderResolutionItemSchema,
   v1FolderResponseSchema,
   v1UpdateFolderRequestSchema,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import { z } from 'zod';
 import { jsonContent, uuidPathParameter, type V1OperationContract } from './apiContract';
 
@@ -21,7 +21,7 @@ export const folderOperations = {
     openApiPath: '/folders',
     summary: 'Create A Folder',
     description:
-      'Creates a folder in the requested parent, or at the Markdawn root when `parentId` is omitted or `null`.',
+      'Creates a folder in the requested parent, or at the Metakip root when `parentId` is omitted or `null`.',
     tags: foldersTag,
     requiredScopes: ['pages:write'],
     request: { required: true, ...jsonContent(createFolderRequestSchema) },
@@ -77,7 +77,7 @@ export const folderOperations = {
     openApiPath: '/folders/{folderId}',
     summary: 'Update Folder Metadata',
     description:
-      'Updates a folder name, parent, or both. Set `parentId` to `null` to move the folder to the Markdawn root.',
+      'Updates a folder name, parent, or both. Set `parentId` to `null` to move the folder to the Metakip root.',
     tags: foldersTag,
     requiredScopes: ['pages:write'],
     parameters: [folderId],

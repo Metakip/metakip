@@ -8,7 +8,7 @@ import {
   WidgetType,
 } from '@codemirror/view';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
-import { getContrastColor } from '@markdawn/shared';
+import { getContrastColor } from '@metakip/shared';
 import * as Y from 'yjs';
 import { getInitial } from '../../utils/avatar';
 

@@ -1,12 +1,12 @@
 $ErrorActionPreference = 'Stop'
 
-$repository = 'atharva-again/Markdawn'
+$repository = 'Metakip/metakip'
 $releaseBaseURL = "https://github.com/$repository/releases"
-$installDir = if ($env:MARKDAWN_INSTALL_DIR) { $env:MARKDAWN_INSTALL_DIR } else { Join-Path $env:LOCALAPPDATA 'Markdawn\bin' }
-$requestedVersion = $env:MARKDAWN_VERSION
-$modifyPath = $env:MARKDAWN_MODIFY_PATH -ne '0'
-$installSkill = $env:MARKDAWN_INSTALL_SKILL
-$httpTimeoutSeconds = $env:MARKDAWN_HTTP_TIMEOUT_SECONDS
+$installDir = if ($env:METAKIP_INSTALL_DIR) { $env:METAKIP_INSTALL_DIR } else { Join-Path $env:LOCALAPPDATA 'Metakip\bin' }
+$requestedVersion = $env:METAKIP_VERSION
+$modifyPath = $env:METAKIP_MODIFY_PATH -ne '0'
+$installSkill = $env:METAKIP_INSTALL_SKILL
+$httpTimeoutSeconds = $env:METAKIP_HTTP_TIMEOUT_SECONDS
 $maxReleaseArchiveBytes = 256MB
 $maxReleaseBinaryBytes = 128MB
 $maxReleaseArchiveEntries = 1024
@@ -55,10 +55,10 @@ function Download-ReleaseAsset([string]$Uri, [string]$Path, [long]$MaximumBytes,
           $destination.Write($buffer, 0, $read)
           if ($showProgress) {
             $percent = [Math]::Min(100, [Math]::Floor(($written * 100) / $contentLength))
-            Write-Progress -Activity 'Downloading Markdawn CLI' -Status $Label -PercentComplete $percent
+            Write-Progress -Activity 'Downloading Metakip CLI' -Status $Label -PercentComplete $percent
           }
         }
-        if ($showProgress) { Write-Progress -Activity 'Downloading Markdawn CLI' -Completed }
+        if ($showProgress) { Write-Progress -Activity 'Downloading Metakip CLI' -Completed }
       } finally {
         $destination.Dispose()
       }
@@ -110,11 +110,11 @@ function Extract-ReleaseBinary([string]$ArchivePath, [string]$DestinationPath) {
   Assert-ReleaseZipDirectory $ArchivePath
   $archive = [IO.Compression.ZipFile]::OpenRead($ArchivePath)
   try {
-    $entries = @($archive.Entries | Where-Object { $_.FullName -ceq 'markdawn.exe' })
-    if ($entries.Count -ne 1) { Fail 'Release archive must contain exactly one Markdawn.exe binary.' }
+    $entries = @($archive.Entries | Where-Object { $_.FullName -ceq 'metakip.exe' })
+    if ($entries.Count -ne 1) { Fail 'Release archive must contain exactly one Metakip.exe binary.' }
     $entry = $entries[0]
     $unixFileType = ($entry.ExternalAttributes -shr 16) -band 0xf000
-    if ($entry.FullName.EndsWith('/') -or ($unixFileType -ne 0 -and $unixFileType -ne 0x8000)) { Fail 'Release archive Markdawn.exe entry is not a regular file.' }
+    if ($entry.FullName.EndsWith('/') -or ($unixFileType -ne 0 -and $unixFileType -ne 0x8000)) { Fail 'Release archive Metakip.exe entry is not a regular file.' }
     if ($entry.Length -gt $maxReleaseBinaryBytes) { Fail "Release binary exceeds $maxReleaseBinaryBytes bytes." }
     if ($entry.CompressedLength -gt $maxReleaseArchiveBytes) { Fail "Compressed release binary exceeds $maxReleaseArchiveBytes bytes." }
     $source = $entry.Open()
@@ -128,7 +128,7 @@ function Extract-ReleaseBinary([string]$ArchivePath, [string]$DestinationPath) {
           if ($written -gt $maxReleaseBinaryBytes) { Fail "Release binary exceeds $maxReleaseBinaryBytes bytes." }
           $destination.Write($buffer, 0, $read)
         }
-        if ($written -ne $entry.Length) { Fail 'Release archive Markdawn.exe entry has an invalid length.' }
+        if ($written -ne $entry.Length) { Fail 'Release archive Metakip.exe entry has an invalid length.' }
       } finally {
         $destination.Dispose()
       }
@@ -141,20 +141,20 @@ function Extract-ReleaseBinary([string]$ArchivePath, [string]$DestinationPath) {
 }
 
 if ($requestedVersion -and $requestedVersion -notmatch '^v?\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$') {
-  Fail 'MARKDAWN_VERSION must be a semantic version such as v1.2.3.'
+  Fail 'METAKIP_VERSION must be a semantic version such as v1.2.3.'
 }
-if ($env:MARKDAWN_MODIFY_PATH -and $env:MARKDAWN_MODIFY_PATH -notin @('0', '1')) {
-  Fail 'MARKDAWN_MODIFY_PATH must be 0 or 1.'
+if ($env:METAKIP_MODIFY_PATH -and $env:METAKIP_MODIFY_PATH -notin @('0', '1')) {
+  Fail 'METAKIP_MODIFY_PATH must be 0 or 1.'
 }
 if ($installSkill -and $installSkill -notin @('0', 'global', 'project')) {
-  Fail 'MARKDAWN_INSTALL_SKILL must be global, project, or 0.'
+  Fail 'METAKIP_INSTALL_SKILL must be global, project, or 0.'
 }
 $parsedHttpTimeoutSeconds = 0
-if ($httpTimeoutSeconds -and (-not [int]::TryParse($httpTimeoutSeconds, [ref]$parsedHttpTimeoutSeconds) -or $parsedHttpTimeoutSeconds -le 0)) { Fail 'MARKDAWN_HTTP_TIMEOUT_SECONDS must be a positive 32-bit integer.' }
+if ($httpTimeoutSeconds -and (-not [int]::TryParse($httpTimeoutSeconds, [ref]$parsedHttpTimeoutSeconds) -or $parsedHttpTimeoutSeconds -le 0)) { Fail 'METAKIP_HTTP_TIMEOUT_SECONDS must be a positive 32-bit integer.' }
 
 $installDir = [IO.Path]::GetFullPath($installDir)
-if ($modifyPath -and $installDir.Contains([IO.Path]::PathSeparator)) { Fail 'MARKDAWN_INSTALL_DIR must not contain the PATH separator when --modify-path is enabled.' }
-$stateDir = if ($env:MARKDAWN_INSTALL_STATE_DIR) { $env:MARKDAWN_INSTALL_STATE_DIR } else { Join-Path $env:LOCALAPPDATA 'Markdawn' }
+if ($modifyPath -and $installDir.Contains([IO.Path]::PathSeparator)) { Fail 'METAKIP_INSTALL_DIR must not contain the PATH separator when --modify-path is enabled.' }
+$stateDir = if ($env:METAKIP_INSTALL_STATE_DIR) { $env:METAKIP_INSTALL_STATE_DIR } else { Join-Path $env:LOCALAPPDATA 'Metakip' }
 $stateDir = [IO.Path]::GetFullPath($stateDir)
 
 $architecture = if ($env:PROCESSOR_ARCHITEW6432) { $env:PROCESSOR_ARCHITEW6432 } else { $env:PROCESSOR_ARCHITECTURE }
@@ -166,14 +166,14 @@ switch ($architecture.ToUpperInvariant()) {
 
 if ($requestedVersion) {
   $version = $requestedVersion.TrimStart('v')
-  $archive = "markdawn_${version}_windows_${goarch}.zip"
+  $archive = "metakip_${version}_windows_${goarch}.zip"
   $downloadBase = "$releaseBaseURL/download/cli/v$version"
 } else {
-  $archive = "markdawn_windows_${goarch}.zip"
+  $archive = "metakip_windows_${goarch}.zip"
   $downloadBase = "$releaseBaseURL/latest/download"
 }
 
-$temporaryDir = Join-Path ([IO.Path]::GetTempPath()) ("markdawn-" + [Guid]::NewGuid().ToString('N'))
+$temporaryDir = Join-Path ([IO.Path]::GetTempPath()) ("metakip-" + [Guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $temporaryDir | Out-Null
 $finalizerBinary = $null
 
@@ -181,10 +181,10 @@ try {
   $archivePath = Join-Path $temporaryDir $archive
   $checksumsPath = Join-Path $temporaryDir 'checksums.txt'
   $releaseVersion = if ($requestedVersion) { "v$version" } else { 'latest' }
-  Write-Phase 'Downloading Markdawn CLI release...'
+  Write-Phase 'Downloading Metakip CLI release...'
   Download-ReleaseAsset "$downloadBase/$archive" $archivePath $maxReleaseArchiveBytes $parsedHttpTimeoutSeconds $archive
   Download-ReleaseAsset "$downloadBase/checksums.txt" $checksumsPath 1MB $parsedHttpTimeoutSeconds 'checksums.txt'
-  Write-Phase 'Verifying Markdawn CLI release...'
+  Write-Phase 'Verifying Metakip CLI release...'
   $checksumLines = @(Get-Content -LiteralPath $checksumsPath | Where-Object { $_ -match ("\s\s" + [Regex]::Escape($archive) + '$') })
   if ($checksumLines.Count -ne 1) { Fail "Checksums.txt must contain exactly one entry for $archive." }
   $checksumLine = $checksumLines[0]
@@ -194,8 +194,8 @@ try {
   $actualChecksum = (Get-FileHash -Algorithm SHA256 -LiteralPath $archivePath).Hash
   if ($actualChecksum -ne $expectedChecksum) { Fail "SHA-256 verification failed for $archive." }
 
-  Write-Phase 'Extracting Markdawn CLI...'
-  $newBinary = Join-Path $temporaryDir 'markdawn.exe'
+  Write-Phase 'Extracting Metakip CLI...'
+  $newBinary = Join-Path $temporaryDir 'metakip.exe'
   Extract-ReleaseBinary $archivePath $newBinary
 
   if (Test-Path -LiteralPath $installDir) {
@@ -203,43 +203,43 @@ try {
   } else {
     New-Item -ItemType Directory -Path $installDir -ErrorAction Stop | Out-Null
   }
-  $finalizerBinary = Join-Path $installDir (".markdawn-finalize-" + [Guid]::NewGuid().ToString('N') + '.exe')
+  $finalizerBinary = Join-Path $installDir (".metakip-finalize-" + [Guid]::NewGuid().ToString('N') + '.exe')
   Copy-Item -LiteralPath $newBinary -Destination $finalizerBinary -ErrorAction Stop
-  Write-Phase 'Installing Markdawn CLI...'
-  $previousStateDir = $env:MARKDAWN_INSTALL_STATE_DIR
-  $env:MARKDAWN_INSTALL_STATE_DIR = $stateDir
+  Write-Phase 'Installing Metakip CLI...'
+  $previousStateDir = $env:METAKIP_INSTALL_STATE_DIR
+  $env:METAKIP_INSTALL_STATE_DIR = $stateDir
   try {
     if ($modifyPath) {
-      $pathFile = if ($env:MARKDAWN_PROFILE_PATH) { [IO.Path]::GetFullPath($env:MARKDAWN_PROFILE_PATH) } else { $PROFILE.CurrentUserAllHosts }
+      $pathFile = if ($env:METAKIP_PROFILE_PATH) { [IO.Path]::GetFullPath($env:METAKIP_PROFILE_PATH) } else { $PROFILE.CurrentUserAllHosts }
       & $finalizerBinary standalone-finalize --install-dir $installDir --path-file $pathFile --path-style powershell
     } else {
       & $finalizerBinary standalone-finalize --install-dir $installDir
     }
     if ($LASTEXITCODE -ne 0) { Fail 'Could not finalize standalone installation.' }
   } finally {
-    if ($null -eq $previousStateDir) { Remove-Item Env:MARKDAWN_INSTALL_STATE_DIR -ErrorAction SilentlyContinue } else { $env:MARKDAWN_INSTALL_STATE_DIR = $previousStateDir }
+    if ($null -eq $previousStateDir) { Remove-Item Env:METAKIP_INSTALL_STATE_DIR -ErrorAction SilentlyContinue } else { $env:METAKIP_INSTALL_STATE_DIR = $previousStateDir }
   }
-  $installedBinary = Join-Path $installDir 'markdawn.exe'
-  Write-Output "Markdawn $releaseVersion installed to $installedBinary."
+  $installedBinary = Join-Path $installDir 'metakip.exe'
+  Write-Output "Metakip $releaseVersion installed to $installedBinary."
   if ($modifyPath) {
     Write-Output "`nUpdated PATH configuration in $pathFile."
-    Write-Output "`nOpen a new terminal before running markdawn."
-    Write-Output "`nRun markdawn login to get started."
+    Write-Output "`nOpen a new terminal before running metakip."
+    Write-Output "`nRun metakip login to get started."
   } else {
     $escapedInstallDir = $installDir.Replace("'", "''")
-    Write-Output "`nPATH was not changed. Add Markdawn to PATH:`n  `$env:Path = '$escapedInstallDir' + [IO.Path]::PathSeparator + `$env:Path"
-    Write-Output "`nAfter adding Markdawn to PATH, run markdawn login to get started."
+    Write-Output "`nPATH was not changed. Add Metakip to PATH:`n  `$env:Path = '$escapedInstallDir' + [IO.Path]::PathSeparator + `$env:Path"
+    Write-Output "`nAfter adding Metakip to PATH, run metakip login to get started."
   }
   if ($installSkill -eq 'global') {
-    Write-Output "`nInstalling Markdawn agent skill globally with npx skills."
-    & (Join-Path $installDir 'markdawn.exe') skill install --global --yes
-    if ($LASTEXITCODE -ne 0) { Fail 'Could not install Markdawn agent skill.' }
+    Write-Output "`nInstalling Metakip agent skill globally with npx skills."
+    & (Join-Path $installDir 'metakip.exe') skill install --global --yes
+    if ($LASTEXITCODE -ne 0) { Fail 'Could not install Metakip agent skill.' }
   } elseif ($installSkill -eq 'project') {
-    Write-Output "`nInstalling Markdawn agent skill for this project with npx skills."
-    & (Join-Path $installDir 'markdawn.exe') skill install --yes
-    if ($LASTEXITCODE -ne 0) { Fail 'Could not install Markdawn agent skill.' }
+    Write-Output "`nInstalling Metakip agent skill for this project with npx skills."
+    & (Join-Path $installDir 'metakip.exe') skill install --yes
+    if ($LASTEXITCODE -ne 0) { Fail 'Could not install Metakip agent skill.' }
   } else {
-    Write-Output "`nOptional agent skill:`n`n  markdawn skill install --global"
+    Write-Output "`nOptional agent skill:`n`n  metakip skill install --global"
   }
 } finally {
   if ($finalizerBinary -and (Test-Path -LiteralPath $finalizerBinary)) { Remove-Item -LiteralPath $finalizerBinary -Force -ErrorAction Stop }

@@ -1,8 +1,8 @@
-import type { SharePermission } from '@markdawn/shared';
+import type { SharePermission } from '@metakip/shared';
 import type { AuthenticatedCredential } from './authenticatedCredential';
 import type { ConnectionLifecycle } from './connectionLifecycle';
 
-const collabSessionBrand: unique symbol = Symbol('markdawn.collabSession');
+const collabSessionBrand: unique symbol = Symbol('metakip.collabSession');
 
 type SessionBase = {
   readonly [collabSessionBrand]: true;

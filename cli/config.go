@@ -12,8 +12,8 @@ import (
 	"unicode/utf8"
 )
 
-const defaultBaseURL = "https://app.markdawn.space"
-const legacyHostedBaseURL = "https://markdawn.space"
+const defaultBaseURL = "https://app.metakip.com"
+const legacyHostedBaseURL = "https://app.markdawn.space"
 
 type config struct {
 	BaseURL string `json:"baseUrl"`
@@ -21,14 +21,14 @@ type config struct {
 }
 
 func configPath() (string, error) {
-	if dir := os.Getenv("MARKDAWN_CONFIG_DIR"); dir != "" {
+	if dir := os.Getenv("METAKIP_CONFIG_DIR"); dir != "" {
 		return filepath.Join(dir, "config.json"), nil
 	}
 	dir, err := os.UserConfigDir()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(dir, "markdawn", "config.json"), nil
+	return filepath.Join(dir, "metakip", "config.json"), nil
 }
 
 func loadConfig() (config, error) {

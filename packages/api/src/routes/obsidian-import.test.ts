@@ -1,5 +1,5 @@
-import { MAX_FOLDER_NAME_LENGTH, MAX_PAGE_TITLE_LENGTH, MAX_YDOC_BYTES } from '@markdawn/shared';
-import { extractConnectionsFromYDoc } from '@markdawn/shared/yjs-helpers';
+import { MAX_FOLDER_NAME_LENGTH, MAX_PAGE_TITLE_LENGTH, MAX_YDOC_BYTES } from '@metakip/shared';
+import { extractConnectionsFromYDoc } from '@metakip/shared/yjs-helpers';
 import { Client } from 'pg';
 import { describe, expect, it } from 'vitest';
 import { testQuery as query } from '../db/testQuery';

@@ -1,5 +1,5 @@
 import type { HocuspocusProvider } from '@hocuspocus/provider';
-import { getAnimalEmoji, getStableColor } from '@markdawn/shared';
+import { getAnimalEmoji, getStableColor } from '@metakip/shared';
 import { useEffect } from 'react';
 import { useShareContext } from '../contexts/ShareContext';
 import { useAuth } from './useAuth';

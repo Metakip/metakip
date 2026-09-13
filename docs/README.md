@@ -1,19 +1,19 @@
-# Markdawn Documentation Site
+# Metakip Documentation Site
 
-This directory contains the Astro and Starlight documentation site for Markdawn.
+This directory contains the Astro and Starlight documentation site for Metakip.
 
 ## Local Development
 
 From the repository root:
 
 ```sh
-pnpm --filter @markdawn/docs dev
+pnpm --filter @metakip/docs dev
 ```
 
 Build the static site:
 
 ```sh
-pnpm --filter @markdawn/docs build
+pnpm --filter @metakip/docs build
 ```
 
 The generated site is written to `docs/dist`.
@@ -33,7 +33,7 @@ Configure the Pages project with:
 
 ```text
 Root directory: repository root (`/`; leave the Pages field blank)
-Build command: pnpm --filter @markdawn/docs build
+Build command: pnpm --filter @metakip/docs build
 Build output directory: docs/dist
 Node.js version: 22.12 or later
 pnpm version: 11.3.0
@@ -41,7 +41,7 @@ pnpm version: 11.3.0
 
 Set the `NODE_VERSION` Pages environment variable to `22.12.0` or a later Node 22 release, and set `PNPM_VERSION` to `11.3.0`. Use the repository root as the build root because the documentation build generates its OpenAPI document from the workspace API source. The generated `docs/openapi.json` file is ignored and recreated during `prebuild`.
 
-Connect the `master` branch for production deployments and add `docs.markdawn.space` as the custom domain.
+Connect the `master` branch for production deployments and add `docs.metakip.com` as the custom domain.
 
 ## Content
 

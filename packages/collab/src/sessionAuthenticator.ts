@@ -1,6 +1,6 @@
 import type { onAuthenticatePayload } from '@hocuspocus/server';
 import type { Logger } from '@logtape/logtape';
-import { getAnonymousName, parsePageMetaRoomName } from '@markdawn/shared';
+import { getAnonymousName, parsePageMetaRoomName } from '@metakip/shared';
 import type { Pool } from 'pg';
 import type { AuthenticatedCredential } from './authenticatedCredential';
 import { CollabAccessError, CollabGuestIdentityExpiredError } from './collabErrors';

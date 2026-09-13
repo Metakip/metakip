@@ -96,8 +96,8 @@ func (cmd *DoctorCmd) Run(r *runtimeState) error {
 		return renderDoctorHealthFailure(r, result, fmt.Errorf("load configuration: %w", err))
 	}
 	tokenSource := ""
-	if os.Getenv("MARKDAWN_TOKEN") != "" {
-		tokenSource = "MARKDAWN_TOKEN"
+	if os.Getenv("METAKIP_TOKEN") != "" {
+		tokenSource = "METAKIP_TOKEN"
 	} else if cfg.Token != "" {
 		tokenSource = "saved configuration"
 	}
@@ -140,7 +140,7 @@ func renderDoctorResult(r *runtimeState, result doctorResult) error {
 	if r.cli.JSON {
 		return r.printJSON(result)
 	}
-	if _, err := fmt.Fprintf(r.stdout, "Markdawn %s\n", terminalText(result.Version)); err != nil {
+	if _, err := fmt.Fprintf(r.stdout, "Metakip %s\n", terminalText(result.Version)); err != nil {
 		return err
 	}
 	configPath := result.ConfigPath
@@ -171,7 +171,7 @@ func renderDoctorResult(r *runtimeState, result doctorResult) error {
 	if result.Authentication.Message != "" {
 		authentication += " — " + result.Authentication.Message
 	} else if result.Authentication.Status == doctorStatusNotAuthenticated {
-		authentication += " — Run `markdawn login` to authenticate."
+		authentication += " — Run `metakip login` to authenticate."
 	}
 	if _, err := fmt.Fprintf(r.stdout, "Authentication: %s\n", terminalText(authentication)); err != nil {
 		return err

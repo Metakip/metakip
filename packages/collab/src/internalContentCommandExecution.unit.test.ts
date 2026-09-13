@@ -1,10 +1,10 @@
 import { createHash, randomUUID } from 'node:crypto';
 import type { Hocuspocus } from '@hocuspocus/server';
 import type { Logger } from '@logtape/logtape';
-import { composePageMarkdown } from '@markdawn/shared';
-import { bindWikiLinkTargets, createYjsDocWithTitle } from '@markdawn/shared/markdown-yjs';
-import { replaceMarkdownBody } from '@markdawn/shared/yjs-document-replacement';
-import { extractWikiLinkTargetIds, yDocToMarkdown } from '@markdawn/shared/yjs-helpers';
+import { composePageMarkdown } from '@metakip/shared';
+import { bindWikiLinkTargets, createYjsDocWithTitle } from '@metakip/shared/markdown-yjs';
+import { replaceMarkdownBody } from '@metakip/shared/yjs-document-replacement';
+import { extractWikiLinkTargetIds, yDocToMarkdown } from '@metakip/shared/yjs-helpers';
 import type { Pool } from 'pg';
 import { describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';

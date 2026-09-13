@@ -1,15 +1,15 @@
 ---
-title: Markdawn vs Obsidian
-description: Compare Markdawn and Obsidian for Markdown files, collaboration, permissions, CLI, API, AI assistants, offline work, and self-hosting.
+title: Metakip vs Obsidian
+description: Compare Metakip and Obsidian for Markdown files, collaboration, permissions, CLI, API, AI assistants, offline work, and self-hosting.
 ---
 
-Obsidian is a local-first notes application built around folders of Markdown files, plugins, and personal knowledge workflows. Markdawn is a web-based shared content layer for teams that need browser access, real-time coediting, permissions, self-hosting, and a common place for people and AI assistants to work.
+Obsidian is a local-first notes application built around folders of Markdown files, plugins, and personal knowledge workflows. Metakip is a web-based shared content layer for teams that need browser access, real-time coediting, permissions, self-hosting, and a common place for people and AI assistants to work.
 
-Choose Obsidian when the vault is the product and local files, offline work, plugins, and personal control are the priority. Choose Markdawn when shared pages need to stay current for a team and should be readable through a browser, CLI, or API.
+Choose Obsidian when the vault is the product and local files, offline work, plugins, and personal control are the priority. Choose Metakip when shared pages need to stay current for a team and should be readable through a browser, CLI, or API.
 
 ## At A Glance
 
-| Decision Area | Markdawn | Obsidian |
+| Decision Area | Metakip | Obsidian |
 | --- | --- | --- |
 | Main job | Shared knowledge and documentation | Local-first notes and personal knowledge management |
 | Content model | Pages, folders, links, and markdown | Markdown files, folders, links, properties, and plugins |
@@ -20,7 +20,7 @@ Choose Obsidian when the vault is the product and local files, offline work, plu
 | AI access | Controlled access through the CLI, API, and MCP | CLI agent workflows and community AI, REST, and MCP plugins |
 | Offline work | Depends on deployment and browser requirements | Local vaults are available offline by default |
 | Hosting | Hosted or self-hosted | Local app; Sync and Publish are hosted services |
-| Pricing | Check the current Markdawn plan | Free app; Sync, Publish, and optional commercial licenses are paid |
+| Pricing | Check the current Metakip plan | Free app; Sync, Publish, and optional commercial licenses are paid |
 
 ## Where Obsidian Is Better
 
@@ -28,13 +28,13 @@ Choose Obsidian when the vault is the product and local files, offline work, plu
 
 Obsidian stores notes as Markdown-formatted plain text files in a vault folder on the local filesystem. This makes the files easy to inspect, back up, process with other tools, and keep available without an internet connection.
 
-Markdawn provides a browser-based page experience and can be self-hosted, but it is a service rather than a folder that is automatically present on every device. Choose Obsidian when offline access and direct ownership of the source files are non-negotiable.
+Metakip provides a browser-based page experience and can be self-hosted, but it is a service rather than a folder that is automatically present on every device. Choose Obsidian when offline access and direct ownership of the source files are non-negotiable.
 
 ### Plugins And Personal Workflows
 
 Obsidian has a large community plugin ecosystem, a theme system, templates, properties, commands, and a TypeScript plugin API. Plugins can add calendars, databases, task workflows, importers, local integrations, and AI features.
 
-This flexibility is a strength for individuals who want to shape their workspace. It also means that portability, security, updates, and team consistency depend on the plugins and settings each vault uses. Markdawn has a smaller and more inspectable page, folder, CLI, and API model.
+This flexibility is a strength for individuals who want to shape their workspace. It also means that portability, security, updates, and team consistency depend on the plugins and settings each vault uses. Metakip has a smaller and more inspectable page, folder, CLI, and API model.
 
 ### Official CLI And Headless Sync
 
@@ -46,25 +46,25 @@ Obsidian also documents headless Sync for automated environments. This can sync 
 
 Obsidian is designed for people who want to build a personal knowledge graph from linked notes, folders, properties, embeds, and plugins. Its local files and deep customization make it a strong fit for research, journaling, technical notes, and long-lived personal archives.
 
-Markdawn is better when the knowledge needs a shared home with explicit access roles and browser-first collaboration rather than a highly customized individual workspace.
+Metakip is better when the knowledge needs a shared home with explicit access roles and browser-first collaboration rather than a highly customized individual workspace.
 
 ### Obsidian Sync And Publish
 
 Obsidian Sync adds encrypted synchronization, version history, and shared vault collaboration. Obsidian Publish turns notes into hosted websites with themes, search, and publishing controls. Publish also supports collaborators who can publish changes to a site.
 
-These services extend Obsidian beyond a single-device vault, but they remain separate from the local editing model. Sync shared-vault access requires an active Sync subscription for each collaborator. Markdawn includes shared-page collaboration in its application and uses one access model for working knowledge.
+These services extend Obsidian beyond a single-device vault, but they remain separate from the local editing model. Sync shared-vault access requires an active Sync subscription for each collaborator. Metakip includes shared-page collaboration in its application and uses one access model for working knowledge.
 
-## Where Markdawn Is Better
+## Where Metakip Is Better
 
 ### Browser-Based Shared Knowledge
 
-Markdawn is better when a team should open the same current page in a browser, edit it together in real time, see collaborator presence, and continue working when connectivity changes. Shared pages support **View**, **Edit**, and **Admin** access.
+Metakip is better when a team should open the same current page in a browser, edit it together in real time, see collaborator presence, and continue working when connectivity changes. Shared pages support **View**, **Edit**, and **Admin** access.
 
-Obsidian can support teams through Sync shared vaults and Publish sites, but those workflows require separate services and configuration. Obsidian Sync synchronizes vault files; it should not be presented as the same browser-native real-time coediting experience as Markdawn.
+Obsidian can support teams through Sync shared vaults and Publish sites, but those workflows require separate services and configuration. Obsidian Sync synchronizes vault files; it should not be presented as the same browser-native real-time coediting experience as Metakip.
 
 ### Direct And Inspectable Permissions
 
-Markdawn provides a smaller, explicit permission model:
+Metakip provides a smaller, explicit permission model:
 
 - **View** allows reading shared content.
 - **Edit** allows changing shared content.
@@ -74,13 +74,13 @@ Obsidian permissions are split between local filesystem access, Sync shared-vaul
 
 ### A Shared Content Layer For People And Tools
 
-Markdawn pages are available through the browser, CLI, and API. The same page model can be used by teammates, scripts, and AI assistants without exposing a local vault or requiring every participant to install the same desktop application.
+Metakip pages are available through the browser, CLI, and API. The same page model can be used by teammates, scripts, and AI assistants without exposing a local vault or requiring every participant to install the same desktop application.
 
-Obsidian's official CLI now narrows this difference for teams that are comfortable running the app or headless Sync. Markdawn remains simpler when the system of record should be a shared service with browser access, API authentication, and application-level permissions.
+Obsidian's official CLI now narrows this difference for teams that are comfortable running the app or headless Sync. Metakip remains simpler when the system of record should be a shared service with browser access, API authentication, and application-level permissions.
 
 ### Self-Hosting The Application
 
-Markdawn has a self-hosting path for teams that want to control deployment and data location. Obsidian's local vault provides strong file ownership, but Obsidian Sync and Publish are hosted services. Running headless Sync on a server does not self-host the Sync backend.
+Metakip has a self-hosting path for teams that want to control deployment and data location. Obsidian's local vault provides strong file ownership, but Obsidian Sync and Publish are hosted services. Running headless Sync on a server does not self-host the Sync backend.
 
 Self-hosting adds responsibility for backups, updates, security, and availability. It matters when infrastructure ownership is a requirement, not merely a preference.
 
@@ -97,7 +97,7 @@ Obsidian's current official developer surface includes:
 
 Obsidian does not document a public hosted REST API for its vaults. Community plugins can provide local REST APIs, MCP servers, and other bridges, but those are plugin-based integrations that need their own security and maintenance review. Obsidian's official documentation does not present a first-party hosted MCP endpoint.
 
-Markdawn provides a documented API, CLI, and MCP support for pages, folders, imports, exports, and access-controlled content. Choose Obsidian when local vault automation and plugin extensibility matter most. Choose Markdawn when a shared service API and controlled remote assistant access are the primary integration surfaces.
+Metakip provides a documented API, CLI, and MCP support for pages, folders, imports, exports, and access-controlled content. Choose Obsidian when local vault automation and plugin extensibility matter most. Choose Metakip when a shared service API and controlled remote assistant access are the primary integration surfaces.
 
 ## Collaboration And Review
 
@@ -105,13 +105,13 @@ Obsidian Sync shared vaults let teams work from synchronized vault copies. All c
 
 Obsidian Publish offers a different collaboration model. Site collaborators can publish changes, while the site owner controls the Publish site. This is suitable for maintaining a published knowledge site, not for giving every reader a browser editor for the underlying vault.
 
-Markdawn is the better fit when collaboration happens directly on shared pages and the access question is simply whether someone can view, edit, or administer the content.
+Metakip is the better fit when collaboration happens directly on shared pages and the access question is simply whether someone can view, edit, or administer the content.
 
 ## Portability And Migration
 
 Obsidian's core content is already Markdown files and attachments. That gives Obsidian a strong portability advantage. A vault can be copied, backed up, inspected, or processed without an Obsidian-specific export operation.
 
-Moving an Obsidian vault into Markdawn still requires verification. Markdawn can import an Obsidian vault containing notes, images, and links between pages, but a vault's plugins, themes, commands, templates, CSS snippets, workspace layout, and `.obsidian` settings do not become Markdawn features automatically.
+Moving an Obsidian vault into Metakip still requires verification. Metakip can import an Obsidian vault containing notes, images, and links between pages, but a vault's plugins, themes, commands, templates, CSS snippets, workspace layout, and `.obsidian` settings do not become Metakip features automatically.
 
 Before migrating, inventory:
 
@@ -123,7 +123,7 @@ Before migrating, inventory:
 
 Keep an untouched copy of the original vault. Import a representative folder first and verify titles, headings, lists, images, links, and folder structure before planning a complete migration.
 
-Moving from Markdawn to Obsidian is also a file migration rather than a one-click service transfer. Export Markdown and attachments, recreate folders and links, and separately replace Markdawn sharing, API, CLI, and deployment workflows.
+Moving from Metakip to Obsidian is also a file migration rather than a one-click service transfer. Export Markdown and attachments, recreate folders and links, and separately replace Metakip sharing, API, CLI, and deployment workflows.
 
 ## AI Assistants And Integrations
 
@@ -131,7 +131,7 @@ Obsidian's official CLI explicitly supports agentic tools that need to read, sea
 
 This gives Obsidian a broad and flexible AI surface, but the security boundary is the local vault and the installed plugins. Review plugin permissions, model providers, credentials, and whether content leaves the device.
 
-Markdawn documents controlled AI assistant access through its CLI, API, and MCP support, with page permissions applied by the application. The better choice depends on whether the AI assistant should operate a local personal vault or a shared, access-controlled content service.
+Metakip documents controlled AI assistant access through its CLI, API, and MCP support, with page permissions applied by the application. The better choice depends on whether the AI assistant should operate a local personal vault or a shared, access-controlled content service.
 
 ## Pricing And Ownership
 
@@ -141,7 +141,7 @@ Obsidian's core apps are free to use. The current pricing page lists:
 - **Publish:** $8 per site per month when billed annually, or $10 per site per month when billed monthly.
 - **Commercial:** $50 per user per year for organizations that choose to support Obsidian commercially. Commercial payment is encouraged for organizational use but is not required to use the app.
 
-Sync and Publish are paid hosted services. The local vault itself remains a folder of files under the user's control. Compare the cost of these add-ons with Markdawn's hosted plan or the infrastructure and maintenance required for a self-hosted deployment.
+Sync and Publish are paid hosted services. The local vault itself remains a folder of files under the user's control. Compare the cost of these add-ons with Metakip's hosted plan or the infrastructure and maintenance required for a self-hosted deployment.
 
 ## Who Should Choose Obsidian?
 
@@ -154,9 +154,9 @@ Obsidian is a strong choice if you:
 - Need a hosted Publish site or Sync shared vaults and accept their separate service model.
 - Are comfortable evaluating community plugins for AI, REST, MCP, and integrations.
 
-## Who Should Choose Markdawn?
+## Who Should Choose Metakip?
 
-Markdawn is a strong choice if you:
+Metakip is a strong choice if you:
 
 - Need shared pages that people can edit in a browser in real time.
 - Need View, Edit, and Admin access for shared pages and folders.
@@ -168,13 +168,13 @@ Markdawn is a strong choice if you:
 
 ## Questions To Answer Before Switching
 
-### Is Markdawn An Obsidian Alternative?
+### Is Metakip An Obsidian Alternative?
 
-Only for some workflows. Markdawn can replace Obsidian as a home for shared documentation, project knowledge, and browser-based collaboration. It is not a replacement for Obsidian's local file ownership, offline-first workflow, plugin ecosystem, or personal knowledge graph customization.
+Only for some workflows. Metakip can replace Obsidian as a home for shared documentation, project knowledge, and browser-based collaboration. It is not a replacement for Obsidian's local file ownership, offline-first workflow, plugin ecosystem, or personal knowledge graph customization.
 
 ### Does Obsidian Support Collaboration?
 
-Yes. Obsidian Sync supports shared vaults, and Obsidian Publish supports site collaborators. Sync shared-vault collaboration requires an active Sync subscription for each collaborator. These workflows synchronize files or publish sites; they are different from Markdawn's browser-based real-time coediting with View, Edit, and Admin access.
+Yes. Obsidian Sync supports shared vaults, and Obsidian Publish supports site collaborators. Sync shared-vault collaboration requires an active Sync subscription for each collaborator. These workflows synchronize files or publish sites; they are different from Metakip's browser-based real-time coediting with View, Edit, and Admin access.
 
 ### Does Obsidian Have A CLI?
 
@@ -184,28 +184,28 @@ Yes. Obsidian now provides an official `obsidian` CLI for reading, searching, wr
 
 Obsidian provides a TypeScript plugin API and an Obsidian URI scheme. It does not document a public hosted REST API or first-party hosted MCP endpoint for vaults. Community plugins can add local REST and MCP integrations, so verify the plugin, security model, and maintenance status before using one with sensitive notes.
 
-### Can I Import An Obsidian Vault Into Markdawn?
+### Can I Import An Obsidian Vault Into Metakip?
 
-Yes. Markdawn supports importing an Obsidian vault, including notes, images, and links between pages. Plugins, themes, CSS snippets, workspace settings, and plugin-specific content need separate review and may require manual conversion.
+Yes. Metakip supports importing an Obsidian vault, including notes, images, and links between pages. Plugins, themes, CSS snippets, workspace settings, and plugin-specific content need separate review and may require manual conversion.
 
 ### Which Tool Is Better For Offline Work?
 
-Obsidian is stronger for offline work because the primary vault is a local folder of Markdown files. Markdawn is a browser-based service with a self-hosting option, so verify the deployment, browser, and connection requirements for the workflow you need.
+Obsidian is stronger for offline work because the primary vault is a local folder of Markdown files. Metakip is a browser-based service with a self-hosting option, so verify the deployment, browser, and connection requirements for the workflow you need.
 
 ### Which Tool Has Better Permissions?
 
-They solve different problems. Markdawn provides View, Edit, and Admin access for shared pages and folders. Obsidian uses local filesystem access, Sync shared-vault membership, and Publish site controls. Test the exact private, shared, published, and external-collaborator cases your team needs.
+They solve different problems. Metakip provides View, Edit, and Admin access for shared pages and folders. Obsidian uses local filesystem access, Sync shared-vault membership, and Publish site controls. Test the exact private, shared, published, and external-collaborator cases your team needs.
 
-## Related Markdawn Guides
+## Related Metakip Guides
 
 - [Import Markdown And Obsidian Notes](/getting-started/bring-your-notes/) for vault imports.
 - [Markdown Support](/getting-started/markdown-support/) for syntax and page links.
-- [Organize Markdawn Pages And Folders](/getting-started/organize-pages-and-folders/) for shared knowledge structure.
-- [Share A Markdawn Page](/getting-started/share-a-page/) for View, Edit, and Admin access.
-- [Markdawn CLI](/agents/markdawn-cli/) for terminal workflows.
+- [Organize Metakip Pages And Folders](/getting-started/organize-pages-and-folders/) for shared knowledge structure.
+- [Share A Metakip Page](/getting-started/share-a-page/) for View, Edit, and Admin access.
+- [Metakip CLI](/agents/metakip-cli/) for terminal workflows.
 - [API Reference](/api-reference/endpoints/) for automation and integrations.
-- [Use Markdawn With AI Assistants](/agents/use-markdawn-with-ai-assistants/) for controlled AI assistant access.
-- [Self-Host Markdawn](/self-hosting/) when deployment ownership matters.
+- [Use Metakip With AI Assistants](/agents/use-metakip-with-ai-assistants/) for controlled AI assistant access.
+- [Self-Host Metakip](/self-hosting/) when deployment ownership matters.
 
 ## Sources And Further Reading
 
@@ -239,4 +239,4 @@ They solve different problems. Markdawn provides View, Edit, and Admin access fo
 
 ## Verdict
 
-Choose **Obsidian** when local Markdown files, offline work, plugins, and personal knowledge management are the main requirements. Choose **Markdawn** when shared project knowledge needs browser-based real-time coediting, explicit page and folder permissions, a common API and CLI surface, and the option to self-host.
+Choose **Obsidian** when local Markdown files, offline work, plugins, and personal knowledge management are the main requirements. Choose **Metakip** when shared project knowledge needs browser-based real-time coediting, explicit page and folder permissions, a common API and CLI surface, and the option to self-host.

@@ -1,5 +1,5 @@
 import type { Document, Hocuspocus } from '@hocuspocus/server';
-import { MAX_WIKI_LINK_PRESENTATION_REQUESTS } from '@markdawn/shared';
+import { MAX_WIKI_LINK_PRESENTATION_REQUESTS } from '@metakip/shared';
 import type { PoolClient } from 'pg';
 import { getSessionUser, isAnonymousSession, isCollabSession } from './collabSession';
 import { isUuid } from './utils';

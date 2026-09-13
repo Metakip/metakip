@@ -14,7 +14,7 @@ fail() {
 fake_bin="$test_dir/bin"
 mock_state="$test_dir/mock"
 mkdir -p "$fake_bin" "$mock_state"
-(cd "$repo_dir/cli" && go build -o "$test_dir/markdawn-finalizer" .)
+(cd "$repo_dir/cli" && go build -o "$test_dir/metakip-finalizer" .)
 real_install=$(command -v install)
 real_mv=$(command -v mv)
 real_wc=$(command -v wc)
@@ -95,15 +95,15 @@ if [ "$list" = 1 ]; then
     fi
   else
     if [ "$verbose" = 1 ]; then
-      printf '%s\n' "-rwxr-xr-x root/root $size Jan 1 00:00 ./markdawn" "-rw-r--r-- root/root $size Jan 1 00:00 ./LICENSE"
+      printf '%s\n' "-rwxr-xr-x root/root $size Jan 1 00:00 ./metakip" "-rw-r--r-- root/root $size Jan 1 00:00 ./LICENSE"
     else
-      printf '%s\n' './markdawn' './LICENSE'
+      printf '%s\n' './metakip' './LICENSE'
     fi
   fi
   exit 0
 fi
 mkdir -p "$destination"
-cp "$MOCK_FINALIZER_BINARY" "$destination/markdawn"
+cp "$MOCK_FINALIZER_BINARY" "$destination/metakip"
 EOF
 
 cat >"$fake_bin/install" <<'EOF'
@@ -149,9 +149,9 @@ run_installer() {
   env \
     HOME="$test_dir/home" \
     PATH="$fake_bin:$PATH" \
-    MOCK_FINALIZER_BINARY="$test_dir/markdawn-finalizer" \
-    MARKDAWN_INSTALL_DIR="$install_dir" \
-    MARKDAWN_INSTALL_STATE_DIR="$state_dir" \
+    MOCK_FINALIZER_BINARY="$test_dir/metakip-finalizer" \
+    METAKIP_INSTALL_DIR="$install_dir" \
+    METAKIP_INSTALL_STATE_DIR="$state_dir" \
     SHELL=/bin/bash \
     "$@" \
     sh "$installer"
@@ -181,7 +181,7 @@ oversized_archive_dir="$test_dir/oversized-archive"
 if run_installer "$oversized_archive_dir" "$test_dir/state-oversized-archive" MOCK_OVERSIZED_ARCHIVE=1; then
   fail "oversized release archive was accepted"
 fi
-[ ! -e "$oversized_archive_dir/markdawn" ] || fail "oversized release archive installed a binary"
+[ ! -e "$oversized_archive_dir/metakip" ] || fail "oversized release archive installed a binary"
 
 if run_installer "$test_dir/failed-download" "$test_dir/state-failed-download" MOCK_CURL_FAIL=1; then
   fail "failed download was accepted"
@@ -197,20 +197,20 @@ fi
 exec "$REAL_FINALIZER" "$@"
 EOF
 chmod +x "$misleading_probe"
-misleading_output=$(run_installer "$test_dir/misleading-probe-install" "$test_dir/state-misleading-probe" MOCK_FINALIZER_BINARY="$misleading_probe" REAL_FINALIZER="$test_dir/markdawn-finalizer")
-printf '%s\n' "$misleading_output" | grep -F 'Markdawn latest installed to ' >/dev/null || fail "installer did not report the latest release channel"
+misleading_output=$(run_installer "$test_dir/misleading-probe-install" "$test_dir/state-misleading-probe" MOCK_FINALIZER_BINARY="$misleading_probe" REAL_FINALIZER="$test_dir/metakip-finalizer")
+printf '%s\n' "$misleading_output" | grep -F 'Metakip latest installed to ' >/dev/null || fail "installer did not report the latest release channel"
 ! printf '%s\n' "$misleading_output" | grep -F 'v999.9.9' >/dev/null || fail "installer trusted binary version output"
 
 pinned_dir="$test_dir/pinned"
-pinned_output=$(run_installer "$pinned_dir" "$test_dir/state-pinned" MARKDAWN_VERSION=v2.3.4 MARKDAWN_MODIFY_PATH=0)
-printf '%s\n' "$pinned_output" | grep -F "Markdawn v2.3.4 installed to $pinned_dir/markdawn." >/dev/null || fail "installer did not report the pinned release version"
+pinned_output=$(run_installer "$pinned_dir" "$test_dir/state-pinned" METAKIP_VERSION=v2.3.4 METAKIP_MODIFY_PATH=0)
+printf '%s\n' "$pinned_output" | grep -F "Metakip v2.3.4 installed to $pinned_dir/metakip." >/dev/null || fail "installer did not report the pinned release version"
 ! printf '%s\n' "$pinned_output" | grep -F '(latest)' >/dev/null || fail "pinned install was labeled latest"
 
 unsafe_archive_dir="$test_dir/unsafe-archive"
-if run_installer "$unsafe_archive_dir" "$test_dir/state-unsafe-archive" MOCK_TAR_ENTRIES='../markdawn'; then
+if run_installer "$unsafe_archive_dir" "$test_dir/state-unsafe-archive" MOCK_TAR_ENTRIES='../metakip'; then
   fail "unsafe release archive was accepted"
 fi
-[ ! -e "$unsafe_archive_dir/markdawn" ] || fail "unsafe release archive installed a binary"
+[ ! -e "$unsafe_archive_dir/metakip" ] || fail "unsafe release archive installed a binary"
 
 too_many_entries=$(awk 'BEGIN { for (entry = 1; entry <= 1025; entry++) print "entry-" entry }')
 if run_installer "$test_dir/too-many-entries" "$test_dir/state-too-many-entries" MOCK_TAR_ENTRIES="$too_many_entries"; then
@@ -229,26 +229,26 @@ grep -F "export PATH='$later_path_dir':\$PATH" "$test_dir/home/.bashrc" >/dev/nu
 
 escaped_source_marker="$test_dir/source-should-not-run"
 escaped_home="$test_dir/hôme ' path \$(touch $escaped_source_marker)"
-escaped_default_dir="$escaped_home/.markdawn/bin"
+escaped_default_dir="$escaped_home/.metakip/bin"
 escaped_default_output=$(run_installer "$escaped_default_dir" "$test_dir/state-escaped-default" HOME="$escaped_home")
 escaped_default_entry=$(printf '%s' "$escaped_default_dir" | sed "s/'/'\\\\''/g")
 grep -F "export PATH='$escaped_default_entry':\$PATH" "$escaped_home/.bashrc" >/dev/null || fail "default install did not escape a spaced Unicode home path"
-printf '%s\n' "$escaped_default_output" | grep -F "Markdawn latest installed to $escaped_default_dir/markdawn." >/dev/null || fail "installer did not report the latest release channel"
-printf '%s\n' "$escaped_default_output" | grep -F 'Open a new terminal before running markdawn.' >/dev/null || fail "PATH activation guidance was not printed"
+printf '%s\n' "$escaped_default_output" | grep -F "Metakip latest installed to $escaped_default_dir/metakip." >/dev/null || fail "installer did not report the latest release channel"
+printf '%s\n' "$escaped_default_output" | grep -F 'Open a new terminal before running metakip.' >/dev/null || fail "PATH activation guidance was not printed"
 [ ! -e "$escaped_source_marker" ] || fail "installer output executed a profile-path command substitution"
 
 opt_out_dir="$test_dir/path-opt-out"
 opt_out_state="$test_dir/state-path-opt-out"
-opt_out_output=$(run_installer "$opt_out_dir" "$opt_out_state" MARKDAWN_MODIFY_PATH=0)
+opt_out_output=$(run_installer "$opt_out_dir" "$opt_out_state" METAKIP_MODIFY_PATH=0)
 ! grep -F '"pathFile"' "$opt_out_state/install.json" >/dev/null || fail "PATH opt-out recorded PATH ownership"
-printf '%s\n' "$opt_out_output" | grep -F 'After adding Markdawn to PATH, run markdawn login to get started.' >/dev/null || fail "PATH opt-out did not explain when markdawn login becomes available"
+printf '%s\n' "$opt_out_output" | grep -F 'After adding Metakip to PATH, run metakip login to get started.' >/dev/null || fail "PATH opt-out did not explain when metakip login becomes available"
 
 spaced_install_dir="$test_dir/install path"
-spaced_output=$(run_installer "$spaced_install_dir" "$test_dir/state-spaced-path" MARKDAWN_MODIFY_PATH=0)
-printf '%s\n' "$spaced_output" | grep -F 'After adding Markdawn to PATH, run markdawn login to get started.' >/dev/null || fail "PATH opt-out login guidance was not printed"
+spaced_output=$(run_installer "$spaced_install_dir" "$test_dir/state-spaced-path" METAKIP_MODIFY_PATH=0)
+printf '%s\n' "$spaced_output" | grep -F 'After adding Metakip to PATH, run metakip login to get started.' >/dev/null || fail "PATH opt-out login guidance was not printed"
 
 metacharacter_install_dir="$test_dir/install \$(touch should-not-run)"
-metacharacter_output=$(run_installer "$metacharacter_install_dir" "$test_dir/state-metacharacter-path" MARKDAWN_MODIFY_PATH=0)
+metacharacter_output=$(run_installer "$metacharacter_install_dir" "$test_dir/state-metacharacter-path" METAKIP_MODIFY_PATH=0)
 metacharacter_path_command=$(printf '%s\n' "$metacharacter_output" | sed -n "/^  export PATH=/p")
 expected_metacharacter_path_command="  export PATH='$metacharacter_install_dir':\$PATH"
 [ "$metacharacter_path_command" = "$expected_metacharacter_path_command" ] || fail "PATH instruction did not quote shell metacharacters"
@@ -256,35 +256,35 @@ PATH="$fake_bin:$PATH" sh -c "${metacharacter_path_command#  }; command -v touch
 [ ! -e "$test_dir/should-not-run" ] || fail "PATH instruction executed an install-path command substitution"
 
 skill_dir="$test_dir/skill-install"
-run_installer "$skill_dir" "$test_dir/state-skill-install" MARKDAWN_INSTALL_SKILL=global
+run_installer "$skill_dir" "$test_dir/state-skill-install" METAKIP_INSTALL_SKILL=global
 expected_npx_arguments='--yes
 skills
 add
-atharva-again/Markdawn
+Metakip/metakip
 --skill
-markdawn
+metakip
 --global
 --yes'
 [ "$(cat "$mock_state/npx-arguments")" = "$expected_npx_arguments" ] || fail "skill installation did not invoke npx skills with the global scope"
 
-if run_installer "$test_dir/invalid-skill" "$test_dir/state-invalid-skill" MARKDAWN_INSTALL_SKILL=invalid; then
+if run_installer "$test_dir/invalid-skill" "$test_dir/state-invalid-skill" METAKIP_INSTALL_SKILL=invalid; then
   fail "invalid skill scope was accepted"
 fi
 
 separator_dir="$test_dir/path:separator"
-if run_installer "$separator_dir" "$test_dir/state-separator" MARKDAWN_MODIFY_PATH=1; then
+if run_installer "$separator_dir" "$test_dir/state-separator" METAKIP_MODIFY_PATH=1; then
   fail "PATH separator install directory was accepted"
 fi
 
 invalid_receipt_dir="$test_dir/invalid-receipt"
 invalid_receipt_state="$test_dir/state-invalid-receipt"
 mkdir -p "$invalid_receipt_dir" "$invalid_receipt_state"
-printf 'previous binary\n' >"$invalid_receipt_dir/markdawn"
+printf 'previous binary\n' >"$invalid_receipt_dir/metakip"
 printf '{ invalid json\n' >"$invalid_receipt_state/install.json"
 if run_installer "$invalid_receipt_dir" "$invalid_receipt_state"; then
   fail "invalid install receipt was accepted"
 fi
-[ "$(cat "$invalid_receipt_dir/markdawn")" = 'previous binary' ] || fail "invalid receipt reinstall replaced the binary"
+[ "$(cat "$invalid_receipt_dir/metakip")" = 'previous binary' ] || fail "invalid receipt reinstall replaced the binary"
 
 failed_state_dir="$test_dir/state-path-file"
 printf 'not a directory\n' >"$failed_state_dir"
@@ -292,34 +292,34 @@ failed_state_install="$test_dir/failed-state-install"
 if run_installer "$failed_state_install" "$failed_state_dir"; then
   fail "state path file was accepted"
 fi
-[ ! -e "$failed_state_install/markdawn" ] || fail "failed state setup installed an unmanaged binary"
+[ ! -e "$failed_state_install/metakip" ] || fail "failed state setup installed an unmanaged binary"
 
 mkdir -p "$test_dir/home"
 existing_path_block="$test_dir/home/.bashrc"
-printf '%s\n' '# >>> markdawn >>>' 'export PATH="/other/markdawn:$PATH"' '# <<< markdawn <<<' >"$existing_path_block"
+printf '%s\n' '# >>> metakip >>>' 'export PATH="/other/metakip:$PATH"' '# <<< metakip <<<' >"$existing_path_block"
 preexisting_block="$test_dir/preexisting-block"
-run_installer "$preexisting_block" "$test_dir/state-preexisting" MARKDAWN_MODIFY_PATH=1
+run_installer "$preexisting_block" "$test_dir/state-preexisting" METAKIP_MODIFY_PATH=1
 ! grep -F '"pathFile"' "$test_dir/state-preexisting/install.json" >/dev/null || fail "receipt retained obsolete PATH ownership"
-grep -F 'export PATH="/other/markdawn:$PATH"' "$existing_path_block" >/dev/null || fail "pre-existing PATH block changed"
+grep -F 'export PATH="/other/metakip:$PATH"' "$existing_path_block" >/dev/null || fail "pre-existing PATH block changed"
 grep -F "export PATH='$preexisting_block':\$PATH" "$existing_path_block" >/dev/null || fail "installer did not add its own PATH block"
 
 rm "$existing_path_block"
 owned_path_dir="$test_dir/owned-path"
 owned_path_state="$test_dir/state-owned-path"
-run_installer "$owned_path_dir" "$owned_path_state" MARKDAWN_MODIFY_PATH=1
+run_installer "$owned_path_dir" "$owned_path_state" METAKIP_MODIFY_PATH=1
 ! grep -F '"pathFile"' "$owned_path_state/install.json" >/dev/null || fail "PATH install retained obsolete ownership"
 run_installer "$owned_path_dir" "$owned_path_state"
 ! grep -F '"pathFile"' "$owned_path_state/install.json" >/dev/null || fail "reinstall wrote obsolete PATH ownership"
-run_installer "$owned_path_dir" "$owned_path_state" MARKDAWN_MODIFY_PATH=1
+run_installer "$owned_path_dir" "$owned_path_state" METAKIP_MODIFY_PATH=1
 ! grep -F '"pathFile"' "$owned_path_state/install.json" >/dev/null || fail "PATH reinstall wrote obsolete ownership"
 moved_path_dir="$test_dir/moved-path"
 if run_installer "$moved_path_dir" "$owned_path_state"; then
   fail "managed installation directory change was accepted"
 fi
-[ ! -e "$moved_path_dir/markdawn" ] || fail "managed installation directory change installed a binary"
+[ ! -e "$moved_path_dir/metakip" ] || fail "managed installation directory change installed a binary"
 
 unsafe_dir="$test_dir/unsafe;touch-pwned"
-run_installer "$unsafe_dir" "$test_dir/state-unsafe" MARKDAWN_MODIFY_PATH=1
+run_installer "$unsafe_dir" "$test_dir/state-unsafe" METAKIP_MODIFY_PATH=1
 grep -F "export PATH='$unsafe_dir':\$PATH" "$test_dir/home/.bashrc" >/dev/null || fail "shell-metacharacter install path was not quoted in the profile"
 
 unsupported_shell_dir="$test_dir/unsupported-shell"

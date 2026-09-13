@@ -4,7 +4,7 @@ import {
   COLLAB_DOCUMENT_RELOAD_REASONS,
   getUnicodeCodePointLength,
   MAX_PAGE_TITLE_LENGTH,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import type { Pool } from 'pg';
 import type * as Y from 'yjs';
 import { SKIP_STORE_LOCAL_ORIGIN } from './hocuspocusTransactionOrigins';

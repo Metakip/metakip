@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import type { Document, Server } from '@hocuspocus/server';
-import { getStableColor } from '@markdawn/shared';
+import { getStableColor } from '@metakip/shared';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import WebSocket from 'ws';
 import * as Y from 'yjs';

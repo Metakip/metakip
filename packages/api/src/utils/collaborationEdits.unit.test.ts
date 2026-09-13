@@ -1,6 +1,6 @@
-import { createYjsDocWithTitle } from '@markdawn/shared/markdown-yjs';
-import { replaceMarkdownBody } from '@markdawn/shared/yjs-document-replacement';
-import { yDocToMarkdown } from '@markdawn/shared/yjs-helpers';
+import { createYjsDocWithTitle } from '@metakip/shared/markdown-yjs';
+import { replaceMarkdownBody } from '@metakip/shared/yjs-document-replacement';
+import { yDocToMarkdown } from '@metakip/shared/yjs-helpers';
 import { describe, expect, it } from 'vitest';
 import * as Y from 'yjs';
 

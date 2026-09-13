@@ -9,7 +9,7 @@ import (
 )
 
 func writeStandalonePathProfile(path string, contents []byte) error {
-	contentsFile, err := os.CreateTemp(filepath.Dir(path), ".markdawn-profile-contents-*")
+	contentsFile, err := os.CreateTemp(filepath.Dir(path), ".metakip-profile-contents-*")
 	if err != nil {
 		return fmt.Errorf("stage PowerShell profile contents: %w", err)
 	}
@@ -31,7 +31,7 @@ $path = '%s'
 $contents = [IO.File]::ReadAllBytes('%s')
 $attributes = [IO.File]::GetAttributes($path)
 $acl = Get-Acl -LiteralPath $path
-$temporary = Join-Path (Split-Path -Parent $path) ('.markdawn-profile-' + [Guid]::NewGuid().ToString('N'))
+$temporary = Join-Path (Split-Path -Parent $path) ('.metakip-profile-' + [Guid]::NewGuid().ToString('N'))
 try {
   [IO.File]::WriteAllBytes($temporary, $contents)
   Set-Acl -LiteralPath $temporary -AclObject $acl

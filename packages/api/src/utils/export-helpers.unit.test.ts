@@ -1,7 +1,7 @@
 import { mkdir, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { parseMarkdownFrontmatter } from '@markdawn/shared';
+import { parseMarkdownFrontmatter } from '@metakip/shared';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { extractImages as extractAuthorizedImages, serializeFrontmatter } from './export-helpers';
 

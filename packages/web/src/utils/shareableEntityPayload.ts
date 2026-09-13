@@ -3,4 +3,4 @@ export {
   parseShareableEntityPayload,
   type ShareableEntityPayload,
   type ShareableEntityType,
-} from '@markdawn/shared';
+} from '@metakip/shared';

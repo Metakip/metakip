@@ -4,7 +4,7 @@ import {
   COLLAB_DOCUMENT_RELOAD_REASONS,
   COLLAB_TERMINAL_REASONS,
   type SharePermission,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import type { Pool } from 'pg';
 import type { PermissionQueryExecutor } from './accessVerifier';
 import type { AuthenticatedCredential } from './authenticatedCredential';

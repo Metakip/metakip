@@ -1,4 +1,4 @@
-# AGENTS.md — @markdawn/shared
+# AGENTS.md — @metakip/shared
 
 ## Export Patterns
 

@@ -1,15 +1,15 @@
 ---
-title: Markdawn vs OneNote
-description: Compare Markdawn and OneNote for notebook collaboration, Microsoft 365 workflows, APIs, exports, AI assistants, markdown content, and hosting.
+title: Metakip vs OneNote
+description: Compare Metakip and OneNote for notebook collaboration, Microsoft 365 workflows, APIs, exports, AI assistants, markdown content, and hosting.
 ---
 
-OneNote is a flexible notebook application for typed notes, handwriting, sketches, recordings, images, attachments, and Microsoft 365 workflows. Markdawn is a focused shared content layer for teams that need browser-based markdown pages, real-time coediting, explicit access roles, self-hosting, and controlled CLI or API access.
+OneNote is a flexible notebook application for typed notes, handwriting, sketches, recordings, images, attachments, and Microsoft 365 workflows. Metakip is a focused shared content layer for teams that need browser-based markdown pages, real-time coediting, explicit access roles, self-hosting, and controlled CLI or API access.
 
-Choose OneNote when notebook-style capture, handwriting, rich media, and Microsoft 365 integration are the priority. Choose Markdawn when the durable artifact should be readable markdown knowledge that people, scripts, and AI assistants can access through a client-neutral service.
+Choose OneNote when notebook-style capture, handwriting, rich media, and Microsoft 365 integration are the priority. Choose Metakip when the durable artifact should be readable markdown knowledge that people, scripts, and AI assistants can access through a client-neutral service.
 
 ## At A Glance
 
-| Decision Area | Markdawn | OneNote |
+| Decision Area | Metakip | OneNote |
 | --- | --- | --- |
 | Main job | Shared project knowledge and documentation | Digital notebooks, freeform notes, and rich capture |
 | Ecosystem | Independent web product | Microsoft 365, OneDrive, SharePoint, Teams, and Microsoft Graph |
@@ -18,11 +18,11 @@ Choose OneNote when notebook-style capture, handwriting, rich media, and Microso
 | Permissions | Page and folder access roles | OneDrive or SharePoint notebook sharing and permissions |
 | Portability | Markdown files, folders, and Obsidian vault imports | OneNote notebook downloads, PDF exports, and Microsoft Graph HTML content |
 | Automation | CLI, API, AI assistant workflows, and MCP | Microsoft Graph API, SDKs, Power Automate connector, and Microsoft 365 integrations |
-| CLI and MCP | Markdawn CLI and MCP | No dedicated official OneNote CLI or OneNote MCP; Graph is the supported API |
+| CLI and MCP | Metakip CLI and MCP | No dedicated official OneNote CLI or OneNote MCP; Graph is the supported API |
 | AI | Controlled AI assistant access through the CLI, API, and MCP | Copilot in OneNote and Microsoft 365 Copilot features, depending on license |
 | Offline work | Depends on deployment and browser requirements | Desktop and mobile apps cache notebooks and sync with OneDrive or SharePoint |
 | Hosting | Hosted or self-hosted | Microsoft-managed service with OneDrive or SharePoint storage |
-| Pricing | Check the current Markdawn plan | OneNote app access is free; Microsoft 365 and Copilot plans vary |
+| Pricing | Check the current Metakip plan | OneNote app access is free; Microsoft 365 and Copilot plans vary |
 
 ## Where OneNote Is Better
 
@@ -30,43 +30,43 @@ Choose OneNote when notebook-style capture, handwriting, rich media, and Microso
 
 OneNote is better for notes that combine typed text with handwriting, sketches, screenshots, photos, audio, video, files, tables, and freeform placement on a page. It is designed to feel like a digital notebook rather than a document tree.
 
-Markdawn is intentionally narrower. Its main artifact is a readable markdown page organized in folders and connected with links. Choose OneNote when the capture surface matters more than Markdown portability.
+Metakip is intentionally narrower. Its main artifact is a readable markdown page organized in folders and connected with links. Choose OneNote when the capture surface matters more than Markdown portability.
 
 ### Microsoft 365 Context
 
 OneNote fits naturally with OneDrive, SharePoint, Teams, Microsoft Graph, Outlook-adjacent workflows, Power Automate, and Microsoft 365 identity. Organizations already using Microsoft 365 can manage OneNote notebooks through the same account, storage, sharing, and administration environment.
 
-Markdawn is a client-neutral content layer. It does not require Microsoft 365, but it also does not inherit Microsoft's identity, compliance, storage, and productivity integrations automatically.
+Metakip is a client-neutral content layer. It does not require Microsoft 365, but it also does not inherit Microsoft's identity, compliance, storage, and productivity integrations automatically.
 
 ### Real-Time Notebook Collaboration
 
 OneNote supports shared notebooks and real-time collaboration. Notebooks stored in OneDrive or SharePoint can be shared with people or groups using view or edit permissions, and collaborators can work from the desktop, web, and mobile applications.
 
-This is a strong fit for team notebooks, meeting notes, classroom materials, project binders, and working documents that benefit from a rich canvas. Markdawn provides real-time coediting on shared markdown pages, but it does not try to reproduce OneNote's ink, canvas, and notebook experience.
+This is a strong fit for team notebooks, meeting notes, classroom materials, project binders, and working documents that benefit from a rich canvas. Metakip provides real-time coediting on shared markdown pages, but it does not try to reproduce OneNote's ink, canvas, and notebook experience.
 
 ### Handwriting, Ink, And Media
 
 OneNote is the better choice for pen input, diagrams, handwritten annotations, scans, voice notes, and embedded rich media. These are core parts of the product rather than content that must be represented in Markdown.
 
-Markdawn is better when the result needs to remain text-first, linkable, exportable, and easy for scripts or AI assistants to process.
+Metakip is better when the result needs to remain text-first, linkable, exportable, and easy for scripts or AI assistants to process.
 
 ### Built-In Microsoft AI
 
 Copilot in OneNote can summarize notes, rewrite content, create task lists, analyze ideas, and draft new content for eligible accounts and plans. Microsoft 365 Copilot and Copilot Notebooks provide additional AI experiences around Microsoft 365 content, but their licensing and storage models are separate from the basic OneNote app.
 
-Markdawn provides controlled AI assistant access through its CLI and API. Choose OneNote when Microsoft 365 Copilot is already part of the organization's workflow. Choose Markdawn when assistants should operate a smaller markdown model with application-level content permissions.
+Metakip provides controlled AI assistant access through its CLI and API. Choose OneNote when Microsoft 365 Copilot is already part of the organization's workflow. Choose Metakip when assistants should operate a smaller markdown model with application-level content permissions.
 
-## Where Markdawn Is Better
+## Where Metakip Is Better
 
 ### Markdown-Centered Knowledge
 
-Markdawn is better when the durable artifact should remain Markdown rather than a rich notebook page. Pages can be read in the browser, CLI, and API, organized in folders, connected with page links, and exported for use in other Markdown tools.
+Metakip is better when the durable artifact should remain Markdown rather than a rich notebook page. Pages can be read in the browser, CLI, and API, organized in folders, connected with page links, and exported for use in other Markdown tools.
 
-OneNote's API returns and accepts structured HTML for page content. OneNote can export notebooks or pages to other formats, but it is not a Markdown-native storage workflow. A migration to Markdawn therefore requires content conversion and verification.
+OneNote's API returns and accepts structured HTML for page content. OneNote can export notebooks or pages to other formats, but it is not a Markdown-native storage workflow. A migration to Metakip therefore requires content conversion and verification.
 
 ### Page And Folder Access
 
-Markdawn provides a direct access model for shared content:
+Metakip provides a direct access model for shared content:
 
 - **View** allows reading shared pages and folders.
 - **Edit** allows changing shared content.
@@ -74,17 +74,17 @@ Markdawn provides a direct access model for shared content:
 
 OneNote sharing is primarily organized around a notebook stored in OneDrive or SharePoint. Microsoft's current sharing guidance says people can receive view or edit access to the notebook, and its personal OneDrive guide notes that single-page sharing was removed. Sharing a section link can still expose the entire notebook to people who have access.
 
-Choose Markdawn when page and folder scope is central to the information architecture. Choose OneNote when notebook-level sharing fits the team's workflow.
+Choose Metakip when page and folder scope is central to the information architecture. Choose OneNote when notebook-level sharing fits the team's workflow.
 
 ### A Smaller And More Inspectable Content Model
 
-Markdawn is built around pages, folders, links, and Markdown. This keeps the content model understandable without requiring a notebook canvas, Microsoft 365 storage location, or rich page HTML.
+Metakip is built around pages, folders, links, and Markdown. This keeps the content model understandable without requiring a notebook canvas, Microsoft 365 storage location, or rich page HTML.
 
-OneNote's richer model is valuable for capture, but it creates more to account for in exports, API integrations, permissions, and migrations. Markdawn is a better fit when the content needs to stay simple enough for people, scripts, and AI assistants to inspect directly.
+OneNote's richer model is valuable for capture, but it creates more to account for in exports, API integrations, permissions, and migrations. Metakip is a better fit when the content needs to stay simple enough for people, scripts, and AI assistants to inspect directly.
 
 ### Self-Hosting And Deployment Control
 
-Markdawn has a self-hosting path for teams that want control over deployment and data location. OneNote is a Microsoft-managed service backed by OneDrive or SharePoint. Microsoft Graph and local caching provide access and synchronization, but they do not provide a self-hosted OneNote server.
+Metakip has a self-hosting path for teams that want control over deployment and data location. OneNote is a Microsoft-managed service backed by OneDrive or SharePoint. Microsoft Graph and local caching provide access and synchronization, but they do not provide a self-hosted OneNote server.
 
 Self-hosting adds responsibility for backups, updates, security, and availability. It matters when infrastructure ownership is a requirement, not merely a preference.
 
@@ -102,21 +102,21 @@ OneNote does not document a dedicated official `onenote` CLI. Developers can use
 
 Microsoft's current Graph MCP Server for Enterprise is a separate Microsoft Graph service and does not document OneNote notes scopes as a OneNote MCP interface. Microsoft has not published a first-party OneNote MCP server. Community MCP servers can wrap the Graph API, but they require independent security, authentication, and maintenance review.
 
-Markdawn provides a documented API, CLI, and MCP support for pages, folders, imports, exports, and access-controlled content. Choose OneNote when Microsoft Graph and Power Automate are the integration center. Choose Markdawn when a smaller Markdown API, CLI, and controlled remote assistant connection are easier to manage.
+Metakip provides a documented API, CLI, and MCP support for pages, folders, imports, exports, and access-controlled content. Choose OneNote when Microsoft Graph and Power Automate are the integration center. Choose Metakip when a smaller Markdown API, CLI, and controlled remote assistant connection are easier to manage.
 
 ## Collaboration And Permissions
 
-OneNote notebooks must be stored in OneDrive or SharePoint to be shared. Microsoft supports inviting people or groups and choosing whether they can view or edit the notebook. OneNote's sharing unit is the notebook, not the individual Markdawn-style page and folder hierarchy.
+OneNote notebooks must be stored in OneDrive or SharePoint to be shared. Microsoft supports inviting people or groups and choosing whether they can view or edit the notebook. OneNote's sharing unit is the notebook, not the individual Metakip-style page and folder hierarchy.
 
 Microsoft's current help also says that the ability to share a single page from personal OneDrive notebooks was removed. A section link can expose the entire notebook to people who have been given access, so test the exact sharing scope before using OneNote for mixed-private and shared knowledge.
 
-Markdawn shares pages and folders with View, Edit, and Admin access and provides real-time coediting with collaborator presence. It is better suited to a knowledge base where different pages need explicit access boundaries.
+Metakip shares pages and folders with View, Edit, and Admin access and provides real-time coediting with collaborator presence. It is better suited to a knowledge base where different pages need explicit access boundaries.
 
 ## Offline Work And Storage
 
 OneNote's desktop and mobile apps cache notebooks locally and synchronize changes with OneDrive or SharePoint when connected. This supports offline note-taking, but the exact behavior depends on the client, account, notebook location, local storage, and synchronization state.
 
-Markdawn is a browser-based service. Verify the deployment, browser, and connection requirements for the workflow you need. Self-hosting gives more control over the service and data location, but it does not automatically turn Markdawn into a local notebook application.
+Metakip is a browser-based service. Verify the deployment, browser, and connection requirements for the workflow you need. Self-hosting gives more control over the service and data location, but it does not automatically turn Metakip into a local notebook application.
 
 ## Portability And Migration
 
@@ -128,7 +128,7 @@ OneNote offers notebook export and import workflows, but the current Microsoft g
 - PDF export is available through supported desktop workflows, but it is a presentation format rather than an editable content model.
 - OneNote's Graph API exposes page content as structured HTML, which can be converted to Markdown with a separate migration process.
 
-Before migrating to Markdawn, inventory:
+Before migrating to Metakip, inventory:
 
 - Notebooks, section groups, sections, pages, and page hierarchy.
 - Typed text, handwriting, drawings, images, audio, video, PDFs, attachments, tables, and tags.
@@ -136,15 +136,15 @@ Before migrating to Markdawn, inventory:
 - Copilot-generated content, Power Automate flows, Graph applications, and connector credentials.
 - Any page links, embedded files, or content that depends on the OneNote canvas.
 
-Export a representative sample, convert structured content to Markdown, preserve attachments separately, and verify titles, headings, lists, tables, images, links, and folder structure before planning a complete migration. Markdawn can import a Markdown file, Markdown folder, or Obsidian vault, but OneNote is not currently a first-class native import.
+Export a representative sample, convert structured content to Markdown, preserve attachments separately, and verify titles, headings, lists, tables, images, links, and folder structure before planning a complete migration. Metakip can import a Markdown file, Markdown folder, or Obsidian vault, but OneNote is not currently a first-class native import.
 
-Moving from Markdawn to OneNote also requires conversion in the other direction. Export Markdown and attachments, then recreate notebook, section, and page organization. Markdawn access roles, API credentials, CLI scripts, and self-hosting configuration do not transfer automatically.
+Moving from Metakip to OneNote also requires conversion in the other direction. Export Markdown and attachments, then recreate notebook, section, and page organization. Metakip access roles, API credentials, CLI scripts, and self-hosting configuration do not transfer automatically.
 
 ## Pricing And Account Ownership
 
 OneNote apps are available at no cost, while Microsoft 365 plans provide different combinations of OneNote, OneDrive storage, business identity, SharePoint storage, administration, and related applications. Microsoft 365 Copilot and Copilot Notebooks require eligible licenses or plans and should be evaluated separately from basic OneNote access.
 
-Markdawn pricing and deployment costs should be evaluated separately from Microsoft 365 licensing. A self-hosted Markdawn deployment trades subscription simplicity for infrastructure responsibility.
+Metakip pricing and deployment costs should be evaluated separately from Microsoft 365 licensing. A self-hosted Metakip deployment trades subscription simplicity for infrastructure responsibility.
 
 Check the current Microsoft 365 plan, OneNote storage location, Graph permissions, and Copilot license that apply to your organization before comparing total cost.
 
@@ -160,9 +160,9 @@ OneNote is a strong choice if you:
 - Need offline work through supported desktop or mobile applications.
 - Accept notebook-level sharing and Microsoft-managed hosting.
 
-## Who Should Choose Markdawn?
+## Who Should Choose Metakip?
 
-Markdawn is a strong choice if you:
+Metakip is a strong choice if you:
 
 - Need shared Markdown pages that people can edit in a browser in real time.
 - Need View, Edit, and Admin access for shared pages and folders.
@@ -174,13 +174,13 @@ Markdawn is a strong choice if you:
 
 ## Questions To Answer Before Switching
 
-### Is Markdawn A Replacement For OneNote?
+### Is Metakip A Replacement For OneNote?
 
-Only for some workflows. Markdawn can replace OneNote as a home for shared documentation, project knowledge, and Markdown-centered pages. It is not a replacement for handwriting, freeform canvases, rich media capture, Microsoft 365 context, or Copilot in OneNote.
+Only for some workflows. Metakip can replace OneNote as a home for shared documentation, project knowledge, and Markdown-centered pages. It is not a replacement for handwriting, freeform canvases, rich media capture, Microsoft 365 context, or Copilot in OneNote.
 
 ### Does OneNote Support Real-Time Collaboration?
 
-Yes. OneNote supports collaborative editing of shared notebooks stored in OneDrive or SharePoint. Microsoft describes real-time collaboration across its supported clients. Markdawn also supports real-time coediting, but with a Markdown page model and View, Edit, and Admin access.
+Yes. OneNote supports collaborative editing of shared notebooks stored in OneDrive or SharePoint. Microsoft describes real-time collaboration across its supported clients. Metakip also supports real-time coediting, but with a Markdown page model and View, Edit, and Admin access.
 
 ### Does OneNote Have An API?
 
@@ -192,27 +192,27 @@ Microsoft does not document a dedicated official OneNote CLI or first-party OneN
 
 ### Can I Export OneNote To Markdown?
 
-Not as a clean first-party Markdown export workflow. OneNote can export notebook archives, PDF files, and structured page content through Microsoft Graph. Convert a representative sample to Markdown and verify rich content before planning a migration into Markdawn.
+Not as a clean first-party Markdown export workflow. OneNote can export notebook archives, PDF files, and structured page content through Microsoft Graph. Convert a representative sample to Markdown and verify rich content before planning a migration into Metakip.
 
 ### Can I Share A Single OneNote Page?
 
-Microsoft's current sharing guidance says single-page sharing from personal OneDrive notebooks was removed. Sharing a section link can expose the entire notebook to people who have access. Use a separate notebook when the sharing boundary must be narrower, or choose Markdawn when page and folder sharing is the primary requirement.
+Microsoft's current sharing guidance says single-page sharing from personal OneDrive notebooks was removed. Sharing a section link can expose the entire notebook to people who have access. Use a separate notebook when the sharing boundary must be narrower, or choose Metakip when page and folder sharing is the primary requirement.
 
 ### Which Tool Has Better Permissions?
 
-They solve different permission problems. Markdawn provides View, Edit, and Admin access for shared pages and folders. OneNote uses OneDrive or SharePoint sharing, with people or links granted view or edit access to a notebook. Test private pages, shared pages, external collaborators, group membership, and inherited storage permissions.
+They solve different permission problems. Metakip provides View, Edit, and Admin access for shared pages and folders. OneNote uses OneDrive or SharePoint sharing, with people or links granted view or edit access to a notebook. Test private pages, shared pages, external collaborators, group membership, and inherited storage permissions.
 
-## Related Markdawn Guides
+## Related Metakip Guides
 
-- [Create A Page In Markdawn](/getting-started/create-your-first-page/) for browser-based writing.
+- [Create A Page In Metakip](/getting-started/create-your-first-page/) for browser-based writing.
 - [Import Markdown And Obsidian Notes](/getting-started/bring-your-notes/) for supported migration workflows.
 - [Markdown Support](/getting-started/markdown-support/) for syntax and page links.
-- [Organize Markdawn Pages And Folders](/getting-started/organize-pages-and-folders/) for shared knowledge structure.
-- [Share A Markdawn Page](/getting-started/share-a-page/) for View, Edit, and Admin access.
-- [Markdawn CLI](/agents/markdawn-cli/) for terminal workflows.
+- [Organize Metakip Pages And Folders](/getting-started/organize-pages-and-folders/) for shared knowledge structure.
+- [Share A Metakip Page](/getting-started/share-a-page/) for View, Edit, and Admin access.
+- [Metakip CLI](/agents/metakip-cli/) for terminal workflows.
 - [API Reference](/api-reference/endpoints/) for automation and integrations.
-- [Use Markdawn With AI Assistants](/agents/use-markdawn-with-ai-assistants/) for controlled AI assistant access.
-- [Self-Host Markdawn](/self-hosting/) when deployment ownership matters.
+- [Use Metakip With AI Assistants](/agents/use-metakip-with-ai-assistants/) for controlled AI assistant access.
+- [Self-Host Metakip](/self-hosting/) when deployment ownership matters.
 
 ## Sources And Further Reading
 
@@ -242,4 +242,4 @@ They solve different permission problems. Markdawn provides View, Edit, and Admi
 
 ## Verdict
 
-Choose **OneNote** for notebook-style capture, handwriting, rich media, Microsoft 365 integration, and Copilot features. Choose **Markdawn** for shared Markdown knowledge with browser-based real-time coediting, explicit page and folder permissions, direct CLI and API access, and the option to self-host.
+Choose **OneNote** for notebook-style capture, handwriting, rich media, Microsoft 365 integration, and Copilot features. Choose **Metakip** for shared Markdown knowledge with browser-based real-time coediting, explicit page and folder permissions, direct CLI and API access, and the option to self-host.

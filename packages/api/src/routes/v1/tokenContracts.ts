@@ -1,4 +1,4 @@
-import { API_TOKEN_SCOPES } from '@markdawn/shared';
+import { API_TOKEN_SCOPES } from '@metakip/shared';
 import { z } from 'zod';
 import { jsonContent, uuidPathParameter, type V1OperationContract } from './apiContract';
 

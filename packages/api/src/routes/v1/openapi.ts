@@ -29,53 +29,53 @@ const errorSchema = {
 export const openApiV1 = {
   openapi: '3.1.0',
   info: {
-    title: 'Markdawn API',
+    title: 'Metakip API',
     version: '1.0.0',
     description:
-      'Read and change pages, folders, and markdown content through the same content layer used by Markdawn.',
+      'Read and change pages, folders, and markdown content through the same content layer used by Metakip.',
   },
   tags: [
     {
       name: 'Identity',
       description: 'Read the authenticated user and authentication context.',
-      'x-markdawn-docs-slug': 'identity',
+      'x-metakip-docs-slug': 'identity',
     },
     {
       name: 'Pages',
       description: 'List, create, and update pages, including their markdown content.',
-      'x-markdawn-docs-slug': 'pages',
+      'x-metakip-docs-slug': 'pages',
     },
     {
       name: 'Folders',
       description: 'List, create, and update folders.',
-      'x-markdawn-docs-slug': 'folders',
+      'x-metakip-docs-slug': 'folders',
     },
     {
       name: 'Lifecycle',
       description: 'Copy, move, trash, restore, and permanently delete pages and folders.',
-      'x-markdawn-docs-slug': 'lifecycle',
+      'x-metakip-docs-slug': 'lifecycle',
     },
     {
       name: 'Imports and Exports',
       description: 'Import markdown and Obsidian content, or export pages and accessible content.',
-      'x-markdawn-docs-slug': 'imports-and-exports',
+      'x-metakip-docs-slug': 'imports-and-exports',
     },
     {
       name: 'API Tokens',
       description: 'Create, list, and revoke API tokens with a browser session.',
-      'x-markdawn-docs-slug': 'api-tokens',
+      'x-metakip-docs-slug': 'api-tokens',
     },
   ],
   servers: [
-    { url: 'https://app.markdawn.space/api/v1', description: 'Hosted Markdawn API' },
-    { url: '/api/v1', description: 'Relative to the current Markdawn server.' },
+    { url: 'https://app.metakip.com/api/v1', description: 'Hosted Metakip API' },
+    { url: '/api/v1', description: 'Relative to the current Metakip server.' },
   ],
   components: {
     securitySchemes: {
       bearerToken: {
         type: 'http',
         scheme: 'bearer',
-        bearerFormat: 'Markdawn API token',
+        bearerFormat: 'Metakip API token',
         description: 'Send a named API token in the Authorization header.',
       },
       browserSession: {

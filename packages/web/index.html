@@ -7,7 +7,7 @@
     <script>
       (() => {
         try {
-          const isDark = localStorage.getItem('markdawn-theme') === 'dark' || ((!localStorage.getItem('markdawn-theme') || localStorage.getItem('markdawn-theme') === 'system') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          const isDark = localStorage.getItem('metakip-theme') === 'dark' || ((!localStorage.getItem('metakip-theme') || localStorage.getItem('metakip-theme') === 'system') && window.matchMedia('(prefers-color-scheme: dark)').matches);
           if (isDark) {
             document.documentElement.classList.add('dark');
             document.documentElement.style.backgroundColor = '#09090b';
@@ -29,15 +29,15 @@
         } catch (_e) {}
       })();
     </script>
-    <meta name="application-name" content="Markdawn" />
-    <meta name="apple-mobile-web-app-title" content="Markdawn" />
+    <meta name="application-name" content="Metakip" />
+    <meta name="apple-mobile-web-app-title" content="Metakip" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>Markdawn</title>
+    <title>Metakip</title>
   </head>
   <body>
     <div id="root"></div>

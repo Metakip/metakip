@@ -3,7 +3,7 @@ import type {
   FolderTreeNode,
   PageTreeNode,
   SharedWithMeItem,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import type { ExplorerItemData } from '../components/workspace/ExplorerItem';
 import type { Favorite } from '../hooks/use-favorites';
 

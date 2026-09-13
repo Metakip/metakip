@@ -1,17 +1,17 @@
 ---
-title: Connect AI Assistants To Markdawn
-description: Connect a terminal-based AI assistant to Markdawn with the CLI, scoped API tokens, read access, and safe exact edits.
+title: Connect AI Assistants To Metakip
+description: Connect a terminal-based AI assistant to Metakip with the CLI, scoped API tokens, read access, and safe exact edits.
 ---
 
-You can use Markdawn with an AI assistant that can work with a terminal, such as Claude Code or Codex. The current path uses the Markdawn CLI and its optional skill.
+You can use Metakip with an AI assistant that can work with a terminal, such as Claude Code or Codex. The current path uses the Metakip CLI and its optional skill.
 
 ## How It Works
 
 1. Install the CLI.
-2. Create a named token in **Markdawn Settings → API tokens**.
-3. Sign in with `markdawn login`.
+2. Create a named token in **Metakip Settings → API tokens**.
+3. Sign in with `metakip login`.
 4. Let the tool read or change pages through the CLI.
-5. Review the result in Markdawn.
+5. Review the result in Metakip.
 
 There is no separate AI notebook to keep in sync.
 
@@ -38,7 +38,7 @@ Do not ask a tool to rewrite an important page from memory when a targeted edit 
 
 Never paste your token into a chat, commit it to a repository, or put it in a command that can be saved in shell history.
 
-See [Markdawn CLI](/agents/markdawn-cli/) for setup and the [generated API Reference](/api-reference/endpoints/) for endpoint details.
+See [Metakip CLI](/agents/metakip-cli/) for setup and the [generated API Reference](/api-reference/endpoints/) for endpoint details.
 
 ## What The Assistant Can Do
 

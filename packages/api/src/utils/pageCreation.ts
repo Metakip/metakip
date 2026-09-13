@@ -2,7 +2,7 @@ import {
   bindWikiLinkTargets,
   createEmptyYjsDoc,
   createYjsDocWithTitle,
-} from '@markdawn/shared/markdown-yjs';
+} from '@metakip/shared/markdown-yjs';
 import { sql } from 'drizzle-orm';
 import { HTTPException } from 'hono/http-exception';
 import { db } from '../db/connection';

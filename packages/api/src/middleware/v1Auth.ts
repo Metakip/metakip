@@ -6,16 +6,16 @@ import {
   hasMcpWriteWithoutRead,
   isApiTokenScope,
   parseApiTokenId,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import {
   hashApiToken,
   sessionIdempotencyPrincipal,
   tokenIdempotencyPrincipal,
-} from '@markdawn/shared/node/api-token-credential';
+} from '@metakip/shared/node/api-token-credential';
 import {
   MCP_INTERNAL_AUTH_HEADER,
   verifyMcpInternalCredential,
-} from '@markdawn/shared/node/mcp-internal-auth';
+} from '@metakip/shared/node/mcp-internal-auth';
 import { sql } from 'drizzle-orm';
 import { createMiddleware } from 'hono/factory';
 import { auth } from '../auth';

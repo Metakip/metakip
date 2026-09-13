@@ -13,7 +13,7 @@ afterEach(async () => {
 
 describe('materializeUploadFile', () => {
   it('removes staged bytes when metadata persistence fails', async () => {
-    directory = await mkdtemp(path.join(os.tmpdir(), 'markdawn-upload-materialization-'));
+    directory = await mkdtemp(path.join(os.tmpdir(), 'metakip-upload-materialization-'));
     const filename = 'failed.png';
 
     await expect(
@@ -30,7 +30,7 @@ describe('materializeUploadFile', () => {
   });
 
   it('keeps staged bytes after metadata persistence succeeds', async () => {
-    directory = await mkdtemp(path.join(os.tmpdir(), 'markdawn-upload-materialization-'));
+    directory = await mkdtemp(path.join(os.tmpdir(), 'metakip-upload-materialization-'));
     const filename = 'stored.png';
 
     await expect(

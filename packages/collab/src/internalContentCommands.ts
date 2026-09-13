@@ -9,7 +9,7 @@ import {
   PageMarkdownError,
   readPageMarkdownCommandResponseSchema,
   replacePageMarkdownCommandResponseSchema,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import {
   ContentCommandError,
   ContentConflictError,

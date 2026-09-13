@@ -14,7 +14,7 @@ import { ToastProvider } from './utils/toast';
 
 initLogger().then(() => {
   const logger = getLogger();
-  logger.info('[app] starting markdawn web');
+  logger.info('[app] starting metakip web');
   logger.debug(`[env] NODE_ENV: ${import.meta.env.MODE}`);
   logger.debug(`[env] VITE_API_URL: ${import.meta.env.VITE_API_URL ?? 'not set'}`);
   logger.debug(`[env] collaboration URL: ${getCollaborationUrl()}`);

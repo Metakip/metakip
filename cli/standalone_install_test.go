@@ -26,7 +26,7 @@ func TestNewUpdateProgressDisablesPlainOutput(t *testing.T) {
 	}
 	progress := newUpdateProgress(runtime)
 	progress.phase("Checking for updates...")
-	progress.phase("Downloading markdawn.tar.gz...")
+	progress.phase("Downloading metakip.tar.gz...")
 	if output.Len() != 0 {
 		t.Fatalf("plain progress output = %q", output.String())
 	}
@@ -34,12 +34,12 @@ func TestNewUpdateProgressDisablesPlainOutput(t *testing.T) {
 
 func TestLoadInstallReceiptRejectsUnknownFields(t *testing.T) {
 	dir := t.TempDir()
-	t.Setenv("MARKDAWN_INSTALL_STATE_DIR", dir)
+	t.Setenv("METAKIP_INSTALL_STATE_DIR", dir)
 	receipt := `{
   "schemaVersion": 1,
   "installMethod": "standalone",
-  "installDir": "/tmp/markdawn",
-  "binaryPath": "/tmp/markdawn/markdawn",
+  "installDir": "/tmp/metakip",
+  "binaryPath": "/tmp/metakip/metakip",
   "unexpected": true
 }`
 	if err := os.WriteFile(filepath.Join(dir, "install.json"), []byte(receipt), 0o600); err != nil {
@@ -50,7 +50,7 @@ func TestLoadInstallReceiptRejectsUnknownFields(t *testing.T) {
 	}
 }
 func TestValidateInstallReceiptRejectsBinaryOutsideInstallDirectory(t *testing.T) {
-	installDir := filepath.Join(t.TempDir(), "markdawn")
+	installDir := filepath.Join(t.TempDir(), "metakip")
 	err := validateInstallReceipt(installReceipt{
 		SchemaVersion: 1,
 		InstallMethod: standaloneInstallMethod,
@@ -63,7 +63,7 @@ func TestValidateInstallReceiptRejectsBinaryOutsideInstallDirectory(t *testing.T
 }
 
 func TestValidateInstallReceiptRejectsRelativePathFile(t *testing.T) {
-	installDir := filepath.Join(t.TempDir(), "markdawn")
+	installDir := filepath.Join(t.TempDir(), "metakip")
 	err := validateInstallReceipt(installReceipt{
 		SchemaVersion: 1,
 		InstallMethod: standaloneInstallMethod,
@@ -78,8 +78,8 @@ func TestValidateInstallReceiptRejectsRelativePathFile(t *testing.T) {
 
 func TestLoadInstallReceiptRestoresInterruptedUninstallBackup(t *testing.T) {
 	stateDir := t.TempDir()
-	t.Setenv("MARKDAWN_INSTALL_STATE_DIR", stateDir)
-	installDir := filepath.Join(t.TempDir(), "markdawn")
+	t.Setenv("METAKIP_INSTALL_STATE_DIR", stateDir)
+	installDir := filepath.Join(t.TempDir(), "metakip")
 	if err := os.Mkdir(installDir, 0o700); err != nil {
 		t.Fatal(err)
 	}
@@ -117,7 +117,7 @@ func TestLoadInstallReceiptRestoresInterruptedUninstallBackup(t *testing.T) {
 
 func TestLoadInstallReceiptDoesNotRestoreBackupAfterCompletedUninstall(t *testing.T) {
 	stateDir := t.TempDir()
-	t.Setenv("MARKDAWN_INSTALL_STATE_DIR", stateDir)
+	t.Setenv("METAKIP_INSTALL_STATE_DIR", stateDir)
 	installDir := filepath.Join(t.TempDir(), "removed")
 	receipt := installReceipt{SchemaVersion: 1, InstallMethod: standaloneInstallMethod, InstallDir: installDir, BinaryPath: filepath.Join(installDir, executableName())}
 	data, err := json.Marshal(receipt)

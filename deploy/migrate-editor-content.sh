@@ -6,6 +6,6 @@ migrateEditorContent() {
     echo "[MIGRATION] Converting editor documents to Markdown Y.Text..."
     (
         cd "$repo_dir"
-        pnpm --filter @markdawn/api db:migrate-editor-content
+        pnpm --filter @metakip/api db:migrate-editor-content
     )
 }

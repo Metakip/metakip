@@ -2,12 +2,12 @@ import {
   buildFolderPath as buildSharedFolderPath,
   buildPagePath as buildSharedPagePath,
   slugifyTitle as slugifySharedTitle,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import { find } from 'linkifyjs';
 import { matchPath } from 'react-router-dom';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const APEX_HOSTNAME = 'markdawn.space';
+const APEX_HOSTNAME = 'metakip.com';
 const RESERVED_APP_PATHS = new Set([
   'api',
   'collab',

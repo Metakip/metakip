@@ -1,4 +1,4 @@
-import { extractIndexedPageConnections, type IndexedPageConnection } from '@markdawn/shared';
+import { extractIndexedPageConnections, type IndexedPageConnection } from '@metakip/shared';
 import { sql } from 'drizzle-orm';
 import { executeQuery, type QueryExecutor } from '../db/query';
 

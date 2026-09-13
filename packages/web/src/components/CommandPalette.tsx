@@ -1,4 +1,4 @@
-import { MARKDAWN_DOCS_URL } from '@markdawn/shared';
+import { METAKIP_DOCS_URL } from '@metakip/shared';
 import { BookOpen, FileText, Plus, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useIdentityNavigate } from '../contexts/IdentityLifecycleContext';
@@ -242,7 +242,7 @@ export function CommandPalette() {
               </li>
               <li>
                 <a
-                  href={MARKDAWN_DOCS_URL}
+                  href={METAKIP_DOCS_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={closeDialog}

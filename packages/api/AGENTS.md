@@ -1,4 +1,4 @@
-# AGENTS.md — @markdawn/api
+# AGENTS.md — @metakip/api
 
 ## Key Decisions
 
@@ -58,6 +58,6 @@ it('returns 401 with invalid token', ...)
 
 ### Integration Harness
 
-- PostgreSQL container: `markdawn-postgres-test`
+- PostgreSQL container: `metakip-postgres-test`
 - Truncate between tests: `SET session_replication_role = replica`
 - Auth: HMAC-SHA256 signed session cookies

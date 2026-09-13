@@ -142,9 +142,9 @@ func TestUpdateOutcomeTextReportsLatestFallback(t *testing.T) {
 		status updateStatus
 		want   string
 	}{
-		{updateStatusUpdated, "Markdawn updated to latest."},
-		{updateStatusScheduled, "Markdawn update to latest is scheduled and will finish after this command exits."},
-		{updateStatusUpToDate, "Markdawn is already up to date: latest."},
+		{updateStatusUpdated, "Metakip updated to latest."},
+		{updateStatusScheduled, "Metakip update to latest is scheduled and will finish after this command exits."},
+		{updateStatusUpToDate, "Metakip is already up to date: latest."},
 	}
 	for _, testCase := range cases {
 		t.Run(string(testCase.status), func(t *testing.T) {
@@ -161,18 +161,18 @@ func TestUpdateOutcomeTextReportsLatestFallback(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if pinned != "Markdawn updated to v1.2.3." {
+	if pinned != "Metakip updated to v1.2.3." {
 		t.Fatalf("pinned outcome text = %q", pinned)
 	}
 }
 
 func TestDownloadReleaseAssetFollowsRedirects(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
-		if request.URL.Path == "/atharva-again/Markdawn/releases/latest/download/asset.tar.gz" {
-			http.Redirect(response, request, "/atharva-again/Markdawn/releases/download/cli/v1.2.3/asset.tar.gz", http.StatusFound)
+		if request.URL.Path == "/Metakip/metakip/releases/latest/download/asset.tar.gz" {
+			http.Redirect(response, request, "/Metakip/metakip/releases/download/cli/v1.2.3/asset.tar.gz", http.StatusFound)
 			return
 		}
-		if request.URL.Path == "/atharva-again/Markdawn/releases/download/cli/v1.2.3/asset.tar.gz" {
+		if request.URL.Path == "/Metakip/metakip/releases/download/cli/v1.2.3/asset.tar.gz" {
 			http.Redirect(response, request, "/objects.githubusercontent.com/github-production-release-asset/asset.tar.gz", http.StatusFound)
 			return
 		}
@@ -186,7 +186,7 @@ func TestDownloadReleaseAssetFollowsRedirects(t *testing.T) {
 	asset, err := downloadReleaseAsset(
 		context.Background(),
 		server.Client(),
-		server.URL+"/atharva-again/Markdawn/releases/latest/download/asset.tar.gz",
+		server.URL+"/Metakip/metakip/releases/latest/download/asset.tar.gz",
 		1024,
 		"asset.tar.gz",
 		noOpUpdateProgress{},
@@ -238,7 +238,7 @@ func TestBinariesMatchStreamsContents(t *testing.T) {
 	directory := t.TempDir()
 	leftPath := filepath.Join(directory, "left")
 	rightPath := filepath.Join(directory, "right")
-	payload := bytes.Repeat([]byte("markdawn"), 8192)
+	payload := bytes.Repeat([]byte("metakip"), 8192)
 	if err := os.WriteFile(leftPath, payload, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -268,7 +268,7 @@ func TestExtractReleaseBinaryAcceptsDotSlashTarPath(t *testing.T) {
 	var archive bytes.Buffer
 	gzipWriter := gzip.NewWriter(&archive)
 	tarWriter := tar.NewWriter(gzipWriter)
-	payload := []byte("markdawn binary")
+	payload := []byte("metakip binary")
 	if err := tarWriter.WriteHeader(&tar.Header{Name: "./" + executableName(), Mode: 0o755, Size: int64(len(payload)), Typeflag: tar.TypeReg}); err != nil {
 		t.Fatal(err)
 	}
@@ -282,7 +282,7 @@ func TestExtractReleaseBinaryAcceptsDotSlashTarPath(t *testing.T) {
 		t.Fatal(err)
 	}
 	target := filepath.Join(t.TempDir(), executableName())
-	if err := extractReleaseBinary(archive.Bytes(), "markdawn_linux_amd64.tar.gz", target); err != nil {
+	if err := extractReleaseBinary(archive.Bytes(), "metakip_linux_amd64.tar.gz", target); err != nil {
 		t.Fatal(err)
 	}
 	actual, err := os.ReadFile(target)
@@ -295,24 +295,24 @@ func TestExtractReleaseBinaryAcceptsDotSlashTarPath(t *testing.T) {
 }
 
 func TestUpdateStandaloneVerifiesAndReplacesBinary(t *testing.T) {
-	if executableName() != "markdawn" {
+	if executableName() != "metakip" {
 		t.Skip("Unix replacement is covered by this test")
 	}
-	archive := releaseTarball(t, "./markdawn", []byte("new binary"))
+	archive := releaseTarball(t, "./metakip", []byte("new binary"))
 	checksum := fmt.Sprintf("%x", sha256.Sum256(archive))
 	server := httptest.NewServer(http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
 		switch request.URL.Path {
 		case "/latest/download/checksums.txt":
 			http.Redirect(response, request, "/releases/download/cli/v1.2.3/checksums.txt", http.StatusFound)
-		case "/latest/download/markdawn_" + runtime.GOOS + "_" + runtime.GOARCH + ".tar.gz":
-			http.Redirect(response, request, "/releases/download/cli/v1.2.3/markdawn_"+runtime.GOOS+"_"+runtime.GOARCH+".tar.gz", http.StatusFound)
+		case "/latest/download/metakip_" + runtime.GOOS + "_" + runtime.GOARCH + ".tar.gz":
+			http.Redirect(response, request, "/releases/download/cli/v1.2.3/metakip_"+runtime.GOOS+"_"+runtime.GOARCH+".tar.gz", http.StatusFound)
 		case "/releases/download/cli/v1.2.3/checksums.txt":
 			http.Redirect(response, request, "/objects.githubusercontent.com/github-production-release-asset/checksums.txt", http.StatusFound)
-		case "/releases/download/cli/v1.2.3/markdawn_" + runtime.GOOS + "_" + runtime.GOARCH + ".tar.gz":
-			http.Redirect(response, request, "/objects.githubusercontent.com/github-production-release-asset/markdawn_"+runtime.GOOS+"_"+runtime.GOARCH+".tar.gz", http.StatusFound)
+		case "/releases/download/cli/v1.2.3/metakip_" + runtime.GOOS + "_" + runtime.GOARCH + ".tar.gz":
+			http.Redirect(response, request, "/objects.githubusercontent.com/github-production-release-asset/metakip_"+runtime.GOOS+"_"+runtime.GOARCH+".tar.gz", http.StatusFound)
 		case "/objects.githubusercontent.com/github-production-release-asset/checksums.txt":
-			_, _ = fmt.Fprintf(response, "%s  markdawn_%s_%s.tar.gz\n", checksum, runtime.GOOS, runtime.GOARCH)
-		case "/objects.githubusercontent.com/github-production-release-asset/markdawn_" + runtime.GOOS + "_" + runtime.GOARCH + ".tar.gz":
+			_, _ = fmt.Fprintf(response, "%s  metakip_%s_%s.tar.gz\n", checksum, runtime.GOOS, runtime.GOARCH)
+		case "/objects.githubusercontent.com/github-production-release-asset/metakip_" + runtime.GOOS + "_" + runtime.GOARCH + ".tar.gz":
 			_, _ = response.Write(archive)
 		default:
 			http.NotFound(response, request)
@@ -343,13 +343,13 @@ func TestUpdateStandaloneVerifiesAndReplacesBinary(t *testing.T) {
 		t.Fatalf("latest update returned unexpected target %#v", outcome)
 	}
 	wantPhases := []string{
-		"Checking for the latest Markdawn release...",
+		"Checking for the latest Metakip release...",
 		"Downloading checksums.txt...",
 		"Downloaded checksums.txt.",
-		"Downloading the Markdawn update...",
-		"Downloaded the Markdawn update.",
-		"Verified the Markdawn update.",
-		"Installing the Markdawn update...",
+		"Downloading the Metakip update...",
+		"Downloaded the Metakip update.",
+		"Verified the Metakip update.",
+		"Installing the Metakip update...",
 	}
 	if strings.Join(progress.messages, "\n") != strings.Join(wantPhases, "\n") {
 		t.Fatalf("update phases = %#v, want %#v", progress.messages, wantPhases)
@@ -384,7 +384,7 @@ func TestUpdateStandaloneVerifiesAndReplacesBinary(t *testing.T) {
 }
 
 func TestUpdateStandaloneAllowsUnknownDownloadedReleaseVersion(t *testing.T) {
-	if executableName() != "markdawn" {
+	if executableName() != "metakip" {
 		t.Skip("Unix replacement is covered by this test")
 	}
 	archive := releaseTarball(t, "./"+executableName(), []byte("new binary"))
@@ -444,7 +444,7 @@ func TestUpdateStandaloneRejectsChecksumMismatch(t *testing.T) {
 }
 
 func TestExpectedReleaseChecksumRejectsDuplicateAndMalformedEntries(t *testing.T) {
-	asset := "markdawn_linux_amd64.tar.gz"
+	asset := "metakip_linux_amd64.tar.gz"
 	valid := strings.Repeat("a", 64)
 	if _, err := expectedReleaseChecksum([]byte(valid+"  "+asset+"\n"+valid+"  "+asset+"\n"), asset); err == nil || !strings.Contains(err.Error(), "multiple") {
 		t.Fatalf("expected duplicate checksum failure, got %v", err)
@@ -469,7 +469,7 @@ func TestExtractReleaseBinaryAcceptsZipBinary(t *testing.T) {
 		t.Fatal(err)
 	}
 	target := filepath.Join(t.TempDir(), executableName())
-	if err := extractReleaseBinary(archive.Bytes(), "markdawn_windows_amd64.zip", target); err != nil {
+	if err := extractReleaseBinary(archive.Bytes(), "metakip_windows_amd64.zip", target); err != nil {
 		t.Fatal(err)
 	}
 	actual, err := os.ReadFile(target)
@@ -496,7 +496,7 @@ func TestExtractReleaseBinaryRejectsDuplicateZipBinary(t *testing.T) {
 	if err := zipWriter.Close(); err != nil {
 		t.Fatal(err)
 	}
-	err := extractReleaseBinary(archive.Bytes(), "markdawn_windows_amd64.zip", filepath.Join(t.TempDir(), executableName()))
+	err := extractReleaseBinary(archive.Bytes(), "metakip_windows_amd64.zip", filepath.Join(t.TempDir(), executableName()))
 	if err == nil || !strings.Contains(err.Error(), "multiple") {
 		t.Fatalf("expected duplicate binary failure, got %v", err)
 	}
@@ -513,15 +513,15 @@ func TestExtractReleaseBinaryRejectsZipWithTooManyEntries(t *testing.T) {
 	if err := zipWriter.Close(); err != nil {
 		t.Fatal(err)
 	}
-	err := extractReleaseBinary(archive.Bytes(), "markdawn_windows_amd64.zip", filepath.Join(t.TempDir(), executableName()))
+	err := extractReleaseBinary(archive.Bytes(), "metakip_windows_amd64.zip", filepath.Join(t.TempDir(), executableName()))
 	if err == nil || !strings.Contains(err.Error(), "entries") {
 		t.Fatalf("expected ZIP entry limit failure, got %v", err)
 	}
 }
 
 func TestExtractReleaseBinaryRejectsDuplicateTarBinary(t *testing.T) {
-	archive := releaseTarballEntries(t, []string{executableName(), "./" + executableName()}, []byte("markdawn binary"))
-	err := extractReleaseBinary(archive, "markdawn_linux_amd64.tar.gz", filepath.Join(t.TempDir(), executableName()))
+	archive := releaseTarballEntries(t, []string{executableName(), "./" + executableName()}, []byte("metakip binary"))
+	err := extractReleaseBinary(archive, "metakip_linux_amd64.tar.gz", filepath.Join(t.TempDir(), executableName()))
 	if err == nil || !strings.Contains(err.Error(), "multiple") {
 		t.Fatalf("expected duplicate binary failure, got %v", err)
 	}
@@ -541,7 +541,7 @@ func TestExtractReleaseBinaryRejectsOversizedTarBinary(t *testing.T) {
 		t.Fatal(err)
 	}
 	target := filepath.Join(t.TempDir(), executableName())
-	err := extractReleaseBinary(archive.Bytes(), "markdawn_linux_amd64.tar.gz", target)
+	err := extractReleaseBinary(archive.Bytes(), "metakip_linux_amd64.tar.gz", target)
 	if err == nil || !strings.Contains(err.Error(), "exceeds") {
 		t.Fatalf("expected oversized binary failure, got %v", err)
 	}
@@ -553,7 +553,7 @@ func TestExtractReleaseBinaryRejectsTarWithTooManyEntries(t *testing.T) {
 		names[index] = fmt.Sprintf("entry-%d", index)
 	}
 	archive := releaseTarballEntries(t, names, nil)
-	err := extractReleaseBinary(archive, "markdawn_linux_amd64.tar.gz", filepath.Join(t.TempDir(), executableName()))
+	err := extractReleaseBinary(archive, "metakip_linux_amd64.tar.gz", filepath.Join(t.TempDir(), executableName()))
 	if err == nil || !strings.Contains(err.Error(), "entries") {
 		t.Fatalf("expected archive entry limit failure, got %v", err)
 	}
@@ -572,7 +572,7 @@ func TestExtractReleaseBinaryRejectsOversizedTarContents(t *testing.T) {
 	if err := gzipWriter.Close(); err != nil {
 		t.Fatal(err)
 	}
-	err := extractReleaseBinary(archive.Bytes(), "markdawn_linux_amd64.tar.gz", filepath.Join(t.TempDir(), executableName()))
+	err := extractReleaseBinary(archive.Bytes(), "metakip_linux_amd64.tar.gz", filepath.Join(t.TempDir(), executableName()))
 	if err == nil || !strings.Contains(err.Error(), "decompressed") {
 		t.Fatalf("expected decompressed contents failure, got %v", err)
 	}

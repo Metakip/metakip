@@ -31,7 +31,7 @@ export function replaceMarkdownBody(
   document: Y.Doc,
   _title: string,
   markdown: string,
-  origin: unknown = 'markdawn-rest-edit',
+  origin: unknown = 'metakip-rest-edit',
 ): void {
   const content = document.getText(COLLABORATIVE_CONTENT_FIELD);
   const current = content.toString();

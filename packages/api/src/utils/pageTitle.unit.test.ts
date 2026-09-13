@@ -1,4 +1,4 @@
-import { getUnicodeCodePointLength, MAX_PAGE_TITLE_LENGTH } from '@markdawn/shared';
+import { getUnicodeCodePointLength, MAX_PAGE_TITLE_LENGTH } from '@metakip/shared';
 import { describe, expect, it } from 'vitest';
 import { createCopyPageTitle, normalizePageTitle } from './pageTitle';
 

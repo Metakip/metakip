@@ -1,8 +1,8 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import type { Logger } from '@logtape/logtape';
-import { INTERNAL_CONTENT_HEADERS } from '@markdawn/shared';
-import { yDocToMarkdown } from '@markdawn/shared/yjs-helpers';
+import { INTERNAL_CONTENT_HEADERS } from '@metakip/shared';
+import { yDocToMarkdown } from '@metakip/shared/yjs-helpers';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
 import { createCollabServer } from './server';

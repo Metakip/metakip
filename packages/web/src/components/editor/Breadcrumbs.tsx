@@ -1,4 +1,4 @@
-import type { Folder, Page } from '@markdawn/shared';
+import type { Folder, Page } from '@metakip/shared';
 import { ChevronRight, Home } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';

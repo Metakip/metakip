@@ -1,4 +1,4 @@
-# AGENTS.md — @markdawn/collab
+# AGENTS.md — @metakip/collab
 
 ## Key Decisions
 

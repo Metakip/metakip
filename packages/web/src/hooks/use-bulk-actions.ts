@@ -3,8 +3,8 @@ import type {
   BulkRemovalOperation,
   BulkRemovalRequest,
   BulkRemovalResult,
-} from '@markdawn/shared';
-import { MAX_BULK_REMOVAL_OPERATIONS_PER_REQUEST } from '@markdawn/shared';
+} from '@metakip/shared';
+import { MAX_BULK_REMOVAL_OPERATIONS_PER_REQUEST } from '@metakip/shared';
 import { useIsMutating, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useIdentityLifecycle } from '../contexts/IdentityLifecycleContext';
 import { beginBulkRemoval } from '../utils/bulkRemovalState';
@@ -74,7 +74,7 @@ export function getBulkRemovalCounts(input: BulkRemovalInput): {
   };
 }
 
-export type { BulkRemovalFailure, BulkRemovalResult } from '@markdawn/shared';
+export type { BulkRemovalFailure, BulkRemovalResult } from '@metakip/shared';
 
 const formatBulkRemovalSuccess = ({
   trashedCount,

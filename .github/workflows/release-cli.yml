@@ -156,10 +156,10 @@ jobs:
             windows/amd64 windows/arm64; do
             goos="${target%/*}"
             goarch="${target#*/}"
-            archive="markdawn_${VERSION}_${goos}_${goarch}"
+            archive="metakip_${VERSION}_${goos}_${goarch}"
             stage="$(mktemp -d)"
-            binary="markdawn"
-            if [[ "$goos" == "windows" ]]; then binary="markdawn.exe"; fi
+            binary="metakip"
+            if [[ "$goos" == "windows" ]]; then binary="metakip.exe"; fi
             CGO_ENABLED=0 GOOS="$goos" GOARCH="$goarch" go -C cli build \
               -trimpath \
               -ldflags "-s -w -X main.version=${VERSION} -X main.commit=${GITHUB_SHA}" \
@@ -174,16 +174,16 @@ jobs:
             fi
             if [[ "${VERSION%%+*}" != *-* ]]; then
               if [[ "$goos" == "windows" ]]; then
-                cp "dist/${archive}.zip" "dist/markdawn_${goos}_${goarch}.zip"
+                cp "dist/${archive}.zip" "dist/metakip_${goos}_${goarch}.zip"
               else
-                cp "dist/${archive}.tar.gz" "dist/markdawn_${goos}_${goarch}.tar.gz"
+                cp "dist/${archive}.tar.gz" "dist/metakip_${goos}_${goarch}.tar.gz"
               fi
             fi
             rm -rf "$stage"
           done
           cp scripts/install-cli.sh dist/install.sh
           cp scripts/install-cli.ps1 dist/install.ps1
-          (cd dist && LC_ALL=C sha256sum markdawn_* > checksums.txt)
+          (cd dist && LC_ALL=C sha256sum metakip_* > checksums.txt)
 
       - uses: actions/attest-build-provenance@v2
         with:

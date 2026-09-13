@@ -206,10 +206,10 @@ jobs:
           docs/src/pages docs/src/scripts
 
       - name: Check Astro and documentation types
-        run: pnpm --filter @markdawn/docs run check
+        run: pnpm --filter @metakip/docs run check
 
       - name: Build documentation
-        run: pnpm --filter @markdawn/docs run build
+        run: pnpm --filter @metakip/docs run build
 
   test:
     name: Test
@@ -231,26 +231,26 @@ jobs:
 
       - name: Test shared
         if: needs.changes.outputs.test_shared == 'true'
-        run: pnpm --filter @markdawn/shared run test
+        run: pnpm --filter @metakip/shared run test
 
       - name: Test API unit suite
         if: needs.changes.outputs.test_api_unit == 'true'
-        run: pnpm --filter @markdawn/api run test:unit
+        run: pnpm --filter @metakip/api run test:unit
 
       - name: Test collaboration unit suite
         if: needs.changes.outputs.test_collab_unit == 'true'
         env:
-          DATABASE_URL: postgresql://markdawn:password@localhost:5432/markdawn_test
+          DATABASE_URL: postgresql://metakip:password@localhost:5432/metakip_test
           COLLAB_INTERNAL_SECRET: test-collaboration-internal-secret
-        run: pnpm --filter @markdawn/collab run test:unit
+        run: pnpm --filter @metakip/collab run test:unit
 
       - name: Test web
         if: needs.changes.outputs.test_web == 'true'
-        run: pnpm --filter @markdawn/web run test
+        run: pnpm --filter @metakip/web run test
 
       - name: Typecheck E2E package
         if: needs.changes.outputs.test_e2e == 'true'
-        run: pnpm --filter @markdawn/e2e run test
+        run: pnpm --filter @metakip/e2e run test
 
   integration:
     name: API and collaboration integration
@@ -291,15 +291,15 @@ jobs:
         run: podman pull postgres:17-alpine
 
       - name: Check database migration history
-        run: pnpm --filter @markdawn/api db:check
+        run: pnpm --filter @metakip/api db:check
         env:
-          DATABASE_URL: postgresql://markdawn:password@localhost:5432/markdawn
+          DATABASE_URL: postgresql://metakip:password@localhost:5432/metakip
 
       - name: Test API integration suite
-        run: pnpm --filter @markdawn/api run test:integration
+        run: pnpm --filter @metakip/api run test:integration
 
       - name: Test collaboration integration suite
-        run: pnpm --filter @markdawn/collab run test:integration
+        run: pnpm --filter @metakip/collab run test:integration
 
   build:
     name: Build
@@ -327,23 +327,23 @@ jobs:
 
       - name: Build shared
         if: needs.changes.outputs.build_shared == 'true'
-        run: pnpm --filter @markdawn/shared run build
+        run: pnpm --filter @metakip/shared run build
 
       - name: Build API
         if: needs.changes.outputs.build_api == 'true'
-        run: pnpm --filter @markdawn/api run build
+        run: pnpm --filter @metakip/api run build
 
       - name: Build collaboration server
         if: needs.changes.outputs.build_collab == 'true'
-        run: pnpm --filter @markdawn/collab run build
+        run: pnpm --filter @metakip/collab run build
 
       - name: Build web
         if: needs.changes.outputs.build_web == 'true'
-        run: pnpm --filter @markdawn/web run build
+        run: pnpm --filter @metakip/web run build
 
       - name: Build marketing site
         if: needs.changes.outputs.build_marketing_site == 'true'
-        run: pnpm --filter @markdawn/marketing-site run build
+        run: pnpm --filter @metakip/marketing-site run build
 
   ci-gate:
     name: CI gate

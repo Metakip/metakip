@@ -206,7 +206,7 @@ describe('uploads API', () => {
 
       const response = await app.request('/api/uploads', {
         method: 'POST',
-        headers: { Cookie: `markdawn_anon_id=${guestId}` },
+        headers: { Cookie: `metakip_anon_id=${guestId}` },
         body: formData,
       });
 
@@ -227,7 +227,7 @@ describe('uploads API', () => {
 
       const response = await app.request('/api/uploads', {
         method: 'POST',
-        headers: { Cookie: `markdawn_anon_id=${crypto.randomUUID()}` },
+        headers: { Cookie: `metakip_anon_id=${crypto.randomUUID()}` },
         body: formData,
       });
 

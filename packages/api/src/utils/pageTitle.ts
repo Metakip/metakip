@@ -2,7 +2,7 @@ import {
   getUnicodeCodePointLength,
   MAX_PAGE_TITLE_LENGTH,
   truncateUnicodeCodePoints,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import { HTTPException } from 'hono/http-exception';
 
 const UNTITLED_PAGE_TITLE = 'Untitled';

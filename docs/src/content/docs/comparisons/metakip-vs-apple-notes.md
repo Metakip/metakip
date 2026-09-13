@@ -1,21 +1,21 @@
 ---
-title: Markdawn vs Apple Notes
-description: Compare Markdawn and Apple Notes for quick capture, shared pages, markdown portability, permissions, offline work, and AI assistant workflows.
+title: Metakip vs Apple Notes
+description: Compare Metakip and Apple Notes for quick capture, shared pages, markdown portability, permissions, offline work, and AI assistant workflows.
 ---
 
-Markdawn and Apple Notes solve different note-taking jobs. Apple Notes is optimized for capturing personal information quickly across Apple devices. Markdawn is designed for pages that need to become shared, structured, portable knowledge.
+Metakip and Apple Notes solve different note-taking jobs. Apple Notes is optimized for capturing personal information quickly across Apple devices. Metakip is designed for pages that need to become shared, structured, portable knowledge.
 
 ## The Short Answer
 
 Choose **Apple Notes** when you want the fastest way to capture thoughts, scans, sketches, checklists, photos, and personal reference material on an iPhone, iPad, or Mac.
 
-Choose **Markdawn** when notes need to be accessible in a browser, shared with people outside the Apple ecosystem, organized as project pages and folders, used by an AI assistant, or managed through markdown, the CLI, or the API.
+Choose **Metakip** when notes need to be accessible in a browser, shared with people outside the Apple ecosystem, organized as project pages and folders, used by an AI assistant, or managed through markdown, the CLI, or the API.
 
 Neither tool is universally better. The right choice depends on whether your primary job is fast personal capture or shared, portable knowledge.
 
 ## At A Glance
 
-| Decision area | Markdawn | Apple Notes |
+| Decision area | Metakip | Apple Notes |
 | --- | --- | --- |
 | Main job | Shared project and team knowledge | Personal capture and reference |
 | Access | Browser, CLI, API, and self-hosted deployments | Native Apple apps plus iCloud.com |
@@ -43,11 +43,11 @@ Apple Notes is a strong fit for handwriting, scans, photos, checklists, links, a
 
 Choose Apple Notes when the surrounding workflow matters more than a portable content format. It is especially well suited to personal shopping lists, receipts, handwritten notes, meeting scratchpads, recipes, and other information that does not need a shared project structure.
 
-## Where Markdawn Is Better
+## Where Metakip Is Better
 
 ### Shared Knowledge Across Devices And Teams
 
-Markdawn gives pages a browser-accessible home. You can organize content into pages and folders, share pages with view, edit, or admin access, and keep a project knowledge base separate from any one person's device ecosystem.
+Metakip gives pages a browser-accessible home. You can organize content into pages and folders, share pages with view, edit, or admin access, and keep a project knowledge base separate from any one person's device ecosystem.
 
 Apple Notes does support shared notes and folders. However, Apple says that collaborators must use an Apple device signed in to their Apple Account. A Reddit user summarized the practical limitation by saying they would use Apple Notes only if sharing did not require the recipient to have an Apple account.
 
@@ -59,27 +59,27 @@ Apple Notes now supports Markdown import on current Mac versions, and Apple's No
 
 That makes Apple Notes more portable than it used to be. It does not eliminate the need to test a real migration. Before switching, check representative notes containing images, attachments, checklists, tags, links, tables, and nested folders. The result may differ between a simple text note and a rich Apple Notes archive.
 
-Markdawn is built around a markdown-centered content layer. It supports Markdown files and folders, and it has a dedicated Obsidian vault importer for notes, images, tags, folders, and backlinks. Other note-taking apps are not treated as first-class imports, so the practical Apple Notes path is:
+Metakip is built around a markdown-centered content layer. It supports Markdown files and folders, and it has a dedicated Obsidian vault importer for notes, images, tags, folders, and backlinks. Other note-taking apps are not treated as first-class imports, so the practical Apple Notes path is:
 
 1. Export a representative set of Apple Notes as Markdown on a current Mac.
 2. Keep the original Apple Notes archive untouched.
-3. Import the resulting Markdown folder into Markdawn.
+3. Import the resulting Markdown folder into Metakip.
 4. Check titles, images, links, lists, and folder structure.
 5. Repeat with the complete archive only after the sample looks correct.
 
 ### API, CLI, And AI Assistant Workflows
 
-Markdawn provides documented API and CLI workflows for reading, editing, importing, exporting, and organizing content. Its documentation also covers connecting AI assistants with controlled access to Markdawn pages.
+Metakip provides documented API and CLI workflows for reading, editing, importing, exporting, and organizing content. Its documentation also covers connecting AI assistants with controlled access to Metakip pages.
 
 Apple Notes can participate in Apple Shortcuts and Mac automation, but Apple does not document a public Notes API, dedicated official Notes CLI, or Notes-specific MCP server. Mac AppleScript is local app automation, not a cross-platform cloud API. Reddit users still ask how to export notes for AI workflows, and an Apple Developer Forum discussion describes the lack of a general Notes API equivalent to APIs such as Calendar's EventKit.
 
-Choose Markdawn when notes need to be part of a repeatable content workflow rather than only a personal app.
+Choose Metakip when notes need to be part of a repeatable content workflow rather than only a personal app.
 
 ### Hosting And Control
 
-Markdawn has a self-hosting path for teams that want more control over deployment and data location. Apple Notes is tightly coupled to Apple accounts and iCloud for its full feature set.
+Metakip has a self-hosting path for teams that want more control over deployment and data location. Apple Notes is tightly coupled to Apple accounts and iCloud for its full feature set.
 
-This is not automatically a reason to leave Apple Notes. Self-hosting adds responsibility for backups, updates, security, and availability. It is a reason to consider Markdawn when infrastructure ownership is part of the requirement.
+This is not automatically a reason to leave Apple Notes. Self-hosting adds responsibility for backups, updates, security, and availability. It is a reason to consider Metakip when infrastructure ownership is part of the requirement.
 
 ## Access And Collaboration Details
 
@@ -87,7 +87,7 @@ Apple Notes is not completely unavailable outside Apple's hardware. Apple provid
 
 Reddit discussions describe that web fallback as less capable than the native apps. Users mention browser friction, missing or inconsistent workflows, and difficulty working from Windows. Treat those reports as user experience signals, not universal product facts.
 
-Markdawn is the better fit when the default access path should be a browser link rather than an Apple device or iCloud account.
+Metakip is the better fit when the default access path should be a browser link rather than an Apple device or iCloud account.
 
 ## Scale And Reliability: Test Your Own Archive
 
@@ -105,9 +105,9 @@ Apple Notes is a strong choice if you:
 - Share notes mostly with people who already use Apple devices.
 - Do not need an API-first or markdown-first knowledge workflow.
 
-## Who Should Choose Markdawn?
+## Who Should Choose Metakip?
 
-Markdawn is a strong choice if you:
+Metakip is a strong choice if you:
 
 - Need shared project context rather than private personal notes.
 - Work with people on Windows, Android, or mixed device environments.
@@ -120,7 +120,7 @@ Markdawn is a strong choice if you:
 
 ### Does Apple Notes Work On Windows?
 
-Apple Notes is available through iCloud.com in a browser. Reddit users commonly describe this as a fallback rather than an equivalent to the native iPhone, iPad, and Mac experience. Markdawn is browser-first, so browser access is the primary workflow rather than a secondary one.
+Apple Notes is available through iCloud.com in a browser. Reddit users commonly describe this as a fallback rather than an equivalent to the native iPhone, iPad, and Mac experience. Metakip is browser-first, so browser access is the primary workflow rather than a secondary one.
 
 ### Can Apple Notes Export Markdown?
 
@@ -128,26 +128,26 @@ Apple's current Mac and iPhone documentation supports exporting notes as Markdow
 
 ### Can I Share Apple Notes With Someone Without An Apple Account?
 
-Apple supports sending a copy, but live collaboration has Apple account and device requirements. If the recipient needs to edit shared project context in a browser without joining the Apple ecosystem, Markdawn is the closer fit.
+Apple supports sending a copy, but live collaboration has Apple account and device requirements. If the recipient needs to edit shared project context in a browser without joining the Apple ecosystem, Metakip is the closer fit.
 
-### Is Markdawn Better For Quick Mobile Capture?
+### Is Metakip Better For Quick Mobile Capture?
 
-Not necessarily. Apple Notes has the advantage for native mobile capture, Siri, handwriting, scans, and Share Sheet workflows. Markdawn is better when the captured information needs to become shared, structured, portable project knowledge.
+Not necessarily. Apple Notes has the advantage for native mobile capture, Siri, handwriting, scans, and Share Sheet workflows. Metakip is better when the captured information needs to become shared, structured, portable project knowledge.
 
-### Can I Import Apple Notes Directly Into Markdawn?
+### Can I Import Apple Notes Directly Into Metakip?
 
-Markdawn does not currently describe Apple Notes as a first-class native import. Export Markdown from Apple Notes on a current Mac, then import the resulting Markdown folder and verify representative content.
+Metakip does not currently describe Apple Notes as a first-class native import. Export Markdown from Apple Notes on a current Mac, then import the resulting Markdown folder and verify representative content.
 
-## Related Markdawn Guides
+## Related Metakip Guides
 
-- [Create A Page In Markdawn](/getting-started/create-your-first-page/) for browser-based writing.
+- [Create A Page In Metakip](/getting-started/create-your-first-page/) for browser-based writing.
 - [Import Markdown And Obsidian Notes](/getting-started/bring-your-notes/) for migration steps and verification.
 - [Markdown Support](/getting-started/markdown-support/) for supported syntax.
-- [Organize Markdawn Pages And Folders](/getting-started/organize-pages-and-folders/) for shared project structure.
-- [Share A Markdawn Page](/getting-started/share-a-page/) for view, edit, and admin access.
-- [Markdawn CLI](/agents/markdawn-cli/) for terminal workflows.
+- [Organize Metakip Pages And Folders](/getting-started/organize-pages-and-folders/) for shared project structure.
+- [Share A Metakip Page](/getting-started/share-a-page/) for view, edit, and admin access.
+- [Metakip CLI](/agents/metakip-cli/) for terminal workflows.
 - [API Reference](/api-reference/endpoints/) for automation and integrations.
-- [Use Markdawn With AI Assistants](/agents/use-markdawn-with-ai-assistants/) for controlled AI assistant access.
+- [Use Metakip With AI Assistants](/agents/use-metakip-with-ai-assistants/) for controlled AI assistant access.
 
 ## Sources And Further Reading
 
@@ -169,4 +169,4 @@ Markdawn does not currently describe Apple Notes as a first-class native import.
 
 ## Verdict
 
-Choose **Apple Notes** for fast, personal, Apple-native capture. Choose **Markdawn** when notes need to become shared project context that works across device ecosystems, remains centered on markdown, and can be connected to the CLI, API, or an AI assistant.
+Choose **Apple Notes** for fast, personal, Apple-native capture. Choose **Metakip** when notes need to become shared project context that works across device ecosystems, remains centered on markdown, and can be connected to the CLI, API, or an AI assistant.

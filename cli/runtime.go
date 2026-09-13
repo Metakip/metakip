@@ -63,7 +63,7 @@ func (r *runtimeState) serverURL() (string, error) {
 		return "", err
 	}
 	baseURL := cfg.BaseURL
-	if value := os.Getenv("MARKDAWN_URL"); value != "" {
+	if value := os.Getenv("METAKIP_URL"); value != "" {
 		baseURL = value
 	}
 	if r.cli.URL != "" {
@@ -81,7 +81,7 @@ func (r *runtimeState) client() (*client, error) {
 		return nil, err
 	}
 	token := cfg.Token
-	if value := os.Getenv("MARKDAWN_TOKEN"); value != "" {
+	if value := os.Getenv("METAKIP_TOKEN"); value != "" {
 		token = value
 	}
 	baseURL, err := r.serverURL()

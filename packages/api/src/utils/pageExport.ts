@@ -1,4 +1,4 @@
-import { extractWikiLinkTargetIds } from '@markdawn/shared/yjs-helpers';
+import { extractWikiLinkTargetIds } from '@metakip/shared/yjs-helpers';
 import { sql } from 'drizzle-orm';
 import { HTTPException } from 'hono/http-exception';
 import JSZip from 'jszip';

@@ -179,13 +179,13 @@ jobs:
       postgresql:
         image: docker.io/library/postgres@sha256:af194ccf3e2d7fe367012c7b88ce8b816c5c889b18a5b316799a1f0d7eac746a
         env:
-          POSTGRES_USER: markdawn
+          POSTGRES_USER: metakip
           POSTGRES_PASSWORD: password
-          POSTGRES_DB: markdawn
+          POSTGRES_DB: metakip
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U markdawn -d markdawn"
+          --health-cmd "pg_isready -U metakip -d metakip"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -205,12 +205,12 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Apply database migrations
-        run: pnpm --filter @markdawn/api db:migrate
+        run: pnpm --filter @metakip/api db:migrate
         env:
-          DATABASE_URL: postgresql://markdawn:password@localhost:5432/markdawn
+          DATABASE_URL: postgresql://metakip:password@localhost:5432/metakip
 
       - name: Build shared dependencies
-        run: pnpm --filter @markdawn/shared run build
+        run: pnpm --filter @metakip/shared run build
 
       - name: Start dev servers
         run: |
@@ -240,7 +240,7 @@ jobs:
           cat /tmp/dev-servers.log
           exit 1
         env:
-          DATABASE_URL: postgresql://markdawn:password@localhost:5432/markdawn
+          DATABASE_URL: postgresql://metakip:password@localhost:5432/metakip
           BETTER_AUTH_SECRET: test-secret-that-is-at-least-32-characters-long
           COLLAB_INTERNAL_SECRET: test-collaboration-internal-secret
           FRONTEND_URL: http://localhost:5173

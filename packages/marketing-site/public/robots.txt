@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://markdawn.space/sitemap.xml
+Sitemap: https://metakip.com/sitemap.xml

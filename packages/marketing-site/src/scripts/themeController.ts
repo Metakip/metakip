@@ -6,7 +6,7 @@ const isTheme = (value: string | null): value is Theme =>
   value === 'light' || value === 'dark' || value === 'system';
 
 const readTheme = (): Theme => {
-  const storedTheme = localStorage.getItem('markdawn-theme');
+  const storedTheme = localStorage.getItem('metakip-theme');
   return isTheme(storedTheme) ? storedTheme : 'system';
 };
 
@@ -28,9 +28,9 @@ export const initializeThemeController = (): void => {
       document.documentElement.classList.toggle('dark', isDark);
       document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
       themeColorMeta.setAttribute('content', isDark ? '#090909' : '#ffffff');
-      if (persist) localStorage.setItem('markdawn-theme', theme);
+      if (persist) localStorage.setItem('metakip-theme', theme);
       updateThemeButton(theme);
-      window.dispatchEvent(new CustomEvent('markdawn-theme-change', { detail: isDark }));
+      window.dispatchEvent(new CustomEvent('metakip-theme-change', { detail: isDark }));
     };
 
     themeButton.addEventListener('click', () => {

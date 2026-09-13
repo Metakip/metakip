@@ -1,16 +1,14 @@
 [Unit]
-Description=Markdawn PostgreSQL Database
+Description=Metakip PostgreSQL Database
 After=network-online.target
 
 [Container]
 Image=docker.io/library/postgres:17-alpine
-ContainerName=markdawn-postgres
-Pod=markdawn.pod
-Environment=POSTGRES_USER=markdawn
-Environment=POSTGRES_DB=markdawn
-EnvironmentFile=/var/www/markdawn/.env
+ContainerName=metakip-postgres
+Pod=metakip.pod
+EnvironmentFile=/var/www/metakip/.env
 Volume=postgres-data:/var/lib/postgresql/data:Z
-HealthCmd=pg_isready -U markdawn -d markdawn
+HealthCmd=CMD-SHELL pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}
 HealthInterval=10s
 HealthTimeout=5s
 HealthRetries=5

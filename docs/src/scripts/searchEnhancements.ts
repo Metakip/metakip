@@ -1,4 +1,4 @@
-const SEARCH_HISTORY_KEY = 'markdawn-docs-search-history';
+const SEARCH_HISTORY_KEY = 'metakip-docs-search-history';
 const MAX_SEARCH_HISTORY = 5;
 
 const SUGGESTED_SEARCHES = [
@@ -6,7 +6,7 @@ const SUGGESTED_SEARCHES = [
   'Markdown support',
   'API authentication',
   'Self-hosting',
-  'Use Markdawn with AI assistants',
+  'Use Metakip with AI assistants',
 ];
 
 type SearchPanel = {
@@ -38,7 +38,7 @@ function clearStoredSearchHistory(): void {
 
 function reportMalformedSearchHistory(message: string): void {
   // biome-ignore lint/suspicious/noConsole: malformed browser state needs a visible diagnostic.
-  console.warn(`[Markdawn docs] ${message}`);
+  console.warn(`[Metakip docs] ${message}`);
 }
 
 function readSearchHistory(): string[] {
@@ -89,16 +89,16 @@ function addToSearchHistory(query: string): void {
 function createSearchButton(query: string, icon: 'clock' | 'arrow'): HTMLButtonElement {
   const button = document.createElement('button');
   button.type = 'button';
-  button.className = 'markdawn-search-item';
+  button.className = 'metakip-search-item';
   button.dataset.searchQuery = query;
 
   const iconElement = document.createElement('span');
-  iconElement.className = 'markdawn-search-item-icon';
+  iconElement.className = 'metakip-search-item-icon';
   iconElement.dataset.icon = icon;
   iconElement.setAttribute('aria-hidden', 'true');
 
   const label = document.createElement('span');
-  label.className = 'markdawn-search-item-label';
+  label.className = 'metakip-search-item-label';
   label.textContent = query;
 
   button.append(iconElement, label);
@@ -110,14 +110,14 @@ function createSearchGroup(title: string): {
   list: HTMLElement;
 } {
   const group = document.createElement('section');
-  group.className = 'markdawn-search-group';
+  group.className = 'metakip-search-group';
 
   const heading = document.createElement('h2');
-  heading.className = 'markdawn-search-group-heading';
+  heading.className = 'metakip-search-group-heading';
   heading.textContent = title;
 
   const list = document.createElement('div');
-  list.className = 'markdawn-search-item-list';
+  list.className = 'metakip-search-item-list';
 
   group.append(heading, list);
   return { group, list };
@@ -134,32 +134,32 @@ function renderRecentSearches(panel: SearchPanel): void {
   panel.suggestedList.replaceChildren(
     ...suggestions.map((query) => createSearchButton(query, 'arrow')),
   );
-  const suggestedGroup = panel.suggestedList.closest<HTMLElement>('.markdawn-search-group');
+  const suggestedGroup = panel.suggestedList.closest<HTMLElement>('.metakip-search-group');
   if (suggestedGroup) suggestedGroup.hidden = suggestions.length === 0;
 }
 
 function createSearchPanel(): SearchPanel {
   const element = document.createElement('div');
-  element.className = 'markdawn-search-start';
-  element.dataset.markdawnSearchStart = '';
+  element.className = 'metakip-search-start';
+  element.dataset.metakipSearchStart = '';
 
   const recent = createSearchGroup('Recent searches');
   const clearButton = document.createElement('button');
   clearButton.type = 'button';
-  clearButton.className = 'markdawn-search-clear';
+  clearButton.className = 'metakip-search-clear';
   clearButton.textContent = 'Clear';
   clearButton.dataset.clearSearchHistory = '';
 
   const recentHeading = recent.group.querySelector('h2');
   if (recentHeading) {
     const recentHeader = document.createElement('div');
-    recentHeader.className = 'markdawn-search-group-header';
+    recentHeader.className = 'metakip-search-group-header';
     recentHeading.replaceWith(recentHeader);
     recentHeader.append(recentHeading, clearButton);
   }
 
   const suggested = createSearchGroup('Suggested');
-  suggested.list.classList.add('markdawn-search-suggestion-list');
+  suggested.list.classList.add('metakip-search-suggestion-list');
 
   element.append(recent.group, suggested.group);
 
@@ -225,9 +225,9 @@ function searchForQuery(siteSearch: HTMLElement, query: string): void {
 
 function bindSearchInput(siteSearch: HTMLElement, panel: SearchPanel): void {
   const input = getSearchInput(siteSearch);
-  if (!input || input.dataset.markdawnSearchHistoryBound === 'true') return;
+  if (!input || input.dataset.metakipSearchHistoryBound === 'true') return;
 
-  input.dataset.markdawnSearchHistoryBound = 'true';
+  input.dataset.metakipSearchHistoryBound = 'true';
   const updatePanelVisibility = () => {
     panel.element.hidden = input.value.trim().length > 0;
   };
@@ -253,19 +253,19 @@ function enhanceSearch(): void {
   const searchContainer = siteSearch.querySelector('.search-container');
   if (!(searchContainer instanceof HTMLElement)) return;
 
-  let panel = searchContainer.querySelector<HTMLElement>('[data-markdawn-search-start]');
+  let panel = searchContainer.querySelector<HTMLElement>('[data-metakip-search-start]');
   if (!panel) {
     const createdPanel = createSearchPanel();
     searchContainer.append(createdPanel.element);
     panel = createdPanel.element;
   }
 
-  const recentGroup = panel.querySelector<HTMLElement>('.markdawn-search-group');
-  const recentList = panel.querySelector<HTMLElement>('.markdawn-search-item-list');
+  const recentGroup = panel.querySelector<HTMLElement>('.metakip-search-group');
+  const recentList = panel.querySelector<HTMLElement>('.metakip-search-item-list');
   const clearButton = panel.querySelector<HTMLButtonElement>('[data-clear-search-history]');
   if (!recentGroup || !recentList || !clearButton) return;
 
-  const suggestedList = panel.querySelector<HTMLElement>('.markdawn-search-suggestion-list');
+  const suggestedList = panel.querySelector<HTMLElement>('.metakip-search-suggestion-list');
   if (!suggestedList) return;
 
   const searchPanel: SearchPanel = {
@@ -276,8 +276,8 @@ function enhanceSearch(): void {
     suggestedList,
   };
 
-  if (siteSearch.dataset.markdawnSearchEnhancements !== 'true') {
-    siteSearch.dataset.markdawnSearchEnhancements = 'true';
+  if (siteSearch.dataset.metakipSearchEnhancements !== 'true') {
+    siteSearch.dataset.metakipSearchEnhancements = 'true';
 
     const dialog = siteSearch.querySelector('dialog');
     if (dialog instanceof HTMLDialogElement) trapDialogFocus(dialog);

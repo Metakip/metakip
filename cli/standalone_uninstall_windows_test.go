@@ -13,11 +13,11 @@ import (
 
 func TestStandaloneUninstallHelperRestoresReceiptWhenBinaryRemovalFails(t *testing.T) {
 	stateDir := t.TempDir()
-	installDir := filepath.Join(stateDir, "Markdawn")
+	installDir := filepath.Join(stateDir, "Metakip")
 	if err := os.Mkdir(installDir, 0o700); err != nil {
 		t.Fatal(err)
 	}
-	binaryPath := filepath.Join(installDir, "markdawn.exe")
+	binaryPath := filepath.Join(installDir, "metakip.exe")
 	if err := os.Mkdir(binaryPath, 0o700); err != nil {
 		t.Fatal(err)
 	}
@@ -33,7 +33,7 @@ func TestStandaloneUninstallHelperRestoresReceiptWhenBinaryRemovalFails(t *testi
 		t.Fatal(err)
 	}
 	configPath := filepath.Join(stateDir, "config.json")
-	config := []byte(`{"baseUrl":"https://app.markdawn.space","token":"secret"}`)
+	config := []byte(`{"baseUrl":"https://app.metakip.com","token":"secret"}`)
 	if err := os.WriteFile(configPath, config, 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -67,11 +67,11 @@ func TestStandaloneUninstallHelperRestoresReceiptWhenBinaryRemovalFails(t *testi
 
 func TestStandaloneUninstallHelperRemovesBinaryAndReceipt(t *testing.T) {
 	stateDir := t.TempDir()
-	installDir := filepath.Join(stateDir, "Markdawn")
+	installDir := filepath.Join(stateDir, "Metakip")
 	if err := os.Mkdir(installDir, 0o700); err != nil {
 		t.Fatal(err)
 	}
-	binaryPath := filepath.Join(installDir, "markdawn.exe")
+	binaryPath := filepath.Join(installDir, "metakip.exe")
 	if err := os.WriteFile(binaryPath, []byte("binary"), 0o600); err != nil {
 		t.Fatal(err)
 	}

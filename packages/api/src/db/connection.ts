@@ -1,4 +1,4 @@
-import { getDbLogger } from '@markdawn/shared';
+import { getDbLogger } from '@metakip/shared';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import * as pg from 'pg';
 

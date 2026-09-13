@@ -2,7 +2,7 @@ import { execSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { Client } from 'pg';
 
-const CONTAINER_NAME_PREFIX = 'markdawn-postgres-test';
+const CONTAINER_NAME_PREFIX = 'metakip-postgres-test';
 
 function getMappedPort(name: string): number {
   const mapping = execSync(`podman port ${name} 5432/tcp`, { encoding: 'utf8' }).trim();
@@ -56,11 +56,11 @@ export default async function setup(): Promise<() => Promise<void>> {
   // cannot both discover and then race to bind the same "free" port.
   try {
     execSync(
-      `podman run -d --name ${containerName} -e POSTGRES_USER=markdawn -e POSTGRES_PASSWORD=password -e POSTGRES_DB=markdawn_test -p 127.0.0.1::5432 postgres:17-alpine -c fsync=off -c full_page_writes=off -c synchronous_commit=off`,
+      `podman run -d --name ${containerName} -e POSTGRES_USER=metakip -e POSTGRES_PASSWORD=password -e POSTGRES_DB=metakip_test -p 127.0.0.1::5432 postgres:17-alpine -c fsync=off -c full_page_writes=off -c synchronous_commit=off`,
       { stdio: 'inherit' },
     );
     const port = getMappedPort(containerName);
-    const testDbUrl = `postgresql://markdawn:password@127.0.0.1:${port}/markdawn_test`;
+    const testDbUrl = `postgresql://metakip:password@127.0.0.1:${port}/metakip_test`;
 
     await waitForDatabase(containerName, testDbUrl);
 
@@ -76,7 +76,7 @@ export default async function setup(): Promise<() => Promise<void>> {
     process.env.DATABASE_URL = testDbUrl;
 
     // Apply the full migration chain through drizzle-kit.
-    execSync('pnpm --filter @markdawn/api exec drizzle-kit migrate', {
+    execSync('pnpm --filter @metakip/api exec drizzle-kit migrate', {
       env: { ...process.env, DATABASE_URL: testDbUrl },
       stdio: 'inherit',
     });

@@ -25,7 +25,7 @@ const (
 	maxReleaseZipDirectoryBytes       = 8 << 20
 )
 
-var releaseBaseURL = "https://github.com/atharva-again/Markdawn/releases"
+var releaseBaseURL = "https://github.com/Metakip/metakip/releases"
 
 func validateReleaseVersion(version string) error {
 	if version != "" && !releaseVersionPattern.MatchString(version) {
@@ -60,7 +60,7 @@ func releaseAssetURL(version, asset string) string {
 }
 
 func releaseArchiveName(version string) string {
-	name := "markdawn_"
+	name := "metakip_"
 	if version != "" {
 		name += strings.TrimPrefix(version, "v") + "_"
 	}
@@ -344,11 +344,11 @@ const (
 func updateOutcomeText(status updateStatus, target string) (string, error) {
 	switch status {
 	case updateStatusScheduled:
-		return fmt.Sprintf("Markdawn update to %s is scheduled and will finish after this command exits.", target), nil
+		return fmt.Sprintf("Metakip update to %s is scheduled and will finish after this command exits.", target), nil
 	case updateStatusUpdated:
-		return fmt.Sprintf("Markdawn updated to %s.", target), nil
+		return fmt.Sprintf("Metakip updated to %s.", target), nil
 	case updateStatusUpToDate:
-		return fmt.Sprintf("Markdawn is already up to date: %s.", target), nil
+		return fmt.Sprintf("Metakip is already up to date: %s.", target), nil
 	default:
 		return "", fmt.Errorf("unknown standalone update status %q", status)
 	}
@@ -384,9 +384,9 @@ func updateStandaloneWithProgress(
 	asset := releaseArchiveName(version)
 	target := newUpdateTarget(version)
 	if target.exactVersion == "" {
-		progress.phase("Checking for the latest Markdawn release...")
+		progress.phase("Checking for the latest Metakip release...")
 	} else {
-		progress.phase("Checking for Markdawn " + target.exactVersion + "...")
+		progress.phase("Checking for Metakip " + target.exactVersion + "...")
 	}
 	progress.phase("Downloading checksums.txt...")
 	checksums, err := downloadReleaseAsset(
@@ -405,7 +405,7 @@ func updateStandaloneWithProgress(
 	if err != nil {
 		return updateOutcome{}, err
 	}
-	progress.phase("Downloading the Markdawn update...")
+	progress.phase("Downloading the Metakip update...")
 	archive, err := downloadReleaseAsset(
 		ctx,
 		client,
@@ -417,13 +417,13 @@ func updateStandaloneWithProgress(
 	if err != nil {
 		return updateOutcome{}, err
 	}
-	progress.phase("Downloaded the Markdawn update.")
+	progress.phase("Downloaded the Metakip update.")
 	actual := fmt.Sprintf("%x", sha256.Sum256(archive))
 	if actual != expected {
 		return updateOutcome{}, fmt.Errorf("SHA-256 verification failed for %s", asset)
 	}
-	progress.phase("Verified the Markdawn update.")
-	staged, err := os.CreateTemp(receipt.InstallDir, ".markdawn-update-*")
+	progress.phase("Verified the Metakip update.")
+	staged, err := os.CreateTemp(receipt.InstallDir, ".metakip-update-*")
 	if err != nil {
 		return updateOutcome{}, fmt.Errorf("create staged binary: %w", err)
 	}
@@ -448,7 +448,7 @@ func updateStandaloneWithProgress(
 		os.Remove(stagedPath)
 		return newUpdateOutcome(updateStatusUpToDate, target), nil
 	}
-	progress.phase("Installing the Markdawn update...")
+	progress.phase("Installing the Metakip update...")
 	deferred, err := replaceUpdatedBinary(receipt.BinaryPath, stagedPath)
 	if err != nil {
 		os.Remove(stagedPath)

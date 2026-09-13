@@ -4,7 +4,7 @@ import {
   type BulkRemovalResult,
   getApiLogger,
   MAX_BULK_REMOVAL_OPERATIONS_PER_REQUEST,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import { Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { HTTPException } from 'hono/http-exception';

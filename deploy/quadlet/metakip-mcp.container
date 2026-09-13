@@ -1,15 +1,15 @@
 [Unit]
-Description=Markdawn MCP Server
-After=network-online.target markdawn-api.service
-Requires=markdawn-api.service
+Description=Metakip MCP Server
+After=network-online.target metakip-api.service
+Requires=metakip-api.service
 
 [Container]
-Image=localhost/markdawn-mcp:latest
-ContainerName=markdawn-mcp
-Pod=markdawn.pod
+Image=localhost/metakip-mcp:latest
+ContainerName=metakip-mcp
+Pod=metakip.pod
 Environment=NODE_ENV=production
 Environment=MCP_PORT=3002
-EnvironmentFile=/var/www/markdawn/.env
+EnvironmentFile=/var/www/metakip/.env
 WorkingDir=/app
 Exec=node /app/packages/mcp/dist/index.js
 

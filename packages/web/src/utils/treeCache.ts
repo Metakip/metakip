@@ -1,4 +1,4 @@
-import type { Folder, FolderTreeNode, Page, PageTreeNode } from '@markdawn/shared';
+import type { Folder, FolderTreeNode, Page, PageTreeNode } from '@metakip/shared';
 
 type TreeNodeContext = Pick<FolderTreeNode, 'ownerId' | 'userPermission' | 'workspaceAccess'>;
 

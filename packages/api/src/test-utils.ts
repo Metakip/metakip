@@ -172,7 +172,7 @@ export async function enableTestPagePublicAccess(pageId: string) {
  * (uploads, imports, exports). Returns the path and a cleanup function.
  * The directory is created under os.tmpdir() to avoid polluting the repo.
  */
-export function createTestTempDir(prefix = 'markdawn-test-'): {
+export function createTestTempDir(prefix = 'metakip-test-'): {
   path: string;
   cleanup: () => void;
 } {

@@ -1,5 +1,5 @@
 {
-  "name": "@markdawn/api",
+  "name": "@metakip/api",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -28,7 +28,7 @@
     "@hono/node-server": "^1.19.9",
     "@logtape/hono": "^2.0.5",
     "@logtape/logtape": "^2.0.5",
-    "@markdawn/shared": "workspace:*",
+    "@metakip/shared": "workspace:*",
     "better-auth": "^1.7.2",
     "better-call": "1.4.0",
     "dotenv": "^17.3.1",

@@ -1,4 +1,4 @@
-import { MAX_YDOC_BYTES } from '@markdawn/shared';
+import { MAX_YDOC_BYTES } from '@metakip/shared';
 import { describe, expect, it } from 'vitest';
 import { testQuery } from '../../db/testQuery';
 import {

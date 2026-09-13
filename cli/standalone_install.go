@@ -17,8 +17,8 @@ import (
 
 const (
 	standaloneInstallMethod = "standalone"
-	pathBlockStart          = "# >>> markdawn >>>"
-	pathBlockEnd            = "# <<< markdawn <<<"
+	pathBlockStart          = "# >>> metakip >>>"
+	pathBlockEnd            = "# <<< metakip <<<"
 )
 
 var releaseVersionPattern = regexp.MustCompile(`^v?[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$`)
@@ -32,27 +32,27 @@ type installReceipt struct {
 }
 
 func installStateDir() (string, error) {
-	if dir := os.Getenv("MARKDAWN_INSTALL_STATE_DIR"); dir != "" {
+	if dir := os.Getenv("METAKIP_INSTALL_STATE_DIR"); dir != "" {
 		return dir, nil
 	}
 	if runtime.GOOS == "windows" {
 		if dir := os.Getenv("LOCALAPPDATA"); dir != "" {
-			return filepath.Join(dir, "Markdawn"), nil
+			return filepath.Join(dir, "Metakip"), nil
 		}
 		dir, err := os.UserConfigDir()
 		if err != nil {
 			return "", err
 		}
-		return filepath.Join(dir, "Markdawn"), nil
+		return filepath.Join(dir, "Metakip"), nil
 	}
 	if dir := os.Getenv("XDG_STATE_HOME"); dir != "" {
-		return filepath.Join(dir, "markdawn"), nil
+		return filepath.Join(dir, "metakip"), nil
 	}
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(home, ".local", "state", "markdawn"), nil
+	return filepath.Join(home, ".local", "state", "metakip"), nil
 }
 
 func installReceiptPath() (string, error) {
@@ -143,9 +143,9 @@ func validateInstallReceipt(receipt installReceipt) error {
 
 func executableName() string {
 	if runtime.GOOS == "windows" {
-		return "markdawn.exe"
+		return "metakip.exe"
 	}
-	return "markdawn"
+	return "metakip"
 }
 
 func managedInstall() (installReceipt, string, error) {
@@ -195,7 +195,7 @@ func unmanagedUpdateError() error {
 		Code:    "unmanaged_install",
 		Message: message,
 		Presentation: cliErrorPresentation{HumanParagraphs: []string{
-			"If this was installed with Go, update it with: go install github.com/atharva-again/Markdawn/cli@latest",
+			"If this was installed with Go, update it with: go install github.com/Metakip/metakip/cli@latest",
 			"Otherwise, reinstall it using the standalone installer.",
 		}},
 	}

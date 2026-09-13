@@ -1,4 +1,4 @@
-import type { SharePermission } from '@markdawn/shared';
+import type { SharePermission } from '@metakip/shared';
 import { type SQL, sql } from 'drizzle-orm';
 import { executeQuery, type QueryExecutor, query } from '../db/query';
 import { enumerableFolderPathsCte } from './enumerableFolderPaths';

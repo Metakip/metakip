@@ -1,7 +1,7 @@
 import {
   hashMcpAccessToken,
   verifyMcpInternalCredential,
-} from '@markdawn/shared/node/mcp-internal-auth';
+} from '@metakip/shared/node/mcp-internal-auth';
 import { describe, expect, it, vi } from 'vitest';
 import type { McpActor } from './types';
 import { V1Client } from './v1Client';
@@ -39,7 +39,7 @@ describe('V1Client idempotency', () => {
     await client.listPages({});
 
     const headers = new Headers(fetcher.mock.calls[0]?.[1]?.headers);
-    const credential = headers.get('X-Markdawn-MCP-Authorization');
+    const credential = headers.get('X-Metakip-MCP-Authorization');
     expect(credential).not.toBeNull();
     expect(verifyMcpInternalCredential(credential ?? '', apiInternalSecret)).toMatchObject(
       actor.authContext,
@@ -65,8 +65,8 @@ describe('V1Client idempotency', () => {
 
     const firstHeaders = new Headers(fetcher.mock.calls[0]?.[1]?.headers);
     const secondHeaders = new Headers(fetcher.mock.calls[1]?.[1]?.headers);
-    expect(firstHeaders.get('X-Markdawn-MCP-Authorization')).not.toBe(
-      secondHeaders.get('X-Markdawn-MCP-Authorization'),
+    expect(firstHeaders.get('X-Metakip-MCP-Authorization')).not.toBe(
+      secondHeaders.get('X-Metakip-MCP-Authorization'),
     );
   });
 

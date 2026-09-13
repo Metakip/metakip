@@ -41,10 +41,10 @@ func (cmd *UninstallCmd) Run(r *runtimeState) error {
 		return r.printJSON(uninstallResult{Uninstalled: !deferred, Scheduled: deferred})
 	}
 	if deferred {
-		_, err = fmt.Fprintln(r.stdout, "Markdawn uninstall is scheduled and will finish after this command exits.")
+		_, err = fmt.Fprintln(r.stdout, "Metakip uninstall is scheduled and will finish after this command exits.")
 		return err
 	}
-	_, err = fmt.Fprintln(r.stdout, "Markdawn uninstalled.")
+	_, err = fmt.Fprintln(r.stdout, "Metakip uninstalled.")
 	return err
 }
 
@@ -53,11 +53,11 @@ func removeStandaloneConfig(path string) error {
 		return nil
 	}
 	if err := os.Remove(path); err != nil && !errors.Is(err, os.ErrNotExist) {
-		return fmt.Errorf("remove Markdawn configuration: %w", err)
+		return fmt.Errorf("remove Metakip configuration: %w", err)
 	}
-	if os.Getenv("MARKDAWN_CONFIG_DIR") == "" {
+	if os.Getenv("METAKIP_CONFIG_DIR") == "" {
 		if err := os.Remove(filepath.Dir(path)); err != nil && !errors.Is(err, os.ErrNotExist) && !errors.Is(err, syscallENOTEMPTY()) {
-			return fmt.Errorf("remove Markdawn configuration directory: %w", err)
+			return fmt.Errorf("remove Metakip configuration directory: %w", err)
 		}
 	}
 	return nil
@@ -93,7 +93,7 @@ func confirmUninstall(r *runtimeState) error {
 	confirmed := false
 	form := huh.NewForm(huh.NewGroup(
 		huh.NewConfirm().
-			Title("Remove this standalone Markdawn installation?").
+			Title("Remove this standalone Metakip installation?").
 			Value(&confirmed).
 			WithButtonAlignment(lipgloss.Left),
 	))

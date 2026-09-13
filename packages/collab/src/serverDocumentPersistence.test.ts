@@ -6,7 +6,7 @@ import {
   type onStoreDocumentPayload,
   type Server,
 } from '@hocuspocus/server';
-import { MAX_PAGE_TITLE_LENGTH } from '@markdawn/shared';
+import { MAX_PAGE_TITLE_LENGTH } from '@metakip/shared';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
 import type { CollabSession } from './collabSession';

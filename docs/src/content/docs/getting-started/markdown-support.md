@@ -1,9 +1,9 @@
 ---
-title: Markdown Support In Markdawn
-description: See which markdown syntax Markdawn supports, how page links and frontmatter work, and which features remain partial.
+title: Markdown Support In Metakip
+description: See which markdown syntax Metakip supports, how page links and frontmatter work, and which features remain partial.
 ---
 
-Markdawn uses markdown for page content, with a few product-specific extensions. The same authored markdown can be read through the browser, CLI, and API.
+Metakip uses markdown for page content, with a few product-specific extensions. The same authored markdown can be read through the browser, CLI, and API.
 
 ## Supported Markdown
 
@@ -13,7 +13,7 @@ Markdawn uses markdown for page content, with a few product-specific extensions.
 | Bold and italic text | Supported | `**bold**` and `*italic*` |
 | Strikethrough | Supported | `~~removed text~~` |
 | Inline code | Supported | ``npm run dev`` |
-| Links | Supported | `[Markdawn](https://markdawn.space)` |
+| Links | Supported | `[Metakip](https://metakip.com)` |
 | Images | Supported | `![Alt text](https://example.com/image.png)` |
 | Bulleted and numbered lists | Supported | `- One` and `1. One` |
 | Task lists | Supported | `- [ ] Todo` and `- [x] Done` |
@@ -30,7 +30,7 @@ Markdawn uses markdown for page content, with a few product-specific extensions.
 
 ## Page Links
 
-Use double brackets when one Markdawn page should link to another:
+Use double brackets when one Metakip page should link to another:
 
 ```markdown
 [[Project Notes]]
@@ -51,7 +51,7 @@ The editor recognizes `NOTE`, `TIP`, `WARNING`, `DANGER`, `INFO`, and `EXAMPLE` 
 > Keep this detail in mind.
 ```
 
-Support is currently partial. If you import or create a page through the API or CLI, verify how the callout renders in the browser before relying on it. GitHub callout types such as `IMPORTANT` and `CAUTION` are not currently recognized as Markdawn callout types.
+Support is currently partial. If you import or create a page through the API or CLI, verify how the callout renders in the browser before relying on it. GitHub callout types such as `IMPORTANT` and `CAUTION` are not currently recognized as Metakip callout types.
 
 ## Frontmatter
 
@@ -84,6 +84,6 @@ For portable content, prefer headings, paragraphs, lists, links, images, tables,
 
 ## Related Guides
 
-- [Create A Page In Markdawn](/getting-started/create-your-first-page/) shows page titles and page links in a first page.
-- [Bring Your Notes to Markdawn](/getting-started/bring-your-notes/) explains what to check after an import.
-- [Markdawn CLI](/agents/markdawn-cli/) shows how to import and export markdown from a terminal.
+- [Create A Page In Metakip](/getting-started/create-your-first-page/) shows page titles and page links in a first page.
+- [Bring Your Notes to Metakip](/getting-started/bring-your-notes/) explains what to check after an import.
+- [Metakip CLI](/agents/metakip-cli/) shows how to import and export markdown from a terminal.

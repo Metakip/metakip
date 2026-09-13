@@ -8,7 +8,7 @@ import {
   type Server,
 } from '@hocuspocus/server';
 import type { getLogger } from '@logtape/logtape';
-import { getAnonymousName, getStableColor } from '@markdawn/shared';
+import { getAnonymousName, getStableColor } from '@metakip/shared';
 import { vi } from 'vitest';
 import WebSocket from 'ws';
 import * as Y from 'yjs';

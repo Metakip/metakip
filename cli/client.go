@@ -39,13 +39,13 @@ func newClient(ctx context.Context, baseURL, token string, timeout time.Duration
 	baseURL = strings.TrimRight(strings.TrimSpace(baseURL), "/")
 	parsed, err := url.Parse(baseURL)
 	if err != nil || (parsed.Scheme != "http" && parsed.Scheme != "https") || parsed.Host == "" {
-		return nil, usageError("Invalid Markdawn URL %q.", baseURL)
+		return nil, usageError("Invalid Metakip URL %q.", baseURL)
 	}
 	if parsed.Scheme == "http" && !isLoopbackHost(parsed.Hostname()) {
-		return nil, usageError("Remote Markdawn URLs must use HTTPS.")
+		return nil, usageError("Remote Metakip URLs must use HTTPS.")
 	}
 	if strings.TrimSpace(token) == "" {
-		return nil, &cliError{Code: "not_authenticated", Message: "Not logged in; run `markdawn login` or set MARKDAWN_TOKEN.", StatusCode: http.StatusUnauthorized}
+		return nil, &cliError{Code: "not_authenticated", Message: "Not logged in; run `metakip login` or set METAKIP_TOKEN.", StatusCode: http.StatusUnauthorized}
 	}
 	if timeout <= 0 {
 		return nil, usageError("Timeout must be greater than zero.")
@@ -82,7 +82,7 @@ func (c *client) requestWithContext(ctx context.Context, method, path string, bo
 	}
 	request.Header.Set("Authorization", "Bearer "+c.token)
 	request.Header.Set("Accept", "application/json, text/markdown")
-	request.Header.Set("User-Agent", "markdawn-cli/"+buildVersion())
+	request.Header.Set("User-Agent", "metakip-cli/"+buildVersion())
 	for key, value := range headers {
 		request.Header.Set(key, value)
 	}
@@ -91,7 +91,7 @@ func (c *client) requestWithContext(ctx context.Context, method, path string, bo
 		if response != nil && response.Body != nil {
 			response.Body.Close()
 		}
-		return nil, &cliError{Code: "network_error", Message: "Could not reach Markdawn", Cause: err}
+		return nil, &cliError{Code: "network_error", Message: "Could not reach Metakip", Cause: err}
 	}
 	if response.StatusCode >= 200 && response.StatusCode < 300 {
 		return response, nil
@@ -101,24 +101,24 @@ func (c *client) requestWithContext(ctx context.Context, method, path string, bo
 	data, err := io.ReadAll(io.LimitReader(response.Body, maxErrorResponseBytes+1))
 	if err != nil {
 		return nil, &cliError{
-			Code: "network_error", Message: "Could not read Markdawn error response", Cause: err,
+			Code: "network_error", Message: "Could not read Metakip error response", Cause: err,
 		}
 	}
 	if len(data) > maxErrorResponseBytes {
 		return nil, &cliError{
-			Code: "invalid_response", Message: "Markdawn error response exceeds the 1 MiB limit",
+			Code: "invalid_response", Message: "Metakip error response exceeds the 1 MiB limit",
 		}
 	}
 	var envelope apiErrorEnvelope
 	if !utf8.Valid(data) {
 		return nil, &cliError{
-			Code: "invalid_response", Message: "Markdawn returned an invalid error response",
+			Code: "invalid_response", Message: "Metakip returned an invalid error response",
 			StatusCode: response.StatusCode,
 		}
 	}
 	if err := json.Unmarshal(data, &envelope); err != nil {
 		return nil, &cliError{
-			Code: "invalid_response", Message: "Markdawn returned an invalid error response",
+			Code: "invalid_response", Message: "Metakip returned an invalid error response",
 			StatusCode: response.StatusCode, Cause: err,
 		}
 	}
@@ -131,7 +131,7 @@ func (c *client) requestWithContext(ctx context.Context, method, path string, bo
 			message = strings.TrimSpace(legacy.Message)
 		} else {
 			return nil, &cliError{
-				Code: "invalid_response", Message: "Markdawn returned an invalid error response",
+				Code: "invalid_response", Message: "Metakip returned an invalid error response",
 				StatusCode: response.StatusCode,
 			}
 		}
@@ -141,7 +141,7 @@ func (c *client) requestWithContext(ctx context.Context, method, path string, bo
 		seconds, parseError := strconv.Atoi(rawRetryAfter)
 		if parseError != nil || seconds < 0 {
 			return nil, &cliError{
-				Code: "invalid_response", Message: "Markdawn returned an invalid Retry-After header",
+				Code: "invalid_response", Message: "Metakip returned an invalid Retry-After header",
 				Cause: parseError,
 			}
 		}
@@ -159,13 +159,13 @@ func decodeJSON(response *http.Response, target any) error {
 		if errorCode(err) == "payload_too_large" {
 			return fmt.Errorf("read API response: %w", err)
 		}
-		return &cliError{Code: "network_error", Message: "Could not read Markdawn response", Cause: err}
+		return &cliError{Code: "network_error", Message: "Could not read Metakip response", Cause: err}
 	}
 	if !utf8.Valid(data) {
-		return &cliError{Code: "invalid_response", Message: "Markdawn returned invalid JSON"}
+		return &cliError{Code: "invalid_response", Message: "Metakip returned invalid JSON"}
 	}
 	if err := json.Unmarshal(data, target); err != nil {
-		return &cliError{Code: "invalid_response", Message: "Markdawn returned invalid JSON", Cause: err}
+		return &cliError{Code: "invalid_response", Message: "Metakip returned invalid JSON", Cause: err}
 	}
 	return nil
 }
@@ -178,7 +178,7 @@ func discardAndCloseResponse(response *http.Response) error {
 	}
 	return &cliError{
 		Code:    "network_error",
-		Message: "Could not drain Markdawn response",
+		Message: "Could not drain Metakip response",
 		Cause:   errors.Join(readErr, closeErr),
 	}
 }

@@ -32,7 +32,7 @@ func TestAddStandalonePathBlockRollsBackNewProfile(t *testing.T) {
 func TestAddStandalonePathBlockAddsOwnedBlockAlongsideForeignBlock(t *testing.T) {
 	directory := t.TempDir()
 	path := filepath.Join(directory, "profile")
-	contents := "# >>> markdawn >>>\nexport PATH=\"/other:$PATH\"\n# <<< markdawn <<<\n"
+	contents := "# >>> metakip >>>\nexport PATH=\"/other:$PATH\"\n# <<< metakip <<<\n"
 	if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -68,7 +68,7 @@ func TestStandaloneFinalizeLeavesExistingPathBlockWhenProfileChanges(t *testing.
 	installDir := filepath.Join(directory, "bin")
 	firstProfile := filepath.Join(directory, "first-profile")
 	secondProfile := filepath.Join(directory, "second-profile")
-	t.Setenv("MARKDAWN_INSTALL_STATE_DIR", stateDir)
+	t.Setenv("METAKIP_INSTALL_STATE_DIR", stateDir)
 	if err := (&StandaloneFinalizeCmd{InstallDir: installDir, PathFile: firstProfile, PathStyle: "sh"}).Run(nil); err != nil {
 		t.Fatal(err)
 	}
@@ -116,7 +116,7 @@ func TestStandaloneFinalizeRollsBackNewProfileAfterFailedBinaryPublication(t *te
 	if err := os.Mkdir(binaryPath, 0o700); err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("MARKDAWN_INSTALL_STATE_DIR", stateDir)
+	t.Setenv("METAKIP_INSTALL_STATE_DIR", stateDir)
 	if err := os.Mkdir(stateDir, 0o700); err != nil {
 		t.Fatal(err)
 	}
@@ -146,7 +146,7 @@ func TestStandaloneFinalizeRollsBackNewProfileAfterFailedBinaryPublication(t *te
 
 func TestAddStandalonePathBlockPreservesUTF16LEProfile(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "Microsoft.PowerShell_profile.ps1")
-	installDir := `C:\Markdawn`
+	installDir := `C:\Metakip`
 	contents := "before\r\nafter\r\n"
 	units := utf16.Encode([]rune(contents))
 	data := make([]byte, 2+len(units)*2)
@@ -187,7 +187,7 @@ func TestAddStandalonePathBlockPreservesProfilePermissions(t *testing.T) {
 	if err := os.Chmod(path, 0o640); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, err := addStandalonePathBlock(path, "/tmp/markdawn", "sh"); err != nil {
+	if _, _, err := addStandalonePathBlock(path, "/tmp/metakip", "sh"); err != nil {
 		t.Fatal(err)
 	}
 	info, err := os.Stat(path)
@@ -212,7 +212,7 @@ func TestAddStandalonePathBlockPreservesSymlinkedProfile(t *testing.T) {
 	if err := os.Symlink(targetPath, profilePath); err != nil {
 		t.Fatal(err)
 	}
-	if _, _, err := addStandalonePathBlock(profilePath, "/tmp/markdawn", "sh"); err != nil {
+	if _, _, err := addStandalonePathBlock(profilePath, "/tmp/metakip", "sh"); err != nil {
 		t.Fatal(err)
 	}
 	info, err := os.Lstat(profilePath)
@@ -226,7 +226,7 @@ func TestAddStandalonePathBlockPreservesSymlinkedProfile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(string(updated), standalonePathEntry("/tmp/markdawn", "sh")) {
+	if !strings.Contains(string(updated), standalonePathEntry("/tmp/metakip", "sh")) {
 		t.Fatalf("profile target was not updated: %q", updated)
 	}
 }
@@ -234,7 +234,7 @@ func TestAddStandalonePathBlockPreservesSymlinkedProfile(t *testing.T) {
 func TestAddStandalonePathBlockRejectsMalformedBlock(t *testing.T) {
 	directory := t.TempDir()
 	path := filepath.Join(directory, "profile")
-	contents := "# >>> markdawn >>>\n# >>> markdawn >>>\n"
+	contents := "# >>> metakip >>>\n# >>> metakip >>>\n"
 	if err := os.WriteFile(path, []byte(contents), 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -256,7 +256,7 @@ func TestAddStandalonePathBlockRejectsInvalidUTF16BOM(t *testing.T) {
 		if err := os.WriteFile(path, data, 0o600); err != nil {
 			t.Fatal(err)
 		}
-		if _, _, err := addStandalonePathBlock(path, "/tmp/markdawn", "sh"); err == nil {
+		if _, _, err := addStandalonePathBlock(path, "/tmp/metakip", "sh"); err == nil {
 			t.Fatalf("invalid BOM %x was accepted", data)
 		}
 		updated, err := os.ReadFile(path)
@@ -273,7 +273,7 @@ func TestStandaloneFinalizePublishesReceipt(t *testing.T) {
 	directory := t.TempDir()
 	stateDir := filepath.Join(directory, "state")
 	installDir := filepath.Join(directory, "bin")
-	t.Setenv("MARKDAWN_INSTALL_STATE_DIR", stateDir)
+	t.Setenv("METAKIP_INSTALL_STATE_DIR", stateDir)
 	if err := (&StandaloneFinalizeCmd{InstallDir: installDir}).Run(nil); err != nil {
 		t.Fatal(err)
 	}

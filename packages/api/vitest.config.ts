@@ -21,7 +21,7 @@ const coverageConfig = {
 
 export default defineConfig({
   test: {
-    name: '@markdawn/api',
+    name: '@metakip/api',
     hookTimeout: 180_000,
     testTimeout: 60_000,
     globals: true,

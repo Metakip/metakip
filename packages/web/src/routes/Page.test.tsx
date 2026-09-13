@@ -1,5 +1,5 @@
 import { WebSocketStatus } from '@hocuspocus/provider';
-import type { CapabilitySet } from '@markdawn/shared';
+import type { CapabilitySet } from '@metakip/shared';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

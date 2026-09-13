@@ -1,21 +1,21 @@
 ---
-title: Markdawn vs Google Docs
-description: Compare Markdawn and Google Docs for collaboration, comments, Google Workspace, markdown portability, AI assistants, APIs, and self-hosting.
+title: Metakip vs Google Docs
+description: Compare Metakip and Google Docs for collaboration, comments, Google Workspace, markdown portability, AI assistants, APIs, and self-hosting.
 ---
 
-Markdawn and Google Docs are both used for shared writing, but they are built around different content models. Google Docs is a mature collaborative word processor connected to Google Drive and Google Workspace. Markdawn is a markdown-centered knowledge layer for pages, folders, links, controlled access, and tool-driven workflows.
+Metakip and Google Docs are both used for shared writing, but they are built around different content models. Google Docs is a mature collaborative word processor connected to Google Drive and Google Workspace. Metakip is a markdown-centered knowledge layer for pages, folders, links, controlled access, and tool-driven workflows.
 
 ## The Short Answer
 
-Choose **Google Docs** when comments, suggestions, rich formatting, version history, Google Drive, and Workspace integrations are the main requirements. Both Google Docs and Markdawn support real-time coediting.
+Choose **Google Docs** when comments, suggestions, rich formatting, version history, Google Drive, and Workspace integrations are the main requirements. Both Google Docs and Metakip support real-time coediting.
 
-Choose **Markdawn** when pages need to remain markdown-centered, connected through page links, organized as durable knowledge, accessible through the CLI, API, or an AI assistant, and available with a self-hosting option.
+Choose **Metakip** when pages need to remain markdown-centered, connected through page links, organized as durable knowledge, accessible through the CLI, API, or an AI assistant, and available with a self-hosting option.
 
-Neither tool is universally better. Google Docs is the stronger review-oriented collaborative document editor. Markdawn is the stronger fit for shared knowledge that should remain simple, portable, and inspectable while collaborators continue editing it.
+Neither tool is universally better. Google Docs is the stronger review-oriented collaborative document editor. Metakip is the stronger fit for shared knowledge that should remain simple, portable, and inspectable while collaborators continue editing it.
 
 ## At A Glance
 
-| Decision area | Markdawn | Google Docs |
+| Decision area | Metakip | Google Docs |
 | --- | --- | --- |
 | Main job | Shared knowledge and documentation | Collaborative documents and drafts |
 | Organization | Pages, folders, links, and backlinks | Drive files, folders, document tabs, and search |
@@ -33,9 +33,9 @@ Neither tool is universally better. Google Docs is the stronger review-oriented 
 
 ### Real-Time Collaborative Editing
 
-Both Google Docs and Markdawn support multiple people editing the same page or document in real time. Markdawn provides live coediting for shared pages with Edit or Admin access, collaborator presence, and a connection status indicator. Google Docs adds comments, suggestions, and action items to that shared editing workflow.
+Both Google Docs and Metakip support multiple people editing the same page or document in real time. Metakip provides live coediting for shared pages with Edit or Admin access, collaborator presence, and a connection status indicator. Google Docs adds comments, suggestions, and action items to that shared editing workflow.
 
-Google Docs is the stronger choice when the review process must stay inside the document. Markdawn is the stronger choice when the result should remain a connected markdown page.
+Google Docs is the stronger choice when the review process must stay inside the document. Metakip is the stronger choice when the result should remain a connected markdown page.
 
 This makes Google Docs a strong choice for agendas, proposals, briefs, manuscripts, requirements drafts, meeting notes, and any document where several people need to write or review at the same time.
 
@@ -43,7 +43,7 @@ This makes Google Docs a strong choice for agendas, proposals, briefs, manuscrip
 
 Google Docs provides a mature review workflow. People can comment on selected text, mention collaborators, assign action items, suggest edits without directly changing the document, and inspect or restore earlier versions.
 
-Choose Google Docs when the history of a document and the discussion around a draft are as important as the final text. Markdawn is better suited to maintaining the accepted knowledge after the review process is complete.
+Choose Google Docs when the history of a document and the discussion around a draft are as important as the final text. Metakip is better suited to maintaining the accepted knowledge after the review process is complete.
 
 ### Rich Formatting And Document Presentation
 
@@ -69,11 +69,11 @@ Google Docs supports offline work when offline access has been configured. On de
 
 Offline availability is not automatic for every document. Test the exact files, devices, browser profiles, and sharing arrangements your team relies on.
 
-## Where Markdawn Is Better
+## Where Metakip Is Better
 
 ### A Markdown-Centered Knowledge Layer
 
-Markdawn is better when the main artifact is a page that people should be able to read, link, edit, export, and keep using without a word-processor document model.
+Metakip is better when the main artifact is a page that people should be able to read, link, edit, export, and keep using without a word-processor document model.
 
 The same authored markdown can be read through the browser, CLI, and API. Pages can be organized into folders and connected with page links and backlinks. This creates a direct path from a research note or meeting note to durable shared documentation.
 
@@ -81,27 +81,27 @@ Google Docs supports Markdown input and copy-paste behavior, and Google Drive ex
 
 ### Pages, Folders, And Backlinks
 
-Markdawn is designed for connected documentation. A page can link to another page, live in a folder, and be discovered through backlinks. This is useful for product decisions, technical documentation, research, runbooks, and knowledge that needs an explicit structure over time.
+Metakip is designed for connected documentation. A page can link to another page, live in a folder, and be discovered through backlinks. This is useful for product decisions, technical documentation, research, runbooks, and knowledge that needs an explicit structure over time.
 
-Google Docs has Drive folders, document tabs, titles, and search. Those features organize documents effectively, but they do not provide the same page-link and backlink model as Markdawn.
+Google Docs has Drive folders, document tabs, titles, and search. Those features organize documents effectively, but they do not provide the same page-link and backlink model as Metakip.
 
 ### Clear Roles For Shared Content
 
-Markdawn supports **View**, **Edit**, and **Admin** access for shared pages and folders. Use View for reading, Edit for changing content, and Admin for managing access and sharing settings.
+Metakip supports **View**, **Edit**, and **Admin** access for shared pages and folders. Use View for reading, Edit for changing content, and Admin for managing access and sharing settings.
 
-Google Docs uses Viewer, Commenter, and Editor roles, plus ownership and Drive sharing controls. Google's model is stronger for document review because of the Commenter role and suggestions. Markdawn's model is more direct when the main question is whether someone can read, change, or administer shared knowledge.
+Google Docs uses Viewer, Commenter, and Editor roles, plus ownership and Drive sharing controls. Google's model is stronger for document review because of the Commenter role and suggestions. Metakip's model is more direct when the main question is whether someone can read, change, or administer shared knowledge.
 
 ### CLI, API, And AI Assistant Workflows
 
-Markdawn provides documented CLI and API workflows for reading, editing, importing, exporting, and organizing content. Its documentation also covers connecting AI assistants with controlled access to Markdawn pages.
+Metakip provides documented CLI and API workflows for reading, editing, importing, exporting, and organizing content. Its documentation also covers connecting AI assistants with controlled access to Metakip pages.
 
-Google Docs provides a Docs API, Apps Script, `clasp`, add-ons, Gemini features, and Workspace MCP servers in Developer Preview. The difference is the unit being automated. Google automates rich documents inside Drive. Markdawn automates pages, folders, links, and markdown.
+Google Docs provides a Docs API, Apps Script, `clasp`, add-ons, Gemini features, and Workspace MCP servers in Developer Preview. The difference is the unit being automated. Google automates rich documents inside Drive. Metakip automates pages, folders, links, and markdown.
 
-Choose Markdawn when scripts or an AI assistant should work with a simple, durable content model without translating every operation into the Google Docs document structure.
+Choose Metakip when scripts or an AI assistant should work with a simple, durable content model without translating every operation into the Google Docs document structure.
 
 ### Self-Hosting And Deployment Control
 
-Markdawn has a self-hosting path for teams that want control over deployment and data location. Google Docs is a Google-managed service and does not provide a comparable self-hosted deployment for the current product.
+Metakip has a self-hosting path for teams that want control over deployment and data location. Google Docs is a Google-managed service and does not provide a comparable self-hosted deployment for the current product.
 
 Self-hosting adds responsibility for backups, updates, security, and availability. It matters when infrastructure ownership is a requirement, not merely a preference.
 
@@ -109,7 +109,7 @@ Self-hosting adds responsibility for backups, updates, security, and availabilit
 
 Google Docs can download or export documents as Markdown, Microsoft Word, PDF, ODT, RTF, TXT, HTML, and other Drive-supported formats. Google Drive also provides broader export and archive workflows.
 
-Google Docs does not use Markdown as its primary authored document model. Before moving content into Markdawn, export a representative sample as Markdown or another structured format and verify headings, lists, tables, links, images, comments, and document tabs.
+Google Docs does not use Markdown as its primary authored document model. Before moving content into Metakip, export a representative sample as Markdown or another structured format and verify headings, lists, tables, links, images, comments, and document tabs.
 
 Before migrating a project, inventory:
 
@@ -120,7 +120,7 @@ Before migrating a project, inventory:
 - Google Drive links, shared links, and Workspace integrations.
 - Gemini-generated content, Apps Script, add-ons, and API automations.
 
-Keep the original Google Docs content untouched while testing. A Word or HTML export may preserve readable content but will not reproduce Google sharing history, comments, Drive permissions, Apps Script, or Gemini context inside Markdawn.
+Keep the original Google Docs content untouched while testing. A Word or HTML export may preserve readable content but will not reproduce Google sharing history, comments, Drive permissions, Apps Script, or Gemini context inside Metakip.
 
 ## Performance And Document Size
 
@@ -128,13 +128,13 @@ Google Docs is reliable for everyday collaborative documents, but community disc
 
 These are user reports, not universal product facts. Test long documents, tables, images, tabs, comments, search, and offline recovery against your real workload.
 
-Markdawn's page and folder model can split knowledge into smaller linked pages instead of keeping an entire project in one document. That improves navigability for connected knowledge, but it is a different workflow from writing one continuous collaborative document.
+Metakip's page and folder model can split knowledge into smaller linked pages instead of keeping an entire project in one document. That improves navigability for connected knowledge, but it is a different workflow from writing one continuous collaborative document.
 
 ## Pricing And Account Ownership
 
 Google Docs is available through personal Google accounts and Google Workspace plans, with storage, administration, security, and Gemini features varying by account and plan. Check current Google Workspace pricing and the limits that apply to your organization.
 
-Markdawn pricing and deployment costs should be evaluated separately from Google Workspace licensing. A self-hosted Markdawn deployment trades subscription simplicity for infrastructure responsibility.
+Metakip pricing and deployment costs should be evaluated separately from Google Workspace licensing. A self-hosted Metakip deployment trades subscription simplicity for infrastructure responsibility.
 
 ## Who Should Choose Google Docs?
 
@@ -149,9 +149,9 @@ Google Docs is a strong choice if you:
 - Need the official `clasp` CLI or Google Workspace MCP Developer Preview for automation.
 - Want offline editing through supported Google workflows.
 
-## Who Should Choose Markdawn?
+## Who Should Choose Metakip?
 
-Markdawn is a strong choice if you:
+Metakip is a strong choice if you:
 
 - Need shared documentation, decisions, research, or meeting knowledge.
 - Need multiple collaborators to edit a shared page in real time.
@@ -164,9 +164,9 @@ Markdawn is a strong choice if you:
 
 ## Questions To Answer Before Switching
 
-### Is Markdawn A Replacement For Google Docs?
+### Is Metakip A Replacement For Google Docs?
 
-Only for some workflows. Markdawn can replace Google Docs as a home for shared documentation and durable knowledge, including real-time coediting. It is not a replacement for comments, suggestions, action items, Google Drive permissions, or polished office document exports.
+Only for some workflows. Metakip can replace Google Docs as a home for shared documentation and durable knowledge, including real-time coediting. It is not a replacement for comments, suggestions, action items, Google Drive permissions, or polished office document exports.
 
 ### Does Google Docs Support Markdown?
 
@@ -174,35 +174,35 @@ Google Docs supports Markdown input and copy-paste behavior for selected formatt
 
 ### Does Google Docs Support AI Assistants?
 
-Yes. Gemini features are available in Google Docs for eligible accounts and plans, and Google provides the Docs API and Apps Script for automation. Markdawn provides API and CLI workflows plus controlled AI assistant access to pages. Compare whether the assistant needs a rich Workspace document or a simple page and folder model.
+Yes. Gemini features are available in Google Docs for eligible accounts and plans, and Google provides the Docs API and Apps Script for automation. Metakip provides API and CLI workflows plus controlled AI assistant access to pages. Compare whether the assistant needs a rich Workspace document or a simple page and folder model.
 
 ### Does Google Docs Have A CLI Or MCP?
 
 Google provides `clasp`, an official CLI for developing, pulling, pushing, versioning, and deploying Apps Script projects. Google also provides Google Workspace MCP servers, including a Docs MCP API, currently in Developer Preview. These are developer and agent surfaces around Google Workspace, not a replacement for the Google Docs editor.
 
-### Can I Import Google Docs Directly Into Markdawn?
+### Can I Import Google Docs Directly Into Metakip?
 
-Markdawn does not currently describe Google Docs as a first-class native import. Export the content as HTML, Word, or another structured format, convert it to Markdown, preserve images and links, and verify a representative sample before planning a full migration.
+Metakip does not currently describe Google Docs as a first-class native import. Export the content as HTML, Word, or another structured format, convert it to Markdown, preserve images and links, and verify a representative sample before planning a full migration.
 
 ### Which Tool Is Better For Collaboration?
 
-Both tools support live coediting. Google Docs is stronger for comments, suggestions, action items, and document review. Markdawn is stronger for maintaining connected markdown knowledge during and after collaboration. Choose based on whether rich document review or durable page structure is the primary need.
+Both tools support live coediting. Google Docs is stronger for comments, suggestions, action items, and document review. Metakip is stronger for maintaining connected markdown knowledge during and after collaboration. Choose based on whether rich document review or durable page structure is the primary need.
 
 ### Which Tool Has Better Permissions?
 
-They solve different permission problems. Google Docs provides Viewer, Commenter, Editor, owner, and Drive sharing controls. Markdawn provides View, Edit, and Admin access for shared content with a smaller permission model. Test the exact external, inherited, and restricted-access cases your team needs.
+They solve different permission problems. Google Docs provides Viewer, Commenter, Editor, owner, and Drive sharing controls. Metakip provides View, Edit, and Admin access for shared content with a smaller permission model. Test the exact external, inherited, and restricted-access cases your team needs.
 
-## Related Markdawn Guides
+## Related Metakip Guides
 
-- [Create A Page In Markdawn](/getting-started/create-your-first-page/) for browser-based writing.
+- [Create A Page In Metakip](/getting-started/create-your-first-page/) for browser-based writing.
 - [Import Markdown And Obsidian Notes](/getting-started/bring-your-notes/) for migration steps and verification.
 - [Markdown Support](/getting-started/markdown-support/) for supported syntax and page links.
-- [Organize Markdawn Pages And Folders](/getting-started/organize-pages-and-folders/) for shared knowledge structure.
-- [Share A Markdawn Page](/getting-started/share-a-page/) for View, Edit, and Admin access.
-- [Markdawn CLI](/agents/markdawn-cli/) for terminal workflows.
+- [Organize Metakip Pages And Folders](/getting-started/organize-pages-and-folders/) for shared knowledge structure.
+- [Share A Metakip Page](/getting-started/share-a-page/) for View, Edit, and Admin access.
+- [Metakip CLI](/agents/metakip-cli/) for terminal workflows.
 - [API Reference](/api-reference/endpoints/) for automation and integrations.
-- [Use Markdawn With AI Assistants](/agents/use-markdawn-with-ai-assistants/) for controlled AI assistant access.
-- [Self-Host Markdawn](/self-hosting/) for deployment ownership.
+- [Use Metakip With AI Assistants](/agents/use-metakip-with-ai-assistants/) for controlled AI assistant access.
+- [Self-Host Metakip](/self-hosting/) for deployment ownership.
 
 ## Sources And Further Reading
 
@@ -235,4 +235,4 @@ They solve different permission problems. Google Docs provides Viewer, Commenter
 
 ## Verdict
 
-Choose **Google Docs** for comments, suggestions, version history, Google Workspace context, and rich exports around live collaborative documents. Choose **Markdawn** for live collaborative knowledge that connects decisions and project pages, with markdown-centered content, direct tool access, simple sharing roles, and the option to self-host.
+Choose **Google Docs** for comments, suggestions, version history, Google Workspace context, and rich exports around live collaborative documents. Choose **Metakip** for live collaborative knowledge that connects decisions and project pages, with markdown-centered content, direct tool access, simple sharing roles, and the option to self-host.

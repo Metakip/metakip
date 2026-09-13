@@ -1,4 +1,4 @@
-import type { Folder, FolderTreeNode, Page, PageTreeNode, ShareEntityType } from '@markdawn/shared';
+import type { Folder, FolderTreeNode, Page, PageTreeNode, ShareEntityType } from '@metakip/shared';
 import type { QueryClient } from '@tanstack/react-query';
 import {
   addFolderToTree,

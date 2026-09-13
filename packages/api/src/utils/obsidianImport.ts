@@ -8,9 +8,9 @@ import {
   getV1VaultImportKind,
   normalizeWikiLinkLookupKey,
   parseMarkdownFrontmatter,
-} from '@markdawn/shared';
-import { bindWikiLinkTargets, markdownToYjsState } from '@markdawn/shared/markdown-yjs';
-import { type ConnectionDraft, normalizeTagSlug } from '@markdawn/shared/yjs-helpers';
+} from '@metakip/shared';
+import { bindWikiLinkTargets, markdownToYjsState } from '@metakip/shared/markdown-yjs';
+import { type ConnectionDraft, normalizeTagSlug } from '@metakip/shared/yjs-helpers';
 import { sql } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { executeQuery, query } from '../db/query';

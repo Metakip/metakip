@@ -1,4 +1,4 @@
-import type { FolderTreeNode, PageTreeNode, SharedNavigationItem } from '@markdawn/shared';
+import type { FolderTreeNode, PageTreeNode, SharedNavigationItem } from '@metakip/shared';
 import { useMemo } from 'react';
 import type { Favorite } from '../../hooks/use-favorites';
 import type { RecentPage } from '../../hooks/use-pages';

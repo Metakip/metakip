@@ -1,4 +1,4 @@
-import { MAX_FOLDER_NAME_LENGTH, MAX_PAGE_TITLE_LENGTH } from '@markdawn/shared';
+import { MAX_FOLDER_NAME_LENGTH, MAX_PAGE_TITLE_LENGTH } from '@metakip/shared';
 import { sql } from 'drizzle-orm';
 import { Client } from 'pg';
 import { describe, expect, it } from 'vitest';
@@ -237,7 +237,7 @@ describe('folders API', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Cookie: `markdawn_anon_id=${crypto.randomUUID()}`,
+          Cookie: `metakip_anon_id=${crypto.randomUUID()}`,
         },
         body: JSON.stringify({ name: 'x'.repeat(5 * 1024) }),
       });
@@ -343,7 +343,7 @@ describe('folders API', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Cookie: `markdawn_anon_id=${guestId}`,
+          Cookie: `metakip_anon_id=${guestId}`,
           Origin: 'http://localhost:5173',
         },
         body: JSON.stringify({ parentId: parent.id, name: 'Guest folder' }),
@@ -1049,7 +1049,7 @@ describe('folders API', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Cookie: `markdawn_anon_id=${guestId}`,
+          Cookie: `metakip_anon_id=${guestId}`,
           Origin: 'http://localhost:5173',
         },
         body: JSON.stringify({ parentId: destination.id }),

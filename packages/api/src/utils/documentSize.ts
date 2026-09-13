@@ -1,4 +1,4 @@
-import { MAX_YDOC_BYTES } from '@markdawn/shared';
+import { MAX_YDOC_BYTES } from '@metakip/shared';
 import { HTTPException } from 'hono/http-exception';
 import * as Y from 'yjs';
 

@@ -1,5 +1,5 @@
 import { Dialog } from '@base-ui/react/dialog';
-import { extractInlineTags, parseMarkdownFrontmatter } from '@markdawn/shared';
+import { extractInlineTags, parseMarkdownFrontmatter } from '@metakip/shared';
 import { directoryOpen } from 'browser-fs-access';
 import { AlertCircle, CheckCircle, FileText, FolderOpen, Image, Loader2, X } from 'lucide-react';
 import { useCallback, useState } from 'react';

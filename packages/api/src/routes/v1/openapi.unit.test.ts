@@ -94,18 +94,18 @@ describe('v1 OpenAPI lifecycle contract', () => {
     expect(folderUpdate.requestBody.content['application/json'].schema.anyOf).toHaveLength(2);
 
     const listPages = paths['/pages']?.get as {
-      'x-markdawn-docs-slug': string;
+      'x-metakip-docs-slug': string;
       'x-required-scopes': string[];
       responses: Record<string, { description: string }>;
     };
-    expect(listPages['x-markdawn-docs-slug']).toBe('pages-get');
+    expect(listPages['x-metakip-docs-slug']).toBe('pages-get');
     expect(listPages['x-required-scopes']).toEqual(['pages:read']);
     expect(listPages.responses['403']?.description).toContain('pages:read');
 
     const pageMetadata = paths['/pages/{pageId}']?.get as {
-      'x-markdawn-docs-slug': string;
+      'x-metakip-docs-slug': string;
     };
-    expect(pageMetadata['x-markdawn-docs-slug']).toBe('pages-page-id-get');
+    expect(pageMetadata['x-metakip-docs-slug']).toBe('pages-page-id-get');
 
     const pageSearch = paths['/pages/search']?.get as {
       'x-required-scopes': string[];

@@ -1,4 +1,4 @@
-import type { BulkRemovalResult } from '@markdawn/shared';
+import type { BulkRemovalResult } from '@metakip/shared';
 import { describe, expect, it } from 'vitest';
 import { testQuery as query } from '../db/testQuery';
 import { createTestApp, createTestPage, createTestSession, createTestUser } from '../test-utils';

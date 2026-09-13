@@ -12,7 +12,7 @@ type skillsDoctorCheck struct {
 }
 
 func inspectSkillsTool() skillsDoctorCheck {
-	const installCommand = "npx skills add atharva-again/Markdawn --skill markdawn"
+	const installCommand = "npx skills add Metakip/metakip --skill metakip"
 	if _, err := exec.LookPath("npx"); err != nil {
 		return skillsDoctorCheck{
 			Status: doctorStatusUnavailable, Message: "Install Node.js to manage the optional agent skill.",

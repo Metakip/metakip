@@ -15,7 +15,7 @@ func TestPurgePreservesShellProfile(t *testing.T) {
 	if err := os.Mkdir(stateDir, 0o700); err != nil {
 		t.Fatal(err)
 	}
-	installDir := filepath.Join(t.TempDir(), "markdawn")
+	installDir := filepath.Join(t.TempDir(), "metakip")
 	if err := os.Mkdir(installDir, 0o700); err != nil {
 		t.Fatal(err)
 	}
@@ -28,12 +28,12 @@ func TestPurgePreservesShellProfile(t *testing.T) {
 		t.Fatal(err)
 	}
 	profilePath := filepath.Join(t.TempDir(), "profile")
-	profile := []byte("before\n# >>> markdawn >>>\nexport PATH=\"" + installDir + ":$PATH\"\n# <<< markdawn <<<\nafter\n")
+	profile := []byte("before\n# >>> metakip >>>\nexport PATH=\"" + installDir + ":$PATH\"\n# <<< metakip <<<\nafter\n")
 	if err := os.WriteFile(profilePath, profile, 0o600); err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("MARKDAWN_INSTALL_STATE_DIR", stateDir)
-	t.Setenv("MARKDAWN_CONFIG_DIR", t.TempDir())
+	t.Setenv("METAKIP_INSTALL_STATE_DIR", stateDir)
+	t.Setenv("METAKIP_CONFIG_DIR", t.TempDir())
 	if err := writeStandaloneReceipt(filepath.Join(stateDir, "install.json"), installReceipt{
 		SchemaVersion: 1,
 		InstallMethod: standaloneInstallMethod,
@@ -68,7 +68,7 @@ func TestRemoveStandaloneBinaryRestoresReceiptWhenBinaryRemovalFails(t *testing.
 	if err := os.Chmod(receiptPath, 0o640); err != nil {
 		t.Fatal(err)
 	}
-	binaryPath := filepath.Join(t.TempDir(), "markdawn")
+	binaryPath := filepath.Join(t.TempDir(), "metakip")
 	if err := os.Mkdir(binaryPath, 0o700); err != nil {
 		t.Fatal(err)
 	}
@@ -76,9 +76,9 @@ func TestRemoveStandaloneBinaryRestoresReceiptWhenBinaryRemovalFails(t *testing.
 		t.Fatal(err)
 	}
 	configDir := t.TempDir()
-	t.Setenv("MARKDAWN_CONFIG_DIR", configDir)
+	t.Setenv("METAKIP_CONFIG_DIR", configDir)
 	configPath := filepath.Join(configDir, "config.json")
-	config := []byte(`{"baseUrl":"https://app.markdawn.space","token":"secret"}`)
+	config := []byte(`{"baseUrl":"https://app.metakip.com","token":"secret"}`)
 	if err := os.WriteFile(configPath, config, 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -128,7 +128,7 @@ func TestRemoveStandaloneBinaryPreservesManagedStateWhenPurgeConfigFails(t *test
 	if err := os.WriteFile(receiptPath, []byte("receipt"), 0o600); err != nil {
 		t.Fatal(err)
 	}
-	binaryPath := filepath.Join(t.TempDir(), "markdawn")
+	binaryPath := filepath.Join(t.TempDir(), "metakip")
 	if err := os.WriteFile(binaryPath, []byte("binary"), 0o700); err != nil {
 		t.Fatal(err)
 	}

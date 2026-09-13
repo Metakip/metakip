@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { MAX_YDOC_BYTES } from '@markdawn/shared';
+import { MAX_YDOC_BYTES } from '@metakip/shared';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { requireCollaborationInternalSecret } from '../env';
 import type { V1Principal } from '../middleware/v1Auth';

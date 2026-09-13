@@ -17,11 +17,11 @@ The config at `e2e/playwright.config.ts` uses relative paths (`./playwright/.aut
 ### 1. PostgreSQL
 
 A PostgreSQL container must be running on `localhost:5432` with:
-- User: `markdawn`
+- User: `metakip`
 - Password: `password`
-- Database: `markdawn`
+- Database: `metakip`
 
-The dev container is named `markdawn-postgres-dev`. Start it:
+The dev container is named `metakip-postgres-dev`. Start it:
 
 ```bash
 # From project root
@@ -34,7 +34,7 @@ Apply pending migrations if the schema is not initialized:
 
 ```bash
 # From project root
-DATABASE_URL=postgresql://markdawn:password@localhost:5432/markdawn pnpm --filter @markdawn/api db:migrate
+DATABASE_URL=postgresql://metakip:password@localhost:5432/metakip pnpm --filter @metakip/api db:migrate
 ```
 
 `db:push` is disabled in this repository. Tests must run against the checked-in migration history.
@@ -52,7 +52,7 @@ The `.env` file at the project root is loaded automatically by `packages/api/src
 
 | Variable | Example |
 |---|---|
-| `DATABASE_URL` | `postgresql://markdawn:password@localhost:5432/markdawn` |
+| `DATABASE_URL` | `postgresql://metakip:password@localhost:5432/metakip` |
 | `BETTER_AUTH_SECRET` | (at least 32 chars) |
 | `FRONTEND_URL` | `http://localhost:5173` |
 | `PORT` | `3001` |
@@ -97,7 +97,7 @@ If you see `ENOENT: no such file or directory, open './playwright/.auth/user.jso
 
 | Aspect | CI | Local |
 |---|---|---|
-| PostgreSQL | GitHub Actions `postgresql` service (pinned image, health checked, fresh per job) | `markdawn-postgres-dev` Podman container (persistent) |
+| PostgreSQL | GitHub Actions `postgresql` service (pinned image, health checked, fresh per job) | `metakip-postgres-dev` Podman container (persistent) |
 | Database state | Empty — migrations applied fresh | Has leftover test data |
 | Working directory | `e2e/` | Must be `e2e/` |
 | TEST_SETUP_TOKEN | Set to `e2e-test-setup-secret` | Required; must match the API process |

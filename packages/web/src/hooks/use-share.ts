@@ -3,7 +3,7 @@ import type {
   ShareEntityType,
   SharePermission,
   ShareSummary,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '../utils/api';
 import { isBulkRemovalInProgress } from '../utils/bulkRemovalState';

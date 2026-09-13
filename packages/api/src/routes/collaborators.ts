@@ -1,7 +1,4 @@
-import {
-  type CollaboratorDisplay,
-  MAX_COLLABORATOR_ENTITY_IDS_PER_REQUEST,
-} from '@markdawn/shared';
+import { type CollaboratorDisplay, MAX_COLLABORATOR_ENTITY_IDS_PER_REQUEST } from '@metakip/shared';
 import { sql } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';

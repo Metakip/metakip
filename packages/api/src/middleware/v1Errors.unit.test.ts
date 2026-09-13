@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { v1ErrorResponse } from './v1Errors';
 
 const logger = vi.hoisted(() => ({ error: vi.fn() }));
-vi.mock('@markdawn/shared', () => ({ getApiLogger: () => logger }));
+vi.mock('@metakip/shared', () => ({ getApiLogger: () => logger }));
 
 describe('v1ErrorResponse', () => {
   it('preserves the current ETag for recognized collaboration conflicts', async () => {

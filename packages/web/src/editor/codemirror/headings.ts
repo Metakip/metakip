@@ -1,6 +1,6 @@
 import { EditorView } from '@codemirror/view';
 import { GFM, parser } from '@lezer/markdown';
-import { type ParsedWikiLinkTarget, parseWikiLinkTarget } from '@markdawn/shared';
+import { type ParsedWikiLinkTarget, parseWikiLinkTarget } from '@metakip/shared';
 import { getHeadingId } from '../../utils/headingNavigation';
 import { mathMarkdownExtension, wikiLinkMarkdownExtension } from './markdownSyntax';
 

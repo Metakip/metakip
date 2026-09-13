@@ -1,15 +1,15 @@
-import { MARKDAWN_CLI_DOCS_URL, MARKDAWN_DOCS_URL, MARKDAWN_GITHUB_URL } from '@markdawn/shared';
+import { METAKIP_CLI_DOCS_URL, METAKIP_DOCS_URL, METAKIP_GITHUB_URL } from '@metakip/shared';
 import { sql } from 'drizzle-orm';
 import { executeQuery, type QueryExecutor } from '../db/query';
 import { createPage } from './pageCreation';
 
-export const WELCOME_PAGE_TITLE = 'Hey, Welcome to Markdawn!';
+export const WELCOME_PAGE_TITLE = 'Hey, Welcome to Metakip!';
 
-export const WELCOME_PAGE_CONTENT = `Hi! I'm Atharva, the sole developer behind Markdawn. Thank you from the bottom of my heart for deciding to use my app. You can DM me on [X](https://x.com/atharva_again) or [LinkedIn](https://www.linkedin.com/in/atharva-again/), or email me at [atharva.verma18@gmail.com](mailto:atharva.verma18@gmail.com) for feedback or questions. You can also browse the [Markdawn documentation](${MARKDAWN_DOCS_URL}) for guides and feature details.
+export const WELCOME_PAGE_CONTENT = `Hi! I'm Atharva, the sole developer behind Metakip. Thank you from the bottom of my heart for deciding to use my app. You can DM me on [X](https://x.com/atharva_again) or [LinkedIn](https://www.linkedin.com/in/atharva-again/), or email me at [atharva.verma18@gmail.com](mailto:atharva.verma18@gmail.com) for feedback or questions. You can also browse the [Metakip documentation](${METAKIP_DOCS_URL}) for guides and feature details.
 
-Markdawn can do almost anything that existing note-taking apps can do.
+Metakip can do almost anything that existing note-taking apps can do.
 
-Oh, and before I forget to mention, it's fully open source so you can self-host it too if you want. I'm running this app on a VPS myself. Head over to the [GitHub repo](${MARKDAWN_GITHUB_URL}) (and leave a star please) to learn more.
+Oh, and before I forget to mention, it's fully open source so you can self-host it too if you want. I'm running this app on a VPS myself. Head over to the [GitHub repo](${METAKIP_GITHUB_URL}) (and leave a star please) to learn more.
 
 Feel free to delete this page whenever you want.
 
@@ -21,7 +21,7 @@ Feel free to delete this page whenever you want.
 4. Backlinks / wikilinks
 5. Properties
 6. Sharing and real-time collaboration
-7. A [CLI](${MARKDAWN_CLI_DOCS_URL}) for you and your agents to work with Markdawn
+7. A [CLI](${METAKIP_CLI_DOCS_URL}) for you and your agents to work with Metakip
 8. Table of contents (hover over the bars on the right for more details)
 9. Exporting to md
 10. Favorites
@@ -33,7 +33,7 @@ Feel free to delete this page whenever you want.
 ## Upcoming Features
 
 1. First-class support for importing from more note-taking apps
-2. Markdawn MCP
+2. Metakip MCP
 3. Version history
 
 ## Importing md / Obsidian Vault
@@ -48,7 +48,7 @@ If you use coding agents like Pi, Codex, or Claude Code, the CLI is especially u
 
 ## Shortcuts
 
-Markdawn includes keyboard shortcuts for power users. They are not configurable yet.
+Metakip includes keyboard shortcuts for power users. They are not configurable yet.
 
 | Action | Linux / Windows | macOS |
 | --- | --- | --- |
@@ -87,7 +87,7 @@ export async function createWelcomePageForUser(
       properties: {
         author: 'Atharva Verma',
         url: 'https://atharvaverma.dev/',
-        tags: ['markdawn', 'welcome'],
+        tags: ['metakip', 'welcome'],
       },
     },
   });

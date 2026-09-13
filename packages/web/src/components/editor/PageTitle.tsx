@@ -1,4 +1,4 @@
-import { MAX_PAGE_TITLE_LENGTH, truncateUnicodeCodePoints } from '@markdawn/shared';
+import { MAX_PAGE_TITLE_LENGTH, truncateUnicodeCodePoints } from '@metakip/shared';
 import type React from 'react';
 import { useCallback, useRef } from 'react';
 import type * as Y from 'yjs';

@@ -1,10 +1,10 @@
 {
-  "name": "markdawn",
+  "name": "metakip",
   "private": true,
   "scripts": {
-    "dev": "pnpm --filter './packages/*' --filter '!@markdawn/marketing-site' --parallel run dev",
-    "dev:marketing-site": "pnpm --filter @markdawn/marketing-site run dev",
-    "dev:docs": "pnpm --filter @markdawn/docs run dev",
+    "dev": "pnpm --filter './packages/*' --filter '!@metakip/marketing-site' --parallel run dev",
+    "dev:marketing-site": "pnpm --filter @metakip/marketing-site run dev",
+    "dev:docs": "pnpm --filter @metakip/docs run dev",
     "build": "pnpm -r --workspace-concurrency=1 run build",
     "test": "pnpm -r --workspace-concurrency=1 run test",
     "e2e": "cd e2e && npx playwright test",

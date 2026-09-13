@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { getAnonymousName } from '@markdawn/shared';
+import { getAnonymousName } from '@metakip/shared';
 import { describe, expect, it } from 'vitest';
 import { testQuery as query } from '../db/testQuery';
 import { persistGuestIdentity, type RequestActor } from './guestAccess';

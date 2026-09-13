@@ -115,7 +115,7 @@ function resourceResult(
       structuredContent,
     };
   }
-  const resourceUri = `urn:markdawn:export:${randomUUID()}`;
+  const resourceUri = `urn:metakip:export:${randomUUID()}`;
   return {
     content: [
       {

@@ -2,7 +2,7 @@ import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import type { ApiTokenScope } from '../utils/apiToken.js';
 import { isApiTokenScope } from '../utils/apiToken.js';
 
-export const MCP_INTERNAL_AUTH_HEADER = 'X-Markdawn-MCP-Authorization';
+export const MCP_INTERNAL_AUTH_HEADER = 'X-Metakip-MCP-Authorization';
 const MCP_INTERNAL_AUTH_VERSION = 1;
 const MCP_INTERNAL_AUTH_TTL_SECONDS = 300;
 export const MCP_API_DEVELOPMENT_SECRET = 'development-only-mcp-api-secret-0123456789abcdef';

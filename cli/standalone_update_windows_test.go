@@ -13,8 +13,8 @@ import (
 
 func TestStandaloneUpdateHelperReplacesBinary(t *testing.T) {
 	directory := t.TempDir()
-	destination := filepath.Join(directory, "markdawn.exe")
-	staged := filepath.Join(directory, "markdawn-staged.exe")
+	destination := filepath.Join(directory, "metakip.exe")
+	staged := filepath.Join(directory, "metakip-staged.exe")
 	failurePath := filepath.Join(directory, "update-failure.txt")
 	if err := os.WriteFile(destination, []byte("old"), 0o600); err != nil {
 		t.Fatal(err)
@@ -40,7 +40,7 @@ func TestStandaloneUpdateHelperReplacesBinary(t *testing.T) {
 
 func TestStandaloneUpdateHelperPersistsFailure(t *testing.T) {
 	directory := t.TempDir()
-	destination := filepath.Join(directory, "markdawn.exe")
+	destination := filepath.Join(directory, "metakip.exe")
 	staged := filepath.Join(directory, "missing-staged.exe")
 	failurePath := filepath.Join(directory, "update-failure.txt")
 	if err := os.WriteFile(destination, []byte("old"), 0o600); err != nil {

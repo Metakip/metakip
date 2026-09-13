@@ -1,21 +1,21 @@
 ---
-title: Markdawn vs Craft
-description: Compare Markdawn and Craft for polished writing, collaboration, offline work, exports, AI assistant access, markdown portability, and self-hosting.
+title: Metakip vs Craft
+description: Compare Metakip and Craft for polished writing, collaboration, offline work, exports, AI assistant access, markdown portability, and self-hosting.
 ---
 
-Markdawn and Craft are both designed for people who care about the quality of their documents. Craft emphasizes polished block-based documents, spaces, offline work, sharing, tasks, and AI. Markdawn emphasizes readable markdown pages, folders, links, controlled access, and a content layer that can be managed through the browser, CLI, API, or an AI assistant.
+Metakip and Craft are both designed for people who care about the quality of their documents. Craft emphasizes polished block-based documents, spaces, offline work, sharing, tasks, and AI. Metakip emphasizes readable markdown pages, folders, links, controlled access, and a content layer that can be managed through the browser, CLI, API, or an AI assistant.
 
 ## The Short Answer
 
 Choose **Craft** when writing quality, visual presentation, native apps, offline work, document sharing, and polished exports are the main requirements.
 
-Choose **Markdawn** when markdown portability, page links, folders, View, Edit, and Admin access, self-hosting, or direct tool access are more important than a highly designed block editor.
+Choose **Metakip** when markdown portability, page links, folders, View, Edit, and Admin access, self-hosting, or direct tool access are more important than a highly designed block editor.
 
-Neither tool is universally better. Craft is the stronger document and presentation surface. Markdawn is the more direct and inspectable content layer.
+Neither tool is universally better. Craft is the stronger document and presentation surface. Metakip is the more direct and inspectable content layer.
 
 ## At A Glance
 
-| Decision area | Markdawn | Craft |
+| Decision area | Metakip | Craft |
 | --- | --- | --- |
 | Main job | Shared knowledge and documentation | Polished documents, notes, tasks, and planning |
 | Content model | Markdown pages, folders, links, and backlinks | Documents, pages, blocks, spaces, and collections |
@@ -53,51 +53,51 @@ Craft supports Markdown, TextBundle, PDF, Word, and plain text exports, dependin
 
 That makes Craft a strong choice for people who want a beautiful editor without giving up practical export options. A Reddit user specifically praised Craft for exporting to images, PDF, and Docx, while another highlighted TextBundle as a way to back up notes with Markdown and photos.
 
-## Where Markdawn Is Better
+## Where Metakip Is Better
 
 ### A Smaller And More Inspectable Content Model
 
-Markdawn is better when the primary artifact is a page that people should be able to read, link, edit, export, and keep using without a presentation-focused block model.
+Metakip is better when the primary artifact is a page that people should be able to read, link, edit, export, and keep using without a presentation-focused block model.
 
 The same authored markdown can be read through the browser, CLI, and API. Pages can be organized into folders and connected with page links and backlinks. This keeps a decision record, research note, meeting note, or technical document understandable without requiring a particular visual layout.
 
-Craft's block model is useful for presentation. Markdawn's markdown model is useful when the content itself needs to remain easy to inspect and transform.
+Craft's block model is useful for presentation. Metakip's markdown model is useful when the content itself needs to remain easy to inspect and transform.
 
 ### Markdown And Content Portability
 
-Markdawn is built around markdown as a content layer. It supports Markdown files and folders, and its Obsidian vault importer can bring in notes, images, tags, folders, and backlinks.
+Metakip is built around markdown as a content layer. It supports Markdown files and folders, and its Obsidian vault importer can bring in notes, images, tags, folders, and backlinks.
 
-Craft also has strong export options. The important distinction is how each product treats portability. Craft exports Markdown and TextBundle from a rich block document. Markdawn stores authored content in a markdown-centered model that can be read through multiple interfaces.
+Craft also has strong export options. The important distinction is how each product treats portability. Craft exports Markdown and TextBundle from a rich block document. Metakip stores authored content in a markdown-centered model that can be read through multiple interfaces.
 
-Choose Markdawn when portability is a primary product requirement rather than a useful export option.
+Choose Metakip when portability is a primary product requirement rather than a useful export option.
 
 ### Direct Permissions For Shared Knowledge
 
-Markdawn supports **View**, **Edit**, and **Admin** access for shared pages and folders. Use View for reading, Edit for changing content, and Admin for managing access and sharing settings.
+Metakip supports **View**, **Edit**, and **Admin** access for shared pages and folders. Use View for reading, Edit for changing content, and Admin for managing access and sharing settings.
 
 This is useful for a focused knowledge base where people need clear content permissions without adopting a larger team and Space administration model.
 
 ### Self-Hosting And Deployment Control
 
-Markdawn has a self-hosting path for teams that want more control over deployment and data location. Craft is a managed application, so teams use Craft's hosted product and account model.
+Metakip has a self-hosting path for teams that want more control over deployment and data location. Craft is a managed application, so teams use Craft's hosted product and account model.
 
 Self-hosting adds responsibility for backups, updates, security, and availability. It is useful when infrastructure ownership is part of the requirement, not a default reason to leave Craft.
 
 ### CLI, API, And AI Assistant Workflows
 
-Markdawn provides documented CLI and API workflows for reading, editing, importing, exporting, and organizing content. Its documentation also covers connecting AI assistants with controlled access to Markdawn pages.
+Metakip provides documented CLI and API workflows for reading, editing, importing, exporting, and organizing content. Its documentation also covers connecting AI assistants with controlled access to Metakip pages.
 
-Craft also provides an API, MCP, AI assistant features, Shortcuts, and integrations. The difference is the content model being automated. Craft exposes a polished document and block system. Markdawn exposes pages, folders, links, and markdown.
+Craft also provides an API, MCP, AI assistant features, Shortcuts, and integrations. The difference is the content model being automated. Craft exposes a polished document and block system. Metakip exposes pages, folders, links, and markdown.
 
 Craft also documents a separate **Craft Agents CLI** for running and managing Craft Agents from a terminal. It is not presented as a general document-management CLI. For document automation, Craft's official API and MCP connections are the more relevant interfaces.
 
-Choose Markdawn when a script or AI assistant should work with durable pages without needing to recreate a rich document layout.
+Choose Metakip when a script or AI assistant should work with durable pages without needing to recreate a rich document layout.
 
 ## Collaboration And Access
 
 Craft supports sharing individual documents and collaborating in shared Spaces. Team owners and admins can manage team members, while individual documents can be shared with people outside the subscription plan.
 
-Markdawn uses a smaller access model for shared content: View, Edit, and Admin. That makes the permission choice direct, but Craft may provide more team-specific collaboration controls depending on the plan and Space setup.
+Metakip uses a smaller access model for shared content: View, Edit, and Admin. That makes the permission choice direct, but Craft may provide more team-specific collaboration controls depending on the plan and Space setup.
 
 Test invitations, public links, comments, edit access, admin controls, and removing access in both products before standardizing on one.
 
@@ -107,7 +107,7 @@ Craft's offline support is a meaningful advantage when the right documents are a
 
 These are community reports, not universal product facts. Test the documents you rely on while offline, across the devices your team actually uses. Measure opening time, edit conflict behavior, image availability, and sync recovery after reconnecting.
 
-Markdawn's browser-first workflow has a different trade-off. Verify the deployment, network, and browser requirements for your environment rather than assuming it provides the same offline behavior as Craft's native apps.
+Metakip's browser-first workflow has a different trade-off. Verify the deployment, network, and browser requirements for your environment rather than assuming it provides the same offline behavior as Craft's native apps.
 
 ## Pricing And Team Scale
 
@@ -115,11 +115,11 @@ Craft's pricing and collaboration features vary by plan, Space, and team size. R
 
 Do not use older Reddit prices as current pricing. Check Craft's current plans and calculate the cost for the actual number of editors, Spaces, AI usage, and collaboration features you need.
 
-Markdawn pricing and deployment costs should be evaluated separately from Craft's subscription price. A self-hosted Markdawn deployment trades subscription simplicity for infrastructure responsibility.
+Metakip pricing and deployment costs should be evaluated separately from Craft's subscription price. A self-hosted Metakip deployment trades subscription simplicity for infrastructure responsibility.
 
 ## Portability And Migration
 
-Before moving from Craft to Markdawn, inventory each Space:
+Before moving from Craft to Metakip, inventory each Space:
 
 - Documents, pages, folders, and collections.
 - Block types, tables, tasks, callouts, and embeds.
@@ -127,7 +127,7 @@ Before moving from Craft to Markdawn, inventory each Space:
 - Comments, collaborators, publishing settings, and permissions.
 - AI-generated content, integrations, and Shortcuts.
 
-Then keep the original Craft content untouched, export a representative sample as Markdown or TextBundle, extract the content and assets where needed, and import that sample into Markdawn. Check titles, headings, tables, images, attachments, links, and folder structure before planning a complete migration.
+Then keep the original Craft content untouched, export a representative sample as Markdown or TextBundle, extract the content and assets where needed, and import that sample into Metakip. Check titles, headings, tables, images, attachments, links, and folder structure before planning a complete migration.
 
 Use TextBundle when preserving embedded images and attachments matters. Treat a migration from a rich block document as a content conversion, not a promise of identical rendering.
 
@@ -142,9 +142,9 @@ Craft is a strong choice if you:
 - Want tasks, AI assistance, comments, and collaborative Spaces.
 - Prefer a managed application over operating your own deployment.
 
-## Who Should Choose Markdawn?
+## Who Should Choose Metakip?
 
-Markdawn is a strong choice if you:
+Metakip is a strong choice if you:
 
 - Need shared documentation, decisions, research, or meeting knowledge.
 - Want a markdown-centered content layer rather than a rich block format.
@@ -155,9 +155,9 @@ Markdawn is a strong choice if you:
 
 ## Questions To Answer Before Switching
 
-### Is Markdawn A Replacement For Craft?
+### Is Metakip A Replacement For Craft?
 
-Only for some workflows. Markdawn can replace Craft as a home for shared documentation and durable knowledge. It is not a replacement for Craft's polished block layout, native offline experience, TextBundle workflow, or visual publishing surface.
+Only for some workflows. Metakip can replace Craft as a home for shared documentation and durable knowledge. It is not a replacement for Craft's polished block layout, native offline experience, TextBundle workflow, or visual publishing surface.
 
 ### Can Craft Export Markdown?
 
@@ -165,31 +165,31 @@ Yes. Craft documents Markdown and TextBundle export, along with PDF, Word, and p
 
 ### Does Craft Support API And MCP Access?
 
-Yes. Craft documents an API, MCP integrations, and AI assistant workflows. Craft also has a Craft Agents CLI, but that CLI manages Craft Agents rather than serving as a general document-management CLI. Markdawn provides a documented page-oriented API and CLI. Compare the content model, permissions, hosting, and automation surface rather than assuming only one product supports tool access.
+Yes. Craft documents an API, MCP integrations, and AI assistant workflows. Craft also has a Craft Agents CLI, but that CLI manages Craft Agents rather than serving as a general document-management CLI. Metakip provides a documented page-oriented API and CLI. Compare the content model, permissions, hosting, and automation surface rather than assuming only one product supports tool access.
 
 ### Which Tool Is Better For Offline Work?
 
-Craft has the clearer offline-first story through its native apps. Markdawn is browser-first and should be evaluated against your deployment and network requirements. Test the exact documents and devices you need before deciding.
+Craft has the clearer offline-first story through its native apps. Metakip is browser-first and should be evaluated against your deployment and network requirements. Test the exact documents and devices you need before deciding.
 
-### Can I Import Craft Directly Into Markdawn?
+### Can I Import Craft Directly Into Metakip?
 
-Markdawn does not currently describe Craft as a first-class native import. Export Markdown or TextBundle from Craft, preserve the original, convert or extract assets as needed, and verify a representative sample before planning a full migration.
+Metakip does not currently describe Craft as a first-class native import. Export Markdown or TextBundle from Craft, preserve the original, convert or extract assets as needed, and verify a representative sample before planning a full migration.
 
 ### Which Tool Has Better Permissions?
 
-They solve different permission problems. Craft provides document sharing, Spaces, team membership, and collaboration controls. Markdawn provides View, Edit, and Admin access for shared content with a smaller permission model. Test the exact external, inherited, and restricted-access cases your team needs.
+They solve different permission problems. Craft provides document sharing, Spaces, team membership, and collaboration controls. Metakip provides View, Edit, and Admin access for shared content with a smaller permission model. Test the exact external, inherited, and restricted-access cases your team needs.
 
-## Related Markdawn Guides
+## Related Metakip Guides
 
-- [Create A Page In Markdawn](/getting-started/create-your-first-page/) for browser-based writing.
+- [Create A Page In Metakip](/getting-started/create-your-first-page/) for browser-based writing.
 - [Import Markdown And Obsidian Notes](/getting-started/bring-your-notes/) for migration steps and verification.
 - [Markdown Support](/getting-started/markdown-support/) for supported syntax and page links.
-- [Organize Markdawn Pages And Folders](/getting-started/organize-pages-and-folders/) for shared knowledge structure.
-- [Share A Markdawn Page](/getting-started/share-a-page/) for View, Edit, and Admin access.
-- [Markdawn CLI](/agents/markdawn-cli/) for terminal workflows.
+- [Organize Metakip Pages And Folders](/getting-started/organize-pages-and-folders/) for shared knowledge structure.
+- [Share A Metakip Page](/getting-started/share-a-page/) for View, Edit, and Admin access.
+- [Metakip CLI](/agents/metakip-cli/) for terminal workflows.
 - [API Reference](/api-reference/endpoints/) for automation and integrations.
-- [Use Markdawn With AI Assistants](/agents/use-markdawn-with-ai-assistants/) for controlled AI assistant access.
-- [Self-Host Markdawn](/self-hosting/) for deployment ownership.
+- [Use Metakip With AI Assistants](/agents/use-metakip-with-ai-assistants/) for controlled AI assistant access.
+- [Self-Host Metakip](/self-hosting/) for deployment ownership.
 
 ## Sources And Further Reading
 
@@ -217,4 +217,4 @@ They solve different permission problems. Craft provides document sharing, Space
 
 ## Verdict
 
-Choose **Craft** for polished documents, native apps, offline work, collaboration, and strong visual exports. Choose **Markdawn** when shared knowledge should remain markdown-centered, inspectable, accessible through the CLI, API, or an AI assistant, and available with the option to self-host.
+Choose **Craft** for polished documents, native apps, offline work, collaboration, and strong visual exports. Choose **Metakip** when shared knowledge should remain markdown-centered, inspectable, accessible through the CLI, API, or an AI assistant, and available with the option to self-host.

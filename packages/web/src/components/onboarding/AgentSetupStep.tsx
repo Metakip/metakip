@@ -1,15 +1,15 @@
-import { MARKDAWN_CLI_DOCS_URL } from '@markdawn/shared';
+import { METAKIP_CLI_DOCS_URL } from '@metakip/shared';
 import { Check, Copy } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { OnboardingActionButton } from './OnboardingActionButton';
 
-export const CLI_GUIDE = MARKDAWN_CLI_DOCS_URL;
-const UNIX_CLI_INSTALL_COMMAND = 'curl -fsSL https://markdawn.space/install.sh | sh';
-const WINDOWS_CLI_INSTALL_COMMAND = 'irm https://markdawn.space/install.ps1 | iex';
-const AGENT_PROMPT = `Set up Markdawn for use in this agent session by following the full CLI guide:
+export const CLI_GUIDE = METAKIP_CLI_DOCS_URL;
+const UNIX_CLI_INSTALL_COMMAND = 'curl -fsSL https://metakip.com/install.sh | sh';
+const WINDOWS_CLI_INSTALL_COMMAND = 'irm https://metakip.com/install.ps1 | iex';
+const AGENT_PROMPT = `Set up Metakip for use in this agent session by following the full CLI guide:
 ${CLI_GUIDE}
 
-Read the guide from start to finish. Install the Markdawn CLI and its agent skill. Then guide me through creating an API token in Markdawn Settings, authenticate with markdawn login, and verify the connection with markdawn whoami and markdawn doctor. Do not create, modify, import, or delete workspace content unless I explicitly ask.`;
+Read the guide from start to finish. Install the Metakip CLI and its agent skill. Then guide me through creating an API token in Metakip Settings, authenticate with metakip login, and verify the connection with metakip whoami and metakip doctor. Do not create, modify, import, or delete workspace content unless I explicitly ask.`;
 
 type CliPlatform = 'linux' | 'macos' | 'unknown' | 'windows';
 type CopiedItem = 'cli-unix' | 'cli-windows' | 'prompt';
@@ -121,7 +121,7 @@ export function AgentSetupStep({
           Set up your agent workflow
         </h1>
         <p className="mt-3 max-w-xl text-sm leading-6 text-zinc-500 dark:text-zinc-400">
-          The CLI lets your agent interact with Markdawn. It can create and organize pages and
+          The CLI lets your agent interact with Metakip. It can create and organize pages and
           folders.
         </p>
         <div className="mt-8 border-y border-zinc-200 dark:border-zinc-800">

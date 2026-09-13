@@ -1,4 +1,4 @@
-import type { CollaboratorDisplay, EntityAccessor, EntityAccessSource } from '@markdawn/shared';
+import type { CollaboratorDisplay, EntityAccessor, EntityAccessSource } from '@metakip/shared';
 import { sql } from 'drizzle-orm';
 import { executeQuery, type QueryExecutor } from '../db/query';
 import type { ShareEntityType, SharePermission } from './share-access';

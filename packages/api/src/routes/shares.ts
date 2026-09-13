@@ -7,7 +7,7 @@ import {
   type InheritedPublicAccess,
   type SharedWithMeItem,
   type ShareSummary,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import { sql } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';

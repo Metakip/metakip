@@ -1,5 +1,5 @@
 {
-  "name": "@markdawn/collab",
+  "name": "@metakip/collab",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -17,7 +17,7 @@
   "dependencies": {
     "@hocuspocus/server": "4.6.0",
     "@logtape/logtape": "^2.0.5",
-    "@markdawn/shared": "workspace:*",
+    "@metakip/shared": "workspace:*",
     "better-auth": "^1.7.2",
     "dotenv": "^17.3.1",
     "pg": "^8.18.0",

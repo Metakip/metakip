@@ -1,4 +1,4 @@
-# AGENTS.md — @markdawn/web
+# AGENTS.md — @metakip/web
 
 ## Gotchas
 

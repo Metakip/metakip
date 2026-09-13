@@ -1,4 +1,4 @@
-import { MAX_INTERNAL_CONTENT_COMMAND_BYTES, MAX_YDOC_BYTES } from '@markdawn/shared';
+import { MAX_INTERNAL_CONTENT_COMMAND_BYTES, MAX_YDOC_BYTES } from '@metakip/shared';
 import { bodyLimit } from 'hono/body-limit';
 
 const payloadTooLarge = bodyLimit({

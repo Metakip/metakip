@@ -1,9 +1,9 @@
 ---
-title: Move A Self-Hosted Markdawn Deployment
-description: Move a self-hosted Markdawn installation, PostgreSQL data, uploads, environment values, and DNS to another compatible server.
+title: Move A Self-Hosted Metakip Deployment
+description: Move a self-hosted Metakip installation, PostgreSQL data, uploads, environment values, and DNS to another compatible server.
 ---
 
-Use this runbook to move a compatible Markdawn installation from one Linux server to another.
+Use this runbook to move a compatible Metakip installation from one Linux server to another.
 
 The goal is a new server with the same application services and persistent data. Keep the old server stopped until you have verified the new deployment.
 
@@ -17,9 +17,9 @@ Clone the repository and copy the existing environment file:
 sudo dnf install -y git
 sudo mkdir -p /var/www
 sudo chown "$USER:$USER" /var/www
-git clone https://github.com/atharva-again/Markdawn.git /var/www/markdawn
-scp old-server:/var/www/markdawn/.env /var/www/markdawn/.env
-cd /var/www/markdawn
+git clone https://github.com/Metakip/metakip.git /var/www/metakip
+scp old-server:/var/www/metakip/.env /var/www/metakip/.env
+cd /var/www/metakip
 ./deploy/setup.sh
 ```
 
@@ -30,10 +30,10 @@ Verify the new deployment, then stop its application services before restoring d
 Stop writes before taking final snapshots:
 
 ```bash
-systemctl --user stop markdawn-api.service markdawn-collab.service
-podman exec markdawn-postgres pg_dump -U markdawn -d markdawn \
-  --format=custom --no-owner > /tmp/markdawn-db.dump
-podman volume export markdawn-data > /tmp/markdawn-data.tar
+systemctl --user stop metakip-api.service metakip-collab.service
+podman exec metakip-postgres pg_dump -U metakip -d metakip \
+  --format=custom --no-owner > /tmp/metakip-db.dump
+podman volume export metakip-data > /tmp/metakip-data.tar
 ```
 
 Copy both snapshots to the new server.
@@ -41,17 +41,17 @@ Copy both snapshots to the new server.
 ## Restore The Data
 
 ```bash
-cat /tmp/markdawn-db.dump | podman exec -i markdawn-postgres \
-  pg_restore -U markdawn -d markdawn --clean --if-exists --no-owner
-podman volume import markdawn-data /tmp/markdawn-data.tar
+cat /tmp/metakip-db.dump | podman exec -i metakip-postgres \
+  pg_restore -U metakip -d metakip --clean --if-exists --no-owner
+podman volume import metakip-data /tmp/metakip-data.tar
 ```
 
 Apply migrations and restart the services:
 
 ```bash
-cd /var/www/markdawn
-pnpm --filter @markdawn/api db:migrate
-systemctl --user start markdawn-api.service markdawn-collab.service
+cd /var/www/metakip
+pnpm --filter @metakip/api db:migrate
+systemctl --user start metakip-api.service metakip-collab.service
 curl http://localhost:3001/api/health
 ```
 
@@ -64,4 +64,4 @@ curl http://localhost:3001/api/health
 
 Keep the old server and both snapshots available until you have verified pages, uploads, login, sharing, and editing.
 
-For routine updates instead of a server move, use [Maintain a Self-Hosted Markdawn](/self-hosting/maintain-a-self-hosted-markdawn/).
+For routine updates instead of a server move, use [Maintain a Self-Hosted Metakip](/self-hosting/maintain-a-self-hosted-metakip/).

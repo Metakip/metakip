@@ -1,4 +1,4 @@
-import { getUnicodeCodePointLength, MAX_FOLDER_NAME_LENGTH } from '@markdawn/shared';
+import { getUnicodeCodePointLength, MAX_FOLDER_NAME_LENGTH } from '@metakip/shared';
 import { sql } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';

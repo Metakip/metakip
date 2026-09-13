@@ -1,4 +1,4 @@
-module github.com/atharva-again/Markdawn/cli
+module github.com/Metakip/metakip/cli
 
 go 1.24.0
 

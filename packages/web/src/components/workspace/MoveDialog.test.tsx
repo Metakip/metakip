@@ -1,4 +1,4 @@
-import type { FolderTreeNode } from '@markdawn/shared';
+import type { FolderTreeNode } from '@metakip/shared';
 import { fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';

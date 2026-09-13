@@ -3,8 +3,8 @@ import {
   type MarkdownImportWarning,
   parseMarkdownFrontmatter,
   UnsupportedMarkdownFrontmatterError,
-} from '@markdawn/shared';
-import { bindWikiLinkTargets, createYjsDocWithTitle } from '@markdawn/shared/markdown-yjs';
+} from '@metakip/shared';
+import { bindWikiLinkTargets, createYjsDocWithTitle } from '@metakip/shared/markdown-yjs';
 import { sql } from 'drizzle-orm';
 import { HTTPException } from 'hono/http-exception';
 import { db } from '../db/connection';

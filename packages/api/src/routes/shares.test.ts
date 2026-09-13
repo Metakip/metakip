@@ -249,7 +249,7 @@ describe('sharing API', () => {
     const page = await createTestPage(owner.id, { title: 'Public permissions' });
     const guestId = crypto.randomUUID();
     const guestHeaders = {
-      Cookie: `markdawn_anon_id=${guestId}`,
+      Cookie: `metakip_anon_id=${guestId}`,
       'Content-Type': 'application/json',
     };
 
@@ -284,7 +284,7 @@ describe('sharing API', () => {
     });
 
     const manageResponse = await app.request(`/api/shares/entity/page/${page.id}`, {
-      headers: { Cookie: `markdawn_anon_id=${guestId}` },
+      headers: { Cookie: `metakip_anon_id=${guestId}` },
     });
     expect(manageResponse.status).toBe(401);
   });

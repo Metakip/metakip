@@ -1,6 +1,6 @@
 import './env';
 import { serve } from '@hono/node-server';
-import { getApiLogger } from '@markdawn/shared';
+import { getApiLogger } from '@metakip/shared';
 import { createApp } from './app';
 import { auth } from './auth';
 import { requireCollaborationInternalSecret, requireMcpApiInternalSecret } from './env';

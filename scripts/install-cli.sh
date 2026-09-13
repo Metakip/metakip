@@ -1,16 +1,16 @@
 #!/bin/sh
 set -eu
 
-repository="atharva-again/Markdawn"
-install_dir="${MARKDAWN_INSTALL_DIR:-$HOME/.markdawn/bin}"
-requested_version="${MARKDAWN_VERSION:-}"
-modify_path="${MARKDAWN_MODIFY_PATH:-1}"
-install_skill="${MARKDAWN_INSTALL_SKILL:-}"
-http_timeout="${MARKDAWN_HTTP_TIMEOUT_SECONDS:-}"
+repository="Metakip/metakip"
+install_dir="${METAKIP_INSTALL_DIR:-$HOME/.metakip/bin}"
+requested_version="${METAKIP_VERSION:-}"
+modify_path="${METAKIP_MODIFY_PATH:-1}"
+install_skill="${METAKIP_INSTALL_SKILL:-}"
+http_timeout="${METAKIP_HTTP_TIMEOUT_SECONDS:-}"
 max_release_archive_bytes=268435456
 max_release_archive_entries=1024
-path_block_start='# >>> markdawn >>>'
-path_block_end='# <<< markdawn <<<'
+path_block_start='# >>> metakip >>>'
+path_block_end='# <<< metakip <<<'
 command_color=''
 color_reset=''
 phase_color=''
@@ -47,7 +47,7 @@ for argument in "$@"; do
     --install-skill=project) install_skill=project ;;
     --help)
       cat <<'EOF'
-Usage: curl -fsSL https://markdawn.space/install.sh | sh
+Usage: curl -fsSL https://metakip.com/install.sh | sh
 
 Options:
   --modify-path          Add the install directory to PATH (the default).
@@ -55,12 +55,12 @@ Options:
   --install-skill[=SCOPE]  Install the agent skill with npx skills (global or project).
 
 Environment:
-  MARKDAWN_VERSION      Install a version such as v1.2.3.
-  MARKDAWN_INSTALL_DIR  Install into this directory.
-  MARKDAWN_MODIFY_PATH  Set to 0 to leave your shell PATH unchanged (default: 1).
-  MARKDAWN_INSTALL_SKILL  Set to global or project to install the optional agent skill.
-  MARKDAWN_INSTALL_STATE_DIR  Override the standalone receipt directory.
-  MARKDAWN_HTTP_TIMEOUT_SECONDS  Set a positive download timeout in seconds.
+  METAKIP_VERSION      Install a version such as v1.2.3.
+  METAKIP_INSTALL_DIR  Install into this directory.
+  METAKIP_MODIFY_PATH  Set to 0 to leave your shell PATH unchanged (default: 1).
+  METAKIP_INSTALL_SKILL  Set to global or project to install the optional agent skill.
+  METAKIP_INSTALL_STATE_DIR  Override the standalone receipt directory.
+  METAKIP_HTTP_TIMEOUT_SECONDS  Set a positive download timeout in seconds.
 EOF
       exit 0
       ;;
@@ -70,11 +70,11 @@ done
 
 case "$modify_path" in
   0 | 1) ;;
-  *) fail "MARKDAWN_MODIFY_PATH must be 0 or 1." ;;
+  *) fail "METAKIP_MODIFY_PATH must be 0 or 1." ;;
 esac
 case "$install_skill" in
   "" | 0 | global | project) ;;
-  *) fail "MARKDAWN_INSTALL_SKILL must be global, project, or 0." ;;
+  *) fail "METAKIP_INSTALL_SKILL must be global, project, or 0." ;;
 esac
 
 require_command curl
@@ -101,10 +101,10 @@ validate_json_string() {
 }
 
 if [ -n "$requested_version" ]; then
-  printf '%s' "$requested_version" | grep -Eq '^v?[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$' || fail "MARKDAWN_VERSION must be a semantic version such as v1.2.3."
+  printf '%s' "$requested_version" | grep -Eq '^v?[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$' || fail "METAKIP_VERSION must be a semantic version such as v1.2.3."
 fi
 if [ -n "$http_timeout" ]; then
-  printf '%s' "$http_timeout" | grep -Eq '^[1-9][0-9]*$' || fail "MARKDAWN_HTTP_TIMEOUT_SECONDS must be a positive integer."
+  printf '%s' "$http_timeout" | grep -Eq '^[1-9][0-9]*$' || fail "METAKIP_HTTP_TIMEOUT_SECONDS must be a positive integer."
 fi
 path_file=""
 path_style=""
@@ -129,19 +129,19 @@ case "$install_dir" in
   /*) ;;
   *) install_dir="$(pwd -P)/$install_dir" ;;
 esac
-validate_json_string "$install_dir" "MARKDAWN_INSTALL_DIR"
+validate_json_string "$install_dir" "METAKIP_INSTALL_DIR"
 if [ "$modify_path" = 1 ]; then
   case "$install_dir" in
-    *:*) fail "MARKDAWN_INSTALL_DIR must not contain : when --modify-path is enabled." ;;
+    *:*) fail "METAKIP_INSTALL_DIR must not contain : when --modify-path is enabled." ;;
   esac
 fi
 
-state_dir="${MARKDAWN_INSTALL_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/markdawn}"
+state_dir="${METAKIP_INSTALL_STATE_DIR:-${XDG_STATE_HOME:-$HOME/.local/state}/metakip}"
 case "$state_dir" in
   /*) ;;
   *) state_dir="$(pwd -P)/$state_dir" ;;
 esac
-validate_json_string "$state_dir" "MARKDAWN_INSTALL_STATE_DIR"
+validate_json_string "$state_dir" "METAKIP_INSTALL_STATE_DIR"
 receipt_path="$state_dir/install.json"
 
 case "$(uname -s)" in
@@ -167,14 +167,14 @@ esac
 
 if [ -n "$requested_version" ]; then
   version=${requested_version#v}
-  archive="markdawn_${version}_${goos}_${goarch}.tar.gz"
+  archive="metakip_${version}_${goos}_${goarch}.tar.gz"
   download_base="https://github.com/$repository/releases/download/cli/v$version"
 else
-  archive="markdawn_${goos}_${goarch}.tar.gz"
+  archive="metakip_${goos}_${goarch}.tar.gz"
   download_base="https://github.com/$repository/releases/latest/download"
 fi
 
-temporary_dir=$(mktemp -d "${TMPDIR:-/tmp}/markdawn.XXXXXX")
+temporary_dir=$(mktemp -d "${TMPDIR:-/tmp}/metakip.XXXXXX")
 finalizer_binary=""
 cleanup() {
 	status=$?
@@ -246,7 +246,7 @@ download_asset "$checksums_path" "$download_base/checksums.txt" 1048576 "checksu
 release_version=latest
 [ -n "$requested_version" ] && release_version="v$version"
 
-phase "Verifying Markdawn CLI release..."
+phase "Verifying Metakip CLI release..."
 checksum_line=$(grep -F "  $archive" "$checksums_path" || true)
 [ -n "$checksum_line" ] || fail "Checksums.txt does not contain $archive."
 expected_checksum=${checksum_line%% *}
@@ -280,7 +280,7 @@ binary_member=$(tar -tzf "$archive_path" | awk -v max_entries="$max_release_arch
   {
     entries++
     if (entries > max_entries) exit 1
-    if ($0 == "markdawn" || $0 == "./markdawn") {
+    if ($0 == "metakip" || $0 == "./metakip") {
       matches++
       member = $0
     }
@@ -289,11 +289,11 @@ binary_member=$(tar -tzf "$archive_path" | awk -v max_entries="$max_release_arch
     if (entries == 0 || entries > max_entries || matches != 1) exit 1
     print member
   }
-') || fail "Release archive must contain exactly one Markdawn binary."
-phase "Extracting Markdawn CLI..."
-tar -xzf "$archive_path" -C "$extract_dir" "$binary_member" || fail "Could not extract Markdawn from $archive."
-binary_path="$extract_dir/markdawn"
-[ -f "$binary_path" ] && [ ! -L "$binary_path" ] || fail "Release archive does not contain a regular Markdawn binary."
+') || fail "Release archive must contain exactly one Metakip binary."
+phase "Extracting Metakip CLI..."
+tar -xzf "$archive_path" -C "$extract_dir" "$binary_member" || fail "Could not extract Metakip from $archive."
+binary_path="$extract_dir/metakip"
+[ -f "$binary_path" ] && [ ! -L "$binary_path" ] || fail "Release archive does not contain a regular Metakip binary."
 [ "$(wc -c <"$binary_path")" -le 134217728 ] || fail "Release binary exceeds 134217728 bytes."
 
 if [ -e "$install_dir" ]; then
@@ -302,29 +302,29 @@ else
   mkdir -p "$install_dir" || fail "Could not create install directory $install_dir."
   chmod 700 "$install_dir" || fail "Could not secure install directory $install_dir."
 fi
-finalizer_binary=$(mktemp "$install_dir/.markdawn-finalize.XXXXXX") || fail "Could not stage standalone finalizer."
+finalizer_binary=$(mktemp "$install_dir/.metakip-finalize.XXXXXX") || fail "Could not stage standalone finalizer."
 cp "$binary_path" "$finalizer_binary" || fail "Could not stage standalone finalizer."
 chmod 700 "$finalizer_binary" || fail "Could not prepare standalone finalizer."
 
-phase "Installing Markdawn CLI..."
+phase "Installing Metakip CLI..."
 if [ "$modify_path" = 1 ]; then
-  MARKDAWN_INSTALL_STATE_DIR="$state_dir" "$finalizer_binary" standalone-finalize --install-dir "$install_dir" --path-file "$path_file" --path-style "$path_style" || fail "Could not finalize standalone installation."
+  METAKIP_INSTALL_STATE_DIR="$state_dir" "$finalizer_binary" standalone-finalize --install-dir "$install_dir" --path-file "$path_file" --path-style "$path_style" || fail "Could not finalize standalone installation."
 else
-  MARKDAWN_INSTALL_STATE_DIR="$state_dir" "$finalizer_binary" standalone-finalize --install-dir "$install_dir" || fail "Could not finalize standalone installation."
+  METAKIP_INSTALL_STATE_DIR="$state_dir" "$finalizer_binary" standalone-finalize --install-dir "$install_dir" || fail "Could not finalize standalone installation."
 fi
 rm -f "$finalizer_binary" || fail "Could not remove standalone finalizer."
 finalizer_binary=""
 
-printf 'Markdawn %s installed to %s/markdawn.\n' "$release_version" "$install_dir"
+printf 'Metakip %s installed to %s/metakip.\n' "$release_version" "$install_dir"
 if [ "$modify_path" = 1 ]; then
   printf '\nUpdated PATH configuration in %s.\n' "$path_file"
-  printf '\nOpen a new terminal before running markdawn.\n'
-  printf '\nRun %bmarkdawn login%b to get started.\n' "$command_color" "$color_reset"
+  printf '\nOpen a new terminal before running metakip.\n'
+  printf '\nRun %bmetakip login%b to get started.\n' "$command_color" "$color_reset"
 else
   if [ -n "$unsupported_shell" ]; then
-    printf '\nPATH was not changed because %s is not a supported shell. Add Markdawn to PATH using your shell\047s native startup-file syntax:\n  ' "$unsupported_shell"
+    printf '\nPATH was not changed because %s is not a supported shell. Add Metakip to PATH using your shell\047s native startup-file syntax:\n  ' "$unsupported_shell"
   else
-    printf '\nPATH was not changed. Add Markdawn to PATH:\n  export PATH='
+    printf '\nPATH was not changed. Add Metakip to PATH:\n  export PATH='
   fi
   printf "'"
   printf '%s' "$install_dir" | sed "s/'/'\\\\''/g" || fail "Could not render PATH instruction."
@@ -333,14 +333,14 @@ else
   else
     printf "':\$PATH\n"
   fi
-  printf '\nAfter adding Markdawn to PATH, run %bmarkdawn login%b to get started.\n' "$command_color" "$color_reset"
+  printf '\nAfter adding Metakip to PATH, run %bmetakip login%b to get started.\n' "$command_color" "$color_reset"
 fi
 if [ "$install_skill" = global ]; then
-  printf '\nInstalling Markdawn agent skill globally with npx skills.\n'
-  "$install_dir/markdawn" skill install --global --yes
+  printf '\nInstalling Metakip agent skill globally with npx skills.\n'
+  "$install_dir/metakip" skill install --global --yes
 elif [ "$install_skill" = project ]; then
-  printf '\nInstalling Markdawn agent skill for this project with npx skills.\n'
-  "$install_dir/markdawn" skill install --yes
+  printf '\nInstalling Metakip agent skill for this project with npx skills.\n'
+  "$install_dir/metakip" skill install --yes
 else
-  printf '\nOptional agent skill:\n\n  %bmarkdawn skill install --global%b\n' "$command_color" "$color_reset"
+  printf '\nOptional agent skill:\n\n  %bmetakip skill install --global%b\n' "$command_color" "$color_reset"
 fi

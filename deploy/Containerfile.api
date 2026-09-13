@@ -11,7 +11,7 @@ COPY packages/shared/package.json packages/shared/package.json
 COPY packages/api/package.json packages/api/package.json
 
 # Install ONLY api + shared deps, production-only (prunes devDependencies)
-RUN pnpm install --frozen-lockfile --filter @markdawn/api --filter @markdawn/shared --prod && pnpm store prune
+RUN pnpm install --frozen-lockfile --filter @metakip/api --filter @metakip/shared --prod && pnpm store prune
 
 # --- Build Deps: install all deps (including devDependencies for building) ---
 FROM base AS build-deps
@@ -20,7 +20,7 @@ COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 COPY patches patches
 COPY packages/shared/package.json packages/shared/package.json
 COPY packages/api/package.json packages/api/package.json
-RUN pnpm install --frozen-lockfile --filter @markdawn/api --filter @markdawn/shared
+RUN pnpm install --frozen-lockfile --filter @metakip/api --filter @metakip/shared
 
 # --- Build: compile source ---
 FROM build-deps AS build

@@ -6,7 +6,7 @@ export const PRODUCT_SUMMARY =
 export const PRODUCT_ORGANIZATION = {
   '@type': 'Organization',
   '@id': `${SITE_ORIGIN}/#organization`,
-  name: 'Markdawn',
+  name: 'Metakip',
   url: SITE_ORIGIN,
   sameAs: [GITHUB_URL],
 } as const;
@@ -14,7 +14,7 @@ export const PRODUCT_ORGANIZATION = {
 export const PRODUCT_WEBSITE = {
   '@type': 'WebSite',
   '@id': `${SITE_ORIGIN}/#website`,
-  name: 'Markdawn',
+  name: 'Metakip',
   url: SITE_ORIGIN,
   description: PRODUCT_SUMMARY,
   publisher: { '@id': `${SITE_ORIGIN}/#organization` },
@@ -23,7 +23,7 @@ export const PRODUCT_WEBSITE = {
 export const PRODUCT_APPLICATION = {
   '@type': 'WebApplication',
   '@id': `${SITE_ORIGIN}/#application`,
-  name: 'Markdawn',
+  name: 'Metakip',
   url: APP_ORIGIN,
   description: PRODUCT_SUMMARY,
   applicationCategory: 'BusinessApplication',

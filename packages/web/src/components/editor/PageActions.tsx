@@ -1,4 +1,4 @@
-import type { Page } from '@markdawn/shared';
+import type { Page } from '@metakip/shared';
 import { Share, Star } from 'lucide-react';
 import { useState } from 'react';
 import { useShareContext } from '../../contexts/ShareContext';

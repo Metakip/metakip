@@ -9,7 +9,7 @@ import {
   v1MarkdownImportResponseSchema,
   v1ParentRequestSchema,
   v1VaultImportResponseSchema,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import { z } from 'zod';
 import { vaultImportRequestSchema } from '../../utils/vaultImportValidation';
 import {
@@ -143,7 +143,7 @@ export const lifecycleOperations = [
     ...lifecyclePaths.pageCopy,
     summary: 'Copy A Page',
     description:
-      'Creates a copy of an accessible page in the requested folder. Set `parentId` to `null` to copy it to the Markdawn root. The copy receives a new ID.',
+      'Creates a copy of an accessible page in the requested folder. Set `parentId` to `null` to copy it to the Metakip root. The copy receives a new ID.',
     tags: lifecycleTag,
     parameters: [pageId],
     request: { required: true, ...jsonContent(parentRequestSchema) },
@@ -159,7 +159,7 @@ export const lifecycleOperations = [
     ...lifecyclePaths.pageMove,
     summary: 'Move A Page',
     description:
-      'Moves an accessible page to the requested folder. Set `parentId` to `null` to move it to the Markdawn root.',
+      'Moves an accessible page to the requested folder. Set `parentId` to `null` to move it to the Metakip root.',
     tags: lifecycleTag,
     parameters: [pageId],
     request: { required: true, ...jsonContent(parentRequestSchema) },
@@ -246,7 +246,7 @@ export const lifecycleOperations = [
     ...lifecyclePaths.folderCopy,
     summary: 'Copy A Folder',
     description:
-      'Copies an accessible folder and its accessible subtree to the requested folder. Set `parentId` to `null` to copy it to the Markdawn root. The response reports whether restricted items were skipped.',
+      'Copies an accessible folder and its accessible subtree to the requested folder. Set `parentId` to `null` to copy it to the Metakip root. The response reports whether restricted items were skipped.',
     tags: lifecycleTag,
     parameters: [folderId],
     request: { required: true, ...jsonContent(parentRequestSchema) },
@@ -344,7 +344,7 @@ export const lifecycleOperations = [
     ...lifecyclePaths.markdownImport,
     summary: 'Import A Page',
     description:
-      'Accepts one .md file and creates a page at the Markdawn root. Local image references that cannot be uploaded are returned as warnings.',
+      'Accepts one .md file and creates a page at the Metakip root. Local image references that cannot be uploaded are returned as warnings.',
     tags: importsExportsTag,
     request: { required: true, ...multipartContent(markdownImportRequestSchema) },
     responses: {
@@ -359,7 +359,7 @@ export const lifecycleOperations = [
     ...lifecyclePaths.obsidianImport,
     summary: 'Import An Obsidian Vault',
     description:
-      'Imports a validated Obsidian vault file list and creates its folders, pages, images, and backlinks at the Markdawn root.',
+      'Imports a validated Obsidian vault file list and creates its folders, pages, images, and backlinks at the Metakip root.',
     tags: importsExportsTag,
     request: {
       required: true,

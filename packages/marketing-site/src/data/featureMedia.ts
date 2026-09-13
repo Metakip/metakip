@@ -13,27 +13,27 @@ export const FEATURE_IMAGES = {
   'obsidian-import': {
     dark: obsidianImportDarkImage,
     light: obsidianImportLightImage,
-    alt: 'The Markdawn dialog for importing an Obsidian vault.',
+    alt: 'The Metakip dialog for importing an Obsidian vault.',
   },
   'workspace-export': {
     dark: workspaceExportDarkImage,
     light: workspaceExportLightImage,
-    alt: 'The Markdawn workspace menu with the export option selected.',
+    alt: 'The Metakip workspace menu with the export option selected.',
   },
   'invite-access': {
     dark: inviteAccessDarkImage,
     light: inviteAccessLightImage,
-    alt: 'The Markdawn sharing panel for granting and restricting page access.',
+    alt: 'The Metakip sharing panel for granting and restricting page access.',
   },
   'browser-page': {
     dark: browserPageDarkImage,
     light: browserPageLightImage,
-    alt: 'A Markdawn page open in the browser.',
+    alt: 'A Metakip page open in the browser.',
   },
   'terminal-page': {
     dark: terminalPageDarkImage,
     light: terminalPageLightImage,
-    alt: 'The same Markdawn page being edited from a terminal.',
+    alt: 'The same Metakip page being edited from a terminal.',
   },
 } as const;
 

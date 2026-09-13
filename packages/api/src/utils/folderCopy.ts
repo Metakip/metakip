@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { MAX_FOLDER_NAME_LENGTH } from '@markdawn/shared';
+import { MAX_FOLDER_NAME_LENGTH } from '@metakip/shared';
 import { sql } from 'drizzle-orm';
 import { executeQuery, type QueryExecutor } from '../db/query';
 import { type FolderDatabaseRow, type NormalizedFolderRow, normalizeFolderRow } from './folderRows';

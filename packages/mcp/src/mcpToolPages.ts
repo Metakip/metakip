@@ -40,7 +40,7 @@ export function registerPageTools(
   registerTool(
     server,
     'list_pages',
-    'Use this when you need to browse accessible Markdawn pages. Results are cursor-paginated; pass nextCursor to continue. Omit parentId to list pages at any depth; root-only filtering is not available through this tool.',
+    'Use this when you need to browse accessible Metakip pages. Results are cursor-paginated; pass nextCursor to continue. Omit parentId to list pages at any depth; root-only filtering is not available through this tool.',
     {
       cursor: z.string().optional(),
       limit: z.number().int().min(1).max(100).optional(),
@@ -53,7 +53,7 @@ export function registerPageTools(
   registerTool(
     server,
     'search_pages',
-    'Use this when you need to find accessible Markdawn pages by title. Searches titles only, returns up to 20 results in relevance order, and includes each page folder path. Use a returned page ID with read_page to inspect its Markdown.',
+    'Use this when you need to find accessible Metakip pages by title. Searches titles only, returns up to 20 results in relevance order, and includes each page folder path. Use a returned page ID with read_page to inspect its Markdown.',
     { query: z.string().trim().min(1) },
     readAnnotations,
     mcpPageSearchSchema,
@@ -74,7 +74,7 @@ export function registerPageTools(
   registerTool(
     server,
     'create_page',
-    'Use this when the user asks to create a new Markdawn page. The title is separate page metadata; do not repeat it as a Markdown H1 unless the user explicitly requests that H1. This changes stored content.',
+    'Use this when the user asks to create a new Metakip page. The title is separate page metadata; do not repeat it as a Markdown H1 unless the user explicitly requests that H1. This changes stored content.',
     {
       title: z.string().optional(),
       parentId: z.string().uuid().nullable().optional(),
@@ -88,7 +88,7 @@ export function registerPageTools(
   registerTool(
     server,
     'update_page',
-    'Use this when the user asks to rename, set an icon on, or clear the icon from a Markdawn page.',
+    'Use this when the user asks to rename, set an icon on, or clear the icon from a Metakip page.',
     {
       reference: z.string().min(1),
       title: z.string().optional(),

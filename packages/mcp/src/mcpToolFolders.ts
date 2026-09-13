@@ -11,7 +11,7 @@ export function registerFolderTools(
   registerTool(
     server,
     'list_folders',
-    'Use this when you need to browse accessible Markdawn folders. Results are cursor-paginated.',
+    'Use this when you need to browse accessible Metakip folders. Results are cursor-paginated.',
     { cursor: z.string().optional(), limit: z.number().int().min(1).max(100).optional() },
     readAnnotations,
     mcpFolderListSchema,
@@ -23,7 +23,7 @@ export function registerFolderTools(
   registerTool(
     server,
     'create_folder',
-    'Use this when the user asks to create a Markdawn folder.',
+    'Use this when the user asks to create a Metakip folder.',
     { name: z.string().optional(), parentId: z.string().uuid().nullable().optional() },
     writeAnnotations,
     mcpFolderSchema,
@@ -32,7 +32,7 @@ export function registerFolderTools(
   registerTool(
     server,
     'update_folder',
-    'Use this when the user asks to rename a Markdawn folder.',
+    'Use this when the user asks to rename a Metakip folder.',
     { reference: z.string().min(1), name: z.string() },
     writeAnnotations,
     mcpFolderSchema,

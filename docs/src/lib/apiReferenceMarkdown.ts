@@ -365,10 +365,10 @@ function getOperations(): ApiOperation[] {
       return data ? [{ data, method }] : [];
     });
     methods.forEach(({ data, method }) => {
-      const docsSlug = asString(data['x-markdawn-docs-slug']);
+      const docsSlug = asString(data['x-metakip-docs-slug']);
       if (!docsSlug) {
         throw new Error(
-          `OpenAPI operation ${method.toUpperCase()} ${path} is missing x-markdawn-docs-slug metadata.`,
+          `OpenAPI operation ${method.toUpperCase()} ${path} is missing x-metakip-docs-slug metadata.`,
         );
       }
       operations.push({
@@ -399,26 +399,26 @@ export function getApiReferencePageMetadata(
   if (sluggedPathname === API_BASE_SLUG) {
     return {
       kind: 'overview',
-      title: 'Markdawn API Reference | Markdawn Docs',
+      title: 'Metakip API Reference | Metakip Docs',
       description: metaDescription(
         asString(asObject(document.info)?.description) ?? '',
-        'Read and change Markdawn pages, folders, and markdown through the API.',
+        'Read and change Metakip pages, folders, and markdown through the API.',
       ),
     };
   }
 
   const tag = (Array.isArray(document.tags) ? document.tags : []).map(asObject).find((item) => {
-    const tagSlug = asString(item?.['x-markdawn-docs-slug']);
+    const tagSlug = asString(item?.['x-metakip-docs-slug']);
     return tagSlug && `${API_BASE_SLUG}/operations/tags/${tagSlug}` === sluggedPathname;
   });
   if (tag) {
     const tagName = asString(tag.name) ?? 'API';
     return {
       kind: 'tag',
-      title: `${tagName} API Reference | Markdawn Docs`,
+      title: `${tagName} API Reference | Metakip Docs`,
       description: metaDescription(
-        `${tagName} endpoints in the Markdawn API. ${asString(tag.description) ?? ''}`,
-        `Use the ${tagName} endpoints in the Markdawn API.`,
+        `${tagName} endpoints in the Metakip API. ${asString(tag.description) ?? ''}`,
+        `Use the ${tagName} endpoints in the Metakip API.`,
       ),
     };
   }
@@ -430,10 +430,10 @@ export function getApiReferencePageMetadata(
     asString(operation.data.summary) ?? `${operation.method.toUpperCase()} ${operation.path}`;
   return {
     kind: 'operation',
-    title: `${title} API | Markdawn Docs`,
+    title: `${title} API | Metakip Docs`,
     description: metaDescription(
       `${operation.method.toUpperCase()} ${operation.path}. ${asString(operation.data.description) ?? ''}`,
-      `Use the Markdawn API to ${title.toLowerCase()}.`,
+      `Use the Metakip API to ${title.toLowerCase()}.`,
     ),
     method: operation.method.toUpperCase(),
     path: operation.path,
@@ -457,22 +457,22 @@ function renderOperation(operation: ApiOperation): string {
 
 function renderOverview(): string {
   const info = asObject(document.info);
-  const lines = ['# Markdawn API Reference', ''];
+  const lines = ['# Metakip API Reference', ''];
   const description = asString(info?.description);
   if (description) lines.push(description, '');
   lines.push(
-    'The API is available at `https://app.markdawn.space/api/v1` and supports bearer tokens and browser sessions.',
+    'The API is available at `https://app.metakip.com/api/v1` and supports bearer tokens and browser sessions.',
     '',
     '## Quick Start',
     '',
-    'Create a named API token in Markdawn Settings, store it in `MARKDAWN_TOKEN`, and send it as a bearer token:',
+    'Create a named API token in Metakip Settings, store it in `METAKIP_TOKEN`, and send it as a bearer token:',
     '',
     '```bash',
-    'curl https://app.markdawn.space/api/v1/pages \\',
-    '  -H "Authorization: Bearer $MARKDAWN_TOKEN"',
+    'curl https://app.metakip.com/api/v1/pages \\',
+    '  -H "Authorization: Bearer $METAKIP_TOKEN"',
     '```',
     '',
-    'Use the [Markdawn CLI](/agents/markdawn-cli/) when you want a terminal workflow instead of making HTTP requests directly.',
+    'Use the [Metakip CLI](/agents/metakip-cli/) when you want a terminal workflow instead of making HTTP requests directly.',
     '',
     '## Endpoint Groups',
     '',
@@ -512,9 +512,9 @@ function createEntries(): ApiReferenceMarkdownEntry[] {
   for (const tagValue of tags) {
     const tag = asObject(tagValue);
     const tagName = asString(tag?.name);
-    const tagSlug = asString(tag?.['x-markdawn-docs-slug']);
+    const tagSlug = asString(tag?.['x-metakip-docs-slug']);
     if (!tagName || !tagSlug) {
-      throw new Error('OpenAPI tag is missing name or x-markdawn-docs-slug metadata.');
+      throw new Error('OpenAPI tag is missing name or x-metakip-docs-slug metadata.');
     }
     const tagOperations = operations.filter((operation) => operation.tags.includes(tagName));
     entries.push({

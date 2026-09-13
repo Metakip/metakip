@@ -1,4 +1,4 @@
-import { MARKDAWN_DOCS_URL, MARKDAWN_GITHUB_URL } from '@markdawn/shared';
+import { METAKIP_DOCS_URL, METAKIP_GITHUB_URL } from '@metakip/shared';
 import { BookOpen, Github, Monitor, Moon, Sun } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 
@@ -39,7 +39,7 @@ export function HeaderActions() {
       </button>
 
       <a
-        href={MARKDAWN_DOCS_URL}
+        href={METAKIP_DOCS_URL}
         target="_blank"
         rel="noopener noreferrer"
         className="p-1.5 rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors text-zinc-600 dark:text-zinc-300 cursor-pointer"
@@ -50,7 +50,7 @@ export function HeaderActions() {
       </a>
 
       <a
-        href={MARKDAWN_GITHUB_URL}
+        href={METAKIP_GITHUB_URL}
         target="_blank"
         rel="noopener noreferrer"
         className="p-1.5 rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors text-zinc-600 dark:text-zinc-300 cursor-pointer"

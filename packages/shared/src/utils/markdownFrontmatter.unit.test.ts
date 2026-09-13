@@ -127,7 +127,7 @@ Body`);
     ['boolean tag', `---\ntag: false\n---\nBody`],
     ['non-JSON number', `---\nscore: .inf\n---\nBody`],
     ['non-JSON YAML type', `---\nlabels: !!set {one: null}\n---\nBody`],
-    ['unresolved custom tag', `---\nmetadata: !markdawn/custom value\n---\nBody`],
+    ['unresolved custom tag', `---\nmetadata: !metakip/custom value\n---\nBody`],
     ['missing delimiter', `---\ntags: [one]\nBody`],
   ])('rejects %s instead of partially importing them', (_name, markdown) => {
     expect(() => parseMarkdownFrontmatter(markdown)).toThrow(UnsupportedMarkdownFrontmatterError);

@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { normalizeLineEndings } from '@markdawn/shared';
+import { normalizeLineEndings } from '@metakip/shared';
 import { Hono } from 'hono';
 import { requireV1OperationScope } from '../../middleware/v1Auth';
 import { applyPageExactEdits } from '../../utils/collaborationContentClient';

@@ -146,7 +146,7 @@ func readExistingInstallReceipt(path, installDir string) (installReceipt, error)
 		return installReceipt{}, fmt.Errorf("read standalone install receipt: %w", err)
 	}
 	if filepath.Clean(receipt.InstallDir) != filepath.Clean(installDir) {
-		return installReceipt{}, fmt.Errorf("a standalone Markdawn installation is already managed at %s; uninstall it before changing the installation directory", receipt.InstallDir)
+		return installReceipt{}, fmt.Errorf("a standalone Metakip installation is already managed at %s; uninstall it before changing the installation directory", receipt.InstallDir)
 	}
 	return receipt, nil
 }
@@ -157,7 +157,7 @@ func copyStandaloneBinary(source, installDir string) (string, error) {
 		return "", fmt.Errorf("open staged standalone executable: %w", err)
 	}
 	defer input.Close()
-	output, err := os.CreateTemp(installDir, ".markdawn-*")
+	output, err := os.CreateTemp(installDir, ".metakip-*")
 	if err != nil {
 		return "", fmt.Errorf("create staged standalone executable: %w", err)
 	}

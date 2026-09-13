@@ -2,7 +2,7 @@ import {
   type AccountFolderPayload,
   deriveCapabilities,
   type PublicFolderPayload,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import { sql } from 'drizzle-orm';
 import { type Context, Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
