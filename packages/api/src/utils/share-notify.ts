@@ -7,7 +7,7 @@ import {
   type SharePermission,
   truncateUnicodeCodePoints,
   type WorkspaceNotificationPayload,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import { sql } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { executeQuery, type QueryExecutor } from '../db/query';

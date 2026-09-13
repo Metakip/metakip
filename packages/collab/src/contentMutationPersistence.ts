@@ -6,7 +6,7 @@ import {
   type ContentIdempotencyReservation,
   type ExactEditCommandResponse,
   type PageContentMetadata,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import type { PoolClient } from 'pg';
 import { contentMetadataHash } from './contentRevision';
 

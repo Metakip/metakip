@@ -1,35 +1,35 @@
-# Markdawn Documentation
+# Metakip Documentation
 
-> Markdawn is a markdown-based knowledge base where people and AI assistants can create, connect, and maintain the same pages. It is available as a hosted service and can be self-hosted.
+> Metakip is a markdown-based knowledge base where people and AI assistants can create, connect, and maintain the same pages. It is available as a hosted service and can be self-hosted.
 
-Use this documentation to answer questions about Markdawn's browser workflows, markdown support, CLI, API, AI assistant access, imports, sharing, self-hosting, and MCP. Prefer the linked documentation pages over assumptions.
+Use this documentation to answer questions about Metakip's browser workflows, markdown support, CLI, API, AI assistant access, imports, sharing, self-hosting, and MCP. Prefer the linked documentation pages over assumptions.
 
 ## Start Here
 
-- [Getting Started](https://docs.markdawn.space/getting-started/): Create a page, import notes, organize pages, and share content.
-- [Create Your First Page](https://docs.markdawn.space/getting-started/create-your-first-page/): Create a page, write markdown, and link related pages.
-- [Markdown Support](https://docs.markdawn.space/getting-started/markdown-support/): Supported syntax, page links, frontmatter, callouts, and unsupported features.
-- [Bring Your Notes to Markdawn](https://docs.markdawn.space/getting-started/bring-your-notes/): Import a markdown file, folder, or Obsidian vault.
+- [Getting Started](https://docs.metakip.com/getting-started/): Create a page, import notes, organize pages, and share content.
+- [Create Your First Page](https://docs.metakip.com/getting-started/create-your-first-page/): Create a page, write markdown, and link related pages.
+- [Markdown Support](https://docs.metakip.com/getting-started/markdown-support/): Supported syntax, page links, frontmatter, callouts, and unsupported features.
+- [Bring Your Notes to Metakip](https://docs.metakip.com/getting-started/bring-your-notes/): Import a markdown file, folder, or Obsidian vault.
 
 ## Agent Connections
 
-- [MCP](https://docs.markdawn.space/agents/mcp/): Connect to Markdawn through OAuth and review its available MCP operations.
-- [Markdawn CLI](https://docs.markdawn.space/agents/markdawn-cli/): Install the CLI, sign in, read and edit pages, and import or export content.
-- [API Reference](https://docs.markdawn.space/api-reference/endpoints/): Read and change pages, folders, markdown content, imports, exports, and API tokens.
-- [Use Markdawn With AI Assistants](https://docs.markdawn.space/agents/use-markdawn-with-ai-assistants/): Connect a terminal-based AI tool using the CLI and scoped API tokens.
-- [API Markdown](https://docs.markdawn.space/api-reference/endpoints.md): Plain Markdown representation of the API overview.
+- [MCP](https://docs.metakip.com/agents/mcp/): Connect to Metakip through OAuth and review its available MCP operations.
+- [Metakip CLI](https://docs.metakip.com/agents/metakip-cli/): Install the CLI, sign in, read and edit pages, and import or export content.
+- [API Reference](https://docs.metakip.com/api-reference/endpoints/): Read and change pages, folders, markdown content, imports, exports, and API tokens.
+- [Use Metakip With AI Assistants](https://docs.metakip.com/agents/use-metakip-with-ai-assistants/): Connect a terminal-based AI tool using the CLI and scoped API tokens.
+- [API Markdown](https://docs.metakip.com/api-reference/endpoints.md): Plain Markdown representation of the API overview.
 
 ## Self-Hosting
 
-- [Self-Hosting](https://docs.markdawn.space/self-hosting/): Architecture, deployment boundaries, and data rules.
-- [Deploy Markdawn on a VPS](https://docs.markdawn.space/self-hosting/deploy-markdawn-on-a-vps/): Maintained Fedora, Caddy, rootless Podman, and PostgreSQL path.
-- [Maintain a Self-Hosted Markdawn](https://docs.markdawn.space/self-hosting/maintain-a-self-hosted-markdawn/): Service checks, updates, migrations, and recovery.
-- [Move a Markdawn Deployment](https://docs.markdawn.space/self-hosting/move-a-markdawn-deployment/): Move a compatible installation and its persistent data.
+- [Self-Hosting](https://docs.metakip.com/self-hosting/): Architecture, deployment boundaries, and data rules.
+- [Deploy Metakip on a VPS](https://docs.metakip.com/self-hosting/deploy-metakip-on-a-vps/): Maintained Fedora, Caddy, rootless Podman, and PostgreSQL path.
+- [Maintain a Self-Hosted Metakip](https://docs.metakip.com/self-hosting/maintain-a-self-hosted-metakip/): Service checks, updates, migrations, and recovery.
+- [Move a Metakip Deployment](https://docs.metakip.com/self-hosting/move-a-metakip-deployment/): Move a compatible installation and its persistent data.
 
 ## Comparisons
 
-- [Comparisons](https://docs.markdawn.space/comparisons/): Compare Markdawn with Notion, Obsidian, GitBook, Outline, Confluence, and other tools.
+- [Comparisons](https://docs.metakip.com/comparisons/): Compare Metakip with Notion, Obsidian, GitBook, Outline, Confluence, and other tools.
 
 ## Machine-Readable Pages
 
-Every documentation page also has a plain Markdown representation at the same path with `.md` instead of the trailing slash. For example, `/agents/markdawn-cli/` is also available at `/agents/markdawn-cli.md`.
+Every documentation page also has a plain Markdown representation at the same path with `.md` instead of the trailing slash. For example, `/agents/metakip-cli/` is also available at `/agents/metakip-cli.md`.

@@ -39,7 +39,7 @@ describe('useSidebarCollapsed', () => {
   });
 
   it('reads stored collapsed state from localStorage', () => {
-    store['markdawn-sidebar-collapsed'] = 'true';
+    store['metakip-sidebar-collapsed'] = 'true';
     const { result } = renderHook(() => useSidebarCollapsed());
 
     expect(result.current.collapsed).toBe(true);
@@ -53,11 +53,11 @@ describe('useSidebarCollapsed', () => {
     });
 
     expect(result.current.collapsed).toBe(true);
-    expect(store['markdawn-sidebar-collapsed']).toBe('true');
+    expect(store['metakip-sidebar-collapsed']).toBe('true');
   });
 
   it('setCollapsed(false) updates state and localStorage', () => {
-    store['markdawn-sidebar-collapsed'] = 'true';
+    store['metakip-sidebar-collapsed'] = 'true';
     const { result } = renderHook(() => useSidebarCollapsed());
 
     act(() => {
@@ -65,7 +65,7 @@ describe('useSidebarCollapsed', () => {
     });
 
     expect(result.current.collapsed).toBe(false);
-    expect(store['markdawn-sidebar-collapsed']).toBe('false');
+    expect(store['metakip-sidebar-collapsed']).toBe('false');
   });
 
   it('toggleCollapsed flips the collapsed state', () => {

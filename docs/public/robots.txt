@@ -1,4 +1,4 @@
-# Markdawn documentation is public and intended to be useful in search results
+# Metakip documentation is public and intended to be useful in search results
 # and in answers from AI assistants. Training access can be managed separately
 # at the hosting layer without blocking retrieval.
 
@@ -29,4 +29,4 @@ Allow: /
 User-agent: Bingbot
 Allow: /
 
-Sitemap: https://docs.markdawn.space/sitemap-index.xml
+Sitemap: https://docs.metakip.com/sitemap-index.xml

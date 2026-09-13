@@ -67,7 +67,7 @@ test.describe('Autolink', () => {
   test('links a typed URL and preserves following text', async ({ page }) => {
     await createNewPage(page);
     await focusEditor(page);
-    const url = 'https://github.com/atharva-again/Markdawn/issues/104';
+    const url = 'https://github.com/Metakip/metakip/issues/104';
 
     await page.keyboard.type(`${url} next`);
 
@@ -210,7 +210,7 @@ test.describe('Autolink', () => {
   test('preserves copied URL paragraph boundaries', async ({ page }) => {
     await createNewPage(page);
     await focusEditor(page);
-    const urls = ['https://x.com/home', 'https://github.com/atharva-again/Markdawn/pull/112'];
+    const urls = ['https://x.com/home', 'https://github.com/Metakip/metakip/pull/112'];
     await pasteClipboardText(page, 'text/plain', urls[0] ?? '');
     await page.keyboard.press('Enter');
     await pasteClipboardText(page, 'text/plain', urls[1] ?? '');

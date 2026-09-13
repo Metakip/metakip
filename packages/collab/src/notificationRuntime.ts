@@ -1,6 +1,6 @@
 import type { Server } from '@hocuspocus/server';
 import type { Logger } from '@logtape/logtape';
-import type { ShareEventPayload, WorkspaceMembershipMessage } from '@markdawn/shared';
+import type { ShareEventPayload, WorkspaceMembershipMessage } from '@metakip/shared';
 import { Client, type Pool } from 'pg';
 import { createCoalescingTaskQueue } from './coalescingTaskQueue';
 import {

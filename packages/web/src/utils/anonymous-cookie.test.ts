@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { getAnonymousId, rotateAnonymousId } from './anonymous-cookie';
 
-const COOKIE_NAME = 'markdawn_anon_id';
+const COOKIE_NAME = 'metakip_anon_id';
 
 function clearAnonymousCookie(): void {
   // biome-ignore lint/suspicious/noDocumentCookie: tests the document.cookie fallback directly

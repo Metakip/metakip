@@ -282,7 +282,7 @@ describe('parsePageMetaStatelessMessage', () => {
     expect(parsePageMetaStatelessMessage('provider-control-message')).toBeNull();
   });
 
-  it('reports malformed Markdawn JSON instead of silently ignoring it', () => {
+  it('reports malformed Metakip JSON instead of silently ignoring it', () => {
     expect(() => parsePageMetaStatelessMessage('{"type":"workspace_membership_event"')).toThrow(
       'Malformed stateless message',
     );

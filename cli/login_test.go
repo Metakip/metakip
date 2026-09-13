@@ -19,7 +19,7 @@ func TestLoginPreservesAuthenticationExitStatus(t *testing.T) {
 		_, _ = io.WriteString(response, `{"error":{"code":"invalid_token","message":"Invalid token"}}`)
 	}))
 	defer server.Close()
-	t.Setenv("MARKDAWN_TOKEN", "invalid-token")
+	t.Setenv("METAKIP_TOKEN", "invalid-token")
 	cfg := config{BaseURL: server.URL}
 	runtime := &runtimeState{
 		ctx: context.Background(), cli: &CLI{}, stdout: io.Discard, stderr: io.Discard,
@@ -41,7 +41,7 @@ func (reader *failingReader) Read(_ []byte) (int, error) {
 }
 
 func TestNonInteractiveLoginDoesNotReadTerminalInput(t *testing.T) {
-	t.Setenv("MARKDAWN_TOKEN", "")
+	t.Setenv("METAKIP_TOKEN", "")
 	for _, test := range []struct {
 		name string
 		cli  CLI
@@ -64,8 +64,8 @@ func TestNonInteractiveLoginDoesNotReadTerminalInput(t *testing.T) {
 			}
 
 			err := (&LoginCmd{}).Run(runtime)
-			if err == nil || !strings.Contains(err.Error(), "MARKDAWN_TOKEN") {
-				t.Fatalf("expected MARKDAWN_TOKEN usage error, got %v", err)
+			if err == nil || !strings.Contains(err.Error(), "METAKIP_TOKEN") {
+				t.Fatalf("expected METAKIP_TOKEN usage error, got %v", err)
 			}
 			if stdin.read {
 				t.Fatal("login read from terminal in non-interactive mode")

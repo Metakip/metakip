@@ -15,10 +15,10 @@ import {
   normalizeLineEndings,
   normalizeWikiLinkLookupKey,
   parsePageMarkdown,
-} from '@markdawn/shared';
-import { bindWikiLinkTargetsInDocument } from '@markdawn/shared/markdown-yjs';
-import { replaceMarkdownBody } from '@markdawn/shared/yjs-document-replacement';
-import { extractWikiLinkTargetIds, yDocToMarkdown } from '@markdawn/shared/yjs-helpers';
+} from '@metakip/shared';
+import { bindWikiLinkTargetsInDocument } from '@metakip/shared/markdown-yjs';
+import { replaceMarkdownBody } from '@metakip/shared/yjs-document-replacement';
+import { extractWikiLinkTargetIds, yDocToMarkdown } from '@metakip/shared/yjs-helpers';
 import type { Pool } from 'pg';
 import * as Y from 'yjs';
 import type { PermissionQueryExecutor } from './accessVerifier';

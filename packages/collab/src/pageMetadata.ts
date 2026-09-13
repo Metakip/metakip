@@ -1,6 +1,6 @@
 import type { Document, Hocuspocus } from '@hocuspocus/server';
 import type { Logger } from '@logtape/logtape';
-import { parsePageMetaRoomName, type SharePermission } from '@markdawn/shared';
+import { parsePageMetaRoomName, type SharePermission } from '@metakip/shared';
 import type { Pool, PoolClient } from 'pg';
 
 export type ActiveMetaDocuments = Map<string, Document>;

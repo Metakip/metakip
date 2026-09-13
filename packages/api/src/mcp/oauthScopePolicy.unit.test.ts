@@ -15,7 +15,7 @@ describe('MCP OAuth scope policy compatibility adapter', () => {
     expect(response.status).toBe(200);
     const delegatedUrl = await response.text();
     expect(delegatedUrl).toContain('redirect_uri=https%3A%2F%2Fclient.example%2Fcallback');
-    expect(delegatedUrl).toContain('markdawn%3Ainvalid-pages-scope-combination');
+    expect(delegatedUrl).toContain('metakip%3Ainvalid-pages-scope-combination');
   });
 
   it('rejects invalid consent scopes without silently dropping the request', async () => {
@@ -59,10 +59,10 @@ describe('MCP OAuth scope policy compatibility adapter', () => {
 
     expect(response.status).toBe(200);
     expect(new URL(delegatedRequest?.url ?? '').searchParams.get('scope')).toContain(
-      'markdawn:invalid-pages-scope-combination',
+      'metakip:invalid-pages-scope-combination',
     );
     await expect(delegatedRequest?.text()).resolves.toContain(
-      'markdawn%3Ainvalid-pages-scope-combination',
+      'metakip%3Ainvalid-pages-scope-combination',
     );
   });
 

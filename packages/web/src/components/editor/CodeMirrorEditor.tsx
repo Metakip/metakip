@@ -4,7 +4,7 @@ import {
   normalizeWikiLinkLookupKey,
   type ParsedWikiLinkTarget,
   type SharePermission,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';

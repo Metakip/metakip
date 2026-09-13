@@ -1,4 +1,4 @@
-import type { ShareEntityType, SharePermission } from '@markdawn/shared';
+import type { ShareEntityType, SharePermission } from '@metakip/shared';
 import { type QueryClient, useMutation, useQueryClient } from '@tanstack/react-query';
 import { consumeSelfLeave, markSelfLeave } from './leave-page';
 import { removeFolderFromNavigationCache, removePageFromNavigationCache } from './navigationCache';

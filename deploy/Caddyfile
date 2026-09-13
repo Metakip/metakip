@@ -1,7 +1,7 @@
-(markdawn_static) {
+(metakip_static) {
     # Static files and SPA fallback — catch-all
     handle {
-        root * /var/www/markdawn/packages/web/dist
+        root * /var/www/metakip/packages/web/dist
 
         # Cache hashed assets for 1 year
         @hashedAssets {
@@ -29,7 +29,7 @@
     }
 }
 
-app.markdawn.space {
+app.metakip.com {
     # Preserve links created before the app moved to the subdomain root.
     redir /app / permanent
     handle_path /app/* {
@@ -53,12 +53,12 @@ app.markdawn.space {
         }
     }
 
-    import markdawn_static
+    import metakip_static
 }
 
-mcp.markdawn.space {
+mcp.metakip.com {
     @mcpLanding path /
-    redir @mcpLanding https://docs.markdawn.space/agents/mcp/ 302
+    redir @mcpLanding https://docs.metakip.com/agents/mcp/ 302
 
     reverse_proxy localhost:3002 {
         header_up X-Real-IP {remote_host}
@@ -66,4 +66,13 @@ mcp.markdawn.space {
         header_up X-Forwarded-Proto {scheme}
         flush_interval -1
     }
+}
+
+# Permanent redirects from the previous hosted domains.
+app.markdawn.space {
+    redir https://app.metakip.com{uri} permanent
+}
+
+mcp.markdawn.space {
+    redir https://mcp.metakip.com{uri} permanent
 }

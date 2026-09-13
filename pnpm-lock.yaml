@@ -90,7 +90,7 @@ importers:
       '@logtape/logtape':
         specifier: ^2.0.5
         version: 2.0.5
-      '@markdawn/shared':
+      '@metakip/shared':
         specifier: workspace:*
         version: link:../shared
       better-auth:
@@ -160,7 +160,7 @@ importers:
       '@logtape/logtape':
         specifier: ^2.0.5
         version: 2.0.5
-      '@markdawn/shared':
+      '@metakip/shared':
         specifier: workspace:*
         version: link:../shared
       better-auth:
@@ -234,7 +234,7 @@ importers:
       '@hono/node-server':
         specifier: ^1.19.9
         version: 1.19.9(hono@4.12.0)
-      '@markdawn/shared':
+      '@metakip/shared':
         specifier: workspace:*
         version: link:../shared
       '@modelcontextprotocol/server':
@@ -359,7 +359,7 @@ importers:
       '@logtape/logtape':
         specifier: ^2.0.5
         version: 2.0.5
-      '@markdawn/shared':
+      '@metakip/shared':
         specifier: workspace:*
         version: link:../shared
       '@tabler/icons-react':

@@ -10,7 +10,7 @@ import (
 
 func TestConfigRoundTripUsesRestrictedPermissions(t *testing.T) {
 	dir := t.TempDir()
-	t.Setenv("MARKDAWN_CONFIG_DIR", dir)
+	t.Setenv("METAKIP_CONFIG_DIR", dir)
 	want := config{BaseURL: "https://example.test", Token: "mdn_secret"}
 	if err := saveConfig(want); err != nil {
 		t.Fatal(err)
@@ -39,7 +39,7 @@ func TestConfigRoundTripUsesRestrictedPermissions(t *testing.T) {
 
 func TestSaveConfigRestrictsExistingFileBeforeReplacingToken(t *testing.T) {
 	dir := t.TempDir()
-	t.Setenv("MARKDAWN_CONFIG_DIR", dir)
+	t.Setenv("METAKIP_CONFIG_DIR", dir)
 	path := filepath.Join(dir, "config.json")
 	if err := os.WriteFile(path, []byte(`{"baseUrl":"https://example.test","token":"old"}`), 0o644); err != nil {
 		t.Fatal(err)
@@ -70,7 +70,7 @@ func TestSaveConfigRestrictsExistingFileBeforeReplacingToken(t *testing.T) {
 
 func TestLoadConfigRejectsInvalidUTF8(t *testing.T) {
 	dir := t.TempDir()
-	t.Setenv("MARKDAWN_CONFIG_DIR", dir)
+	t.Setenv("METAKIP_CONFIG_DIR", dir)
 	if err := os.WriteFile(filepath.Join(dir, "config.json"), []byte{0x7b, 0x22, 0xff, 0x22, 0x7d}, 0o600); err != nil {
 		t.Fatal(err)
 	}
@@ -79,23 +79,23 @@ func TestLoadConfigRejectsInvalidUTF8(t *testing.T) {
 	}
 }
 
-func TestLoadConfigDefaultsToMarkdawnCloud(t *testing.T) {
+func TestLoadConfigDefaultsToMetakipCloud(t *testing.T) {
 	dir := t.TempDir()
-	t.Setenv("MARKDAWN_CONFIG_DIR", dir)
+	t.Setenv("METAKIP_CONFIG_DIR", dir)
 	config, err := loadConfig()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if config.BaseURL != "https://app.markdawn.space" {
+	if config.BaseURL != "https://app.metakip.com" {
 		t.Fatalf("default base URL = %q", config.BaseURL)
 	}
 }
 
 func TestLoadConfigMigratesLegacyHostedURL(t *testing.T) {
 	dir := t.TempDir()
-	t.Setenv("MARKDAWN_CONFIG_DIR", dir)
+	t.Setenv("METAKIP_CONFIG_DIR", dir)
 	path := filepath.Join(dir, "config.json")
-	if err := os.WriteFile(path, []byte(`{"baseUrl":"https://markdawn.space/","token":"secret"}`), 0o600); err != nil {
+	if err := os.WriteFile(path, []byte(`{"baseUrl":"https://app.markdawn.space/","token":"secret"}`), 0o600); err != nil {
 		t.Fatal(err)
 	}
 
@@ -118,7 +118,7 @@ func TestLoadConfigMigratesLegacyHostedURL(t *testing.T) {
 
 func TestLoadConfigRejectsUnknownFieldsAndMultipleValues(t *testing.T) {
 	dir := t.TempDir()
-	t.Setenv("MARKDAWN_CONFIG_DIR", dir)
+	t.Setenv("METAKIP_CONFIG_DIR", dir)
 	path := filepath.Join(dir, "config.json")
 	if err := os.WriteFile(path, []byte(`{"baseUrl":"https://example.test","token":"secret","unknown":true}`), 0o600); err != nil {
 		t.Fatal(err)

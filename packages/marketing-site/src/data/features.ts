@@ -42,7 +42,7 @@ export const FEATURE_GROUPS = [
     link: {
       kind: 'external',
       label: 'Read About The CLI →',
-      url: `${DOCS_ORIGIN}/agents/markdawn-cli/`,
+      url: `${DOCS_ORIGIN}/agents/metakip-cli/`,
     },
   },
   {
@@ -51,7 +51,7 @@ export const FEATURE_GROUPS = [
     body: richText({
       kind: 'text',
       value:
-        'Give collaborators View, Edit, or Admin access. When they are connected, everyone can edit the same page in real time and see the collaboration status. If the connection drops, Markdawn switches to read-only instead of accepting edits against stale content.',
+        'Give collaborators View, Edit, or Admin access. When they are connected, everyone can edit the same page in real time and see the collaboration status. If the connection drops, Metakip switches to read-only instead of accepting edits against stale content.',
     }),
     media: [
       {
@@ -59,7 +59,7 @@ export const FEATURE_GROUPS = [
         lightUrl: '/videos/collab-light.mp4',
         darkUrl: '/videos/collab-dark.mp4',
         type: 'video/mp4',
-        alt: 'A Markdawn page being edited collaboratively in real time.',
+        alt: 'A Metakip page being edited collaboratively in real time.',
       },
       { kind: 'image', imageId: 'invite-access' },
     ],
@@ -87,7 +87,7 @@ export const FEATURE_GROUPS = [
         lightUrl: '/videos/backlink-light.mp4',
         darkUrl: '/videos/backlink-section.mp4',
         type: 'video/mp4',
-        alt: 'A Markdawn page showing linked knowledge and backlinks.',
+        alt: 'A Metakip page showing linked knowledge and backlinks.',
       },
     ],
     link: {
@@ -110,13 +110,13 @@ export const FEATURE_GROUPS = [
         lightUrl: '/videos/token-light.webm',
         darkUrl: '/videos/token-dark.webm',
         type: 'video/webm',
-        alt: 'A Markdawn API token set up with scoped access.',
+        alt: 'A Metakip API token set up with scoped access.',
       },
     ],
     link: {
       kind: 'external',
       label: 'Read About Agent Access →',
-      url: `${DOCS_ORIGIN}/agents/use-markdawn-with-ai-assistants/`,
+      url: `${DOCS_ORIGIN}/agents/use-metakip-with-ai-assistants/`,
     },
   },
   {
@@ -125,7 +125,7 @@ export const FEATURE_GROUPS = [
     body: richText({
       kind: 'text',
       value:
-        'Import one markdown file, a folder, or an Obsidian vault. Export a page or the whole workspace from the CLI. Use Markdawn as a hosted service, or run the open-source application on infrastructure you control.',
+        'Import one markdown file, a folder, or an Obsidian vault. Export a page or the whole workspace from the CLI. Use Metakip as a hosted service, or run the open-source application on infrastructure you control.',
     }),
     media: [
       { kind: 'image', imageId: 'obsidian-import' },
@@ -141,9 +141,9 @@ export const FEATURE_GROUPS = [
 
 export const FAQS = [
   {
-    question: 'Is Markdawn only for AI agents?',
+    question: 'Is Metakip only for AI agents?',
     answer:
-      'No. Markdawn is for people first, with the CLI and API as direct ways for terminals, scripts, and AI assistants to use the same pages.',
+      'No. Metakip is for people first, with the CLI and API as direct ways for terminals, scripts, and AI assistants to use the same pages.',
   },
   {
     question: 'How do people and agents share a page?',
@@ -151,7 +151,7 @@ export const FAQS = [
       'They use the same content layer. A person can write in the browser while a terminal or assistant reads and edits that page through the CLI or API.',
   },
   {
-    question: 'Does Markdawn use markdown for page content?',
+    question: 'Does Metakip use markdown for page content?',
     answer:
       'Yes. Page content remains markdown across the browser, CLI, and API. Titles and access settings are stored separately as page metadata.',
   },
@@ -161,8 +161,8 @@ export const FAQS = [
       'Yes. Import one markdown file, a markdown folder, or an Obsidian vault. Keep the original copy until representative titles, links, images, and folders have been verified.',
   },
   {
-    question: 'Can I self-host Markdawn?',
+    question: 'Can I self-host Metakip?',
     answer:
-      'Yes. Markdawn is open source under GNU AGPL v3 and includes a documented deployment path for a VPS with Caddy, Podman, and PostgreSQL.',
+      'Yes. Metakip is open source under GNU AGPL v3 and includes a documented deployment path for a VPS with Caddy, Podman, and PostgreSQL.',
   },
 ] as const;

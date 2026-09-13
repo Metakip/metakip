@@ -1,6 +1,6 @@
 import './env';
 import { serve } from '@hono/node-server';
-import { setupLogger } from '@markdawn/shared';
+import { setupLogger } from '@metakip/shared';
 import { getMcpRuntimeConfig } from './config';
 import { createMcpApp } from './routes';
 

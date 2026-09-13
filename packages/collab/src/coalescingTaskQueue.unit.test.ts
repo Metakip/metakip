@@ -1,4 +1,4 @@
-import type { ShareEventPayload } from '@markdawn/shared';
+import type { ShareEventPayload } from '@metakip/shared';
 import { describe, expect, it, vi } from 'vitest';
 import { createCoalescingTaskQueue } from './coalescingTaskQueue';
 import { getShareEventQueueKey, mergeShareEventMetadata } from './notificationRuntime';

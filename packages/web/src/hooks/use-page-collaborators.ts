@@ -1,7 +1,4 @@
-import {
-  type CollaboratorDisplay,
-  MAX_COLLABORATOR_ENTITY_IDS_PER_REQUEST,
-} from '@markdawn/shared';
+import { type CollaboratorDisplay, MAX_COLLABORATOR_ENTITY_IDS_PER_REQUEST } from '@metakip/shared';
 import { useQuery } from '@tanstack/react-query';
 import { isBulkRemovalInProgress } from '../utils/bulkRemovalState';
 

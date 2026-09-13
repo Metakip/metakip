@@ -2,7 +2,7 @@ import {
   createMcpInternalCredential,
   hashMcpAccessToken,
   type McpInternalAuthContext,
-} from '@markdawn/shared/node/mcp-internal-auth';
+} from '@metakip/shared/node/mcp-internal-auth';
 import { Hono } from 'hono';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -74,7 +74,7 @@ describe('v1 authentication boundaries', () => {
     );
 
     const response = await createTestApp().request('/test', {
-      headers: { 'X-Markdawn-MCP-Authorization': credential },
+      headers: { 'X-Metakip-MCP-Authorization': credential },
     });
 
     expect(response.status).toBe(200);
@@ -98,7 +98,7 @@ describe('v1 authentication boundaries', () => {
     );
 
     const response = await createTestApp().request('/test', {
-      headers: { 'X-Markdawn-MCP-Authorization': credential },
+      headers: { 'X-Metakip-MCP-Authorization': credential },
     });
 
     expect(response.status).toBe(401);
@@ -109,7 +109,7 @@ describe('v1 authentication boundaries', () => {
     queryMock.mockResolvedValue({ rows: [] });
 
     const response = await createTestApp().request('/test', {
-      headers: { 'X-Markdawn-MCP-Authorization': mcpCredential(['pages:read']) },
+      headers: { 'X-Metakip-MCP-Authorization': mcpCredential(['pages:read']) },
     });
 
     expect(response.status).toBe(401);
@@ -132,7 +132,7 @@ describe('v1 authentication boundaries', () => {
     );
 
     const response = await createTestApp().request('/test', {
-      headers: { 'X-Markdawn-MCP-Authorization': credential },
+      headers: { 'X-Metakip-MCP-Authorization': credential },
     });
 
     expect(response.status).toBe(401);
@@ -158,7 +158,7 @@ describe('v1 authentication boundaries', () => {
     );
 
     const response = await createTestApp().request('/test', {
-      headers: { 'X-Markdawn-MCP-Authorization': credential },
+      headers: { 'X-Metakip-MCP-Authorization': credential },
     });
 
     expect(response.status).toBe(200);
@@ -174,7 +174,7 @@ describe('v1 authentication boundaries', () => {
       .mockResolvedValueOnce({ rows: [{ id: 'session-1' }] });
 
     const readOnlyResponse = await createTestApp('pages:write').request('/test', {
-      headers: { 'X-Markdawn-MCP-Authorization': mcpCredential(['pages:read']) },
+      headers: { 'X-Metakip-MCP-Authorization': mcpCredential(['pages:read']) },
     });
 
     expect(readOnlyResponse.status).toBe(403);
@@ -184,7 +184,7 @@ describe('v1 authentication boundaries', () => {
 
     const writableResponse = await createTestApp('pages:write').request('/test', {
       headers: {
-        'X-Markdawn-MCP-Authorization': mcpCredential(['pages:read', 'pages:write']),
+        'X-Metakip-MCP-Authorization': mcpCredential(['pages:read', 'pages:write']),
       },
     });
 

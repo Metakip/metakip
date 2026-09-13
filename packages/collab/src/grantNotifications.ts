@@ -4,7 +4,7 @@ import {
   type GrantReceivedMessage,
   getPageMetaRoomName,
   isPageMetaRoomName,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import type { Pool } from 'pg';
 import { getSessionUser, isAnonymousSession, isCollabSession } from './collabSession';
 import type { GrantReceivedPayload } from './notificationPayloads';

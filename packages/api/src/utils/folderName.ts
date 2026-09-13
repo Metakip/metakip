@@ -2,7 +2,7 @@ import {
   getUnicodeCodePointLength,
   MAX_FOLDER_NAME_LENGTH,
   truncateUnicodeCodePoints,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import { HTTPException } from 'hono/http-exception';
 
 const DEFAULT_FOLDER_NAME = 'New Folder';

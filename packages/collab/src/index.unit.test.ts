@@ -28,8 +28,8 @@ vi.mock('pg', () => ({
   },
 }));
 
-vi.mock('@markdawn/shared', async () => {
-  const actual = await vi.importActual<typeof import('@markdawn/shared')>('@markdawn/shared');
+vi.mock('@metakip/shared', async () => {
+  const actual = await vi.importActual<typeof import('@metakip/shared')>('@metakip/shared');
   return {
     ...actual,
     setupLogger: vi.fn(),
@@ -42,7 +42,7 @@ vi.mock('@markdawn/shared', async () => {
   };
 });
 
-vi.mock('@markdawn/shared/yjs-helpers', () => ({
+vi.mock('@metakip/shared/yjs-helpers', () => ({
   extractConnectionsFromYDoc: vi.fn(() => []),
   normalizeTagSlug: vi.fn((value: string) => `#${value.replace(/^#+/, '').toLowerCase()}`),
 }));
@@ -50,7 +50,7 @@ vi.mock('@markdawn/shared/yjs-helpers', () => ({
 describe('collab package entry point', () => {
   it('resolves the module graph without errors', async () => {
     vi.stubEnv('COLLAB_INTERNAL_SECRET', 'test-collaboration-internal-secret');
-    vi.stubEnv('DATABASE_URL', 'postgresql://markdawn:password@localhost:5432/markdawn');
+    vi.stubEnv('DATABASE_URL', 'postgresql://metakip:password@localhost:5432/metakip');
     const mod = await import('./index');
     expect(mod).toBeDefined();
   });

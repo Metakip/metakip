@@ -16,10 +16,10 @@ import {
   type McpReplacePage,
   type McpTrashList,
   type McpWhoami,
-} from '@markdawn/shared';
-import type { McpInternalAuthContext } from '@markdawn/shared/node/mcp-internal-auth';
+} from '@metakip/shared';
+import type { McpInternalAuthContext } from '@metakip/shared/node/mcp-internal-auth';
 
-export * from '@markdawn/shared';
+export * from '@metakip/shared';
 
 export type McpActor = {
   authContext: McpInternalAuthContext;

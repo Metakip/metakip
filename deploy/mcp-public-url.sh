@@ -6,7 +6,7 @@ ensureMcpPublicUrl() {
     local configured
 
     if ! grep -Eq '^[[:space:]]*MCP_PUBLIC_URL[[:space:]]*=' "$env_file"; then
-        printf '\nMCP_PUBLIC_URL=https://mcp.markdawn.space\n' >> "$env_file"
+        printf '\nMCP_PUBLIC_URL=https://mcp.metakip.com\n' >> "$env_file"
         echo -e "${YELLOW}[CHECK] Provisioned MCP_PUBLIC_URL in ${env_file}.${NC}"
     fi
 

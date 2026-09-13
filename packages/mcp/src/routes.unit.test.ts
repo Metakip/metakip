@@ -122,7 +122,7 @@ describe('MCP service routes', () => {
     await expect(response.json()).resolves.toEqual({
       error: {
         code: 'service_unavailable',
-        message: 'Markdawn API is temporarily unavailable',
+        message: 'Metakip API is temporarily unavailable',
       },
     });
   });

@@ -1,4 +1,4 @@
-import { getAppLogger, parseMcpApiUrl } from '@markdawn/shared';
+import { getAppLogger, parseMcpApiUrl } from '@metakip/shared';
 import type { Context } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 
@@ -55,7 +55,7 @@ export async function proxyToApi(
       {
         error: {
           code: 'service_unavailable',
-          message: 'Markdawn API is temporarily unavailable',
+          message: 'Metakip API is temporarily unavailable',
         },
       },
       503,

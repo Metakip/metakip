@@ -63,7 +63,7 @@ export const USE_CASES = [
     link: {
       kind: 'external',
       label: 'Read About The CLI →',
-      url: `${DOCS_ORIGIN}/agents/markdawn-cli/`,
+      url: `${DOCS_ORIGIN}/agents/metakip-cli/`,
     } satisfies MarketingLink,
   },
   {
@@ -77,7 +77,7 @@ export const USE_CASES = [
     link: {
       kind: 'external',
       label: 'Read About Agent Access →',
-      url: `${DOCS_ORIGIN}/agents/use-markdawn-with-ai-assistants/`,
+      url: `${DOCS_ORIGIN}/agents/use-metakip-with-ai-assistants/`,
     } satisfies MarketingLink,
   },
 ] as const;
@@ -91,7 +91,7 @@ export const USE_CASE_PAGE = {
   closing: 'Start with a page, bring in your existing notes, or share a workspace with your team.',
   footerTitle: 'Next step',
   footerLinks: [
-    { kind: 'app', label: 'Open Markdawn' },
+    { kind: 'app', label: 'Open Metakip' },
     { kind: 'internal', label: 'Read The Features', path: '/features' },
   ],
 } satisfies MarketingHtmlPageDefinition;

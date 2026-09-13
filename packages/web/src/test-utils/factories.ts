@@ -1,4 +1,4 @@
-import type { Folder, FolderTreeNode, Page, PageTreeNode, User } from '@markdawn/shared';
+import type { Folder, FolderTreeNode, Page, PageTreeNode, User } from '@metakip/shared';
 
 let idCounter = 0;
 

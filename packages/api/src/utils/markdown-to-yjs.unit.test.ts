@@ -6,8 +6,8 @@ import {
   extractTitleFromYjs,
   markdownToYjsState,
   stripLeadingH1,
-} from '@markdawn/shared/markdown-yjs';
-import { yDocToMarkdown } from '@markdawn/shared/yjs-helpers';
+} from '@metakip/shared/markdown-yjs';
+import { yDocToMarkdown } from '@metakip/shared/yjs-helpers';
 import { describe, expect, it } from 'vitest';
 import * as Y from 'yjs';
 

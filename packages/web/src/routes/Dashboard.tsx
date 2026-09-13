@@ -1,4 +1,4 @@
-import type { FolderTreeNode } from '@markdawn/shared';
+import type { FolderTreeNode } from '@metakip/shared';
 import {
   ChevronDown,
   ChevronRight,
@@ -121,7 +121,7 @@ export default function HomeView() {
   const selection = useSelection();
 
   const [viewMode, setViewMode] = useState<'card' | 'list'>(() => {
-    const saved = localStorage.getItem('markdawn:viewMode');
+    const saved = localStorage.getItem('metakip:viewMode');
     return saved === 'list' ? 'list' : 'card';
   });
   const [moveDialogOpen, setMoveDialogOpen] = useState(false);
@@ -752,7 +752,7 @@ export default function HomeView() {
               type="button"
               onClick={() => {
                 setViewMode('card');
-                localStorage.setItem('markdawn:viewMode', 'card');
+                localStorage.setItem('metakip:viewMode', 'card');
               }}
               className={`p-1.5 rounded-md transition-colors cursor-pointer ${viewMode === 'card' ? 'bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-100' : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'}`}
               title="Card view"
@@ -763,7 +763,7 @@ export default function HomeView() {
               type="button"
               onClick={() => {
                 setViewMode('list');
-                localStorage.setItem('markdawn:viewMode', 'list');
+                localStorage.setItem('metakip:viewMode', 'list');
               }}
               className={`p-1.5 rounded-md transition-colors cursor-pointer ${viewMode === 'list' ? 'bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-100' : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'}`}
               title="List view"

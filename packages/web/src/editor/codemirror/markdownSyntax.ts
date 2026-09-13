@@ -1,5 +1,5 @@
 import type { MarkdownExtension } from '@lezer/markdown';
-import { parseWikiLinkTarget } from '@markdawn/shared';
+import { parseWikiLinkTarget } from '@metakip/shared';
 
 const OPEN_BRACKET = 91;
 const BACKSLASH = 92;
@@ -13,7 +13,7 @@ function isEscaped(context: { char(position: number): number }, position: number
   return backslashes % 2 === 1;
 }
 
-/** Parse Markdawn wiki links as first-class inline Markdown constructs. */
+/** Parse Metakip wiki links as first-class inline Markdown constructs. */
 export const wikiLinkMarkdownExtension: MarkdownExtension = {
   defineNodes: [
     'WikiLink',

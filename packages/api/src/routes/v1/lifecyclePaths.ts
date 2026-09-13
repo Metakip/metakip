@@ -1,4 +1,4 @@
-import type { ApiTokenScope } from '@markdawn/shared';
+import type { ApiTokenScope } from '@metakip/shared';
 
 type LifecycleOperationPath = {
   routePath: string;

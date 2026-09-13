@@ -2,7 +2,7 @@ import { useCallback, useEffect, useSyncExternalStore } from 'react';
 
 export type Theme = 'light' | 'dark' | 'system';
 
-const THEME_KEY = 'markdawn-theme';
+const THEME_KEY = 'metakip-theme';
 const DARK_THEME_COLOR = '#09090b';
 const LIGHT_THEME_COLOR = '#ffffff';
 

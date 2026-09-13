@@ -28,7 +28,7 @@ export type FolderReference = {
 export function parseApiResponse<T>(schema: z.ZodType<T>, value: unknown): T {
   const parsed = schema.safeParse(value);
   if (!parsed.success) {
-    throw new McpBackendError('Markdawn API returned an invalid response', 503, {
+    throw new McpBackendError('Metakip API returned an invalid response', 503, {
       code: 'invalid_upstream_response',
       details: parsed.error.issues,
     });
@@ -54,7 +54,7 @@ export function asString(value: unknown, field: string): string {
 
 export function requireEtag(value: string | null): string {
   if (value === null || value.length === 0) {
-    throw new McpBackendError('Markdawn API response did not include an ETag', 503, {
+    throw new McpBackendError('Metakip API response did not include an ETag', 503, {
       code: 'invalid_upstream_response',
     });
   }
@@ -75,13 +75,13 @@ export function responseErrorBody(value: unknown): {
       message:
         typeof errorObject.message === 'string'
           ? errorObject.message
-          : 'Markdawn API request failed',
+          : 'Metakip API request failed',
       ...(typeof errorObject.code === 'string' ? { code: errorObject.code } : {}),
       ...(errorObject.details === undefined ? {} : { details: errorObject.details }),
     };
   }
   return {
-    message: typeof body.message === 'string' ? body.message : 'Markdawn API request failed',
+    message: typeof body.message === 'string' ? body.message : 'Metakip API request failed',
   };
 }
 

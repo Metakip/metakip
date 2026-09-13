@@ -36,7 +36,7 @@ test.describe('Dark mode', () => {
   test('dark mode applies dark class to html', async ({ page }) => {
     await createNewPage(page);
 
-    await page.evaluate(() => localStorage.setItem('markdawn-theme', 'dark'));
+    await page.evaluate(() => localStorage.setItem('metakip-theme', 'dark'));
     await page.reload();
     await expect(page).toHaveURL(/\/[^/]+$/);
 
@@ -47,7 +47,7 @@ test.describe('Dark mode', () => {
   test('light mode removes dark class from html', async ({ page }) => {
     await createNewPage(page);
 
-    await page.evaluate(() => localStorage.setItem('markdawn-theme', 'light'));
+    await page.evaluate(() => localStorage.setItem('metakip-theme', 'light'));
     await page.reload();
     await expect(page).toHaveURL(/\/[^/]+$/);
 

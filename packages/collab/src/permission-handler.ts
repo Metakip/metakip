@@ -4,8 +4,8 @@ import type {
   ShareEventPayload,
   SharePermission,
   WorkspaceMembershipMessage,
-} from '@markdawn/shared';
-import { COLLAB_TERMINAL_REASONS, getPageMetaRoomName, isPageMetaRoomName } from '@markdawn/shared';
+} from '@metakip/shared';
+import { COLLAB_TERMINAL_REASONS, getPageMetaRoomName, isPageMetaRoomName } from '@metakip/shared';
 import type { Pool } from 'pg';
 import {
   type CollabSession,

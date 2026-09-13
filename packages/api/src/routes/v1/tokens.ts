@@ -1,4 +1,4 @@
-import type { ApiTokenScope } from '@markdawn/shared';
+import type { ApiTokenScope } from '@metakip/shared';
 import { sql } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';

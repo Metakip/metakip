@@ -1,4 +1,4 @@
-import { getUnicodeCodePointLength, MAX_FOLDER_NAME_LENGTH } from '@markdawn/shared';
+import { getUnicodeCodePointLength, MAX_FOLDER_NAME_LENGTH } from '@metakip/shared';
 import { describe, expect, it } from 'vitest';
 import { createCopyFolderName, normalizeFolderName } from './folderName';
 

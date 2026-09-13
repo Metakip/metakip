@@ -7,7 +7,7 @@ import {
   COLLAB_TERMINAL_REASONS,
   getPageMetaRoomName,
   type PageMetaStatelessMessage,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import { type QueryClient, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import * as Y from 'yjs';

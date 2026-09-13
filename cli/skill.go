@@ -5,10 +5,10 @@ import (
 	"os/exec"
 )
 
-const markdawnSkillSource = "atharva-again/Markdawn"
+const metakipSkillSource = "Metakip/metakip"
 
 func (cmd *SkillInstallCmd) Run(r *runtimeState) error {
-	arguments := []string{"skills", "add", markdawnSkillSource, "--skill", "markdawn"}
+	arguments := []string{"skills", "add", metakipSkillSource, "--skill", "metakip"}
 	if cmd.Global {
 		arguments = append(arguments, "--global")
 	}
@@ -25,7 +25,7 @@ func (cmd *SkillUpdateCmd) Run(r *runtimeState) error {
 	if cmd.Global && cmd.Project {
 		return usageError("The --global and --project options cannot be used together.")
 	}
-	arguments := []string{"skills", "update", "markdawn"}
+	arguments := []string{"skills", "update", "metakip"}
 	if cmd.Global {
 		arguments = append(arguments, "--global")
 	}

@@ -4,7 +4,7 @@ import {
   type McpInternalAuthContext,
   mcpConnectionIdFromClaims,
   parseMcpInternalAuthContext,
-} from '@markdawn/shared/node/mcp-internal-auth';
+} from '@metakip/shared/node/mcp-internal-auth';
 import type { McpHttpHandler } from '@modelcontextprotocol/server';
 import { MCP_READ_SCOPE, MCP_WRITE_SCOPE, type McpActor, type McpScope } from './types';
 
@@ -167,7 +167,7 @@ export function createMcpRequestAuthenticator(
       return mcpHandler.fetch(request, {
         authInfo: {
           token,
-          clientId: 'markdawn-mcp-proxy',
+          clientId: 'metakip-mcp-proxy',
           scopes: [...context.scopes],
           resource: new URL('/mcp', options.publicUrl),
           extra: { context },

@@ -14,7 +14,7 @@ exportRoute.get('/export', async (c) => {
     buffer.byteOffset + buffer.byteLength,
   ) as ArrayBuffer;
   c.header('Content-Type', 'application/zip');
-  c.header('Content-Disposition', 'attachment; filename="markdawn-export.zip"');
+  c.header('Content-Disposition', 'attachment; filename="metakip-export.zip"');
   return c.newResponse(arrayBuffer, 200);
 });
 

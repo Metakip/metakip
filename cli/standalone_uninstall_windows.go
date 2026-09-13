@@ -49,7 +49,7 @@ if ($parent -gt 0) {
 }
 Copy-Item -LiteralPath $receiptPath -Destination $receiptBackup -Force -ErrorAction Stop
 if ($configPath -ne '' -and (Test-Path -LiteralPath $configPath)) {
-  if (-not (Test-Path -LiteralPath $configPath -PathType Leaf)) { throw 'Markdawn configuration is not a regular file' }
+  if (-not (Test-Path -LiteralPath $configPath -PathType Leaf)) { throw 'Metakip configuration is not a regular file' }
   $configBytes = [IO.File]::ReadAllBytes($configPath)
   $configAttributes = [IO.File]::GetAttributes($configPath)
   $configAcl = Get-Acl -LiteralPath $configPath
@@ -68,7 +68,7 @@ if ($configChanged) {
     Set-Acl -LiteralPath $configPath -AclObject $configAcl
     [IO.File]::SetAttributes($configPath, $configAttributes)
   } catch {
-    $failureMessage += [Environment]::NewLine + 'restore Markdawn configuration: ' + $_.Exception.Message
+    $failureMessage += [Environment]::NewLine + 'restore Metakip configuration: ' + $_.Exception.Message
   }
 }
 if (Test-Path -LiteralPath $receiptBackup -PathType Leaf) {

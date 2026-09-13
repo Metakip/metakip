@@ -2,7 +2,7 @@ import {
   buildWikiLinkResolution,
   type WikiLinkLookupRow,
   type WikiLinkResolution,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import type { Pool } from 'pg';
 
 type QueryExecutor = Pick<Pool, 'query'>;

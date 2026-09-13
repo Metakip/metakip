@@ -1,4 +1,4 @@
-import type { McpInternalAuthContext } from '@markdawn/shared/node/mcp-internal-auth';
+import type { McpInternalAuthContext } from '@metakip/shared/node/mcp-internal-auth';
 import type { McpHttpHandler } from '@modelcontextprotocol/server';
 import { describe, expect, it, vi } from 'vitest';
 

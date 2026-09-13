@@ -1,7 +1,7 @@
 node_modules/
 dist/
 /cli/cli
-/cli/markdawn
+/cli/metakip
 /cli/*.exe
 .env
 .env.local

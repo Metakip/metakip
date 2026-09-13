@@ -1,4 +1,4 @@
-import type { Folder, Page } from '@markdawn/shared';
+import type { Folder, Page } from '@metakip/shared';
 import { useCallback } from 'react';
 import { useIdentityLifecycle, useIdentityNavigate } from '../contexts/IdentityLifecycleContext';
 import { buildPagePath } from '../utils/url';

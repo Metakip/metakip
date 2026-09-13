@@ -1,4 +1,4 @@
-import type { SharePermission } from '@markdawn/shared';
+import type { SharePermission } from '@metakip/shared';
 import { canRenameEntity } from '../../utils/entity-actions';
 
 export type SidebarPlacement = 'owned' | 'workspace' | 'shared' | 'alias';

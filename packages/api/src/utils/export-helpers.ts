@@ -1,10 +1,10 @@
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { serializeFrontmatter } from '@markdawn/shared';
-import { type MarkdownRenderOptions, yDocToMarkdown } from '@markdawn/shared/yjs-helpers';
+import { serializeFrontmatter } from '@metakip/shared';
+import { type MarkdownRenderOptions, yDocToMarkdown } from '@metakip/shared/yjs-helpers';
 
-export { serializeFrontmatter } from '@markdawn/shared';
+export { serializeFrontmatter } from '@metakip/shared';
 
 /**
  * Matches markdown image syntax: ![alt](src) with optional title.

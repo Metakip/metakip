@@ -1,5 +1,5 @@
-import { MAX_PAGE_TITLE_LENGTH, MAX_YDOC_BYTES } from '@markdawn/shared';
-import { extractConnectionsFromYDoc, yDocToMarkdown } from '@markdawn/shared/yjs-helpers';
+import { MAX_PAGE_TITLE_LENGTH, MAX_YDOC_BYTES } from '@metakip/shared';
+import { extractConnectionsFromYDoc, yDocToMarkdown } from '@metakip/shared/yjs-helpers';
 import { describe, expect, it } from 'vitest';
 import { testQuery as query } from '../db/testQuery';
 import {

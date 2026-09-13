@@ -1,4 +1,4 @@
-const COOKIE_NAME = 'markdawn_anon_id';
+const COOKIE_NAME = 'metakip_anon_id';
 const ONE_YEAR_SECONDS = 365 * 24 * 60 * 60;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

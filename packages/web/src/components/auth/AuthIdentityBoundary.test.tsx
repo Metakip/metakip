@@ -254,7 +254,7 @@ describe('AuthIdentityBoundary', () => {
     const userAQueryClient = identityClients.get('user-a');
     expect(userAQueryClient).toBeDefined();
     const clearSpy = vi.spyOn(userAQueryClient as QueryClient, 'clear');
-    document.title = 'Secret Project | Markdawn';
+    document.title = 'Secret Project | Metakip';
     const favicon =
       document.querySelector<HTMLLinkElement>('link[rel="icon"]') ??
       document.head.appendChild(document.createElement('link'));
@@ -289,7 +289,7 @@ describe('AuthIdentityBoundary', () => {
     expect(screen.getByRole('button', { name: 'Populate state' })).toBeInTheDocument();
     expect(screen.getByTestId('identity-state')).toHaveTextContent('user-a:1:1:dirty');
     expect(screen.getByText('A private invitation')).toBeInTheDocument();
-    expect(document.title).toBe('Secret Project | Markdawn');
+    expect(document.title).toBe('Secret Project | Metakip');
     expect(document.querySelector<HTMLLinkElement>('link[rel="icon"]')?.href).toContain(
       'data:image/svg+xml,private',
     );

@@ -1,6 +1,6 @@
-import { MAX_PAGE_TITLE_LENGTH } from '@markdawn/shared';
-import { markdownToYjsState } from '@markdawn/shared/markdown-yjs';
-import { extractConnectionsFromYDoc } from '@markdawn/shared/yjs-helpers';
+import { MAX_PAGE_TITLE_LENGTH } from '@metakip/shared';
+import { markdownToYjsState } from '@metakip/shared/markdown-yjs';
+import { extractConnectionsFromYDoc } from '@metakip/shared/yjs-helpers';
 import { sql } from 'drizzle-orm';
 import { Client } from 'pg';
 import { describe, expect, it } from 'vitest';
@@ -67,7 +67,7 @@ function expectFieldsAbsent(value: Record<string, unknown>, fields: readonly str
 }
 
 function guestCookie(id = crypto.randomUUID()): string {
-  return `markdawn_anon_id=${id}`;
+  return `metakip_anon_id=${id}`;
 }
 
 function createBoundWikiLinkYdoc(targetId: string, label = ''): Buffer {
@@ -291,7 +291,7 @@ describe('pages API', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Cookie: `markdawn_anon_id=${guestId}`,
+          Cookie: `metakip_anon_id=${guestId}`,
           Origin: 'http://localhost:5173',
         },
         body: JSON.stringify({ title: 'Guest child', parentId: folder.id }),
@@ -313,7 +313,7 @@ describe('pages API', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Cookie: 'markdawn_anon_id=22222222-2222-4222-8222-222222222222',
+          Cookie: 'metakip_anon_id=22222222-2222-4222-8222-222222222222',
         },
         body: JSON.stringify({ parentId: folder.id }),
       });
@@ -731,7 +731,7 @@ describe('pages API', () => {
 
       expect(res.status).toBe(200);
       expect(res.headers.get('Content-Type')).toContain('application/zip');
-      expect(res.headers.get('Content-Disposition')).toContain('markdawn-export.zip');
+      expect(res.headers.get('Content-Disposition')).toContain('metakip-export.zip');
     });
   });
 
@@ -2171,7 +2171,7 @@ describe('pages API', () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Cookie: `markdawn_anon_id=${guestId}`,
+          Cookie: `metakip_anon_id=${guestId}`,
           Origin: 'http://localhost:5173',
         },
         body: JSON.stringify({ parentId: folder.id }),

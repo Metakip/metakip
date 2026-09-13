@@ -1,4 +1,4 @@
-import { v1VaultImportFileSchema, vaultImportRequestSchema } from '@markdawn/shared';
+import { v1VaultImportFileSchema, vaultImportRequestSchema } from '@metakip/shared';
 import type { McpServer } from '@modelcontextprotocol/server';
 import { z } from 'zod';
 import { registerExportTool, registerTool, writeAnnotations } from './mcpToolRegistration';
@@ -26,7 +26,7 @@ export function registerImportExportTools(
   registerExportTool(
     server,
     'export_all',
-    'Use this when you need an archive of all accessible Markdawn pages and attachments.',
+    'Use this when you need an archive of all accessible Metakip pages and attachments.',
     {},
     mcpExportResultSchema,
     (_input, options) => backend.exportAll(options),
@@ -37,7 +37,7 @@ export function registerImportExportTools(
   registerTool(
     server,
     'import_page',
-    'Use this when the user provides Markdown content and asks to import it as a Markdawn page. The filename becomes the page title metadata; do not add a duplicate H1 matching the filename unless explicitly requested. This does not access the client filesystem.',
+    'Use this when the user provides Markdown content and asks to import it as a Metakip page. The filename becomes the page title metadata; do not add a duplicate H1 matching the filename unless explicitly requested. This does not access the client filesystem.',
     { filename: z.string().min(1), content: z.string() },
     writeAnnotations,
     mcpMarkdownImportSchema,

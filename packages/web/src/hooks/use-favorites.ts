@@ -1,4 +1,4 @@
-import type { ShareEntityType } from '@markdawn/shared';
+import type { ShareEntityType } from '@metakip/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useIdentityLifecycle } from '../contexts/IdentityLifecycleContext';
 import { isBulkRemovalInProgress } from '../utils/bulkRemovalState';

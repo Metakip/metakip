@@ -1,6 +1,6 @@
 import { randomBytes, randomUUID } from 'node:crypto';
-import { API_TOKEN_PREFIX } from '@markdawn/shared';
-import { hashApiToken } from '@markdawn/shared/node/api-token-credential';
+import { API_TOKEN_PREFIX } from '@metakip/shared';
+import { hashApiToken } from '@metakip/shared/node/api-token-credential';
 
 export function createApiTokenSecret(): { id: string; token: string; tokenHash: string } {
   const id = randomUUID();

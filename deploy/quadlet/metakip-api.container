@@ -1,0 +1,24 @@
+[Unit]
+Description=Metakip API Server (Hono)
+After=network-online.target metakip-postgres.service
+Requires=metakip-postgres.service
+
+[Container]
+Image=localhost/metakip-api:latest
+ContainerName=metakip-api
+Pod=metakip.pod
+Environment=NODE_ENV=production
+Environment=PORT=3001
+EnvironmentFile=/var/www/metakip/.env
+WorkingDir=/app
+Exec=node /app/packages/api/dist/index.mjs
+Volume=metakip-data:/app/packages/api/uploads:Z
+
+
+[Service]
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=300
+
+[Install]
+WantedBy=default.target

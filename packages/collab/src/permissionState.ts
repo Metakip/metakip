@@ -3,8 +3,8 @@ import type {
   PermissionSnapshotMessage,
   SharePermission,
   StatelessShareMessage,
-} from '@markdawn/shared';
-import { COLLAB_TERMINAL_REASONS, shouldApplyPermissionSnapshot } from '@markdawn/shared';
+} from '@metakip/shared';
+import { COLLAB_TERMINAL_REASONS, shouldApplyPermissionSnapshot } from '@metakip/shared';
 
 export type PermissionConnection = ReturnType<Document['getConnections']>[number];
 

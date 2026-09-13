@@ -1,6 +1,6 @@
 import { unlink } from 'node:fs/promises';
 import path from 'node:path';
-import { getApiLogger } from '@markdawn/shared';
+import { getApiLogger } from '@metakip/shared';
 import { sql } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { executeQuery, type QueryExecutor } from '../db/query';

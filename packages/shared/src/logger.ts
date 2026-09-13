@@ -14,13 +14,13 @@ export async function setupLogger(): Promise<void> {
       console: getConsoleSink(),
     },
     loggers: [
-      { category: ['markdawn', 'api'], lowestLevel: 'info', sinks: ['console'] },
-      { category: ['markdawn', 'http'], lowestLevel: 'debug', sinks: ['console'] },
-      { category: ['markdawn', 'db'], lowestLevel: 'debug', sinks: ['console'] },
-      { category: ['markdawn', 'auth'], lowestLevel: 'info', sinks: ['console'] },
-      { category: ['markdawn', 'collab'], lowestLevel: 'info', sinks: ['console'] },
-      { category: ['markdawn', 'web'], lowestLevel: 'debug', sinks: ['console'] },
-      { category: ['markdawn'], lowestLevel: 'info', sinks: ['console'] },
+      { category: ['metakip', 'api'], lowestLevel: 'info', sinks: ['console'] },
+      { category: ['metakip', 'http'], lowestLevel: 'debug', sinks: ['console'] },
+      { category: ['metakip', 'db'], lowestLevel: 'debug', sinks: ['console'] },
+      { category: ['metakip', 'auth'], lowestLevel: 'info', sinks: ['console'] },
+      { category: ['metakip', 'collab'], lowestLevel: 'info', sinks: ['console'] },
+      { category: ['metakip', 'web'], lowestLevel: 'debug', sinks: ['console'] },
+      { category: ['metakip'], lowestLevel: 'info', sinks: ['console'] },
     ],
   });
 
@@ -28,25 +28,25 @@ export async function setupLogger(): Promise<void> {
 }
 
 export function getApiLogger(): Logger {
-  return getLogger(['markdawn', 'api']);
+  return getLogger(['metakip', 'api']);
 }
 
 export function getDbLogger(): Logger {
-  return getLogger(['markdawn', 'db']);
+  return getLogger(['metakip', 'db']);
 }
 
 export function getAuthLogger(): Logger {
-  return getLogger(['markdawn', 'auth']);
+  return getLogger(['metakip', 'auth']);
 }
 
 export function getCollabLogger(): Logger {
-  return getLogger(['markdawn', 'collab']);
+  return getLogger(['metakip', 'collab']);
 }
 
 export function getWebLogger(): Logger {
-  return getLogger(['markdawn', 'web']);
+  return getLogger(['metakip', 'web']);
 }
 
 export function getAppLogger(): Logger {
-  return getLogger(['markdawn']);
+  return getLogger(['metakip']);
 }

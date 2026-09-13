@@ -1,4 +1,4 @@
-import { GUEST_IDENTITY_LOCK_PREFIX } from '@markdawn/shared';
+import { GUEST_IDENTITY_LOCK_PREFIX } from '@metakip/shared';
 import { sql } from 'drizzle-orm';
 import { db } from '../db/connection';
 import { executeQuery, type QueryExecutor } from '../db/query';

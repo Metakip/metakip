@@ -3,7 +3,7 @@ import {
   type Page,
   type PageTreeNode,
   parseMarkdownImportResult,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { useShareContext } from '../contexts/ShareContext';

@@ -1,6 +1,6 @@
 import type { EditorState, Range } from '@codemirror/state';
 import { Decoration } from '@codemirror/view';
-import { parseWikiLinkTarget } from '@markdawn/shared';
+import { parseWikiLinkTarget } from '@metakip/shared';
 import { ensureAbsoluteUrl } from '../../utils/url';
 import { type LivePreviewOptions, type PreviewNodeRef, selectionTouches } from './livePreviewTypes';
 import { ImageWidget, WikiLinkWidget } from './livePreviewWidgets';

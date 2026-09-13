@@ -13,7 +13,7 @@ import {
   type PageTreeNode,
   type SharePermission,
   shouldApplyPermissionSnapshot,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import type { QueryClient } from '@tanstack/react-query';
 import type * as Y from 'yjs';
 import { refreshWikiLinkPresentations } from '../editor/wikiLinkPresentations';

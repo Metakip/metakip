@@ -4,7 +4,7 @@ import {
   type FolderDetailPayload,
   getAnonymousName,
   type PublicPermission,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import {
   createContext,
   type ReactNode,

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "Markdawn Podman Setup"
+echo "Metakip Podman Setup"
 echo "====================="
 
 RED='\033[0;31m'
@@ -11,6 +11,12 @@ NC='\033[0m'
 
 if [ "$EUID" -eq 0 ]; then
     echo -e "${RED}[ERROR] Do not run as root. Run as the deploy user.${NC}"
+    exit 1
+fi
+
+if [ -d /var/www/markdawn/.git ]; then
+    echo -e "${RED}[ERROR] A legacy Markdawn deployment was detected.${NC}"
+    echo "Follow the one-time migration at https://docs.metakip.com/self-hosting/maintain-a-self-hosted-metakip/." >&2
     exit 1
 fi
 
@@ -36,16 +42,14 @@ if [ -d ".git" ]; then
     REPO_DIR="$(pwd)"
 else
     echo -e "${YELLOW}Cloning repository...${NC}"
-    git clone https://github.com/atharva-again/markdawn.git /var/www/markdawn
-    REPO_DIR="/var/www/markdawn"
+    git clone https://github.com/Metakip/metakip.git /var/www/metakip
+    REPO_DIR="/var/www/metakip"
 fi
 
 cd "$REPO_DIR"
 
 # shellcheck source=collaboration-secret.sh
 . "$REPO_DIR/deploy/collaboration-secret.sh"
-# shellcheck source=migrate-hosted-environment.sh
-. "$REPO_DIR/deploy/migrate-hosted-environment.sh"
 # shellcheck source=migrate-editor-content.sh
 . "$REPO_DIR/deploy/migrate-editor-content.sh"
 # shellcheck source=mcp-api-secret.sh
@@ -72,7 +76,6 @@ else
     created_env=true
 fi
 ensureCollaborationSecret .env
-migrateHostedEnvironment .env
 ensureMcpApiInternalSecret .env
 if [ "$created_env" = "true" ]; then
     echo -e "${YELLOW}.env created from .env.production. Edit it now:${NC}"
@@ -82,8 +85,8 @@ fi
 echo -e "${YELLOW}[STEP 6/8] Building application...${NC}"
 pnpm install
 ensureMcpPublicUrl .env
-pnpm --filter @markdawn/shared build
-pnpm --filter @markdawn/web build
+pnpm --filter @metakip/shared build
+pnpm --filter @metakip/web build
 
 echo -e "${YELLOW}[STEP 7/8] Setting up Podman Quadlet services...${NC}"
 mkdir -p ~/.config/containers/systemd
@@ -92,17 +95,17 @@ echo -e "${YELLOW}[PULL] Pre-pulling PostgreSQL image to avoid timeout on first 
 podman pull docker.io/library/postgres:17-alpine
 
 podman volume create postgres-data 2>/dev/null || true
-podman volume create markdawn-data 2>/dev/null || true
+podman volume create metakip-data 2>/dev/null || true
 
-cp "$REPO_DIR/deploy/quadlet/markdawn.pod" ~/.config/containers/systemd/
-cp "$REPO_DIR/deploy/quadlet/markdawn-postgres.container" ~/.config/containers/systemd/
-cp "$REPO_DIR/deploy/quadlet/markdawn-api.container" ~/.config/containers/systemd/
-cp "$REPO_DIR/deploy/quadlet/markdawn-mcp.container" ~/.config/containers/systemd/
-cp "$REPO_DIR/deploy/quadlet/markdawn-collab.container" ~/.config/containers/systemd/
+cp "$REPO_DIR/deploy/quadlet/metakip.pod" ~/.config/containers/systemd/
+cp "$REPO_DIR/deploy/quadlet/metakip-postgres.container" ~/.config/containers/systemd/
+cp "$REPO_DIR/deploy/quadlet/metakip-api.container" ~/.config/containers/systemd/
+cp "$REPO_DIR/deploy/quadlet/metakip-mcp.container" ~/.config/containers/systemd/
+cp "$REPO_DIR/deploy/quadlet/metakip-collab.container" ~/.config/containers/systemd/
 
-podman build -t localhost/markdawn-api:latest -f "$REPO_DIR/deploy/Containerfile.api" "$REPO_DIR"
-podman build -t localhost/markdawn-mcp:latest -f "$REPO_DIR/deploy/Containerfile.mcp" "$REPO_DIR"
-podman build -t localhost/markdawn-collab:latest -f "$REPO_DIR/deploy/Containerfile.collab" "$REPO_DIR"
+podman build -t localhost/metakip-api:latest -f "$REPO_DIR/deploy/Containerfile.api" "$REPO_DIR"
+podman build -t localhost/metakip-mcp:latest -f "$REPO_DIR/deploy/Containerfile.mcp" "$REPO_DIR"
+podman build -t localhost/metakip-collab:latest -f "$REPO_DIR/deploy/Containerfile.collab" "$REPO_DIR"
 
 echo -e "${YELLOW}[STEP 8/8] Configuring Caddy reverse proxy...${NC}"
 sudo caddy validate --config "$REPO_DIR/deploy/Caddyfile"
@@ -118,12 +121,13 @@ sudo systemctl enable --now caddy
 sudo systemctl reload caddy
 
 systemctl --user daemon-reload
-systemctl --user start markdawn-pod.service
-systemctl --user start markdawn-postgres.service
+systemctl --user start metakip-pod.service
+systemctl --user start metakip-postgres.service
 
 echo -e "${YELLOW}[WAIT] Waiting for PostgreSQL to be ready...${NC}"
 for i in {1..30}; do
-    if podman exec markdawn-postgres pg_isready -U markdawn -d markdawn >/dev/null 2>&1; then
+    if podman exec metakip-postgres sh -c \
+        'exec pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"' >/dev/null 2>&1; then
         echo -e "${GREEN}[OK] PostgreSQL is ready.${NC}"
         break
     fi
@@ -135,10 +139,10 @@ for i in {1..30}; do
 done
 
 echo -e "${YELLOW}[SCHEMA] Running db:migrate to initialize database...${NC}"
-pnpm --filter @markdawn/api db:migrate
+pnpm --filter @metakip/api db:migrate
 migrateEditorContent "$REPO_DIR"
 
-systemctl --user start markdawn-api.service markdawn-mcp.service markdawn-collab.service
+systemctl --user start metakip-api.service metakip-mcp.service metakip-collab.service
 
 echo -e "${YELLOW}[CHECK] Verifying MCP service and API connectivity...${NC}"
 for i in {1..15}; do
@@ -155,7 +159,7 @@ done
 
 echo -e "${GREEN}[DONE] Setup complete!${NC}"
 echo ""
-echo "Check status: systemctl --user status markdawn-postgres.service markdawn-api.service markdawn-mcp.service markdawn-collab.service"
-echo "View logs:    journalctl --user -u markdawn-api.service -f"
-echo "MCP logs:     journalctl --user -u markdawn-mcp.service -f"
-echo "API health:   curl https://app.markdawn.space/api/health"
+echo "Check status: systemctl --user status metakip-postgres.service metakip-api.service metakip-mcp.service metakip-collab.service"
+echo "View logs:    journalctl --user -u metakip-api.service -f"
+echo "MCP logs:     journalctl --user -u metakip-mcp.service -f"
+echo "API health:   curl https://app.metakip.com/api/health"

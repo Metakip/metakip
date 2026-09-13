@@ -19,7 +19,7 @@ const coverageConfig = {
 
 export default defineConfig({
   test: {
-    name: '@markdawn/collab',
+    name: '@metakip/collab',
     hookTimeout: 180_000,
     testTimeout: 60_000,
     globals: true,

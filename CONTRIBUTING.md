@@ -1,4 +1,4 @@
-# Contributing to Markdawn
+# Contributing to Metakip
 
 ## pnpm Version
 

@@ -1,13 +1,13 @@
 #!/bin/bash
 set -Eeuo pipefail
 
-REPO_DIR="${REPO_DIR:-/var/www/markdawn}"
-SOURCE_CONFIG="$REPO_DIR/deploy/Caddyfile"
+REPO_DIR="${REPO_DIR:-/var/www/metakip}"
+SOURCE_CONFIG="${CADDY_SOURCE_CONFIG:-$REPO_DIR/deploy/Caddyfile}"
 TARGET_CONFIG="${CADDY_CONFIG_PATH:-/etc/caddy/Caddyfile}"
 BACKUP_CONFIG="${TARGET_CONFIG}.backup.$(date -u '+%Y%m%dT%H%M%SZ')"
 
 if [ ! -f "$SOURCE_CONFIG" ]; then
-    echo "[ERROR] Repository Caddyfile not found: $SOURCE_CONFIG" >&2
+    echo "[ERROR] Caddy source configuration not found: $SOURCE_CONFIG" >&2
     exit 1
 fi
 

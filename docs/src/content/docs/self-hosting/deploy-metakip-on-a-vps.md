@@ -1,6 +1,6 @@
 ---
-title: Deploy Markdawn On A Fedora VPS
-description: Deploy Markdawn on a Fedora VPS with Caddy, rootless Podman, PostgreSQL, OAuth, persistent storage, and database migrations.
+title: Deploy Metakip On A Fedora VPS
+description: Deploy Metakip on a Fedora VPS with Caddy, rootless Podman, PostgreSQL, OAuth, persistent storage, and database migrations.
 ---
 
 This guide documents the maintained deployment path for one Fedora VPS with Caddy, rootless Podman, and PostgreSQL.
@@ -25,7 +25,7 @@ The setup script targets Fedora and Podman. It is not a requirement imposed by t
 An adapted deployment needs to provide:
 
 - PostgreSQL with persistent storage.
-- The Markdawn API.
+- The Metakip API.
 - The collaboration service with WebSocket support.
 - The MCP gateway when offering remote MCP access.
 - The built web application.
@@ -42,7 +42,7 @@ The included scripts do not manage every alternative environment. If you use Doc
 Run these commands on the documented Fedora server as a non-root user:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/atharva-again/Markdawn/master/deploy/setup.sh -o setup.sh
+curl -fsSL https://raw.githubusercontent.com/Metakip/metakip/master/deploy/setup.sh -o setup.sh
 chmod +x setup.sh
 ./setup.sh
 ```
@@ -51,9 +51,9 @@ The script prompts you to edit `.env`, installs required tools, creates persiste
 
 ### Custom domains
 
-The checked-in Caddy configuration serves the application at `app.markdawn.space`. The public marketing site is hosted separately. The setup script copies the Caddy file to `/etc/caddy/Caddyfile`; setting `FRONTEND_URL` does not change the Caddy hostname automatically. Custom domains therefore require a manual Caddyfile edit.
+The checked-in Caddy configuration serves the application at `app.metakip.com`. The public marketing site is hosted separately. The setup script copies the Caddy file to `/etc/caddy/Caddyfile`; setting `FRONTEND_URL` does not change the Caddy hostname automatically. Custom domains therefore require a manual Caddyfile edit.
 
-For a root-based custom deployment, remove the `markdawn.space` site block and rename the `app.markdawn.space` site block to your domain in `deploy/Caddyfile` before running the setup script when using an existing checkout, or make the same edit after setup. The app site block includes compatibility redirects from legacy `/app/...` paths to root-based paths. The setup script also starts MCP, so rename the `mcp.markdawn.space` site block to the MCP hostname you control; it must reverse proxy to `localhost:3002`. If you intentionally do not expose MCP, remove its service and Caddy site block from your adapted deployment.
+For a root-based custom deployment, remove the `metakip.com` site block and rename the `app.metakip.com` site block to your domain in `deploy/Caddyfile` before running the setup script when using an existing checkout, or make the same edit after setup. The app site block includes compatibility redirects from legacy `/app/...` paths to root-based paths. The setup script also starts MCP, so rename the `mcp.metakip.com` site block to the MCP hostname you control; it must reverse proxy to `localhost:3002`. If you intentionally do not expose MCP, remove its service and Caddy site block from your adapted deployment.
 
 ```sh
 sudoedit /etc/caddy/Caddyfile
@@ -90,14 +90,14 @@ MCP_API_INTERNAL_SECRET
 
 Use a secret of at least 32 characters for `BETTER_AUTH_SECRET`. Create a unique `COLLAB_INTERNAL_SECRET` of at least 32 characters. The setup and deployment scripts generate `MCP_API_INTERNAL_SECRET`; never use the development value in production. Do not reuse example passwords or commit `.env`.
 
-The incremental deployment script migrates exact legacy hosted values from `markdawn.space` to `app.markdawn.space` for `FRONTEND_URL`, `CORS_ORIGINS`, and `VITE_API_URL`, and removes the obsolete `VITE_APP_URL` setting. Better Auth derives its issuer as `${FRONTEND_URL}/api/auth` unless `BETTER_AUTH_ISSUER` is explicitly set; if you set that override, it must match the public frontend domain. Custom environment values are left unchanged; review `.env` before deploying. Normal application deployments do not modify Caddy.
+The normal setup and deployment scripts only manage Metakip installations. Existing Markdawn servers must first run the one-time migration documented in [Maintain a Self-Hosted Metakip](/self-hosting/maintain-a-self-hosted-metakip/). That migration preserves the existing PostgreSQL role and database names while moving the installation, service definitions, hosted domains, and uploads volume to their Metakip locations. Better Auth derives its issuer as `${FRONTEND_URL}/api/auth` unless `BETTER_AUTH_ISSUER` is explicitly set; if you set that override, it must match the public frontend domain.
 
-For the hosted deployment, `MCP_PUBLIC_URL` is `https://mcp.markdawn.space`. For a self-hosted MCP hostname, set it to the complete public HTTPS origin, such as `https://mcp.your-domain.example`. It must be an origin only: do not include a path, query, fragment, credentials, or a non-HTTPS scheme. The deployment validator accepts custom public HTTPS hostnames and rejects loopback or IP-literal production origins. `MCP_API_URL` may use HTTP only for a loopback API on the same machine; remote API origins must use HTTPS because the MCP-to-API credential crosses that connection.
+For the hosted deployment, `MCP_PUBLIC_URL` is `https://mcp.metakip.com`. For a self-hosted MCP hostname, set it to the complete public HTTPS origin, such as `https://mcp.your-domain.example`. It must be an origin only: do not include a path, query, fragment, credentials, or a non-HTTPS scheme. The deployment validator accepts custom public HTTPS hostnames and rejects loopback or IP-literal production origins. `MCP_API_URL` may use HTTP only for a loopback API on the same machine; remote API origins must use HTTPS because the MCP-to-API credential crosses that connection.
 
 To apply the checked-in Caddy changes explicitly, review and run:
 
 ```sh
-sudo /var/www/markdawn/deploy/update-caddy.sh
+sudo /var/www/metakip/deploy/update-caddy.sh
 ```
 
 This command validates the repository configuration, backs up the installed configuration, installs the new file, reloads Caddy, and verifies that the service remains active. It intentionally replaces `/etc/caddy/Caddyfile`; merge custom domains and rules into `deploy/Caddyfile` first.
@@ -126,10 +126,10 @@ After signing in, verify one page can be created and edited in the browser. If y
 ## If Setup Fails
 
 ```bash
-journalctl --user -u markdawn-postgres.service --no-pager
-journalctl --user -u markdawn-api.service --no-pager
-journalctl --user -u markdawn-mcp.service --no-pager
-journalctl --user -u markdawn-collab.service --no-pager
+journalctl --user -u metakip-postgres.service --no-pager
+journalctl --user -u metakip-api.service --no-pager
+journalctl --user -u metakip-mcp.service --no-pager
+journalctl --user -u metakip-collab.service --no-pager
 ```
 
-For later updates and migration safety, see [Maintain a Self-Hosted Markdawn](/self-hosting/maintain-a-self-hosted-markdawn/). To move the installation, see [Move a Markdawn Deployment](/self-hosting/move-a-markdawn-deployment/).
+For later updates and migration safety, see [Maintain a Self-Hosted Metakip](/self-hosting/maintain-a-self-hosted-metakip/). To move the installation, see [Move a Metakip Deployment](/self-hosting/move-a-metakip-deployment/).

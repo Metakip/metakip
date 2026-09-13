@@ -1,0 +1,69 @@
+(markdawn_static) {
+    # Static files and SPA fallback — catch-all
+    handle {
+        root * /var/www/markdawn/packages/web/dist
+
+        # Cache hashed assets for 1 year
+        @hashedAssets {
+            path_regexp hashed ^/assets/.*-[a-zA-Z0-9]{8,}\.(js|css|woff2?|ttf|png|jpg|jpeg|gif|webp|svg|ico)$
+        }
+        header @hashedAssets Cache-Control "public, max-age=31536000, immutable"
+
+        # Never cache HTML
+        @htmlFiles {
+            path *.html
+        }
+        header @htmlFiles Cache-Control "no-cache, no-store, must-revalidate"
+
+        try_files {path} /index.html
+        file_server
+
+        # Security headers
+        header {
+            X-Frame-Options "SAMEORIGIN"
+            X-Content-Type-Options "nosniff"
+            Referrer-Policy "strict-origin-when-cross-origin"
+        }
+
+        encode gzip
+    }
+}
+
+app.markdawn.space {
+    # Preserve links created before the app moved to the subdomain root.
+    redir /app / permanent
+    handle_path /app/* {
+        redir {uri} permanent
+    }
+
+    # API and OAuth discovery routes — evaluated first
+    @apiRoutes path /api/* /.well-known/*
+    handle @apiRoutes {
+        reverse_proxy localhost:3001 {
+            header_up X-Real-IP {remote}
+            header_up X-Forwarded-For {header.X-Forwarded-For}
+            header_up X-Forwarded-Proto {scheme}
+        }
+    }
+
+    # WebSocket collab
+    handle /collab {
+        reverse_proxy localhost:1234 {
+            flush_interval -1
+        }
+    }
+
+    import markdawn_static
+}
+
+mcp.markdawn.space {
+    @mcpLanding path /
+    redir @mcpLanding https://docs.markdawn.space/agents/mcp/ 302
+
+    reverse_proxy localhost:3002 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {header.X-Forwarded-For}
+        header_up X-Forwarded-Proto {scheme}
+        flush_interval -1
+    }
+}

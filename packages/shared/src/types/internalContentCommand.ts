@@ -3,11 +3,11 @@ import { MAX_YDOC_BYTES } from '../constants/collaboration.js';
 import { fitsPageMarkdownSize } from '../utils/pageMarkdownSize.js';
 
 export const INTERNAL_CONTENT_HEADERS = {
-  secret: 'x-markdawn-internal-secret',
-  userId: 'x-markdawn-user-id',
-  requestId: 'x-markdawn-request-id',
-  tokenId: 'x-markdawn-token-id',
-  idempotencyPrincipal: 'x-markdawn-idempotency-principal',
+  secret: 'x-metakip-internal-secret',
+  userId: 'x-metakip-user-id',
+  requestId: 'x-metakip-request-id',
+  tokenId: 'x-metakip-token-id',
+  idempotencyPrincipal: 'x-metakip-idempotency-principal',
 } as const;
 
 export const MAX_EXACT_EDITS = 100;

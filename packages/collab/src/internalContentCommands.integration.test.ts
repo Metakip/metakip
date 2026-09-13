@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import type { Logger } from '@logtape/logtape';
-import { INTERNAL_CONTENT_HEADERS, type ReadPageMarkdownCommandResponse } from '@markdawn/shared';
-import { replaceMarkdownBody } from '@markdawn/shared/yjs-document-replacement';
-import { yDocToMarkdown } from '@markdawn/shared/yjs-helpers';
+import { INTERNAL_CONTENT_HEADERS, type ReadPageMarkdownCommandResponse } from '@metakip/shared';
+import { replaceMarkdownBody } from '@metakip/shared/yjs-document-replacement';
+import { yDocToMarkdown } from '@metakip/shared/yjs-helpers';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
 import { createCollabServer } from './server';

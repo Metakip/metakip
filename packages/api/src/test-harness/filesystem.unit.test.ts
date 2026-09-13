@@ -10,7 +10,7 @@ describe('test-harness / filesystem isolation', () => {
     // Ensure no test artifacts leaked into the repo uploads directory
     const files = existsSync(uploadsPath) ? readdirSync(uploadsPath) : [];
     for (const file of files) {
-      expect(file).not.toMatch(/^markdawn-test-/);
+      expect(file).not.toMatch(/^metakip-test-/);
     }
   });
 

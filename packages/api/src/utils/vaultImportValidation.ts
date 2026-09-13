@@ -5,7 +5,7 @@ import {
   type V1VaultImportFile,
   type V1VaultImportKind,
   v1VaultImportFileSchema,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 
 export type VaultImportKind = V1VaultImportKind;
 export type VaultImportFile = V1VaultImportFile;

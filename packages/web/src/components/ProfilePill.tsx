@@ -1,4 +1,4 @@
-import { MARKDAWN_DOCS_URL } from '@markdawn/shared';
+import { METAKIP_DOCS_URL } from '@metakip/shared';
 import clsx from 'clsx';
 import {
   BookOpen,
@@ -120,7 +120,7 @@ export function ProfilePill({
           <ThemeToggle />
           <Tooltip label="Documentation" position="top">
             <a
-              href={MARKDAWN_DOCS_URL}
+              href={METAKIP_DOCS_URL}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Documentation"

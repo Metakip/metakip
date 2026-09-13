@@ -1,6 +1,6 @@
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import type { Document, Server } from '@hocuspocus/server';
-import { getAnimalEmoji, getAnonymousName, getStableColor } from '@markdawn/shared';
+import { getAnimalEmoji, getAnonymousName, getStableColor } from '@metakip/shared';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import * as Y from 'yjs';
 import type { CollabSession } from './collabSession';

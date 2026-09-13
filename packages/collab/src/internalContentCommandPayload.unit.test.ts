@@ -1,5 +1,5 @@
 import { Readable } from 'node:stream';
-import { MAX_YDOC_BYTES, PageMarkdownError } from '@markdawn/shared';
+import { MAX_YDOC_BYTES, PageMarkdownError } from '@metakip/shared';
 import { describe, expect, it } from 'vitest';
 import { readMarkdownCommandBody } from './internalContentCommandPayload';
 

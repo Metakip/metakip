@@ -1,4 +1,4 @@
-import { PageMarkdownError } from '@markdawn/shared';
+import { PageMarkdownError } from '@metakip/shared';
 import { CollabAccessError } from './collabErrors';
 import { ContentCommandPayloadError } from './internalContentCommandPayload';
 

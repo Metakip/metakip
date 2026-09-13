@@ -1,5 +1,5 @@
 export function resetDocumentMetadata(): void {
-  document.title = 'Markdawn';
+  document.title = 'Metakip';
 
   const favicon = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
   if (favicon) favicon.href = '/vite.svg';

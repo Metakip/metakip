@@ -59,7 +59,7 @@ describe('getMcpRuntimeConfig', () => {
     expect(() =>
       getMcpRuntimeConfig({
         NODE_ENV: 'production',
-        MCP_PUBLIC_URL: 'https://mcp.markdawn.space',
+        MCP_PUBLIC_URL: 'https://mcp.metakip.com',
         MCP_API_INTERNAL_SECRET: 'development-only-mcp-api-secret-0123456789abcdef',
       }),
     ).toThrow('MCP_API_INTERNAL_SECRET must not use the development value in production');

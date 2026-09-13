@@ -14,7 +14,7 @@ import {
 } from './url';
 
 describe('app subdomain workspace paths', () => {
-  const appLocation = { hostname: 'app.markdawn.space' };
+  const appLocation = { hostname: 'app.metakip.com' };
   const localAppLocation = {
     hostname: 'localhost',
     origin: 'http://localhost:5173',
@@ -50,7 +50,7 @@ describe('app subdomain workspace paths', () => {
 
 describe('getHttpUrl', () => {
   it.each([
-    'https://github.com/atharva-again/Markdawn/issues/104',
+    'https://github.com/Metakip/metakip/issues/104',
     'http://example.com/path?query=value#section',
     'HTTPS://EXAMPLE.COM/path',
   ])('accepts valid direct HTTP(S) URLs: %s', (url) => {

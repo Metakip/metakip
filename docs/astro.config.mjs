@@ -3,7 +3,7 @@ import { defineConfig } from 'astro/config';
 import starlightOpenAPI, { openAPISidebarGroups } from 'starlight-openapi';
 
 const inlineCodeStylesPlugin = {
-  name: 'markdawn-inline-code-styles',
+  name: 'metakip-inline-code-styles',
   hooks: {
     'config:setup': ({ command, config, updateConfig }) => {
       if (command !== 'build') return;
@@ -15,24 +15,42 @@ const inlineCodeStylesPlugin = {
 };
 
 export default defineConfig({
-  site: 'https://docs.markdawn.space',
+  site: 'https://docs.metakip.com',
   redirects: {
     '/api-reference/': '/api-reference/endpoints/',
+    '/agents/markdawn-cli/': '/agents/metakip-cli/',
+    '/agents/use-markdawn-with-ai-assistants/': '/agents/use-metakip-with-ai-assistants/',
+    '/self-hosting/deploy-markdawn-on-a-vps/': '/self-hosting/deploy-metakip-on-a-vps/',
+    '/self-hosting/maintain-a-self-hosted-markdawn/':
+      '/self-hosting/maintain-a-self-hosted-metakip/',
+    '/self-hosting/move-a-markdawn-deployment/': '/self-hosting/move-a-metakip-deployment/',
+    '/comparisons/markdawn-vs-apple-notes/': '/comparisons/metakip-vs-apple-notes/',
+    '/comparisons/markdawn-vs-coda/': '/comparisons/metakip-vs-coda/',
+    '/comparisons/markdawn-vs-confluence/': '/comparisons/metakip-vs-confluence/',
+    '/comparisons/markdawn-vs-craft/': '/comparisons/metakip-vs-craft/',
+    '/comparisons/markdawn-vs-evernote/': '/comparisons/metakip-vs-evernote/',
+    '/comparisons/markdawn-vs-gitbook/': '/comparisons/metakip-vs-gitbook/',
+    '/comparisons/markdawn-vs-google-docs/': '/comparisons/metakip-vs-google-docs/',
+    '/comparisons/markdawn-vs-notion/': '/comparisons/metakip-vs-notion/',
+    '/comparisons/markdawn-vs-obsidian/': '/comparisons/metakip-vs-obsidian/',
+    '/comparisons/markdawn-vs-onenote/': '/comparisons/metakip-vs-onenote/',
+    '/comparisons/markdawn-vs-outline/': '/comparisons/metakip-vs-outline/',
+    '/comparisons/markdawn-vs-slite/': '/comparisons/metakip-vs-slite/',
   },
   integrations: [
     starlight({
-      title: 'Markdawn Docs',
-      description: 'Learn Markdawn, build with the API, and bring your own agents.',
-      favicon: 'https://markdawn.space/icon-192.png',
+      title: 'Metakip Docs',
+      description: 'Learn Metakip, build with the API, and bring your own agents.',
+      favicon: 'https://metakip.com/icon-192.png',
       editLink: {
-        baseUrl: 'https://github.com/atharva-again/Markdawn/edit/master/docs/',
+        baseUrl: 'https://github.com/Metakip/metakip/edit/master/docs/',
       },
       lastUpdated: true,
       social: [
         {
           icon: 'github',
-          label: 'Markdawn on GitHub',
-          href: 'https://github.com/atharva-again/Markdawn',
+          label: 'Metakip on GitHub',
+          href: 'https://github.com/Metakip/metakip',
         },
       ],
       customCss: ['./src/styles/custom.css'],
@@ -64,7 +82,7 @@ export default defineConfig({
             { label: 'Getting Started', link: '/getting-started/' },
             { label: 'Create Your First Page', link: '/getting-started/create-your-first-page/' },
             { label: 'Markdown Support', link: '/getting-started/markdown-support/' },
-            { label: 'Bring Your Notes to Markdawn', link: '/getting-started/bring-your-notes/' },
+            { label: 'Bring Your Notes to Metakip', link: '/getting-started/bring-your-notes/' },
             {
               label: 'Organize Pages and Folders',
               link: '/getting-started/organize-pages-and-folders/',
@@ -77,10 +95,10 @@ export default defineConfig({
           items: [
             { label: 'Agents', link: '/agents/' },
             { label: 'MCP', link: '/agents/mcp/' },
-            { label: 'Markdawn CLI', link: '/agents/markdawn-cli/' },
+            { label: 'Metakip CLI', link: '/agents/metakip-cli/' },
             {
-              label: 'Use Markdawn With AI Assistants',
-              link: '/agents/use-markdawn-with-ai-assistants/',
+              label: 'Use Metakip With AI Assistants',
+              link: '/agents/use-metakip-with-ai-assistants/',
             },
           ],
         },
@@ -92,32 +110,32 @@ export default defineConfig({
           label: 'Self-Hosting',
           items: [
             { label: 'Self-Hosting', link: '/self-hosting/' },
-            { label: 'Deploy Markdawn on a VPS', link: '/self-hosting/deploy-markdawn-on-a-vps/' },
+            { label: 'Deploy Metakip on a VPS', link: '/self-hosting/deploy-metakip-on-a-vps/' },
             {
-              label: 'Maintain a Self-Hosted Markdawn',
-              link: '/self-hosting/maintain-a-self-hosted-markdawn/',
+              label: 'Maintain a Self-Hosted Metakip',
+              link: '/self-hosting/maintain-a-self-hosted-metakip/',
             },
             {
-              label: 'Move a Markdawn Deployment',
-              link: '/self-hosting/move-a-markdawn-deployment/',
+              label: 'Move a Metakip Deployment',
+              link: '/self-hosting/move-a-metakip-deployment/',
             },
           ],
         },
         {
           label: 'Comparisons',
           items: [
-            { label: 'Apple Notes', link: '/comparisons/markdawn-vs-apple-notes/' },
-            { label: 'Coda / Superhuman Docs', link: '/comparisons/markdawn-vs-coda/' },
-            { label: 'Confluence', link: '/comparisons/markdawn-vs-confluence/' },
-            { label: 'Craft', link: '/comparisons/markdawn-vs-craft/' },
-            { label: 'Evernote', link: '/comparisons/markdawn-vs-evernote/' },
-            { label: 'GitBook', link: '/comparisons/markdawn-vs-gitbook/' },
-            { label: 'Google Docs', link: '/comparisons/markdawn-vs-google-docs/' },
-            { label: 'Notion', link: '/comparisons/markdawn-vs-notion/' },
-            { label: 'Obsidian', link: '/comparisons/markdawn-vs-obsidian/' },
-            { label: 'OneNote', link: '/comparisons/markdawn-vs-onenote/' },
-            { label: 'Outline', link: '/comparisons/markdawn-vs-outline/' },
-            { label: 'Slite', link: '/comparisons/markdawn-vs-slite/' },
+            { label: 'Apple Notes', link: '/comparisons/metakip-vs-apple-notes/' },
+            { label: 'Coda / Superhuman Docs', link: '/comparisons/metakip-vs-coda/' },
+            { label: 'Confluence', link: '/comparisons/metakip-vs-confluence/' },
+            { label: 'Craft', link: '/comparisons/metakip-vs-craft/' },
+            { label: 'Evernote', link: '/comparisons/metakip-vs-evernote/' },
+            { label: 'GitBook', link: '/comparisons/metakip-vs-gitbook/' },
+            { label: 'Google Docs', link: '/comparisons/metakip-vs-google-docs/' },
+            { label: 'Notion', link: '/comparisons/metakip-vs-notion/' },
+            { label: 'Obsidian', link: '/comparisons/metakip-vs-obsidian/' },
+            { label: 'OneNote', link: '/comparisons/metakip-vs-onenote/' },
+            { label: 'Outline', link: '/comparisons/metakip-vs-outline/' },
+            { label: 'Slite', link: '/comparisons/metakip-vs-slite/' },
           ],
         },
       ],

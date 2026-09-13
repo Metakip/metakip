@@ -1,4 +1,4 @@
-import type { SharePermission } from '@markdawn/shared';
+import type { SharePermission } from '@metakip/shared';
 import { PageTreeRow } from './PageTreeRow';
 import type { SidebarPlacement } from './sidebarCapabilities';
 import type { SidebarTreeRuntime } from './sidebarRuntime';

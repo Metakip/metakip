@@ -1,4 +1,4 @@
-import type { SharedNavigationItem, SharedWithMeItem } from '@markdawn/shared';
+import type { SharedNavigationItem, SharedWithMeItem } from '@metakip/shared';
 import { useQuery } from '@tanstack/react-query';
 import { isBulkRemovalInProgress } from '../utils/bulkRemovalState';
 

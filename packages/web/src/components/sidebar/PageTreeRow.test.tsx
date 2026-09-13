@@ -1,4 +1,4 @@
-import { MAX_FOLDER_NAME_LENGTH, MAX_PAGE_TITLE_LENGTH } from '@markdawn/shared';
+import { MAX_FOLDER_NAME_LENGTH, MAX_PAGE_TITLE_LENGTH } from '@metakip/shared';
 import { fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';

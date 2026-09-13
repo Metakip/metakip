@@ -4,7 +4,7 @@ import {
   MAX_PAGE_TITLE_LENGTH,
   type SharePermission,
   truncateUnicodeCodePoints,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import clsx from 'clsx';
 import { Check, FileText, Folder } from 'lucide-react';
 import type React from 'react';

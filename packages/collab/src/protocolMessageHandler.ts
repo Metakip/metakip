@@ -1,5 +1,5 @@
 import type { beforeHandleMessagePayload, Connection, Document } from '@hocuspocus/server';
-import { COLLAB_TERMINAL_REASONS, type StatelessShareMessage } from '@markdawn/shared';
+import { COLLAB_TERMINAL_REASONS, type StatelessShareMessage } from '@metakip/shared';
 import type { Pool, PoolClient } from 'pg';
 import { withSerializedPermissionCheck } from './accessVerifier';
 import type { AuthenticatedCredential } from './authenticatedCredential';

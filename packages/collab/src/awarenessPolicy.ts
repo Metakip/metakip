@@ -1,5 +1,5 @@
 import type { Connection, Document } from '@hocuspocus/server';
-import { getAnimalEmoji, getAnonymousName, getStableColor } from '@markdawn/shared';
+import { getAnimalEmoji, getAnonymousName, getStableColor } from '@metakip/shared';
 import { CollabProtocolDeniedError } from './collabErrors';
 import { readVarUint } from './collaborationProtocol';
 import { type CollabSession, getSessionUser, isAnonymousSession } from './collabSession';

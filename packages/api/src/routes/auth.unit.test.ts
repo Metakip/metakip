@@ -49,7 +49,7 @@ describe('OAuth authorization routing', () => {
     const delegatedRequest = authHandler.mock.calls[0]?.[0];
     expect(delegatedRequest).toBeInstanceOf(Request);
     expect(new URL(delegatedRequest?.url ?? '').searchParams.get('scope')).toContain(
-      'markdawn:invalid-pages-scope-combination',
+      'metakip:invalid-pages-scope-combination',
     );
   });
 
@@ -62,7 +62,7 @@ describe('OAuth authorization routing', () => {
 
     const delegatedRequest = authHandler.mock.calls[0]?.[0];
     await expect(delegatedRequest?.text()).resolves.toContain(
-      'markdawn%3Ainvalid-pages-scope-combination',
+      'metakip%3Ainvalid-pages-scope-combination',
     );
   });
 

@@ -1,4 +1,4 @@
-import type { FolderTreeNode, PageTreeNode } from '@markdawn/shared';
+import type { FolderTreeNode, PageTreeNode } from '@metakip/shared';
 
 export function collectAllFolderIds(folders: FolderTreeNode[]): string[] {
   const ids: string[] = [];

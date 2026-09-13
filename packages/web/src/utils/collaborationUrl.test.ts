@@ -9,8 +9,8 @@ describe('getCollaborationUrl', () => {
   });
 
   it('uses secure WebSockets on an HTTPS origin', () => {
-    expect(getCollaborationUrl({ protocol: 'https:', host: 'markdawn.space' })).toBe(
-      'wss://markdawn.space/collab',
+    expect(getCollaborationUrl({ protocol: 'https:', host: 'metakip.com' })).toBe(
+      'wss://metakip.com/collab',
     );
   });
 });

@@ -1,4 +1,4 @@
-import { COLLAB_GUEST_IDENTITY_EXPIRED_REASON, COLLAB_TERMINAL_REASONS } from '@markdawn/shared';
+import { COLLAB_GUEST_IDENTITY_EXPIRED_REASON, COLLAB_TERMINAL_REASONS } from '@metakip/shared';
 
 export class CollabAccessError extends Error {
   readonly code = 'COLLAB_ACCESS_DENIED';

@@ -1,11 +1,11 @@
-import type { WorkspaceMember, WorkspaceMembership } from '@markdawn/shared';
+import type { WorkspaceMember, WorkspaceMembership } from '@metakip/shared';
 import { type QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { isBulkRemovalInProgress } from '../utils/bulkRemovalState';
 import { showSuccessToast } from '../utils/toast';
 
 const API_BASE = '/api';
 
-export type { WorkspaceMember, WorkspaceMembership } from '@markdawn/shared';
+export type { WorkspaceMember, WorkspaceMembership } from '@metakip/shared';
 
 async function fetchWorkspaceMembers(): Promise<WorkspaceMember[]> {
   const res = await fetch(`${API_BASE}/workspace/members`);

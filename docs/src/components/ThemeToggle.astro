@@ -72,14 +72,14 @@
   type Theme = 'system' | 'dark' | 'light';
   type ThemeProvider = { apply: (theme: Theme) => void };
   const getProvider = (): ThemeProvider | undefined =>
-    (window as Window & { MarkdawnThemeProvider?: ThemeProvider }).MarkdawnThemeProvider;
+    (window as Window & { MetakipThemeProvider?: ThemeProvider }).MetakipThemeProvider;
   const labels: Record<Theme, string> = {
     light: 'Switch to dark theme',
     dark: 'Switch to system theme',
     system: 'Switch to light theme',
   };
   const getTheme = (): Theme => {
-    const value = localStorage.getItem('markdawn-theme');
+    const value = localStorage.getItem('metakip-theme');
     return value === 'dark' || value === 'light' || value === 'system' ? value : 'system';
   };
   const update = (theme: Theme): void => {

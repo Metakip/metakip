@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { getAnonymousName } from '@markdawn/shared';
+import { getAnonymousName } from '@metakip/shared';
 import { sql } from 'drizzle-orm';
 import type { Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
@@ -8,7 +8,7 @@ import { db } from '../db/connection';
 import { executeQuery, type QueryExecutor } from '../db/query';
 import { ensureFolderAccess, ensurePageAccess, type SharePermission } from './share-access';
 
-const GUEST_COOKIE_NAME = 'markdawn_anon_id';
+const GUEST_COOKIE_NAME = 'metakip_anon_id';
 const GUEST_COOKIE_MAX_AGE_SECONDS = 365 * 24 * 60 * 60;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 

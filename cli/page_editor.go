@@ -13,7 +13,7 @@ func preferredEditor(override string) string {
 	if value := strings.TrimSpace(override); value != "" {
 		return value
 	}
-	for _, name := range []string{"MARKDAWN_EDITOR", "VISUAL", "EDITOR"} {
+	for _, name := range []string{"METAKIP_EDITOR", "VISUAL", "EDITOR"} {
 		if value := strings.TrimSpace(os.Getenv(name)); value != "" {
 			return value
 		}
@@ -27,7 +27,7 @@ func editPageInEditor(
 	content []byte,
 	editorOverride string,
 ) ([]byte, bool, error) {
-	dir, err := os.MkdirTemp("", "markdawn-edit-*")
+	dir, err := os.MkdirTemp("", "metakip-edit-*")
 	if err != nil {
 		return nil, false, err
 	}
@@ -39,7 +39,7 @@ func editPageInEditor(
 	}
 	editor := preferredEditor(editorOverride)
 	if editor == "" {
-		return nil, false, usageError("Set MARKDAWN_EDITOR, VISUAL, or EDITOR, or pass --editor.")
+		return nil, false, usageError("Set METAKIP_EDITOR, VISUAL, or EDITOR, or pass --editor.")
 	}
 	parts, err := parseEditorCommand(editor)
 	if err != nil || len(parts) == 0 {

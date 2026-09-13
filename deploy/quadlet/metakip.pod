@@ -1,5 +1,5 @@
 [Unit]
-Description=Markdawn Application Pod
+Description=Metakip Application Pod
 
 [Pod]
 PublishPort=3001:3001

@@ -1,5 +1,5 @@
-import { normalizeMcpPublicOrigin, parseMcpApiUrl } from '@markdawn/shared';
-import { requireMcpApiInternalSecret } from '@markdawn/shared/node/mcp-internal-auth';
+import { normalizeMcpPublicOrigin, parseMcpApiUrl } from '@metakip/shared';
+import { requireMcpApiInternalSecret } from '@metakip/shared/node/mcp-internal-auth';
 
 export type McpRuntimeConfig = {
   apiUrl: string;

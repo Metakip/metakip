@@ -1,6 +1,6 @@
-import { hasMcpWriteWithoutRead, MCP_READ_SCOPE, MCP_WRITE_SCOPE } from '@markdawn/shared';
+import { hasMcpWriteWithoutRead, MCP_READ_SCOPE, MCP_WRITE_SCOPE } from '@metakip/shared';
 
-const INVALID_MCP_SCOPE_SENTINEL = 'markdawn:invalid-pages-scope-combination';
+const INVALID_MCP_SCOPE_SENTINEL = 'metakip:invalid-pages-scope-combination';
 
 /**
  * Better Auth does not expose a requested-scope validation callback, while its

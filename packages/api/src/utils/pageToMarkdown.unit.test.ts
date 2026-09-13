@@ -1,4 +1,4 @@
-import { createYjsDocWithTitle } from '@markdawn/shared/markdown-yjs';
+import { createYjsDocWithTitle } from '@metakip/shared/markdown-yjs';
 import { describe, expect, it } from 'vitest';
 import { pageToMarkdown } from './export-helpers';
 

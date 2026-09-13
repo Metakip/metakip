@@ -1,4 +1,4 @@
-import type { Folder, Page } from '@markdawn/shared';
+import type { Folder, Page } from '@metakip/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { showSuccessToast } from '../utils/toast';
 

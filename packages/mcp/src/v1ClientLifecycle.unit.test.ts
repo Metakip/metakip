@@ -1,4 +1,4 @@
-import { hashMcpAccessToken } from '@markdawn/shared/node/mcp-internal-auth';
+import { hashMcpAccessToken } from '@metakip/shared/node/mcp-internal-auth';
 import { describe, expect, it } from 'vitest';
 import type { McpActor, McpFolder, McpPage } from './types';
 import { V1LifecycleClient } from './v1ClientLifecycle';

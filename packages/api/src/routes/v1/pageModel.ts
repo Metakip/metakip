@@ -1,4 +1,4 @@
-import { PageMarkdownError, type ParsedPageMarkdown, parsePageMarkdown } from '@markdawn/shared';
+import { PageMarkdownError, type ParsedPageMarkdown, parsePageMarkdown } from '@metakip/shared';
 import { HTTPException } from 'hono/http-exception';
 import type { AccessiblePageRow } from '../../utils/pageRepository';
 import type { PageResponse } from './pageContracts';

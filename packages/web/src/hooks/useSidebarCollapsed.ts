@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-const STORAGE_KEY = 'markdawn-sidebar-collapsed';
+const STORAGE_KEY = 'metakip-sidebar-collapsed';
 
 function getInitialCollapsed(): boolean {
   if (typeof window === 'undefined') return false;

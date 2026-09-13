@@ -19,7 +19,7 @@ type CLI struct {
 	JSON    bool             `short:"j" help:"Write stable JSON to stdout."`
 	Plain   bool             `help:"Disable colors and rich Markdown rendering."`
 	NoInput bool             `help:"Fail instead of prompting when input or selection is required."`
-	URL     string           `help:"Override the Markdawn server URL." placeholder:"URL"`
+	URL     string           `help:"Override the Metakip server URL." placeholder:"URL"`
 	Timeout time.Duration    `help:"HTTP request and retry timeout." default:"30s"`
 	Version kong.VersionFlag `name:"version" short:"v" help:"Print the version."`
 
@@ -29,15 +29,15 @@ type CLI struct {
 	Page   PageCmd   `cmd:"" help:"Read and edit pages." group:"Page"`
 	Folder FolderCmd `cmd:"" help:"Read and manage folders." group:"Folder"`
 	Trash  TrashCmd  `cmd:"" help:"Manage deleted pages and folders." group:"Trash"`
-	Export ExportCmd `cmd:"" help:"Export Markdawn content." group:"Import and Export"`
-	Import ImportCmd `cmd:"" help:"Import Markdawn content." group:"Import and Export"`
-	Skill  SkillCmd  `cmd:"" help:"Install or update the optional Markdawn agent skill." group:"Skill"`
+	Export ExportCmd `cmd:"" help:"Export Metakip content." group:"Import and Export"`
+	Import ImportCmd `cmd:"" help:"Import Metakip content." group:"Import and Export"`
+	Skill  SkillCmd  `cmd:"" help:"Install or update the optional Metakip agent skill." group:"Skill"`
 
 	Completion CompletionCmd         `cmd:"" help:"Generate a shell completion script." group:"Tooling"`
 	Doctor     DoctorCmd             `cmd:"" help:"Check CLI, authentication, and standalone install health." group:"Tooling"`
 	Finalize   StandaloneFinalizeCmd `cmd:"" name:"standalone-finalize" hidden:"" group:"Tooling"`
-	Uninstall  UninstallCmd          `cmd:"" help:"Remove a standalone Markdawn installation." group:"Tooling"`
-	Update     UpdateCmd             `cmd:"" help:"Update a standalone Markdawn installation." group:"Tooling"`
+	Uninstall  UninstallCmd          `cmd:"" help:"Remove a standalone Metakip installation." group:"Tooling"`
+	Update     UpdateCmd             `cmd:"" help:"Update a standalone Metakip installation." group:"Tooling"`
 }
 
 type LoginCmd struct{}
@@ -62,8 +62,8 @@ type StandaloneFinalizeCmd struct {
 }
 
 type SkillCmd struct {
-	Install SkillInstallCmd `cmd:"" help:"Install the Markdawn skill with npx skills."`
-	Update  SkillUpdateCmd  `cmd:"" help:"Update an installed Markdawn skill with npx skills."`
+	Install SkillInstallCmd `cmd:"" help:"Install the Metakip skill with npx skills."`
+	Update  SkillUpdateCmd  `cmd:"" help:"Update an installed Metakip skill with npx skills."`
 }
 
 type SkillInstallCmd struct {
@@ -126,7 +126,7 @@ func (cmd *LoginCmd) Run(r *runtimeState) error {
 		return err
 	}
 	baseURL := cfg.BaseURL
-	if envURL := os.Getenv("MARKDAWN_URL"); envURL != "" {
+	if envURL := os.Getenv("METAKIP_URL"); envURL != "" {
 		baseURL = envURL
 	}
 	if r.cli.URL != "" {
@@ -134,9 +134,9 @@ func (cmd *LoginCmd) Run(r *runtimeState) error {
 	}
 	baseURL = strings.TrimRight(strings.TrimSpace(baseURL), "/")
 
-	token := strings.TrimSpace(os.Getenv("MARKDAWN_TOKEN"))
+	token := strings.TrimSpace(os.Getenv("METAKIP_TOKEN"))
 	if token == "" && r.interactive() {
-		input := huh.NewInput().Title("API token").Description("Create a named token in Markdawn Settings.").EchoMode(huh.EchoModePassword).Value(&token)
+		input := huh.NewInput().Title("API token").Description("Create a named token in Metakip Settings.").EchoMode(huh.EchoModePassword).Value(&token)
 		err = huh.NewForm(huh.NewGroup(input)).WithInput(r.stdin).WithOutput(r.stderr).RunWithContext(r.ctx)
 		if errors.Is(err, huh.ErrUserAborted) {
 			return &cliError{Code: "aborted", Message: "Login cancelled."}
@@ -151,9 +151,9 @@ func (cmd *LoginCmd) Run(r *runtimeState) error {
 	token = strings.TrimSpace(token)
 	if token == "" {
 		if r.stdinTTY && !r.interactive() {
-			return usageError("API token is required in MARKDAWN_TOKEN when terminal input is disabled.")
+			return usageError("API token is required in METAKIP_TOKEN when terminal input is disabled.")
 		}
-		return usageError("API token is required on stdin or in MARKDAWN_TOKEN.")
+		return usageError("API token is required on stdin or in METAKIP_TOKEN.")
 	}
 	user, err := r.verifyToken(baseURL, token)
 	if err != nil {
@@ -195,8 +195,8 @@ func (cmd *LogoutCmd) Run(r *runtimeState) error {
 	if _, err := fmt.Fprintln(r.stdout, "Logged out."); err != nil {
 		return err
 	}
-	if os.Getenv("MARKDAWN_TOKEN") != "" {
-		if _, err := fmt.Fprintln(r.stderr, "MARKDAWN_TOKEN is still set and will continue to authenticate commands."); err != nil {
+	if os.Getenv("METAKIP_TOKEN") != "" {
+		if _, err := fmt.Fprintln(r.stderr, "METAKIP_TOKEN is still set and will continue to authenticate commands."); err != nil {
 			return err
 		}
 	}

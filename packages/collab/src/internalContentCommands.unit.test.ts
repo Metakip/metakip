@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { Logger } from '@logtape/logtape';
-import { INTERNAL_CONTENT_HEADERS, MAX_INTERNAL_CONTENT_COMMAND_BYTES } from '@markdawn/shared';
+import { INTERNAL_CONTENT_HEADERS, MAX_INTERNAL_CONTENT_COMMAND_BYTES } from '@metakip/shared';
 import { describe, expect, it, vi } from 'vitest';
 import { createContentCommandAdmission } from './contentCommandAdmission';
 import type { InternalContentCommandOptions } from './internalContentCommandExecution';

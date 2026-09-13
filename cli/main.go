@@ -43,8 +43,8 @@ func main() {
 	cli := CLI{}
 	parser, err := kong.New(
 		&cli,
-		kong.Name("markdawn"),
-		kong.Description("Read and edit Markdawn pages from the terminal."),
+		kong.Name("metakip"),
+		kong.Description("Read and edit Metakip pages from the terminal."),
 		kong.UsageOnError(),
 		kong.ConfigureHelp(kong.HelpOptions{Compact: true, Summary: true}),
 		kong.Vars{"version": buildVersion()},

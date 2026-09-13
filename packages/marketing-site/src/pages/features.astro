@@ -2,9 +2,9 @@
 // biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
 import { Image } from 'astro:assets';
 // biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
-import heroImage from '../assets/markdawn-hero.png';
+import heroImage from '../assets/metakip-hero.png';
 // biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
-import heroLightImage from '../assets/markdawn-hero-light.png';
+import heroLightImage from '../assets/metakip-hero-light.png';
 // biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
 import AppLink from '../components/AppLink.astro';
 // biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
@@ -22,7 +22,7 @@ import {
 import * as siteConfig from '../data/siteConfig';
 
 const PAGE_URL = `${siteConfig.SITE_ORIGIN}/features`;
-const PAGE_TITLE = 'Features | Markdawn';
+const PAGE_TITLE = 'Features | Metakip';
 const PAGE_DESCRIPTION =
   'A collaborative knowledge base for humans and agents. Write, organize, and share knowledge in the browser, then let terminals and AI agents work with the same pages through the CLI and API.';
 // biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
@@ -208,7 +208,7 @@ const STRUCTURED_DATA = {
             <Image
               class="hero-image-light"
               src={heroLightImage}
-              alt="A Markdawn page open in the editor with properties, tags, links, and markdown content."
+              alt="A Metakip page open in the editor with properties, tags, links, and markdown content."
               width={1196}
               height={949}
               loading="eager"
@@ -217,7 +217,7 @@ const STRUCTURED_DATA = {
             <Image
               class="hero-image-dark"
               src={heroImage}
-              alt="A Markdawn page open in the editor with properties, tags, links, and markdown content in dark mode."
+              alt="A Metakip page open in the editor with properties, tags, links, and markdown content in dark mode."
               width={1196}
               height={949}
               loading="lazy"
@@ -243,8 +243,8 @@ const STRUCTURED_DATA = {
 
         <section class="closing marketing-closing" aria-label="Next step">
           <p>Start in the browser. Add the CLI when you want a terminal in the loop.</p>
-          <p><AppLink class="inline-link">Open Markdawn</AppLink> or <a class="inline-link" href={`${siteConfig.DOCS_ORIGIN}/agents/markdawn-cli/`} target="_blank" rel="noopener noreferrer">Read The CLI Guide</a>.</p>
-          <p><a class="inline-link" href="/use-cases">See Who Markdawn Is For</a>.</p>
+          <p><AppLink class="inline-link">Open Metakip</AppLink> or <a class="inline-link" href={`${siteConfig.DOCS_ORIGIN}/agents/metakip-cli/`} target="_blank" rel="noopener noreferrer">Read The CLI Guide</a>.</p>
+          <p><a class="inline-link" href="/use-cases">See Who Metakip Is For</a>.</p>
         </section>
         </div>
       </article>

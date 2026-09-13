@@ -1,4 +1,4 @@
-import { getV1VaultImportKind } from '@markdawn/shared';
+import { getV1VaultImportKind } from '@metakip/shared';
 import {
   type BinaryExport,
   type ImportFile,
@@ -51,7 +51,7 @@ export class V1ImportExportClient {
     );
     const contentType = response.headers.get('content-type') ?? 'application/zip';
     const contentDisposition =
-      response.headers.get('content-disposition') ?? 'attachment; filename="markdawn-export"';
+      response.headers.get('content-disposition') ?? 'attachment; filename="metakip-export"';
     const body = await this.io.readBinaryOrMarkdown(response, contentType, options?.signal);
     return {
       body,
@@ -70,7 +70,7 @@ export class V1ImportExportClient {
       body: await this.io.readBytes(response, options?.signal),
       contentType: 'application/zip',
       contentDisposition:
-        response.headers.get('content-disposition') ?? 'attachment; filename="markdawn-export.zip"',
+        response.headers.get('content-disposition') ?? 'attachment; filename="metakip-export.zip"',
     };
   }
 

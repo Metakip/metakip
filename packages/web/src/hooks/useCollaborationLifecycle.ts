@@ -1,6 +1,6 @@
 import type { EditorView } from '@codemirror/view';
 import { HocuspocusProvider, type WebSocketStatus } from '@hocuspocus/provider';
-import type { SharePermission } from '@markdawn/shared';
+import type { SharePermission } from '@metakip/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef } from 'react';
 import * as Y from 'yjs';

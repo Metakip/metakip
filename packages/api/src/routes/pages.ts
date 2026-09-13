@@ -9,8 +9,8 @@ import {
   type WikiLinkPresentation,
   type WikiLinkPresentationRequest,
   type WikiLinkPresentationResponse,
-} from '@markdawn/shared';
-import { bindWikiLinkTargets, createYjsDocWithTitle } from '@markdawn/shared/markdown-yjs';
+} from '@metakip/shared';
+import { bindWikiLinkTargets, createYjsDocWithTitle } from '@metakip/shared/markdown-yjs';
 import { sql } from 'drizzle-orm';
 import { type Context, Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';

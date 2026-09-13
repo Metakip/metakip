@@ -16,7 +16,7 @@ import {
   type ReplacePageMarkdownCommandResponse,
   readPageMarkdownCommandResponseSchema,
   replacePageMarkdownCommandResponseSchema,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import { HTTPException } from 'hono/http-exception';
 import type { ZodType } from 'zod';
 import { requireCollaborationInternalSecret } from '../env';

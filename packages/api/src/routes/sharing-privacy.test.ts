@@ -30,7 +30,7 @@ function expectDisplayOnly(value: unknown): asserts value is CollaboratorDisplay
   }
 }
 
-const guestCookie = () => `markdawn_anon_id=${randomUUID()}`;
+const guestCookie = () => `metakip_anon_id=${randomUUID()}`;
 
 describe('sharing identity privacy', () => {
   it('returns display identities but not management data to direct and inherited collaborators', async () => {

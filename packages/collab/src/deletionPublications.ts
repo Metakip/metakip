@@ -4,7 +4,7 @@ import {
   COLLAB_TERMINAL_REASONS,
   type EntityDeletedMessage,
   type WorkspaceMembershipMessage,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import type { Pool, PoolClient } from 'pg';
 import { rebuildActivePageMetaDocuments } from './metadataPublications';
 import {

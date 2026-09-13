@@ -45,14 +45,14 @@ describe('useTheme', () => {
   });
 
   it('reads stored theme from localStorage', () => {
-    store['markdawn-theme'] = 'dark';
+    store['metakip-theme'] = 'dark';
     const { result } = renderHook(() => useTheme());
 
     expect(result.current.theme).toBe('dark');
   });
 
   it('defaults to "system" for invalid stored values', () => {
-    store['markdawn-theme'] = 'invalid-value';
+    store['metakip-theme'] = 'invalid-value';
     const { result } = renderHook(() => useTheme());
 
     expect(result.current.theme).toBe('system');
@@ -66,7 +66,7 @@ describe('useTheme', () => {
     });
 
     expect(result.current.theme).toBe('dark');
-    expect(store['markdawn-theme']).toBe('dark');
+    expect(store['metakip-theme']).toBe('dark');
   });
 
   it('applies "dark" class to documentElement when theme is dark', () => {
@@ -80,7 +80,7 @@ describe('useTheme', () => {
   });
 
   it('removes "dark" class from documentElement when theme is light', () => {
-    store['markdawn-theme'] = 'dark';
+    store['metakip-theme'] = 'dark';
     const { result } = renderHook(() => useTheme());
 
     act(() => {
@@ -126,7 +126,7 @@ describe('useTheme', () => {
   });
 
   it('isDark is false when theme is light', () => {
-    store['markdawn-theme'] = 'dark';
+    store['metakip-theme'] = 'dark';
     const { result } = renderHook(() => useTheme());
 
     act(() => {

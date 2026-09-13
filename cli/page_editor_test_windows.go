@@ -19,12 +19,12 @@ func testEditorCommand(t *testing.T) string {
 }
 
 func TestParseEditorCommandPreservesWindowsPath(t *testing.T) {
-	command := `"C:\Program Files\Markdawn\editor.exe" --wait`
+	command := `"C:\Program Files\Metakip\editor.exe" --wait`
 	got, err := parseEditorCommand(command)
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := []string{`C:\Program Files\Markdawn\editor.exe`, "--wait"}
+	want := []string{`C:\Program Files\Metakip\editor.exe`, "--wait"}
 	if !reflect.DeepEqual(got, want) {
 		t.Fatalf("parseEditorCommand(%q) = %#v, want %#v", command, got, want)
 	}

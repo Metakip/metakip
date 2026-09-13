@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
-  <title id="title">Markdawn: One knowledge base. Every interface.</title>
+  <title id="title">Metakip: One knowledge base. Every interface.</title>
   <desc id="description">The collaborative knowledge base for humans and agents.</desc>
   <rect width="1200" height="630" fill="#0b0b0b"/>
   <path d="M72 102H1128M72 528H1128" stroke="#333333" stroke-width="2"/>
-  <text x="72" y="75" fill="#f5f5f5" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" letter-spacing="1">MARKDAWN</text>
+  <text x="72" y="75" fill="#f5f5f5" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" letter-spacing="1">METAKIP</text>
   <text x="1128" y="75" fill="#a1a1aa" font-family="Arial, Helvetica, sans-serif" font-size="16" text-anchor="end" letter-spacing="2">MARKDOWN-CENTERED KNOWLEDGE</text>
   <text x="72" y="220" fill="#f5f5f5" font-family="Arial, Helvetica, sans-serif" font-size="76" font-weight="700" letter-spacing="-4">One knowledge</text>
   <text x="72" y="302" fill="#f5f5f5" font-family="Arial, Helvetica, sans-serif" font-size="76" font-weight="700" letter-spacing="-4">base. Every</text>

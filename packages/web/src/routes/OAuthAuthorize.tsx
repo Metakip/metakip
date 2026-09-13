@@ -184,7 +184,7 @@ export default function OAuthAuthorize() {
               onClick={() => navigate('/app')}
               className="mt-6 cursor-pointer rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-700 dark:hover:bg-zinc-600"
             >
-              Return to Markdawn
+              Return to Metakip
             </button>
           </>
         ) : client ? (
@@ -209,7 +209,7 @@ export default function OAuthAuthorize() {
               </p>
             ) : null}
             <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
-              This application is requesting access to your Markdawn pages and folders.
+              This application is requesting access to your Metakip pages and folders.
             </p>
             <div className="mt-6 space-y-3">
               {requestedPermissionScopes.map((scope) => (

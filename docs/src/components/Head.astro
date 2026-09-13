@@ -6,14 +6,14 @@ const pathname = Astro.url.pathname;
 const siteUrl = new URL(Astro.site ?? Astro.url.origin);
 const canonicalUrl = new URL(pathname, siteUrl).toString();
 const apiMetadata = getApiReferencePageMetadata(pathname);
-const sourceTitle = typeof entry.data.title === 'string' ? entry.data.title : 'Markdawn Documentation';
+const sourceTitle = typeof entry.data.title === 'string' ? entry.data.title : 'Metakip Documentation';
 const sourceDescription =
   typeof entry.data.description === 'string'
     ? entry.data.description
-    : 'Guides for using Markdawn pages, the API, the CLI, AI assistants, and self-hosting.';
+    : 'Guides for using Metakip pages, the API, the CLI, AI assistants, and self-hosting.';
 const pageTitle =
   apiMetadata?.title ??
-  (pathname === '/' ? 'Documentation | Markdawn Docs' : `${sourceTitle} | Markdawn Docs`);
+  (pathname === '/' ? 'Documentation | Metakip Docs' : `${sourceTitle} | Metakip Docs`);
 const pageDescription = apiMetadata?.description ?? sourceDescription;
 const markdownPath = `/${pathname.replace(/^\/+|\/+$/g, '') || 'index'}.md`;
 const markdownUrl = new URL(markdownPath, siteUrl).toString();
@@ -33,19 +33,19 @@ if (section && section.href !== pathname) {
   breadcrumbItems.push({ name: section.label, item: new URL(section.href, siteUrl).toString() });
 }
 if (pathname !== '/') {
-  breadcrumbItems.push({ name: pageTitle.replace(/ \| Markdawn Docs$/, ''), item: canonicalUrl });
+  breadcrumbItems.push({ name: pageTitle.replace(/ \| Metakip Docs$/, ''), item: canonicalUrl });
 }
 
-const organizationId = 'https://markdawn.space/#organization';
+const organizationId = 'https://metakip.com/#organization';
 const siteId = `${siteUrl.toString().replace(/\/$/, '')}/#website`;
 const graph: Record<string, unknown>[] = [
   {
     '@type': 'Organization',
     '@id': organizationId,
-    name: 'Markdawn',
-    url: 'https://markdawn.space',
-    logo: 'https://markdawn.space/icon-192.png',
-    sameAs: ['https://github.com/atharva-again/Markdawn'],
+    name: 'Metakip',
+    url: 'https://metakip.com',
+    logo: 'https://metakip.com/icon-192.png',
+    sameAs: ['https://github.com/Metakip/metakip'],
   },
   {
     '@type': 'WebPage',
@@ -64,7 +64,7 @@ if (pathname === '/') {
   graph.push({
     '@type': 'WebSite',
     '@id': siteId,
-    name: 'Markdawn Docs',
+    name: 'Metakip Docs',
     url: siteUrl.toString(),
     description: pageDescription,
     publisher: { '@id': organizationId },

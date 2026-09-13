@@ -1,7 +1,7 @@
 import { defineConfig } from 'astro/config';
 
 export default defineConfig({
-  site: 'https://markdawn.space',
+  site: 'https://metakip.com',
   output: 'static',
   server: {
     port: 8888,

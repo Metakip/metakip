@@ -10,7 +10,7 @@ import {
   v1PageResolutionResponseSchema,
   v1PageResponseSchema,
   v1UpdatePageRequestSchema,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import { z } from 'zod';
 import {
   jsonContent,
@@ -141,7 +141,7 @@ export const pageOperations = {
     openApiPath: '/pages',
     summary: 'Create A Page',
     description:
-      'Creates a page in the requested folder, or at the Markdawn root when `parentId` is omitted or `null`. You can include initial markdown in the request body.',
+      'Creates a page in the requested folder, or at the Metakip root when `parentId` is omitted or `null`. You can include initial markdown in the request body.',
     tags: pagesTag,
     requiredScopes: ['pages:write'],
     request: { required: true, ...jsonContent(createPageRequestSchema) },

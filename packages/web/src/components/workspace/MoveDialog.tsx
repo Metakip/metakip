@@ -1,5 +1,5 @@
 import { FloatingPortal } from '@floating-ui/react';
-import type { FolderTreeNode } from '@markdawn/shared';
+import type { FolderTreeNode } from '@metakip/shared';
 import clsx from 'clsx';
 import { ChevronDown, ChevronRight, Folder, Home } from 'lucide-react';
 import { type ReactNode, useEffect, useMemo, useState } from 'react';

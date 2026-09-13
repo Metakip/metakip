@@ -1,2 +1,2 @@
-/app https://app.markdawn.space/ 301
-/app/* https://app.markdawn.space/:splat 301
+/app https://app.metakip.com/ 301
+/app/* https://app.metakip.com/:splat 301

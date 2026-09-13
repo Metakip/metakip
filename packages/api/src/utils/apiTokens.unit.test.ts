@@ -1,5 +1,5 @@
-import { parseApiTokenId } from '@markdawn/shared';
-import { hashApiToken } from '@markdawn/shared/node/api-token-credential';
+import { parseApiTokenId } from '@metakip/shared';
+import { hashApiToken } from '@metakip/shared/node/api-token-credential';
 import { describe, expect, it } from 'vitest';
 import { createApiTokenSecret } from './apiTokens';
 

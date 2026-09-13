@@ -11,8 +11,8 @@ function isLoopbackHostname(hostname: string): boolean {
   return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
 }
 
-/** Default public origin for the hosted Markdawn deployment. */
-export const MCP_PRODUCTION_PUBLIC_ORIGIN = 'https://mcp.markdawn.space';
+/** Default public origin for the hosted Metakip deployment. */
+export const MCP_PRODUCTION_PUBLIC_ORIGIN = 'https://mcp.metakip.com';
 
 export function parseMcpApiUrl(value: string): URL {
   let parsed: URL;

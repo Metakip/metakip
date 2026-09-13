@@ -4,7 +4,7 @@ import type {
   FolderPageDto,
   FolderTreeNode,
   PageTreeNode,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import { getPagesInFolder } from '../utils/page-tree';
 
 function toDate(value: string | Date | null | undefined): Date {

@@ -25,7 +25,7 @@ func inspectStandaloneInstall() standaloneDoctorCheck {
 	data, err := os.ReadFile(path)
 	if errors.Is(err, os.ErrNotExist) {
 		return standaloneDoctorCheck{
-			Status: doctorStatusNotInstalled, Message: "Install Markdawn with the standalone installer.", ReceiptPath: path,
+			Status: doctorStatusNotInstalled, Message: "Install Metakip with the standalone installer.", ReceiptPath: path,
 		}
 	}
 	if err != nil {

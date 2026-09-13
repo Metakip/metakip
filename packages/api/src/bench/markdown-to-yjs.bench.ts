@@ -1,4 +1,4 @@
-import { markdownToYjsState } from '@markdawn/shared/markdown-yjs';
+import { markdownToYjsState } from '@metakip/shared/markdown-yjs';
 import { bench, describe } from 'vitest';
 
 describe('markdownToYjsState benchmarks', () => {

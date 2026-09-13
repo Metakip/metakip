@@ -20,5 +20,10 @@ test -n "$bundle_swap_line"
 test "$source_line" -gt "$pull_line"
 test "$editor_migration_source_line" -gt "$pull_line"
 test "$editor_migration_call_line" -lt "$bundle_swap_line"
+! grep -q '^\. .*deploy/migrations/' "$deploy_script"
+! grep -q 'migratePostgresIdentifiers\|ensureUploadsVolume\|UPDATE_HOSTED_CADDY' "$deploy_script"
+grep -Fqx 'HealthCmd=CMD-SHELL pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}' \
+    "$SCRIPT_DIR/quadlet/metakip-postgres.container"
 
 bash "$SCRIPT_DIR/migrate-editor-content.unit.test.sh"
+bash "$SCRIPT_DIR/migrations/markdawn-to-metakip.unit.test.sh"

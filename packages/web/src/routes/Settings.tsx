@@ -1,4 +1,4 @@
-import { MARKDAWN_DOCS_URL } from '@markdawn/shared';
+import { METAKIP_DOCS_URL } from '@metakip/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { BookOpen, Download, FolderOpen } from 'lucide-react';
 import { useState } from 'react';
@@ -57,7 +57,7 @@ export default function Settings() {
           Manage your account and data.
         </p>
         <a
-          href={MARKDAWN_DOCS_URL}
+          href={METAKIP_DOCS_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-zinc-700 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white"

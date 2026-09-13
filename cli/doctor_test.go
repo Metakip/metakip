@@ -33,7 +33,7 @@ func TestDoctorStandaloneCheckExposesStructuredPaths(t *testing.T) {
 	if err := os.WriteFile(receiptPath, data, 0o600); err != nil {
 		t.Fatal(err)
 	}
-	t.Setenv("MARKDAWN_INSTALL_STATE_DIR", stateDir)
+	t.Setenv("METAKIP_INSTALL_STATE_DIR", stateDir)
 
 	check := inspectStandaloneInstall()
 	if check.Status != doctorStatusHealthy || check.ReceiptPath != receiptPath || check.BinaryPath != binaryPath || check.Error != "" {
@@ -64,7 +64,7 @@ func TestDoctorStandaloneCheckExposesStructuredPaths(t *testing.T) {
 }
 
 func TestDoctorChecksSavedAuthentication(t *testing.T) {
-	t.Setenv("MARKDAWN_TOKEN", "")
+	t.Setenv("METAKIP_TOKEN", "")
 	server := httptest.NewServer(http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
 		if request.Method != http.MethodGet || request.URL.Path != "/api/v1/me" {
 			t.Fatalf("unexpected request %s %s", request.Method, request.URL.Path)
@@ -97,13 +97,13 @@ func TestDoctorChecksSavedAuthentication(t *testing.T) {
 }
 
 func TestDoctorReportsMissingAuthenticationWithoutNetwork(t *testing.T) {
-	t.Setenv("MARKDAWN_TOKEN", "")
+	t.Setenv("METAKIP_TOKEN", "")
 	output := &bytes.Buffer{}
 	runtime := &runtimeState{
 		ctx:         t.Context(),
 		cli:         &CLI{JSON: true, Timeout: time.Second},
 		stdout:      output,
-		configValue: &config{BaseURL: "https://markdawn.example.com"},
+		configValue: &config{BaseURL: "https://metakip.example.com"},
 	}
 	if err := (&DoctorCmd{}).Run(runtime); err != nil {
 		t.Fatal(err)
@@ -118,7 +118,7 @@ func TestDoctorReportsMissingAuthenticationWithoutNetwork(t *testing.T) {
 }
 
 func TestDoctorRendersIndependentChecksWhenAuthenticationFails(t *testing.T) {
-	t.Setenv("MARKDAWN_TOKEN", "")
+	t.Setenv("METAKIP_TOKEN", "")
 	server := httptest.NewServer(http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
 		response.WriteHeader(http.StatusUnauthorized)
 		fmt.Fprint(response, `{"error":{"code":"not_authenticated","message":"Invalid token"}}`)

@@ -1,8 +1,8 @@
 import { existsSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { MAX_YDOC_BYTES } from '@markdawn/shared';
-import { createYjsDocWithTitle } from '@markdawn/shared/markdown-yjs';
+import { MAX_YDOC_BYTES } from '@metakip/shared';
+import { createYjsDocWithTitle } from '@metakip/shared/markdown-yjs';
 import { config } from 'dotenv';
 import pg, { type PoolClient } from 'pg';
 import { remark } from 'remark';
@@ -402,7 +402,7 @@ async function migrate(): Promise<void> {
   try {
     await client.query('BEGIN');
     await client.query(
-      "select pg_advisory_xact_lock(hashtext('markdawn-editor-content-migration'))",
+      "select pg_advisory_xact_lock(hashtext('metakip-editor-content-migration'))",
     );
     if (await hasCompletedMigration(client)) {
       await client.query('COMMIT');

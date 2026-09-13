@@ -1,6 +1,6 @@
 import './env';
 import { honoLogger } from '@logtape/hono';
-import { getApiLogger, setupLogger } from '@markdawn/shared';
+import { getApiLogger, setupLogger } from '@metakip/shared';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { HTTPException } from 'hono/http-exception';
@@ -68,7 +68,7 @@ export async function createApp() {
   app.use(
     '*',
     honoLogger({
-      category: ['markdawn', 'http'],
+      category: ['metakip', 'http'],
       skip: (c) => c.req.path === '/api/health',
     }),
   );

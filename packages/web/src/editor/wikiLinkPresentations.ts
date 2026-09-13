@@ -3,7 +3,7 @@ import {
   normalizeWikiLinkLookupKey,
   type WikiLinkPresentation,
   type WikiLinkPresentationResponse,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import { getLogger } from '../logger-init';
 
 export type WikiLinkReference = { targetId?: string; path?: string };

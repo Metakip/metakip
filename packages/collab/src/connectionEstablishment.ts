@@ -1,5 +1,5 @@
 import type { Connection, connectedPayload } from '@hocuspocus/server';
-import { COLLAB_TERMINAL_REASONS } from '@markdawn/shared';
+import { COLLAB_TERMINAL_REASONS } from '@metakip/shared';
 import { withSerializedPermissionCheck } from './accessVerifier';
 import type { AuthenticatedCredential } from './authenticatedCredential';
 import { CollabAccessError } from './collabErrors';

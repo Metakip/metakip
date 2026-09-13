@@ -8,7 +8,7 @@ import {
   type PageTreeNode,
   parsePageDetailPayload,
   type SharePermission,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { FileQuestion, LogIn, RefreshCw, ShieldOff } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -228,7 +228,7 @@ export default function Page() {
   const updateDocumentMeta = useCallback(() => {
     if (!page) return;
 
-    document.title = `${page.title} | Markdawn`;
+    document.title = `${page.title} | Metakip`;
 
     const existingLink = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
     const icon = page.icon;

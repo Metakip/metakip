@@ -1,7 +1,7 @@
 import {
   createMcpInternalCredential,
   MCP_INTERNAL_AUTH_HEADER,
-} from '@markdawn/shared/node/mcp-internal-auth';
+} from '@metakip/shared/node/mcp-internal-auth';
 import { type McpActor, McpBackendError } from './types';
 import { responseErrorBody } from './v1ClientResponse';
 
@@ -58,7 +58,7 @@ function transportFailure(classification: RequestOutcomeClass, error: unknown): 
       details: errorDetails(error),
     });
   }
-  return new McpBackendError('Markdawn API is unavailable', 503, {
+  return new McpBackendError('Metakip API is unavailable', 503, {
     code: 'service_unavailable',
     details: errorDetails(error),
   });
@@ -73,7 +73,7 @@ function invalidErrorResponse(
   return new McpBackendError(
     uncertain
       ? 'Mutation error response was invalid; outcome is uncertain'
-      : 'Markdawn API returned an invalid error response',
+      : 'Metakip API returned an invalid error response',
     503,
     {
       code: uncertain ? 'outcome_uncertain' : 'invalid_upstream_response',
@@ -92,7 +92,7 @@ function invalidMutationResponse(
       details: error instanceof McpBackendError ? error.details : errorDetails(error),
     });
   }
-  return new McpBackendError('Markdawn API returned an invalid mutation response', 503, {
+  return new McpBackendError('Metakip API returned an invalid mutation response', 503, {
     code: 'invalid_upstream_response',
     details: error instanceof McpBackendError ? error.details : errorDetails(error),
   });
@@ -119,7 +119,7 @@ export class V1ClientTransport {
       try {
         return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
       } catch (error) {
-        throw new McpBackendError('Markdawn export returned invalid UTF-8', 503, {
+        throw new McpBackendError('Metakip export returned invalid UTF-8', 503, {
           code: 'invalid_upstream_response',
           details: error instanceof Error ? error.message : String(error),
         });
@@ -158,7 +158,7 @@ export class V1ClientTransport {
       }
     } catch (error) {
       if (signal?.aborted) throw signal.reason ?? error;
-      throw new McpBackendError('Markdawn export response could not be read', 503, {
+      throw new McpBackendError('Metakip export response could not be read', 503, {
         code: 'invalid_upstream_response',
         details: error instanceof Error ? error.message : String(error),
       });
@@ -251,7 +251,7 @@ export class V1ClientTransport {
     try {
       return (await response.json()) as unknown;
     } catch (error) {
-      throw new McpBackendError('Markdawn API returned invalid JSON', 503, {
+      throw new McpBackendError('Metakip API returned invalid JSON', 503, {
         code: 'invalid_upstream_response',
         details: error instanceof Error ? error.message : String(error),
       });

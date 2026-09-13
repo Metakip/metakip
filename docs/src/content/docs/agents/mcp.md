@@ -1,21 +1,21 @@
 ---
-title: Use Markdawn With MCP
-description: Connect an AI assistant to Markdawn through remote MCP and OAuth.
+title: Use Metakip With MCP
+description: Connect an AI assistant to Metakip through remote MCP and OAuth.
 ---
 
-Markdawn supports remote MCP connections for AI assistants that support the
+Metakip supports remote MCP connections for AI assistants that support the
 protocol. A connected assistant can work with the same pages and folders you
 use in the browser, CLI, and API.
 
-## Connect To Markdawn
+## Connect To Metakip
 
 Use this MCP endpoint in your assistant:
 
 ```text
-https://mcp.markdawn.space/mcp
+https://mcp.metakip.com/mcp
 ```
 
-On the first connection, Markdawn asks you to sign in and approve the access
+On the first connection, Metakip asks you to sign in and approve the access
 the assistant requested. Review the permissions before approving the
 connection.
 
@@ -27,7 +27,7 @@ connection.
 
 Some assistants may also ask to stay connected. This lets the connection
 refresh its access after a browser session expires. It does not grant access to
-pages, and Markdawn shows it separately on the consent screen.
+pages, and Metakip shows it separately on the consent screen.
 
 ## Access Changes And Revocation
 
@@ -46,7 +46,7 @@ MCP provides workspace operations for:
 - Importing Markdown and Obsidian content.
 - Exporting a page or the workspace.
 
-Mutations preserve Markdawn's idempotency and conflict rules. If an operation
+Mutations preserve Metakip's idempotency and conflict rules. If an operation
 reports `outcome_uncertain`, inspect the affected page or folder before trying
 it again. Lifecycle batches report each item separately, so check every result
 instead of assuming that the whole batch succeeded.
@@ -73,4 +73,4 @@ BETTER_AUTH_JWKS_URL=http://127.0.0.1:3001/api/auth/jwks
 HTTP MCP URLs are accepted only for `localhost`, `127.0.0.1`, and `::1`.
 Non-loopback MCP URLs must use HTTPS.
 
-For a self-hosted deployment, see the [deployment guide](/self-hosting/deploy-markdawn-on-a-vps/).
+For a self-hosted deployment, see the [deployment guide](/self-hosting/deploy-metakip-on-a-vps/).

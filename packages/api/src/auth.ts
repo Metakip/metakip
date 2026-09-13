@@ -2,7 +2,7 @@ import { cimd } from '@better-auth/cimd';
 import { fetchClientMetadataResource } from '@better-auth/cimd/node';
 import type { BetterAuthPlugin } from '@better-auth/core';
 import { mcp } from '@better-auth/mcp';
-import { getApiLogger } from '@markdawn/shared';
+import { getApiLogger } from '@metakip/shared';
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { jwt } from 'better-auth/plugins';

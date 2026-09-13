@@ -4,8 +4,8 @@ import { fileURLToPath } from 'node:url';
 import {
   parseMcpPublicUrl,
   requireCollaborationInternalSecret as validateCollaborationInternalSecret,
-} from '@markdawn/shared';
-import { requireMcpApiInternalSecret as validateMcpApiInternalSecret } from '@markdawn/shared/node/mcp-internal-auth';
+} from '@metakip/shared';
+import { requireMcpApiInternalSecret as validateMcpApiInternalSecret } from '@metakip/shared/node/mcp-internal-auth';
 import { config } from 'dotenv';
 
 const currentDir = dirname(fileURLToPath(import.meta.url));

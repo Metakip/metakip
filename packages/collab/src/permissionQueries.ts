@@ -1,4 +1,4 @@
-import type { SharePermission } from '@markdawn/shared';
+import type { SharePermission } from '@metakip/shared';
 import type { Pool } from 'pg';
 import type { AuthenticatedCredential } from './authenticatedCredential';
 import type { PermissionState } from './permissionState';

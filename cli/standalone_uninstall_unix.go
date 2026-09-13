@@ -30,13 +30,13 @@ func removeStandaloneBinary(binaryPath, receiptPath, configPath string) (bool, e
 	}
 	if err := removeStandaloneConfig(configPath); err != nil {
 		if restoreErr := restoreStandaloneConfig(config); restoreErr != nil {
-			return false, fmt.Errorf("remove Markdawn configuration: %w; restore Markdawn configuration: %v", err, restoreErr)
+			return false, fmt.Errorf("remove Metakip configuration: %w; restore Metakip configuration: %v", err, restoreErr)
 		}
 		return false, err
 	}
 	if err := os.Remove(receiptPath); err != nil {
 		if restoreErr := restoreStandaloneConfig(config); restoreErr != nil {
-			return false, fmt.Errorf("remove standalone install receipt: %w; restore Markdawn configuration: %v", err, restoreErr)
+			return false, fmt.Errorf("remove standalone install receipt: %w; restore Metakip configuration: %v", err, restoreErr)
 		}
 		return false, fmt.Errorf("remove standalone install receipt: %w", err)
 	}
@@ -71,18 +71,18 @@ func backupStandaloneConfig(path string) (*standaloneConfigBackup, error) {
 		return nil, nil
 	}
 	if err != nil {
-		return nil, fmt.Errorf("stat Markdawn configuration before removal: %w", err)
+		return nil, fmt.Errorf("stat Metakip configuration before removal: %w", err)
 	}
 	if !info.Mode().IsRegular() {
-		return nil, fmt.Errorf("stat Markdawn configuration before removal: not a regular file")
+		return nil, fmt.Errorf("stat Metakip configuration before removal: not a regular file")
 	}
 	contents, err := os.ReadFile(path)
 	if err != nil {
-		return nil, fmt.Errorf("read Markdawn configuration before removal: %w", err)
+		return nil, fmt.Errorf("read Metakip configuration before removal: %w", err)
 	}
 	directoryInfo, err := os.Stat(filepath.Dir(path))
 	if err != nil {
-		return nil, fmt.Errorf("stat Markdawn configuration directory before removal: %w", err)
+		return nil, fmt.Errorf("stat Metakip configuration directory before removal: %w", err)
 	}
 	return &standaloneConfigBackup{path: path, contents: contents, mode: info.Mode(), directoryMode: directoryInfo.Mode()}, nil
 }
@@ -92,7 +92,7 @@ func restoreStandaloneUninstallState(receiptPath string, receipt []byte, receipt
 		return fmt.Errorf("restore standalone install receipt: %w", err)
 	}
 	if err := restoreStandaloneConfig(config); err != nil {
-		return fmt.Errorf("restore Markdawn configuration: %w", err)
+		return fmt.Errorf("restore Metakip configuration: %w", err)
 	}
 	return nil
 }

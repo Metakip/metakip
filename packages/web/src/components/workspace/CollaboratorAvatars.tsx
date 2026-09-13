@@ -1,4 +1,4 @@
-import type { CollaboratorDisplay } from '@markdawn/shared';
+import type { CollaboratorDisplay } from '@metakip/shared';
 import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { getInitial } from '../../utils/avatar';

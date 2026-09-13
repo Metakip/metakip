@@ -7,7 +7,7 @@ import {
   isPageMetaRoomName,
   MAX_YDOC_BYTES,
   requireCollaborationInternalSecret,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 import type { Pool } from 'pg';
 import type * as Y from 'yjs';
 import { createAccessVerifier } from './accessVerifier';
@@ -220,7 +220,7 @@ export function createCollabServer(config: CollabServerConfig) {
 
   const server = new Server({
     port,
-    // Hocuspocus v4 increased its default to 60 seconds. Keep Markdawn's
+    // Hocuspocus v4 increased its default to 60 seconds. Keep Metakip's
     // established v3 connection-liveness behavior explicit across upgrades.
     timeout: CONNECTION_TIMEOUT_MS,
     onRequest: async ({ request, response }) => {

@@ -1,4 +1,4 @@
-import type { CapabilitySet } from '@markdawn/shared';
+import type { CapabilitySet } from '@metakip/shared';
 import { act, render } from '@testing-library/react';
 import type { Dispatch, SetStateAction } from 'react';
 import { describe, expect, it, vi } from 'vitest';

@@ -5,7 +5,7 @@ import {
   applyExactEditsCommandSchema,
   MAX_YDOC_BYTES,
   PageMarkdownError,
-} from '@markdawn/shared';
+} from '@metakip/shared';
 
 export class ContentCommandPayloadError extends Error {}
 

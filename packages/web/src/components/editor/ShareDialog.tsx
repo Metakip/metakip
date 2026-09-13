@@ -6,7 +6,7 @@ import {
   useFloating,
   useInteractions,
 } from '@floating-ui/react';
-import type { ShareEntityType, SharePermission } from '@markdawn/shared';
+import type { ShareEntityType, SharePermission } from '@metakip/shared';
 import { Check, Copy, Globe2, Lock, Mail, Shield, UserRound, X } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';

@@ -1,22 +1,22 @@
 ---
-title: Create A Page In Markdawn
-description: Create a Markdawn page, write markdown, add a page link, and confirm that your first piece of knowledge is saved.
+title: Create A Page In Metakip
+description: Create a Metakip page, write markdown, add a page link, and confirm that your first piece of knowledge is saved.
 ---
 
 Create a page for one useful piece of information, such as a launch checklist, meeting notes, or a project decision. The page title is separate from the markdown content.
 
 ## Before You Begin
 
-Sign in to Markdawn in your browser. You do not need to know markdown before you start. The editor accepts ordinary text and markdown syntax.
+Sign in to Metakip in your browser. You do not need to know markdown before you start. The editor accepts ordinary text and markdown syntax.
 
 ## Create A Page
 
-1. Sign in to Markdawn.
+1. Sign in to Metakip.
 2. Choose **New page**.
 3. Enter a title that describes the page.
 4. Start writing in the editor.
 
-The page opens with the title you entered. Markdawn stores the title as page metadata and does not automatically add an H1 to the markdown body.
+The page opens with the title you entered. Metakip stores the title as page metadata and does not automatically add an H1 to the markdown body.
 
 ## Check That It Worked
 

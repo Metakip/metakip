@@ -1,6 +1,6 @@
 import type { Hocuspocus } from '@hocuspocus/server';
 import type { Logger } from '@logtape/logtape';
-import { COLLAB_DOCUMENT_RELOAD_REASONS } from '@markdawn/shared';
+import { COLLAB_DOCUMENT_RELOAD_REASONS } from '@metakip/shared';
 import type { Pool } from 'pg';
 import { getDocumentContentHash } from './documentContentHash';
 import { isUuid } from './utils';

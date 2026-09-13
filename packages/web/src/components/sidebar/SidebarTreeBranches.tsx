@@ -1,4 +1,4 @@
-import type { FolderTreeNode, PageTreeNode, SharedNavigationItem } from '@markdawn/shared';
+import type { FolderTreeNode, PageTreeNode, SharedNavigationItem } from '@metakip/shared';
 import { SidebarEntityRow } from './SidebarEntityRow';
 import type { SidebarTreeRuntime } from './sidebarRuntime';
 

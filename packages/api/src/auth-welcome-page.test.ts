@@ -128,7 +128,7 @@ describe('Better Auth welcome page hook', () => {
       properties: {
         author: 'Atharva Verma',
         url: 'https://atharvaverma.dev/',
-        tags: ['markdawn', 'welcome'],
+        tags: ['metakip', 'welcome'],
       },
     });
 
@@ -136,7 +136,7 @@ describe('Better Auth welcome page hook', () => {
     Y.applyUpdate(document, page.ydoc);
     const content = document.getText('content').toString();
     expect(content).toBe(WELCOME_PAGE_CONTENT);
-    expect(content).toContain("I'm Atharva, the sole developer behind Markdawn");
+    expect(content).toContain("I'm Atharva, the sole developer behind Metakip");
     expect(content).toContain('Toggle sidebar');
     document.destroy();
 

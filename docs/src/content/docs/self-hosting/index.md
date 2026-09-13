@@ -1,26 +1,26 @@
 ---
-title: Self-Host Markdawn
-description: Run Markdawn on infrastructure you control with the maintained Fedora, Caddy, rootless Podman, and PostgreSQL deployment path.
+title: Self-Host Metakip
+description: Run Metakip on infrastructure you control with the maintained Fedora, Caddy, rootless Podman, and PostgreSQL deployment path.
 ---
 
-Self-hosting runs Markdawn on infrastructure you control instead of using the hosted service. The maintained path uses one Fedora VPS, Caddy, rootless Podman containers, and PostgreSQL.
+Self-hosting runs Metakip on infrastructure you control instead of using the hosted service. The maintained path uses one Fedora VPS, Caddy, rootless Podman containers, and PostgreSQL.
 
 The documented deployment path uses one Fedora VPS with Caddy, rootless Podman containers, and self-hosted PostgreSQL. This is the path covered by the included setup and deployment scripts.
 
-Markdawn is made up of containerized application services, so an experienced operator can adapt the deployment to Ubuntu, another Linux distribution, Docker Compose, or another compatible container environment. Those deployments require manual adaptation and verification rather than using the Fedora setup script unchanged.
+Metakip is made up of containerized application services, so an experienced operator can adapt the deployment to Ubuntu, another Linux distribution, Docker Compose, or another compatible container environment. Those deployments require manual adaptation and verification rather than using the Fedora setup script unchanged.
 
 ## Choose Your Guide
 
-- [Deploy Markdawn on a VPS](/self-hosting/deploy-markdawn-on-a-vps/) covers the documented first installation.
-- [Maintain a Self-Hosted Markdawn](/self-hosting/maintain-a-self-hosted-markdawn/) covers updates, service checks, logs, and common failures.
-- [Move a Markdawn Deployment](/self-hosting/move-a-markdawn-deployment/) covers moving a compatible installation to another server.
+- [Deploy Metakip on a VPS](/self-hosting/deploy-metakip-on-a-vps/) covers the documented first installation.
+- [Maintain a Self-Hosted Metakip](/self-hosting/maintain-a-self-hosted-metakip/) covers updates, service checks, logs, and common failures.
+- [Move a Metakip Deployment](/self-hosting/move-a-metakip-deployment/) covers moving a compatible installation to another server.
 
 ## What You Run
 
 - Caddy or another public reverse proxy.
 - PostgreSQL 17 with persistent storage.
-- The Markdawn API service.
-- The Markdawn collaboration service.
+- The Metakip API service.
+- The Metakip collaboration service.
 - The built web application.
 - Persistent storage for the database and uploads.
 
@@ -42,4 +42,4 @@ Self-hosting means you are responsible for DNS, TLS, backups, updates, database 
 
 ## Next Steps
 
-Start with [Deploy Markdawn on a VPS](/self-hosting/deploy-markdawn-on-a-vps/), then keep [Maintain a Self-Hosted Markdawn](/self-hosting/maintain-a-self-hosted-markdawn/) available for updates and recovery.
+Start with [Deploy Metakip on a VPS](/self-hosting/deploy-metakip-on-a-vps/), then keep [Maintain a Self-Hosted Metakip](/self-hosting/maintain-a-self-hosted-metakip/) available for updates and recovery.

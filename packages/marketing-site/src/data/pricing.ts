@@ -4,26 +4,26 @@ import { DOCS_ORIGIN, GITHUB_URL } from './siteConfig';
 
 export const PRICING_PAGE = {
   title: 'Free for now.',
-  description: 'Markdawn is free during public beta, with no paid plans yet.',
-  intro: ['Markdawn is free during public beta, with no paid plans yet.'],
+  description: 'Metakip is free during public beta, with no paid plans yet.',
+  intro: ['Metakip is free during public beta, with no paid plans yet.'],
   sections: [
     {
       id: 'hosted',
-      title: 'Hosted Markdawn',
+      title: 'Hosted Metakip',
       body: richText({
         kind: 'text',
         value:
-          'Use the hosted Markdawn app in your browser, then reach the same pages from the CLI or API. The hosted service is free during the public beta.',
+          'Use the hosted Metakip app in your browser, then reach the same pages from the CLI or API. The hosted service is free during the public beta.',
       }),
-      link: { kind: 'app', label: 'Open Markdawn' },
+      link: { kind: 'app', label: 'Open Metakip' },
     },
     {
       id: 'self-hosted',
-      title: 'Self-host Markdawn',
+      title: 'Self-host Metakip',
       body: richText({
         kind: 'text',
         value:
-          'Markdawn is open source under GNU AGPL v3. Run it on infrastructure you control. The software is free to self-host; your infrastructure and operations remain yours.',
+          'Metakip is open source under GNU AGPL v3. Run it on infrastructure you control. The software is free to self-host; your infrastructure and operations remain yours.',
       }),
       link: {
         kind: 'external',
@@ -42,8 +42,8 @@ export const PRICING_PAGE = {
       link: { kind: 'internal', label: 'Read The Features', path: '/features' },
     },
   ],
-  closing: 'Start with a page and see whether Markdawn fits your workflow.',
-  footerTitle: 'Explore Markdawn',
+  closing: 'Start with a page and see whether Metakip fits your workflow.',
+  footerTitle: 'Explore Metakip',
   footerLinks: [
     { label: 'See The Use Cases', path: '/use-cases', kind: 'internal' },
     { label: 'View The Source Code', url: GITHUB_URL, kind: 'external' },

@@ -67,7 +67,7 @@ const {
 
     updateAutoplay();
     updateVideoSource(document.documentElement.classList.contains('dark'));
-    window.addEventListener('markdawn-theme-change', (event) => {
+    window.addEventListener('metakip-theme-change', (event) => {
       if (!(event instanceof CustomEvent) || typeof event.detail !== 'boolean') {
         throw new Error('Invalid theme change event');
       }

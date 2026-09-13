@@ -20,4 +20,4 @@ export MIGRATION_TEST_LOG="$temp_dir/pnpm.log"
 migrateEditorContent "$temp_dir"
 
 test "$(wc -l < "$MIGRATION_TEST_LOG")" -eq 1
-grep -q -- '--filter @markdawn/api db:migrate-editor-content' "$MIGRATION_TEST_LOG"
+grep -q -- '--filter @metakip/api db:migrate-editor-content' "$MIGRATION_TEST_LOG"

@@ -16,7 +16,7 @@ describe('useCreateApiToken', () => {
       expiresAt: null,
       lastUsedAt: null,
       createdAt: '2026-07-26T00:00:00.000Z',
-      token: 'markdawn_one_time_secret',
+      token: 'metakip_one_time_secret',
     };
     vi.mocked(apiFetch).mockResolvedValueOnce(created);
     const queryClient = new QueryClient({

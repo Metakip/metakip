@@ -1,4 +1,4 @@
-import type { ApiTokenAuditOperation, ApiTokenAuditResult } from '@markdawn/shared';
+import type { ApiTokenAuditOperation, ApiTokenAuditResult } from '@metakip/shared';
 import { sql } from 'drizzle-orm';
 import {
   type AnyPgColumn,

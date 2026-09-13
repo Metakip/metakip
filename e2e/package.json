@@ -1,5 +1,5 @@
 {
-  "name": "@markdawn/e2e",
+  "name": "@metakip/e2e",
   "private": true,
   "devDependencies": {
     "@playwright/test": "^1.59.1",
