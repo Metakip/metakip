@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { createNewPage, focusEditor } from '../fixtures';
+import { copyEditorText, createNewPage, focusEditor } from '../fixtures';
 
 test('inline code matches fenced code colors and typography in both themes', async ({ page }) => {
   await createNewPage(page);
@@ -109,6 +109,35 @@ test('bold and italic shortcuts combine and toggle independently', async ({ page
   await expect(page.locator('.cm-md-strong')).toHaveCount(0);
   await expect(page.locator('.cm-content')).toHaveText('hello');
 });
+
+for (const exitMethod of [
+  { name: 'Ctrl+I', key: 'Control+i' },
+  { name: 'ArrowRight', key: 'ArrowRight' },
+]) {
+  test(`${exitMethod.name} exits italic formatting before the next character`, async ({ page }) => {
+    await createNewPage(page);
+    await focusEditor(page);
+    await page.keyboard.press('Control+i');
+    await page.keyboard.type('my name is atharva');
+    await page.keyboard.press(exitMethod.key);
+    await page.keyboard.type('X');
+
+    await expect.poll(() => copyEditorText(page)).toBe('*my name is atharva*X');
+  });
+
+  test(`${exitMethod.name} moves trailing whitespace outside italic formatting`, async ({
+    page,
+  }) => {
+    await createNewPage(page);
+    await focusEditor(page);
+    await page.keyboard.press('Control+i');
+    await page.keyboard.type('my name is atharva ');
+    await page.keyboard.press(exitMethod.key);
+    await page.keyboard.type('X');
+
+    await expect.poll(() => copyEditorText(page)).toBe('*my name is atharva* X');
+  });
+}
 
 test('blockquote continues once and exits on an empty quoted line', async ({ page }) => {
   await createNewPage(page);

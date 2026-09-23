@@ -21,6 +21,7 @@ import {
   pasteCodeBlockText,
 } from '../components/editor/codeBlockCommands';
 import { moveToAdjacentTableCell } from '../components/editor/editorTableCommands';
+import { inlineFormattingState } from '../components/editor/inlineFormattingCommands';
 import { collaborationCursors } from '../editor/codemirror/collaborationCursors';
 import {
   type EditorHeading,
@@ -271,6 +272,7 @@ export function useCodeMirror({
           completeHTMLTags: false,
           pasteURLAsLink: false,
         }),
+        inlineFormattingState,
         livePreview({
           ...(onWikiLinkClick !== undefined ? { onWikiLinkClick } : {}),
           ...(resolveHeadingWikiLink !== undefined ? { resolveHeadingWikiLink } : {}),
