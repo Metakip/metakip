@@ -5,6 +5,11 @@ import { GFM } from '@lezer/markdown';
 import { describe, expect, it, vi } from 'vitest';
 import { selectedCodeBlock } from './codeBlockCommands';
 import { createEditorFormattingCommands } from './editorFormattingCommands';
+import {
+  inlineFormattingState,
+  movePastInlineFormatting,
+  toggleInlineFormatting,
+} from './inlineFormattingCommands';
 import { deriveActiveStates } from './useEditorActiveStates';
 
 function createCommands(document: string, anchor = 0, head = document.length, readOnly = false) {
@@ -25,6 +30,20 @@ function createCommands(document: string, anchor = 0, head = document.length, re
     updateActiveStates: vi.fn(),
   });
   return { commands, editor };
+}
+
+function createInlineEditor(document = '', anchor = 0, readOnly = false): EditorView {
+  return new EditorView({
+    state: EditorState.create({
+      doc: document,
+      selection: { anchor },
+      extensions: [
+        markdown({ extensions: [GFM] }),
+        inlineFormattingState,
+        EditorState.readOnly.of(readOnly),
+      ],
+    }),
+  });
 }
 
 describe('editor formatting commands', () => {
@@ -268,6 +287,40 @@ describe('editor formatting commands', () => {
     commands.handleBlockquote();
     commands.handleCode();
     expect(editor.state.doc.toString()).toBe('First\nSecond');
+    editor.destroy();
+  });
+
+  it('does not move or rewrite read-only inline formatting', () => {
+    const editor = createInlineEditor('*hello*', 6, true);
+
+    expect(movePastInlineFormatting(editor)).toBe(false);
+    expect(editor.state.doc.toString()).toBe('*hello*');
+    expect(editor.state.selection.main.head).toBe(6);
+    editor.destroy();
+  });
+
+  it('does not treat an escaped delimiter as inline formatting', () => {
+    const source = '\\*literal*';
+    const editor = createInlineEditor(source, source.length - 1);
+
+    expect(movePastInlineFormatting(editor)).toBe(false);
+    expect(editor.state.doc.toString()).toBe(source);
+    expect(editor.state.selection.main.head).toBe(source.length - 1);
+    editor.destroy();
+  });
+
+  it('keeps a type-ahead formatting pair usable when content ends in whitespace', () => {
+    const editor = createInlineEditor();
+
+    toggleInlineFormatting(editor, 'italic');
+    editor.dispatch({
+      changes: { from: 1, insert: 'hello ' },
+      selection: { anchor: 7 },
+    });
+    toggleInlineFormatting(editor, 'italic');
+
+    expect(editor.state.doc.toString()).toBe('*hello* ');
+    expect(editor.state.selection.main.head).toBe(8);
     editor.destroy();
   });
 

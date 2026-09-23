@@ -135,6 +135,9 @@ function addSyntaxDecorations(
         ranges.push(Decoration.replace({}).range(node.from, node.from + 1));
       }
       const isCodeFence = node.name === 'CodeMark' && node.node.parent?.name === 'FencedCode';
+      const cursorAtInlineEnd =
+        !isCodeFence &&
+        state.selection.ranges.some((range) => range.empty && range.head === parent?.to);
       if (
         hiddenMarks.has(node.name) &&
         parent &&
@@ -142,7 +145,8 @@ function addSyntaxDecorations(
           state,
           isCodeFence ? state.doc.lineAt(parent.from).from : parent.from,
           isCodeFence ? state.doc.lineAt(parent.to).to + 1 : parent.to,
-        )
+        ) &&
+        !cursorAtInlineEnd
       ) {
         // The space after an opening # marker is syntax too, not heading indentation.
         const to =

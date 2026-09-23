@@ -1,9 +1,16 @@
-import { syntaxTree } from '@codemirror/language';
-import type { ChangeSpec, EditorState } from '@codemirror/state';
+import { ensureSyntaxTree, syntaxTree } from '@codemirror/language';
+import { type ChangeSpec, type EditorState, StateEffect, StateField } from '@codemirror/state';
 import type { EditorView } from '@codemirror/view';
 
 type InlineKind = 'bold' | 'italic' | 'strike' | 'code';
-type MarkRange = { from: number; to: number; contentFrom: number; contentTo: number };
+type MarkRange = {
+  from: number;
+  to: number;
+  contentFrom: number;
+  contentTo: number;
+  delimiter: string;
+};
+type ActiveInlineMark = MarkRange & { kind: InlineKind };
 type TextRange = { from: number; to: number };
 const definitions = {
   bold: { node: 'StrongEmphasis', marker: 'EmphasisMark', delimiter: '**' },
@@ -12,11 +19,58 @@ const definitions = {
   code: { node: 'InlineCode', marker: 'CodeMark', delimiter: '`' },
 } as const;
 
+const setActiveInlineMark = StateEffect.define<ActiveInlineMark | null>();
+
+/**
+ * Tracks a formatting pair inserted by the editor until it is closed or the
+ * caret leaves it. This covers the short period where Markdown has not yet
+ * parsed a pair because its content ends in whitespace.
+ */
+export const inlineFormattingState = StateField.define<ActiveInlineMark | null>({
+  create: () => null,
+  update(active, transaction) {
+    const effect = transaction.effects.find((candidate) => candidate.is(setActiveInlineMark));
+    if (effect) return effect.value;
+    if (!active) return null;
+
+    const mapped: ActiveInlineMark = {
+      ...active,
+      from: transaction.changes.mapPos(active.from, -1),
+      to: transaction.changes.mapPos(active.to, 1),
+      contentFrom: transaction.changes.mapPos(active.contentFrom, -1),
+      contentTo: transaction.changes.mapPos(active.contentTo, 1),
+    };
+    const selection = transaction.state.selection.main;
+    const definition = definitions[active.kind];
+    const hasDelimiters =
+      transaction.state.sliceDoc(mapped.from, mapped.contentFrom) === definition.delimiter &&
+      transaction.state.sliceDoc(mapped.contentTo, mapped.to) === definition.delimiter;
+    if (
+      !selection.empty ||
+      selection.head < mapped.contentFrom ||
+      selection.head > mapped.contentTo ||
+      !hasDelimiters
+    ) {
+      return null;
+    }
+    return mapped;
+  },
+});
+
 function matchingMarks(state: EditorState, kind: InlineKind): MarkRange[] {
   const { from, to, empty } = state.selection.main;
   const definition = definitions[kind];
   const matches: MarkRange[] = [];
-  syntaxTree(state).iterate({
+  // A just-typed closing delimiter at the end of a document may not have been
+  // parsed yet. Ensure the tree reaches the caret before deciding whether the
+  // caret is inside an inline span; otherwise adding a trailing space appears
+  // to make the toggle suddenly start working.
+  const tree =
+    ensureSyntaxTree(
+      state,
+      Math.min(state.doc.length, Math.max(from, to) + definition.delimiter.length),
+    ) ?? syntaxTree(state);
+  tree.iterate({
     from: Math.max(0, from - 1),
     to: Math.min(state.doc.length, to + 1),
     enter(node) {
@@ -42,11 +96,54 @@ function matchingMarks(state: EditorState, kind: InlineKind): MarkRange[] {
         contentFrom += 1;
         contentTo -= 1;
       }
-      matches.push({ from: node.from, to: node.to, contentFrom, contentTo });
+      matches.push({
+        from: node.from,
+        to: node.to,
+        contentFrom,
+        contentTo,
+        delimiter: definition.delimiter,
+      });
       return false;
     },
   });
   return matches;
+}
+
+function marksAtCursor(state: EditorState, kind: InlineKind): MarkRange[] {
+  const marks = matchingMarks(state, kind);
+  if (marks.length > 0) return marks;
+
+  const active = state.field(inlineFormattingState, false);
+  if (
+    active?.kind !== kind ||
+    active.contentFrom === active.contentTo ||
+    !state.selection.main.empty ||
+    state.selection.main.head < active.contentFrom ||
+    state.selection.main.head > active.contentTo
+  ) {
+    return marks;
+  }
+  return [active];
+}
+
+function movePastMark(view: EditorView, mark: MarkRange): void {
+  const content = view.state.sliceDoc(mark.contentFrom, mark.contentTo);
+  const trailingWhitespace = mark.delimiter === '`' ? '' : (content.match(/[\t ]+$/)?.[0] ?? '');
+  if (trailingWhitespace) {
+    const whitespaceFrom = mark.contentTo - trailingWhitespace.length;
+    view.dispatch({
+      changes: {
+        from: whitespaceFrom,
+        to: mark.to,
+        insert: mark.delimiter + trailingWhitespace,
+      },
+      selection: { anchor: mark.to },
+      scrollIntoView: true,
+      userEvent: 'input',
+    });
+    return;
+  }
+  view.dispatch({ selection: { anchor: mark.to }, scrollIntoView: true });
 }
 
 function wrapText(text: string, delimiter: string): string {
@@ -209,19 +306,16 @@ export function toggleInlineFormatting(view: EditorView, kind: InlineKind): void
     if (!context.parent) break;
     context = context.parent;
   }
-  const marks = matchingMarks(state, kind);
+  const marks = marksAtCursor(state, kind);
   const mark = marks[0];
-  if (
-    selection.empty &&
-    mark &&
-    (selection.head === mark.contentTo || selection.head === mark.to)
-  ) {
+  if (selection.empty && mark && selection.head === mark.contentTo) {
     // Toggling at the end changes where the next characters go, not the
     // formatting of the text that has already been written.
-    view.dispatch({
-      selection: { anchor: selection.head === mark.to ? mark.contentTo : mark.to },
-      scrollIntoView: true,
-    });
+    movePastMark(view, mark);
+    return;
+  }
+  if (selection.empty && mark && selection.head === mark.to) {
+    view.dispatch({ selection: { anchor: mark.contentTo }, scrollIntoView: true });
     return;
   }
   if (selection.empty && mark) {
@@ -294,12 +388,22 @@ export function toggleInlineFormatting(view: EditorView, kind: InlineKind): void
         changes: { from: selection.from - delimiter.length, to: selection.to + delimiter.length },
         selection: { anchor: selection.from - delimiter.length },
         userEvent: 'input',
+        effects: setActiveInlineMark.of(null),
       });
     } else {
+      const from = selection.from;
       view.dispatch({
         changes: { from: selection.from, insert: delimiter + delimiter },
         selection: { anchor: selection.from + delimiter.length },
         userEvent: 'input',
+        effects: setActiveInlineMark.of({
+          from,
+          to: from + delimiter.length * 2,
+          contentFrom: from + delimiter.length,
+          contentTo: from + delimiter.length,
+          delimiter,
+          kind,
+        }),
       });
     }
     return;
@@ -317,4 +421,27 @@ export function toggleInlineFormatting(view: EditorView, kind: InlineKind): void
     scrollIntoView: true,
     userEvent: 'input',
   });
+}
+
+/** Move over a hidden closing delimiter when the caret is at the end of an inline span. */
+export function movePastInlineFormatting(view: EditorView): boolean {
+  if (view.state.readOnly) return false;
+
+  const selection = view.state.selection.main;
+
+  const candidates = (Object.keys(definitions) as InlineKind[]).flatMap((kind) =>
+    marksAtCursor(view.state, kind).filter((mark) =>
+      selection.empty
+        ? mark.contentTo === selection.head
+        : mark.contentFrom === selection.from && mark.contentTo === selection.to,
+    ),
+  );
+  const mark = candidates.reduce<MarkRange | undefined>(
+    (current, candidate) => (!current || candidate.to > current.to ? candidate : current),
+    undefined,
+  );
+  if (!mark || mark.to <= selection.head) return false;
+
+  movePastMark(view, mark);
+  return true;
 }
