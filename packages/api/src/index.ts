@@ -10,6 +10,7 @@ import {
 } from './utils/dataRetention';
 import { drainExpiredGuestIdentities } from './utils/guestIdentityCleanup';
 import { processUploadDeletionQueue } from './utils/uploadCleanup';
+import { getUploadStorage } from './utils/uploadStorage';
 
 async function main() {
   // Better Auth seeds and verifies the configured MCP resource while its
@@ -18,7 +19,6 @@ async function main() {
   await auth.$context;
   const app = await createApp();
 
-  await processUploadDeletionQueue();
   let retentionTask: Promise<void> | null = null;
   const runRetention = () => {
     if (retentionTask) return;
@@ -73,13 +73,21 @@ async function main() {
         guestCleanupTask = null;
       });
   };
-  const uploadCleanupTimer = setInterval(() => {
-    void processUploadDeletionQueue().catch((error: unknown) => {
-      getApiLogger().error('Upload deletion queue drain failed', {
-        error: error instanceof Error ? error.message : String(error),
+  let uploadCleanupTask: Promise<void> | null = null;
+  const runUploadCleanup = () => {
+    if (uploadCleanupTask) return;
+    uploadCleanupTask = processUploadDeletionQueue()
+      .then(() => undefined)
+      .catch((error: unknown) => {
+        getApiLogger().error('Upload deletion queue drain failed', {
+          error: error instanceof Error ? error.message : String(error),
+        });
+      })
+      .finally(() => {
+        uploadCleanupTask = null;
       });
-    });
-  }, 60_000);
+  };
+  const uploadCleanupTimer = setInterval(runUploadCleanup, 60_000);
   uploadCleanupTimer.unref();
 
   const guestCleanupTimer = setInterval(runGuestCleanup, 24 * 60 * 60 * 1000);
@@ -101,12 +109,15 @@ async function main() {
   initialGuestCleanup.unref();
   const initialRetention = setTimeout(runRetention, 0);
   initialRetention.unref();
+  const initialUploadCleanup = setTimeout(runUploadCleanup, 0);
+  initialUploadCleanup.unref();
 }
 
 // Validate the private API-to-collaboration trust boundary before the API
 // opens its listening socket or reports healthy.
 requireCollaborationInternalSecret();
 requireMcpApiInternalSecret();
+getUploadStorage();
 main();
 
 export type { AppType } from './app';

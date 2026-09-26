@@ -171,6 +171,7 @@ metakip export all --output FILE [--force]
 metakip export page <page-id-or-title> [--output FILE] [--force]
 metakip import folder DIRECTORY [--yes]
 metakip import page FILE.md
+metakip upload image FILE --page PAGE [--alt TEXT]
 
 # Skill
 metakip skill install [--global] [--copy] [--yes]
@@ -182,6 +183,8 @@ metakip doctor
 metakip uninstall [--purge] [--dry-run] [--yes]
 metakip update [VERSION]
 ```
+
+`upload image` prints the managed Markdown reference to stdout; insert it with a targeted page edit.
 
 ## Work safely
 

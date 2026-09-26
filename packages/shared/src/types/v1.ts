@@ -127,6 +127,25 @@ export const v1MarkdownImportRequestSchema = z
   .object({ file: z.file({ error: 'File is required' }) })
   .strict();
 
+export const v1ImageUploadRequestSchema = z
+  .object({
+    file: z.file({ error: 'File is required' }),
+    alt: z.string().max(500).optional(),
+  })
+  .strict();
+
+export const v1ImageUploadResponseSchema = z
+  .object({
+    id: v1UuidSchema,
+    url: z.string().min(1),
+    markdown: z.string().min(1),
+    filename: z.string().min(1),
+    originalName: z.string().min(1),
+    mimeType: z.enum(['image/jpeg', 'image/png', 'image/gif', 'image/webp']),
+    size: z.number().int().nonnegative(),
+  })
+  .strict();
+
 export const v1LifecycleEntityResponseSchema = z.object({ id: v1UuidSchema }).strict();
 export const v1LifecycleDeletedResponseSchema = z.object({ deleted: z.literal(true) }).strict();
 export const v1LifecyclePurgeResponseSchema = v1LifecycleDeletedResponseSchema
@@ -185,6 +204,7 @@ export type V1FolderResponse = z.infer<typeof v1FolderResponseSchema>;
 export type V1CreateFolderRequest = z.infer<typeof v1CreateFolderRequestSchema>;
 export type V1UpdateFolderRequest = z.infer<typeof v1UpdateFolderRequestSchema>;
 export type V1ParentRequest = z.infer<typeof v1ParentRequestSchema>;
+export type V1ImageUploadResponse = z.infer<typeof v1ImageUploadResponseSchema>;
 export type V1LifecycleEntityResponse = z.infer<typeof v1LifecycleEntityResponseSchema>;
 export type V1LifecycleDeletedResponse = z.infer<typeof v1LifecycleDeletedResponseSchema>;
 export type V1LifecyclePurgeResponse = z.infer<typeof v1LifecyclePurgeResponseSchema>;

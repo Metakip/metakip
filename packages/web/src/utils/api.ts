@@ -2,12 +2,22 @@ const API_BASE = '/api';
 
 export class ApiError extends Error {
   status: number;
+  code: string | undefined;
 
-  constructor(status: number, message: string) {
+  constructor(status: number, message: string, code?: string) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
+    this.code = code;
   }
+}
+
+function responseErrorCode(body: unknown): string | undefined {
+  if (!body || typeof body !== 'object' || !('error' in body)) return undefined;
+  const error = body.error;
+  return error && typeof error === 'object' && 'code' in error && typeof error.code === 'string'
+    ? error.code
+    : undefined;
 }
 
 function responseErrorMessage(body: unknown, status: number): string {
@@ -29,7 +39,7 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
   const res = await fetch(`${API_BASE}${path}`, init);
   if (!res.ok) {
     const body = await res.json().catch(() => null);
-    throw new ApiError(res.status, responseErrorMessage(body, res.status));
+    throw new ApiError(res.status, responseErrorMessage(body, res.status), responseErrorCode(body));
   }
   if (res.status === 204) return undefined as T;
   return res.json();

@@ -13,10 +13,7 @@ import {
 } from './share-access';
 import { notifyShareRevoke } from './share-notify';
 import { getEntityMetaUserIds } from './shareRecipients';
-import {
-  drainUploadDeletionQueueBestEffort,
-  purgeUnreferencedUploadsForPages,
-} from './uploadCleanup';
+import { purgeUnreferencedUploadsForPages } from './uploadCleanup';
 
 export type FolderTrashResult =
   | { deleted: true }
@@ -112,7 +109,6 @@ export async function permanentlyDeletePage(pageId: string, userId: string): Pro
     await purgeEntityAccessMetadata(tx, 'page', [pageId]);
     await executeQuery(tx, sql`delete from pages where id = ${pageId} and is_deleted = true`);
   });
-  await drainUploadDeletionQueueBestEffort();
 }
 
 export async function moveFolderToTrash(

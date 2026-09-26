@@ -14,7 +14,6 @@ import {
   createTestUser,
 } from '../test-utils';
 import {
-  drainUploadDeletionQueueBestEffort,
   processUploadDeletionQueue,
   purgeUnreferencedUploadsForPages,
 } from '../utils/uploadCleanup';
@@ -31,13 +30,12 @@ async function uploadImage(
 ): Promise<{ url: string; filename: string; filePath: string }> {
   const formData = new FormData();
   formData.append('file', new File([PNG_BYTES], originalName, { type: 'image/png' }));
-  formData.append('pageId', pageId);
-  const response = await app.request('/api/uploads', {
+  const response = await app.request(`/api/v1/pages/${pageId}/images`, {
     method: 'POST',
     headers: { Cookie: cookie },
     body: formData,
   });
-  expect(response.status).toBe(200);
+  expect(response.status).toBe(201);
   const body = (await response.json()) as { url: string };
   const filename = body.url.split('/').at(-1);
   if (!filename) throw new Error('Upload response did not include a filename');
@@ -95,6 +93,7 @@ async function expectUploadPurged(
   cookie: string,
   upload: { url: string; filename: string; filePath: string },
 ): Promise<void> {
+  await processUploadDeletionQueue();
   const databaseState = await query<{ uploads: string; refs: string }>(
     `select
        (select count(*) from uploads where filename = $1)::text as uploads,
@@ -111,14 +110,6 @@ async function expectUploadPurged(
 }
 
 describe('permanent purge upload cleanup', () => {
-  it('does not propagate unexpected post-commit queue-drain failures', async () => {
-    const result = await drainUploadDeletionQueueBestEffort(async () => {
-      throw new Error('simulated queue query failure');
-    });
-
-    expect(result).toBe(false);
-  });
-
   it('deletes the last-reference upload row and file when a page is permanently deleted', async () => {
     const app = await createTestApp();
     const owner = await createTestUser();
@@ -444,6 +435,9 @@ describe('permanent purge upload cleanup', () => {
       );
       expect(queued.rows[0]).toEqual({ attempts: 1, last_error: 'simulated unlink failure' });
 
+      await query('update upload_deletion_queue set delete_after = now() where filename = $1', [
+        upload.filename,
+      ]);
       const retried = await processUploadDeletionQueue();
       expect(retried).toEqual({ failed: 0, processed: 1 });
       expect(await fileExists(upload.filePath)).toBe(false);
@@ -481,8 +475,8 @@ describe('permanent purge upload cleanup', () => {
       const attemptedFilenames: string[] = [];
       const secondAttempt = await processUploadDeletionQueue(
         db,
-        async (filePath) => {
-          attemptedFilenames.push(path.basename(filePath));
+        async (filename) => {
+          attemptedFilenames.push(filename);
         },
         1,
       );

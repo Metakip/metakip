@@ -10,12 +10,10 @@ import { toggleMarkdownList } from './markdownListTransforms';
 
 interface EditorFormattingCommandOptions {
   editor: EditorView | null;
-  identityLifecycle: { isActive(): boolean };
-  isAnonymous: boolean;
   keepVisible(): void;
-  pageId: string;
   reposition(): void;
   updateActiveStates(): void;
+  uploadImage?: (file: File) => void;
 }
 
 export interface EditorFormattingCommands {
@@ -135,15 +133,6 @@ function convertSelectionToParagraph(view: EditorView): void {
   });
 }
 
-function escapeImageAltText(filename: string): string {
-  return filename
-    .replace(/\\/g, '\\\\')
-    .replace(/\[/g, '\\[')
-    .replace(/\]/g, '\\]')
-    .replace(/[*_~`]/g, '\\$&')
-    .replace(/[\r\n]+/g, ' ');
-}
-
 function toggleBlockquote(view: EditorView): void {
   const { state } = view;
   const selection = state.selection.main;
@@ -183,12 +172,10 @@ function toggleBlockquote(view: EditorView): void {
 
 export function createEditorFormattingCommands({
   editor,
-  identityLifecycle,
-  isAnonymous,
   keepVisible,
-  pageId,
   reposition,
   updateActiveStates,
+  uploadImage,
 }: EditorFormattingCommandOptions): EditorFormattingCommands {
   const updateSoon = () => {
     window.setTimeout(updateActiveStates, 0);
@@ -229,43 +216,14 @@ export function createEditorFormattingCommands({
     }
   };
 
-  const handleImageUpload = async (file: File) => {
-    if (!editor || isAnonymous || !identityLifecycle.isActive()) return;
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('pageId', pageId);
-    try {
-      const response = await fetch('/api/uploads', {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
-      });
-      if (!identityLifecycle.isActive()) return;
-      const body: unknown = await response.json();
-      if (!response.ok) {
-        const message =
-          body && typeof body === 'object' && 'message' in body
-            ? String(body.message)
-            : 'Upload failed';
-        throw new Error(message);
-      }
-      if (!body || typeof body !== 'object' || !('url' in body) || typeof body.url !== 'string') {
-        throw new Error('Upload returned an invalid image URL');
-      }
-      run((view) => replaceSelection(view, `![${escapeImageAltText(file.name)}](${body.url})`));
-    } catch (error) {
-      if (identityLifecycle.isActive()) alert(`Upload failed: ${(error as Error).message}`);
-    }
-  };
-
   const handleImageUploadFromSlash = () => {
-    if (isAnonymous || !identityLifecycle.isActive()) return;
+    if (!uploadImage) return;
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
-    input.onchange = (event) => {
-      const file = (event.target as HTMLInputElement).files?.[0];
-      if (file) void handleImageUpload(file);
+    input.onchange = () => {
+      const file = input.files?.[0];
+      if (file) uploadImage(file);
     };
     input.click();
   };

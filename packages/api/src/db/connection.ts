@@ -31,3 +31,5 @@ pool.on('error', (err) => {
 });
 
 export const db = drizzle({ client: pool });
+
+export const closeDatabaseConnection = async (): Promise<void> => pool.end();

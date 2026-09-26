@@ -144,37 +144,38 @@ async function authenticateMcpInternalRequest(request: Request): Promise<V1Princ
   };
 }
 
-export const requireV1Auth = createMiddleware(async (c, next) => {
-  const logger = getApiLogger();
-  const bearer = c.req
-    .header('authorization')
+/** Also used by protected assets, which allow anonymous reads of public pages. */
+export async function authenticateV1Request(request: Request): Promise<V1Principal | null> {
+  const bearer = request.headers
+    .get('authorization')
     ?.match(/^Bearer\s+(.+)$/i)?.[1]
     ?.trim();
-  const internalCredential = c.req.header(MCP_INTERNAL_AUTH_HEADER);
+  const internalCredential = request.headers.get(MCP_INTERNAL_AUTH_HEADER);
   if (internalCredential || bearer) {
-    const principal = internalCredential
+    return internalCredential
       ? bearer
         ? null
-        : await authenticateMcpInternalRequest(c.req.raw)
+        : await authenticateMcpInternalRequest(request)
       : parseApiTokenId(bearer ?? '')
         ? await authenticateApiToken(bearer ?? '')
         : null;
-    if (!principal) {
-      logger.debug(`[v1:auth] invalid token: ${c.req.method} ${c.req.path}`);
-      return c.json({ error: { code: 'unauthorized', message: 'Unauthorized' } }, 401);
-    }
-    c.set('v1Principal', principal);
-    return next();
   }
 
-  const session = await auth.api.getSession({ headers: c.req.raw.headers });
+  const session = await auth.api.getSession({ headers: request.headers });
   const userId = session?.user?.id;
   const credential = session?.session?.token;
-  if (!userId || !credential) {
-    logger.debug(`[v1:auth] unauthenticated: ${c.req.method} ${c.req.path}`);
+  return userId && credential ? { kind: 'session', userId, credential } : null;
+}
+
+export const requireV1Auth = createMiddleware(async (c, next) => {
+  const principal = await authenticateV1Request(c.req.raw);
+  if (!principal) {
+    getApiLogger().debug(
+      `[v1:auth] ${c.req.header('authorization') || c.req.header(MCP_INTERNAL_AUTH_HEADER) ? 'invalid token' : 'unauthenticated'}: ${c.req.method} ${c.req.path}`,
+    );
     return c.json({ error: { code: 'unauthorized', message: 'Unauthorized' } }, 401);
   }
-  c.set('v1Principal', { kind: 'session', userId, credential });
+  c.set('v1Principal', principal);
   return next();
 });
 

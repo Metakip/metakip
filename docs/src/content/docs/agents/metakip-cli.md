@@ -90,9 +90,17 @@ Read the page immediately before editing. The CLI refuses to guess if the passag
 ```sh
 metakip import page notes.md
 metakip import folder ./notes
+metakip upload image ./diagram.png --page PAGE_ID --alt "System diagram"
 metakip export page PAGE_ID --output page.md
 metakip export all --output metakip-export.zip
 ```
+
+The upload command prints a managed Markdown image reference. Insert that reference with a targeted
+page edit. If the image is already reliably hosted for every intended reader, you can instead add
+`![Diagram](https://example.com/diagram.png)` directly. Avoid base64 data images because they bloat
+the collaborative page document.
+Private managed image URLs require access to a referenced page. API clients can download them with
+an API token that has `pages:read`; the CLI's upload permission alone does not grant read access.
 
 ## Agent Skill
 

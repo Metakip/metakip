@@ -31,6 +31,7 @@ type CLI struct {
 	Trash  TrashCmd  `cmd:"" help:"Manage deleted pages and folders." group:"Trash"`
 	Export ExportCmd `cmd:"" help:"Export Metakip content." group:"Import and Export"`
 	Import ImportCmd `cmd:"" help:"Import Metakip content." group:"Import and Export"`
+	Upload UploadCmd `cmd:"" help:"Upload managed attachments." group:"Import and Export"`
 	Skill  SkillCmd  `cmd:"" help:"Install or update the optional Metakip agent skill." group:"Skill"`
 
 	Completion CompletionCmd         `cmd:"" help:"Generate a shell completion script." group:"Tooling"`
@@ -114,6 +115,10 @@ type ExportCmd struct {
 type ImportCmd struct {
 	Folder ImportFolderCmd `cmd:"" help:"Import a folder or Obsidian vault."`
 	Page   ImportPageCmd   `cmd:"" help:"Import one Markdown page."`
+}
+
+type UploadCmd struct {
+	Image UploadImageCmd `cmd:"" help:"Upload an image and attach it to a page."`
 }
 
 type CompletionCmd struct {

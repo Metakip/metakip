@@ -1,6 +1,6 @@
 ---
 title: Move A Self-Hosted Metakip Deployment
-description: Move a self-hosted Metakip installation, PostgreSQL data, uploads, environment values, and DNS to another compatible server.
+description: Move a self-hosted Metakip installation, PostgreSQL data, upload storage, environment values, and DNS to another compatible server.
 ---
 
 Use this runbook to move a compatible Metakip installation from one Linux server to another.
@@ -37,6 +37,10 @@ podman volume export metakip-data > /tmp/metakip-data.tar
 ```
 
 Copy both snapshots to the new server.
+
+The copied environment file preserves the selected upload backend. When using R2, it keeps the
+deployment connected to the same private bucket. The `metakip-data` snapshot is required for local
+uploads and should be retained as a rollback backup after an explicit R2 migration.
 
 ## Restore The Data
 

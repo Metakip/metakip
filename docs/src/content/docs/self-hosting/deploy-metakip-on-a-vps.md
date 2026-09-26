@@ -32,7 +32,7 @@ An adapted deployment needs to provide:
 - A reverse proxy for the public origin, API routes, `/collab` WebSocket traffic,
   and the MCP gateway's `/mcp` and OAuth routes when MCP is enabled.
 - The environment variables from `.env.production`.
-- Persistent storage for the database and uploads.
+- Persistent storage for the database and either local upload storage or a private Cloudflare R2 bucket.
 - `db:migrate` before the application accepts traffic.
 
 The included scripts do not manage every alternative environment. If you use Docker Compose or Ubuntu, adapt the service definitions and maintain the deployment yourself.
@@ -86,7 +86,35 @@ VITE_API_URL
 MCP_PUBLIC_URL
 MCP_API_URL
 MCP_API_INTERNAL_SECRET
+UPLOAD_STORAGE
+R2_ACCOUNT_ID
+R2_ACCESS_KEY_ID
+R2_SECRET_ACCESS_KEY
+R2_BUCKET
 ```
+
+Set `UPLOAD_STORAGE` to `local` or `r2`. Local storage uses the persistent Metakip data volume.
+For R2, create a private bucket and an API token with object read, write, and delete access to that
+bucket, then configure all four `R2_*` values. Metakip stores stable application URLs in page
+Markdown and authorizes every download, so the bucket must not be public.
+
+Do not switch an existing installation directly from local storage to R2. Stop the API, keep
+`UPLOAD_STORAGE=local`, configure the four `R2_*` values, and run:
+
+```sh
+UPLOAD_MIGRATION_SOURCE_DIR="$(podman volume inspect metakip-data --format '{{.Mountpoint}}')" \
+  pnpm --filter @metakip/api uploads:migrate-to-r2
+```
+
+Run the command as the same user that owns the rootless Podman deployment. The explicit source
+directory points the host-side migration at the `metakip-data` volume mounted by the API container;
+the migration refuses to guess this path. The command copies and verifies every database-tracked
+upload and is safe to rerun. Switch `UPLOAD_STORAGE=r2` only after it succeeds, then restart the API.
+Retain the local upload volume for a rollback period. Normal R2 reads do not perform migration.
+
+When upgrading an installation created before upload backends were configurable, the deployment
+script adds `UPLOAD_STORAGE=local` so the existing persistent upload volume continues to be used.
+Moving that installation to R2 remains an explicit configuration change.
 
 Use a secret of at least 32 characters for `BETTER_AUTH_SECRET`. Create a unique `COLLAB_INTERNAL_SECRET` of at least 32 characters. The setup and deployment scripts generate `MCP_API_INTERNAL_SECRET`; never use the development value in production. Do not reuse example passwords or commit `.env`.
 

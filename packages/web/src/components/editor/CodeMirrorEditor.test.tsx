@@ -127,7 +127,7 @@ vi.mock('../../hooks/useCodeMirror', () => {
     },
   };
   return {
-    useCodeMirror: () => ({
+    useCodeMirror: (props: { onImageUpload?: (file: File) => Promise<unknown> }) => ({
       setContainer: vi.fn(),
       editor: mocks.hasEditor ? editor : null,
       initializationState:
@@ -135,6 +135,10 @@ vi.mock('../../hooks/useCodeMirror', () => {
           ? { status: 'error', error: new Error('initialization failed') }
           : { status: mocks.initializationStatus },
       retryInitialization: mocks.retryInitialization,
+      uploadImage: (file: File) => {
+        const pendingUpload = props.onImageUpload?.(file);
+        if (pendingUpload) void pendingUpload.catch(() => undefined);
+      },
     }),
   };
 });

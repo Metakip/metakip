@@ -30,6 +30,7 @@ import {
   type HeadingWikiLinkResolver,
 } from '../editor/codemirror/headings';
 import { editorHighlightStyle } from '../editor/codemirror/highlightStyle';
+import { createImageUploads } from '../editor/codemirror/imageUploads';
 import { livePreview } from '../editor/codemirror/livePreview';
 import {
   mathMarkdownExtension,
@@ -46,6 +47,7 @@ import { routeEditorPaste } from '../editor/utils/pasteRouter';
 import type { UrlPasteIntent } from '../editor/utils/urlPaste';
 import type { WikiLinkNavigationTarget, WikiLinkReference } from '../editor/wikiLinkPresentations';
 import { getLogger } from '../logger-init';
+import type { ImageUploader } from '../utils/imageUpload';
 
 export type CodeMirrorInitializationState =
   | { status: 'initializing' }
@@ -71,6 +73,7 @@ interface UseCodeMirrorProps {
     range: { from: number; to: number } | null,
   ) => void;
   readOnly?: boolean;
+  onImageUpload?: ImageUploader;
   onOutlineChange?: (headings: readonly EditorHeading[], activeHeadingId: string) => void;
   resolveHeadingWikiLink?: HeadingWikiLinkResolver;
 }
@@ -193,6 +196,7 @@ export function useCodeMirror({
   onSlashMenuSuggest,
   onOutlineChange,
   resolveHeadingWikiLink,
+  onImageUpload,
   readOnly = false,
 }: UseCodeMirrorProps) {
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
@@ -209,12 +213,15 @@ export function useCodeMirror({
   const onSlashMenuSuggestRef = useRef(onSlashMenuSuggest);
   const onOutlineChangeRef = useRef(onOutlineChange);
   const resolveHeadingWikiLinkRef = useRef(resolveHeadingWikiLink);
+  const onImageUploadRef = useRef(onImageUpload);
+  const imageUploadsRef = useRef<ReturnType<typeof createImageUploads> | null>(null);
   onChangeRef.current = onChange;
   onWikiLinkSuggestRef.current = onWikiLinkSuggest;
   onWikiLinkResolvedRef.current = onWikiLinkResolved;
   onSlashMenuSuggestRef.current = onSlashMenuSuggest;
   onOutlineChangeRef.current = onOutlineChange;
   resolveHeadingWikiLinkRef.current = resolveHeadingWikiLink;
+  onImageUploadRef.current = onImageUpload;
   readOnlyRef.current = readOnly;
 
   const retryInitialization = useCallback(() => {
@@ -230,6 +237,7 @@ export function useCodeMirror({
     let outlineTimer: number | undefined;
     let activeHeadingFrame: number | undefined;
     let currentHeadings: readonly EditorHeading[] = [];
+    let imageUploads: ReturnType<typeof createImageUploads> | null = null;
     const publishOutline = (currentView: EditorView, parseDocument: boolean) => {
       if (!parseDocument) {
         onOutlineChangeRef.current?.(
@@ -259,9 +267,12 @@ export function useCodeMirror({
     };
     setInitializationState({ status: 'initializing' });
     try {
+      imageUploads = createImageUploads({ getUploader: () => onImageUploadRef.current });
+      imageUploadsRef.current = imageUploads;
       const collaborativeText = doc?.getText('content');
       // Keep browser-native caret/selection, matching the previous editor (also over cell backgrounds).
       const extensions = [
+        imageUploads.extension,
         highlightSpecialChars(),
         dropCursor(),
         indentOnInput(),
@@ -383,12 +394,16 @@ export function useCodeMirror({
       publishOutline(view, true);
       setInitializationState({ status: 'ready' });
     } catch (error) {
+      imageUploads?.dispose();
+      if (imageUploadsRef.current === imageUploads) imageUploadsRef.current = null;
       view?.destroy();
       undoManager?.destroy();
       setEditor(null);
       setInitializationState({ status: 'error', error });
     }
     return () => {
+      imageUploads?.dispose();
+      if (imageUploadsRef.current === imageUploads) imageUploadsRef.current = null;
       setEditor((current) => (current === view ? null : current));
       if (outlineTimer !== undefined) window.clearTimeout(outlineTimer);
       if (activeHeadingFrame !== undefined) window.cancelAnimationFrame(activeHeadingFrame);
@@ -419,5 +434,14 @@ export function useCodeMirror({
     });
   }, [editor, readOnly]);
 
-  return { setContainer, editor, initializationState, retryInitialization };
+  return {
+    setContainer,
+    editor,
+    initializationState,
+    retryInitialization,
+    uploadImage: (file: File) => {
+      if (!editor || editor.state.readOnly) return;
+      imageUploadsRef.current?.uploadFiles(editor, [file]);
+    },
+  };
 }

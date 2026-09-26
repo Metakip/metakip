@@ -31,6 +31,7 @@ export type ApiTokenAuditOperation =
   | 'folder.lifecycle'
   | 'trash.lifecycle'
   | 'import.lifecycle'
+  | 'image.upload'
   | 'page.content.edit'
   | 'page.content.replace';
 export type ApiTokenAuditResult = 'success' | 'conflict';

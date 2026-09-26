@@ -42,7 +42,6 @@ import {
   type SharePermission,
 } from '../utils/share-access';
 import { purgeFolderSubtrees } from '../utils/trashLifecycle';
-import { drainUploadDeletionQueueBestEffort } from '../utils/uploadCleanup';
 
 const foldersRoute = new Hono();
 const foldersPublicRoute = new Hono();
@@ -225,8 +224,6 @@ foldersRoute.delete('/trash/empty-all', async (c) => {
       roots.rows.map((row) => row.id),
     );
   });
-  await drainUploadDeletionQueueBestEffort();
-
   return c.json({ deleted: true, folders: purged.folders, pages: purged.pages });
 });
 

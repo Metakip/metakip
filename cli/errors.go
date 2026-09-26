@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -18,14 +19,15 @@ const (
 )
 
 type cliError struct {
-	Code            string
-	Message         string
-	StatusCode      int
-	Details         any
-	Cause           error
-	RetryAfter      time.Duration
-	Presentation    cliErrorPresentation
-	AlreadyRendered bool
+	Code             string
+	Message          string
+	StatusCode       int
+	Details          any
+	Cause            error
+	RetryAfter       time.Duration
+	Presentation     cliErrorPresentation
+	AlreadyRendered  bool
+	OutcomeUncertain bool
 }
 
 func (e *cliError) Error() string {
@@ -58,6 +60,17 @@ func errorCode(err error) string {
 		return typed.Code
 	}
 	return ""
+}
+
+func mutationOutcomeUncertain(err error) bool {
+	var requestError *cliError
+	return errors.Is(err, context.Canceled) ||
+		errors.Is(err, context.DeadlineExceeded) ||
+		errorCode(err) == "network_error" ||
+		errorCode(err) == "invalid_response" ||
+		(errors.As(err, &requestError) &&
+			requestError.StatusCode >= http.StatusInternalServerError &&
+			requestError.StatusCode <= 599)
 }
 
 func exitCode(err error) int {

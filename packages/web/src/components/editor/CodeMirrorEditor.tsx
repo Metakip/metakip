@@ -35,6 +35,7 @@ import { TableOfContents } from './TableOfContents';
 import { useEditorActiveStates } from './useEditorActiveStates';
 import './editor.css';
 import type { HocuspocusProvider, WebSocketStatus } from '@hocuspocus/provider';
+import { uploadPageImage } from '../../utils/imageUpload';
 import { createEditorCommandRegistry } from './editorCommandRegistry';
 import { createEditorFormattingCommands } from './editorFormattingCommands';
 import { createEditorTableCommands } from './editorTableCommands';
@@ -85,6 +86,26 @@ export function CodeMirrorEditor({
   const setReadOnly = useSetReadOnly();
   const setCapabilities = useSetCapabilities();
   const identityLifecycle = useIdentityLifecycle();
+  const uploadImage = useCallback(
+    async (file: File, signal?: AbortSignal, idempotencyKey?: string) => {
+      const identityRetired = () => {
+        const error = new Error('The active identity changed during upload');
+        error.name = 'AbortError';
+        return error;
+      };
+      if (!identityLifecycle.isActive()) throw identityRetired();
+      try {
+        const result = await uploadPageImage(file, pageId, signal, idempotencyKey);
+        if (!identityLifecycle.isActive()) throw identityRetired();
+        return result;
+      } catch (error) {
+        if (!identityLifecycle.isActive()) throw identityRetired();
+        throw error;
+      }
+    },
+    [identityLifecycle, pageId],
+  );
+  const imageUploader = isAnonymous ? undefined : uploadImage;
   const queryClient = useQueryClient();
   const { doc, provider } = usePageCollaboration({
     pageId,
@@ -154,7 +175,13 @@ export function CodeMirrorEditor({
     ) => void
   >(() => {});
 
-  const { setContainer, editor, initializationState, retryInitialization } = useCodeMirror({
+  const {
+    setContainer,
+    editor,
+    initializationState,
+    retryInitialization,
+    uploadImage: insertImage,
+  } = useCodeMirror({
     ...(initialValue !== undefined && { initialValue }),
     ...(onChange !== undefined && { onChange }),
     doc,
@@ -174,6 +201,7 @@ export function CodeMirrorEditor({
     ),
     resolveHeadingWikiLink,
     readOnly: isReadOnly,
+    ...(imageUploader ? { onImageUpload: imageUploader } : {}),
   });
 
   useEffect(() => {
@@ -304,12 +332,10 @@ export function CodeMirrorEditor({
 
   const formattingCommands = createEditorFormattingCommands({
     editor,
-    identityLifecycle,
-    isAnonymous,
     keepVisible,
-    pageId,
     reposition,
     updateActiveStates,
+    ...(imageUploader ? { uploadImage: insertImage } : {}),
   });
   const tableCommands = createEditorTableCommands(editor, keepVisible, updateActiveStates);
   const editorCommands = createEditorCommandRegistry(

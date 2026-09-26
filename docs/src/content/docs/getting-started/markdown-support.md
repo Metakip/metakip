@@ -42,6 +42,19 @@ The editor suggests matching pages while you type. The double-bracket syntax is 
 
 Use page links when a page refers to information that already exists elsewhere. This keeps the source page shorter and gives readers a path to the related context.
 
+## Images
+
+Use ordinary Markdown for an image that is already hosted and available to every intended reader:
+
+```markdown
+![System diagram](https://example.com/system-diagram.png)
+```
+
+Images pasted, dropped, or selected in the browser are uploaded as private managed attachments.
+API and CLI clients can also upload managed JPEG, PNG, GIF, and WebP files to an editable page.
+Base64 data image URLs are accepted by Markdown, but they are discouraged because they make the
+collaborative page document much larger and bypass attachment caching and cleanup.
+
 ## Callouts Are Partially Supported
 
 The editor recognizes `NOTE`, `TIP`, `WARNING`, `DANGER`, `INFO`, and `EXAMPLE` callouts:

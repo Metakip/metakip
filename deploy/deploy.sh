@@ -99,12 +99,16 @@ git pull origin master
 . "$REPO_DIR/deploy/mcp-api-secret.sh"
 # shellcheck source=mcp-public-url.sh
 . "$REPO_DIR/deploy/mcp-public-url.sh"
+# shellcheck source=upload-storage.sh
+. "$REPO_DIR/deploy/upload-storage.sh"
 
 # Existing installations predate the private API-to-collaboration command
 # boundary. Generate its independent credential once during upgrade, and
 # refuse repository placeholders rather than starting with a known secret.
 ensureCollaborationSecret .env
 ensureMcpApiInternalSecret .env
+migrateUploadStorage .env
+ensureUploadStorage .env
 
 echo -e "${YELLOW}[STEP 2/9] Installing dependencies...${NC}"
 pnpm install
