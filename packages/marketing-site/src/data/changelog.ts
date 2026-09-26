@@ -37,6 +37,101 @@ const commitLink = (hash: string): MarketingLink => ({
 
 export const CHANGELOG_ENTRIES: readonly ChangelogEntry[] = [
   {
+    id: 'large-document-editing',
+    date: '2026-09-27',
+    title: 'Smoother editing for larger pages',
+    details: [
+      'Live Markdown previews and table layouts now stay more consistent as you move through long pages.',
+      'Heading navigation, table editing, and formatting commands behave more predictably while you write.',
+    ],
+    links: [
+      {
+        kind: 'external',
+        label: 'Read About Markdown Support →',
+        url: `${DOCS_ORIGIN}/getting-started/markdown-support/`,
+      },
+      pullRequestLink(162),
+    ],
+  },
+  {
+    id: 'managed-image-uploads',
+    date: '2026-09-26',
+    title: 'Add images without leaving your page',
+    details: [
+      'Paste, drop, or select an image in the editor to upload it as a private, managed attachment.',
+      'The CLI and API can upload images to a page too, and image-aware imports and exports help keep attachments with your content.',
+    ],
+    links: [
+      {
+        kind: 'external',
+        label: 'Read About Images In Markdown →',
+        url: `${DOCS_ORIGIN}/getting-started/markdown-support/`,
+      },
+      {
+        kind: 'external',
+        label: 'Read The CLI Guide →',
+        url: `${DOCS_ORIGIN}/agents/metakip-cli/`,
+      },
+      pullRequestLink(161),
+    ],
+  },
+  {
+    id: 'reliable-inline-formatting',
+    date: '2026-09-23',
+    title: 'Keep your writing flow while formatting',
+    details: [
+      'Inline formatting shortcuts now behave more reliably as you finish bold, italic, and other formatted text.',
+      'The editor handles tricky cursor positions, escaped markers, and trailing spaces more consistently.',
+    ],
+    links: [
+      {
+        kind: 'external',
+        label: 'Read About Markdown Support →',
+        url: `${DOCS_ORIGIN}/getting-started/markdown-support/`,
+      },
+      pullRequestLink(160),
+    ],
+  },
+  {
+    id: 'live-markdown-editor',
+    date: '2026-09-12',
+    title: 'A refreshed live Markdown editor',
+    details: [
+      'The editor now presents Markdown in a live-preview writing experience while keeping the underlying page content portable.',
+      'Headings, formatting, tables, links, math, and real-time collaboration remain part of the same editing workflow.',
+    ],
+    links: [
+      {
+        kind: 'external',
+        label: 'Explore Markdown Support →',
+        url: `${DOCS_ORIGIN}/getting-started/markdown-support/`,
+      },
+      pullRequestLink(158),
+    ],
+  },
+  {
+    id: 'page-title-search-everywhere',
+    date: '2026-09-02',
+    title: 'Search page titles across tools',
+    details: [
+      'Title search is now available to API, CLI, and MCP workflows, so people and assistants can locate pages from the tools they already use.',
+      'Results are relevance-ordered, include folder paths, and are limited to pages the connected user can access.',
+    ],
+    links: [
+      {
+        kind: 'external',
+        label: 'Read The CLI Guide →',
+        url: `${DOCS_ORIGIN}/agents/metakip-cli/`,
+      },
+      {
+        kind: 'external',
+        label: 'Read About Metakip MCP →',
+        url: `${DOCS_ORIGIN}/agents/mcp/`,
+      },
+      pullRequestLink(156),
+    ],
+  },
+  {
     id: 'mcp-support',
     date: '2026-08-30',
     title: 'Connect Metakip through MCP',
