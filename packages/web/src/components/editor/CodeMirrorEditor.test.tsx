@@ -139,6 +139,7 @@ vi.mock('../../hooks/useCodeMirror', () => {
         const pendingUpload = props.onImageUpload?.(file);
         if (pendingUpload) void pendingUpload.catch(() => undefined);
       },
+      refreshHeadingResolver: vi.fn(),
     }),
   };
 });

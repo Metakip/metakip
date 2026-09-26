@@ -27,6 +27,11 @@
       "types": "./src/utils/markdownToYjs.ts",
       "default": "./dist/utils/markdownToYjs.js"
     },
+    "./wiki-link": {
+      "development": "./src/utils/wikiLink.ts",
+      "types": "./src/utils/wikiLink.ts",
+      "default": "./dist/utils/wikiLink.js"
+    },
     "./yjs-document-replacement": {
       "development": "./src/utils/yjsDocumentReplacement.ts",
       "types": "./src/utils/yjsDocumentReplacement.ts",

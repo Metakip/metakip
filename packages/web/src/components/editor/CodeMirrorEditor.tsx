@@ -11,12 +11,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { useIsReadOnly, useSetReadOnly } from '../../contexts/EditorReadOnlyContext';
 import { useIdentityLifecycle } from '../../contexts/IdentityLifecycleContext';
 import { useSetCapabilities, useShareContext } from '../../contexts/ShareContext';
-import {
-  type EditorHeading,
-  extractEditorHeadings,
-  getActiveHeadingIdInView,
-  scrollToEditorHeading,
-} from '../../editor/codemirror/headings';
+import { type EditorHeading, scrollToEditorHeading } from '../../editor/codemirror/headings';
 import {
   fetchWikiLinkPresentations,
   refreshWikiLinkPresentations,
@@ -181,6 +176,7 @@ export function CodeMirrorEditor({
     initializationState,
     retryInitialization,
     uploadImage: insertImage,
+    refreshHeadingResolver,
   } = useCodeMirror({
     ...(initialValue !== undefined && { initialValue }),
     ...(onChange !== undefined && { onChange }),
@@ -295,10 +291,8 @@ export function CodeMirrorEditor({
   useEffect(() => {
     if (!editor) return;
     void headingWikiLinkPagesSignature;
-    const nextHeadings = extractEditorHeadings(editor.state.doc.toString(), resolveHeadingWikiLink);
-    setHeadings(nextHeadings);
-    setActiveHeadingId(getActiveHeadingIdInView(nextHeadings, editor));
-  }, [editor, headingWikiLinkPagesSignature, resolveHeadingWikiLink]);
+    refreshHeadingResolver();
+  }, [editor, headingWikiLinkPagesSignature, refreshHeadingResolver]);
 
   useEffect(() => {
     if (!editor) return undefined;

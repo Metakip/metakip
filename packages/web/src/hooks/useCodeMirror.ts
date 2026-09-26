@@ -23,11 +23,12 @@ import {
 import { moveToAdjacentTableCell } from '../components/editor/editorTableCommands';
 import { inlineFormattingState } from '../components/editor/inlineFormattingCommands';
 import { collaborationCursors } from '../editor/codemirror/collaborationCursors';
+import { type HeadingSyntax, parseEditorHeadingSyntax } from '../editor/codemirror/headingSyntax';
 import {
   type EditorHeading,
-  extractEditorHeadings,
   getActiveHeadingIdInView,
   type HeadingWikiLinkResolver,
+  resolveEditorHeadings,
 } from '../editor/codemirror/headings';
 import { editorHighlightStyle } from '../editor/codemirror/highlightStyle';
 import { createImageUploads } from '../editor/codemirror/imageUploads';
@@ -215,6 +216,7 @@ export function useCodeMirror({
   const resolveHeadingWikiLinkRef = useRef(resolveHeadingWikiLink);
   const onImageUploadRef = useRef(onImageUpload);
   const imageUploadsRef = useRef<ReturnType<typeof createImageUploads> | null>(null);
+  const refreshHeadingResolverRef = useRef<() => void>(() => {});
   onChangeRef.current = onChange;
   onWikiLinkSuggestRef.current = onWikiLinkSuggest;
   onWikiLinkResolvedRef.current = onWikiLinkResolved;
@@ -228,6 +230,7 @@ export function useCodeMirror({
     setInitializationState({ status: 'initializing' });
     setInitializationAttempt((attempt) => attempt + 1);
   }, []);
+  const refreshHeadingResolver = useCallback(() => refreshHeadingResolverRef.current(), []);
 
   useEffect(() => {
     if (!container) return undefined;
@@ -238,25 +241,87 @@ export function useCodeMirror({
     let activeHeadingFrame: number | undefined;
     let currentHeadings: readonly EditorHeading[] = [];
     let imageUploads: ReturnType<typeof createImageUploads> | null = null;
+    let currentSyntax: readonly HeadingSyntax[] | null = null;
+    let currentSyntaxDoc: EditorState['doc'] | null = null;
+    let currentOutlineMarkdown = '';
+    let pendingOutlineDoc: EditorState['doc'] | null = null;
+    let pendingMarkdown = '';
+    let outlineGeneration = 0;
+    let outlineWorker: Worker | null = null;
+    const publishCurrentHeadings = (currentView: EditorView) => {
+      onOutlineChangeRef.current?.(
+        currentHeadings,
+        getActiveHeadingIdInView(currentHeadings, currentView),
+      );
+    };
+    const applySyntax = (generation: number, syntax: readonly HeadingSyntax[]) => {
+      if (
+        generation !== outlineGeneration ||
+        !view?.dom.isConnected ||
+        view.state.doc !== pendingOutlineDoc
+      )
+        return;
+      currentSyntax = syntax;
+      currentSyntaxDoc = pendingOutlineDoc;
+      currentOutlineMarkdown = pendingMarkdown;
+      currentHeadings = resolveEditorHeadings(
+        pendingMarkdown,
+        syntax,
+        resolveHeadingWikiLinkRef.current,
+      );
+      publishCurrentHeadings(view);
+    };
+    if (typeof Worker !== 'undefined') {
+      try {
+        outlineWorker = new Worker(
+          new URL('../editor/codemirror/headingOutline.worker.ts', import.meta.url),
+          { type: 'module' },
+        );
+        outlineWorker.onmessage = (
+          event: MessageEvent<{ generation: number; headings: HeadingSyntax[] }>,
+        ) => {
+          applySyntax(event.data.generation, event.data.headings);
+        };
+        outlineWorker.onerror = () => {
+          outlineWorker?.terminate();
+          outlineWorker = null;
+          if (pendingOutlineDoc && view?.state.doc === pendingOutlineDoc) {
+            applySyntax(outlineGeneration, parseEditorHeadingSyntax(pendingMarkdown));
+          }
+        };
+      } catch {
+        outlineWorker = null;
+      }
+    }
+    refreshHeadingResolverRef.current = () => {
+      if (!view || !currentSyntax || view.state.doc !== currentSyntaxDoc) return;
+      currentHeadings = resolveEditorHeadings(
+        currentOutlineMarkdown,
+        currentSyntax,
+        resolveHeadingWikiLinkRef.current,
+      );
+      publishCurrentHeadings(view);
+    };
     const publishOutline = (currentView: EditorView, parseDocument: boolean) => {
       if (!parseDocument) {
-        onOutlineChangeRef.current?.(
-          currentHeadings,
-          getActiveHeadingIdInView(currentHeadings, currentView),
-        );
+        publishCurrentHeadings(currentView);
         return;
       }
+      if (!onOutlineChangeRef.current) return;
+      if (currentSyntax && currentView.state.doc === currentSyntaxDoc) {
+        refreshHeadingResolverRef.current();
+        return;
+      }
+      const generation = ++outlineGeneration;
       if (outlineTimer !== undefined) window.clearTimeout(outlineTimer);
       outlineTimer = window.setTimeout(() => {
-        currentHeadings = extractEditorHeadings(
-          currentView.state.doc.toString(),
-          resolveHeadingWikiLinkRef.current,
-        );
-        onOutlineChangeRef.current?.(
-          currentHeadings,
-          getActiveHeadingIdInView(currentHeadings, currentView),
-        );
-      }, 50);
+        outlineTimer = undefined;
+        if (generation !== outlineGeneration || !currentView.dom.isConnected) return;
+        pendingOutlineDoc = currentView.state.doc;
+        pendingMarkdown = pendingOutlineDoc.toString();
+        if (outlineWorker) outlineWorker.postMessage({ generation, markdown: pendingMarkdown });
+        else applySyntax(generation, parseEditorHeadingSyntax(pendingMarkdown));
+      }, 150);
     };
     const refreshActiveHeading = () => {
       if (activeHeadingFrame !== undefined) return;
@@ -289,7 +354,7 @@ export function useCodeMirror({
           ...(resolveHeadingWikiLink !== undefined ? { resolveHeadingWikiLink } : {}),
           onWikiLinkResolved: (reference, title) => {
             onWikiLinkResolvedRef.current?.(reference, title);
-            if (view) publishOutline(view, true);
+            refreshHeadingResolverRef.current();
           },
         }),
         EditorView.lineWrapping,
@@ -404,6 +469,9 @@ export function useCodeMirror({
     return () => {
       imageUploads?.dispose();
       if (imageUploadsRef.current === imageUploads) imageUploadsRef.current = null;
+      outlineGeneration += 1;
+      outlineWorker?.terminate();
+      refreshHeadingResolverRef.current = () => {};
       setEditor((current) => (current === view ? null : current));
       if (outlineTimer !== undefined) window.clearTimeout(outlineTimer);
       if (activeHeadingFrame !== undefined) window.cancelAnimationFrame(activeHeadingFrame);
@@ -443,5 +511,6 @@ export function useCodeMirror({
       if (!editor || editor.state.readOnly) return;
       imageUploadsRef.current?.uploadFiles(editor, [file]);
     },
+    refreshHeadingResolver,
   };
 }

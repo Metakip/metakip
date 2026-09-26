@@ -1,4 +1,4 @@
-import { syntaxTree } from '@codemirror/language';
+import { ensureSyntaxTree, syntaxTree } from '@codemirror/language';
 import type { ChangeSpec } from '@codemirror/state';
 import type { EditorView } from '@codemirror/view';
 import { linkMarkdown, newLinkTarget } from '../../editor/codemirror/visualEditorTargets';
@@ -82,10 +82,16 @@ function replaceSelectedLines(view: EditorView, transform: (lines: string[]) => 
 function convertSelectionToParagraph(view: EditorView): void {
   const state = view.state;
   const selected = selectedLineRange(view);
+  if (!ensureSyntaxTree(state, selected.to, 50)) {
+    showInfoToast('Markdown is still parsing. Try again, or select a smaller range.');
+    return;
+  }
   const changes: ChangeSpec[] = [];
   const setextTitleLines = new Set<number>();
 
   syntaxTree(state).iterate({
+    from: selected.from,
+    to: selected.to,
     enter(node) {
       if (
         !/^SetextHeading[12]$/.test(node.name) ||

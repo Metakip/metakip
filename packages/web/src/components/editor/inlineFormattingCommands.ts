@@ -1,6 +1,7 @@
 import { ensureSyntaxTree, syntaxTree } from '@codemirror/language';
 import { type ChangeSpec, type EditorState, StateEffect, StateField } from '@codemirror/state';
 import type { EditorView } from '@codemirror/view';
+import { showInfoToast } from '../../utils/toast';
 
 type InlineKind = 'bold' | 'italic' | 'strike' | 'code';
 type MarkRange = {
@@ -280,6 +281,13 @@ export function toggleInlineFormatting(view: EditorView, kind: InlineKind): void
   const { state } = view;
   const selection = state.selection.main;
   const delimiter = definitions[kind].delimiter;
+  // A selection can extend well beyond CodeMirror's parsed viewport. In that
+  // case the syntax exclusions below would miss code blocks and tables and
+  // insert Markdown delimiters into them. Never format from a partial tree.
+  if (!selection.empty && !ensureSyntaxTree(state, selection.to, 50)) {
+    showInfoToast('Markdown is still parsing. Try again, or select a smaller range.');
+    return;
+  }
   const line = state.doc.lineAt(selection.head);
   // In particular, an empty strike pair (~~~~) parses as a code fence until typed into.
   if (

@@ -1,4 +1,4 @@
-import { syntaxTree } from '@codemirror/language';
+import { syntaxTree, syntaxTreeAvailable } from '@codemirror/language';
 import type { Range } from '@codemirror/state';
 import { Decoration, type DecorationSet, type EditorView } from '@codemirror/view';
 import { codeBlockRange, codeBlockText } from '../../components/editor/codeBlockCommands';
@@ -67,11 +67,52 @@ function addBlockMathDecoration(
   }
 }
 
-function addTagDecorations(view: EditorView, ranges: Range<Decoration>[]): void {
+export interface PreviewRange {
+  from: number;
+  to: number;
+}
+
+/** Expand a preview refresh to contain every intersected display-math block.
+ * Its widget and hidden source lines must be added or removed as one unit. */
+export function expandPreviewRangeForBlockMath(
+  view: EditorView,
+  range: PreviewRange,
+): PreviewRange {
+  const { doc } = view.state;
+  let from = doc.lineAt(Math.max(0, Math.min(range.from, doc.length))).from;
+  let to = doc.lineAt(Math.max(0, Math.min(range.to, doc.length))).to;
+  if (from > to) [from, to] = [to, from];
+
+  syntaxTree(view.state).iterate({
+    from,
+    to,
+    enter(node) {
+      if (node.name !== 'BlockMath') return undefined;
+      from = Math.min(from, doc.lineAt(node.from).from);
+      to = Math.max(to, doc.lineAt(node.to).to);
+      return false;
+    },
+  });
+  return { from, to };
+}
+
+function addTagDecorations(
+  view: EditorView,
+  ranges: Range<Decoration>[],
+  from: number,
+  to: number,
+): void {
   const state = view.state;
-  const decoratedTags = new Set<number>();
-  for (let lineNumber = 1; lineNumber <= state.doc.lines; lineNumber += 1) {
+  const tree = syntaxTree(state);
+  for (
+    let lineNumber = state.doc.lineAt(from).number;
+    lineNumber <= state.doc.lineAt(to).number;
+    lineNumber += 1
+  ) {
     const line = state.doc.line(lineNumber);
+    // A fragment without a parsed context cannot distinguish a tag from text
+    // inside a code block or heading. Leave it as source until parsing catches up.
+    if (!syntaxTreeAvailable(state, line.to)) continue;
     const tagPattern = /(^|[\s(])#([\p{L}\p{N}][\p{L}\p{N}_/-]*)/gu;
     let match = tagPattern.exec(line.text);
     while (match !== null) {
@@ -79,7 +120,7 @@ function addTagDecorations(view: EditorView, ranges: Range<Decoration>[]): void 
       const from = line.from + match.index + leadingLength;
       const to = from + 1 + (match[2]?.length ?? 0);
       type TreeNode = { name: string; parent: TreeNode | null };
-      let cursor: TreeNode | null = syntaxTree(state).resolveInner(from, 1) as TreeNode;
+      let cursor: TreeNode | null = tree.resolveInner(from, 1) as TreeNode;
       let excluded = false;
       while (cursor) {
         if (
@@ -93,8 +134,7 @@ function addTagDecorations(view: EditorView, ranges: Range<Decoration>[]): void 
         }
         cursor = cursor.parent;
       }
-      if (!excluded && !decoratedTags.has(from)) {
-        decoratedTags.add(from);
+      if (!excluded) {
         ranges.push(Decoration.mark({ class: 'cm-md-tag' }).range(from, to));
       }
       match = tagPattern.exec(line.text);
@@ -106,9 +146,10 @@ function addSyntaxDecorations(
   view: EditorView,
   options: LivePreviewOptions,
   ranges: Range<Decoration>[],
+  from: number,
+  to: number,
 ): void {
   const state = view.state;
-  const markdownSource = state.doc.toString();
   const hiddenMarks = new Set([
     'EmphasisMark',
     'StrikethroughMark',
@@ -125,6 +166,8 @@ function addSyntaxDecorations(
   const decoratedMathBlocks = new Set<number>();
 
   syntaxTree(state).iterate({
+    from,
+    to,
     enter(node) {
       if (node.name === 'BlockMath') {
         addBlockMathDecoration(view, node, decoratedMathBlocks, ranges);
@@ -170,11 +213,7 @@ function addSyntaxDecorations(
 
       if (/^(?:ATXHeading[1-6]|SetextHeading[12])$/.test(node.name)) {
         const level = node.name.slice(-1);
-        const headingText = getHeadingText(
-          markdownSource,
-          node.node,
-          options.resolveHeadingWikiLink,
-        );
+        const headingText = getHeadingText(state.doc, node.node, options.resolveHeadingWikiLink);
         ranges.push(
           Decoration.line({
             class: `cm-md-heading cm-md-heading-${level}`,
@@ -188,7 +227,11 @@ function addSyntaxDecorations(
       } else if (node.name === 'Blockquote') {
         const firstLine = state.doc.lineAt(node.from).number;
         const lastLine = state.doc.lineAt(node.to).number;
-        for (let lineNumber = firstLine; lineNumber <= lastLine; lineNumber += 1) {
+        for (
+          let lineNumber = Math.max(firstLine, state.doc.lineAt(from).number);
+          lineNumber <= Math.min(lastLine, state.doc.lineAt(to).number);
+          lineNumber += 1
+        ) {
           const line = state.doc.line(lineNumber);
           ranges.push(Decoration.line({ class: 'cm-md-blockquote' }).range(line.from));
         }
@@ -198,13 +241,19 @@ function addSyntaxDecorations(
         const first = state.doc.line(firstLine);
         const block = codeBlockRange(state, node.from, node.to);
         const active = selectionTouches(state, first.from, state.doc.line(lastLine).to + 1);
-        ranges.push(
-          Decoration.widget({
-            widget: new CopyCodeWidget(codeBlockText(state, block)),
-            side: 1,
-          }).range(first.to),
-        );
-        for (let lineNumber = firstLine; lineNumber <= lastLine; lineNumber += 1) {
+        if (first.from >= from) {
+          ranges.push(
+            Decoration.widget({
+              widget: new CopyCodeWidget(codeBlockText(state, block)),
+              side: 1,
+            }).range(first.to),
+          );
+        }
+        for (
+          let lineNumber = Math.max(firstLine, state.doc.lineAt(from).number);
+          lineNumber <= Math.min(lastLine, state.doc.lineAt(to).number);
+          lineNumber += 1
+        ) {
           const line = state.doc.line(lineNumber);
           const fenceOnly =
             (lineNumber === firstLine && node.node.firstChild?.nextSibling?.name !== 'CodeInfo') ||
@@ -289,9 +338,19 @@ function addSyntaxDecorations(
 export function buildLivePreviewDecorations(
   view: EditorView,
   options: LivePreviewOptions,
+  from = 0,
+  to = view.state.doc.length,
 ): DecorationSet {
   const ranges: Range<Decoration>[] = [];
-  addTagDecorations(view, ranges);
-  addSyntaxDecorations(view, options, ranges);
-  return Decoration.set(ranges, true);
+  const expanded = expandPreviewRangeForBlockMath(view, { from, to });
+  const start = expanded.from;
+  const end = expanded.to;
+  addTagDecorations(view, ranges, start, end);
+  addSyntaxDecorations(view, options, ranges, start, end);
+  // An ancestor can extend outside the requested window. Keep only decorations
+  // that actually intersect it; the rest will be built when their region is shown.
+  return Decoration.set(
+    ranges.filter((range) => range.to >= start && range.from <= end),
+    true,
+  );
 }

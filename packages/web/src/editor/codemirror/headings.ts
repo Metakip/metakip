@@ -1,24 +1,18 @@
+import type { Text } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
-import { GFM, parser } from '@lezer/markdown';
 import { type ParsedWikiLinkTarget, parseWikiLinkTarget } from '@metakip/shared';
 import { getHeadingId } from '../../utils/headingNavigation';
-import { mathMarkdownExtension, wikiLinkMarkdownExtension } from './markdownSyntax';
+import {
+  type HeadingSyntax,
+  type HeadingSyntaxNode,
+  parseEditorHeadingSyntax,
+} from './headingSyntax';
 
 export type EditorHeading = {
   id: string;
   text: string;
   level: number;
   from: number;
-};
-
-const markdownParser = parser.configure([GFM, wikiLinkMarkdownExtension, mathMarkdownExtension]);
-
-type HeadingTreeNode = {
-  name: string;
-  from: number;
-  to: number;
-  firstChild: HeadingTreeNode | null;
-  nextSibling: HeadingTreeNode | null;
 };
 
 type SourceRange = { from: number; to: number };
@@ -37,22 +31,18 @@ const HIDDEN_HEADING_MARKS = new Set([
   'WikiLinkMark',
 ]);
 
-function headingLevel(nodeName: string): number | null {
-  const match = nodeName.match(/^(?:ATXHeading([1-6])|SetextHeading([12]))$/);
-  const value = match?.[1] ?? match?.[2];
-  return value ? Number(value) : null;
-}
-
 function hiddenHeadingSourceRanges(
-  markdown: string,
-  root: HeadingTreeNode,
+  markdown: string | Text,
+  root: HeadingSyntaxNode,
   resolveWikiLink?: HeadingWikiLinkResolver,
 ): SourcePart[] {
   const ranges: SourcePart[] = [];
+  const slice = (from: number, to: number) =>
+    typeof markdown === 'string' ? markdown.slice(from, to) : markdown.sliceString(from, to);
   const add = (from: number, to: number, replacement?: string): void => {
     if (from < to) ranges.push({ from, to, ...(replacement !== undefined ? { replacement } : {}) });
   };
-  const visit = (node: HeadingTreeNode, parentName = ''): void => {
+  const visit = (node: HeadingSyntaxNode, parentName = ''): void => {
     if (HIDDEN_HEADING_MARKS.has(node.name)) {
       add(node.from, node.to);
       return;
@@ -71,7 +61,7 @@ function hiddenHeadingSourceRanges(
     }
     if (node.name === 'WikiLink') {
       let child = node.firstChild;
-      let target: HeadingTreeNode | null = null;
+      let target: HeadingSyntaxNode | null = null;
       let hasAlias = false;
       while (child) {
         if (child.name === 'WikiLinkTarget') target = child;
@@ -80,7 +70,7 @@ function hiddenHeadingSourceRanges(
         child = child.nextSibling;
       }
       if (target) {
-        const parsed = parseWikiLinkTarget(markdown.slice(node.from + 2, node.to - 2));
+        const parsed = parseWikiLinkTarget(slice(node.from + 2, node.to - 2));
         if (hasAlias) add(target.from, target.to);
         else if (parsed) {
           const visibleText =
@@ -101,39 +91,44 @@ function hiddenHeadingSourceRanges(
 }
 
 export function getHeadingText(
-  markdown: string,
-  heading: HeadingTreeNode,
+  markdown: string | Text,
+  heading: HeadingSyntaxNode,
   resolveWikiLink?: HeadingWikiLinkResolver,
 ): string {
+  const slice = (from: number, to: number) =>
+    typeof markdown === 'string' ? markdown.slice(from, to) : markdown.sliceString(from, to);
   const ranges = hiddenHeadingSourceRanges(markdown, heading, resolveWikiLink);
   let result = '';
   let position = heading.from;
   for (const range of ranges) {
     const from = Math.max(position, range.from);
     const to = Math.min(heading.to, range.to);
-    if (from > position) result += markdown.slice(position, from);
+    if (from > position) result += slice(position, from);
     if (range.replacement !== undefined) result += range.replacement;
     position = Math.max(position, to);
   }
-  if (position < heading.to) result += markdown.slice(position, heading.to);
+  if (position < heading.to) result += slice(position, heading.to);
   return result.trim();
 }
 
-/** Parse the complete document rather than CodeMirror's virtualized viewport. */
+/** Resolve headings without reparsing when a wiki-link title changes. */
+export function resolveEditorHeadings(
+  markdown: string,
+  syntax: readonly HeadingSyntax[],
+  resolveWikiLink?: HeadingWikiLinkResolver,
+): EditorHeading[] {
+  return syntax.map(({ level, from, node }) => {
+    const text = getHeadingText(markdown, node, resolveWikiLink);
+    return { id: getHeadingId(text), text, level, from };
+  });
+}
+
+/** Synchronous fallback for environments without workers and small standalone uses. */
 export function extractEditorHeadings(
   markdown: string,
   resolveWikiLink?: HeadingWikiLinkResolver,
 ): EditorHeading[] {
-  const headings: EditorHeading[] = [];
-  markdownParser.parse(markdown).iterate({
-    enter(node) {
-      const level = headingLevel(node.name);
-      if (level === null) return;
-      const text = getHeadingText(markdown, node.node, resolveWikiLink);
-      headings.push({ id: getHeadingId(text), text, level, from: node.from });
-    },
-  });
-  return headings;
+  return resolveEditorHeadings(markdown, parseEditorHeadingSyntax(markdown), resolveWikiLink);
 }
 
 export function getActiveHeadingId(
@@ -157,10 +152,24 @@ export function getActiveHeadingIdInView(
   headings: readonly EditorHeading[],
   view: EditorView,
 ): string {
-  let active = headings[0];
+  if (!headings.length) return '';
+  // The rendered viewport begins above the visible top edge. Start near that
+  // position instead of measuring every preceding heading on every scroll.
+  let low = 0;
+  let high = headings.length;
+  while (low < high) {
+    const middle = (low + high) >> 1;
+    if ((headings[middle]?.from ?? Infinity) <= view.viewport.from) low = middle + 1;
+    else high = middle;
+  }
+  const start = Math.max(0, low - 1);
+  let active = headings[start];
   const topBoundary = (typeof window === 'undefined' ? 0 : window.innerHeight) * 0.2;
-  for (const heading of headings) {
-    const top = view.documentTop + view.lineBlockAt(heading.from).top;
+  const documentTop = view.documentTop;
+  for (let index = start; index < headings.length; index += 1) {
+    const heading = headings[index];
+    if (!heading) break;
+    const top = documentTop + view.lineBlockAt(heading.from).top;
     if (top > topBoundary) break;
     active = heading;
   }
