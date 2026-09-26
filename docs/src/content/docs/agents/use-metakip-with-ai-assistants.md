@@ -42,4 +42,9 @@ See [Metakip CLI](/agents/metakip-cli/) for setup and the [generated API Referen
 
 ## What The Assistant Can Do
 
-With read access, an assistant can list pages, view page content, inspect folders, and answer from the information it can access. With write access, it can create pages or apply targeted changes. It cannot bypass the permissions attached to the token or pages.
+With read access, an assistant can list pages, view page content, inspect folders, and answer from the information it can access. With write access, it can create pages, apply targeted changes, and upload managed images to editable pages through the API or CLI. It cannot bypass the permissions attached to the token or pages.
+
+For an image that is already hosted, an assistant can use standard Markdown such as
+`![Diagram](https://example.com/diagram.png)`. The URL must remain available to every intended
+reader. For private or durable attachments, use the managed image upload operation. Avoid base64
+data images unless there is a specific interoperability requirement.

@@ -5,10 +5,7 @@ import { executeQuery, type QueryExecutor } from '../db/query';
 import { deletedFolderOwnerSql, deletedPageOwnerSql } from './deletedEntityOwner';
 import { purgeEntityAccessMetadata } from './entityCleanup';
 import { lockWorkspaceAccessMutation } from './share-access';
-import {
-  drainUploadDeletionQueueBestEffort,
-  purgeUnreferencedUploadsForPages,
-} from './uploadCleanup';
+import { purgeUnreferencedUploadsForPages } from './uploadCleanup';
 
 export async function emptyTrashForUser(
   userId: string,
@@ -52,7 +49,6 @@ export async function emptyTrashForUser(
     }
     return { folders: folderCounts.folders, pages: folderCounts.pages + pageIds.length };
   });
-  await drainUploadDeletionQueueBestEffort();
   return result;
 }
 

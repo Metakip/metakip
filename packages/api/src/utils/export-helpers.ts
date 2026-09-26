@@ -1,6 +1,5 @@
 import { createHash } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
-import path from 'node:path';
+import { basename, extname } from 'node:path';
 import { serializeFrontmatter } from '@metakip/shared';
 import { type MarkdownRenderOptions, yDocToMarkdown } from '@metakip/shared/yjs-helpers';
 
@@ -12,11 +11,10 @@ export { serializeFrontmatter } from '@metakip/shared';
  * 4=title (double-quoted), 5=title (single-quoted), 6=title (parenthesized).
  */
 const IMAGE_REGEX =
-  /!\[([^\]]*)\]\((?:<([^>]*)>|([^)\s]+))(?:\s+(?:"([^"]*)"|'([^']*)'|\(([^)]*)\)))?\)/g;
+  /!\[((?:\\.|[^\]])*)\]\((?:<([^>]*)>|([^)\s]+))(?:\s+(?:"([^"]*)"|'([^']*)'|\(([^)]*)\)))?\)/g;
 
 const CODE_FENCE_REGEX = /```[\s\S]*?```/g;
 const INLINE_CODE_REGEX = /`[^`]+`/g;
-
 const PLACEHOLDER_PREFIX = '\u0000CODE_';
 const PLACEHOLDER_SUFFIX = '\u0000';
 
@@ -31,33 +29,91 @@ interface ImageMatch {
 function maskCodeBlocks(markdown: string): { masked: string; blocks: string[] } {
   const blocks: string[] = [];
   const masked = markdown
-    .replace(CODE_FENCE_REGEX, (m) => {
-      blocks.push(m);
+    .replace(CODE_FENCE_REGEX, (match) => {
+      blocks.push(match);
       return `${PLACEHOLDER_PREFIX}${blocks.length - 1}${PLACEHOLDER_SUFFIX}`;
     })
-    .replace(INLINE_CODE_REGEX, (m) => {
-      blocks.push(m);
+    .replace(INLINE_CODE_REGEX, (match) => {
+      blocks.push(match);
       return `${PLACEHOLDER_PREFIX}${blocks.length - 1}${PLACEHOLDER_SUFFIX}`;
     });
   return { masked, blocks };
 }
 
-function restoreCodeBlocks(masked: string, blocks: string[]): string {
+function restoreCodeBlocks(masked: string, blocks: readonly string[]): string {
   let result = masked;
-  for (let i = 0; i < blocks.length; i++) {
-    result = result.replace(`${PLACEHOLDER_PREFIX}${i}${PLACEHOLDER_SUFFIX}`, blocks[i] ?? '');
+  for (let index = 0; index < blocks.length; index += 1) {
+    result = result.replace(
+      `${PLACEHOLDER_PREFIX}${index}${PLACEHOLDER_SUFFIX}`,
+      blocks[index] ?? '',
+    );
   }
   return result;
 }
 
-function extractSrcFromMatch(match: RegExpExecArray): string | null {
-  // Group 2 is <url> form, group 3 is bare url form
-  return match[2] ?? match[3] ?? null;
+function findImageMatches(markdown: string): {
+  blocks: string[];
+  masked: string;
+  matches: ImageMatch[];
+} {
+  const { masked, blocks } = maskCodeBlocks(markdown);
+  const matches: ImageMatch[] = [];
+  let match: RegExpExecArray | null;
+  // biome-ignore lint/suspicious/noAssignInExpressions: standard regex exec pattern
+  while ((match = IMAGE_REGEX.exec(masked)) !== null) {
+    const src = match[2] ?? match[3];
+    if (!src) continue;
+    const title = match[4] ?? match[5] ?? match[6] ?? '';
+    const titleDelim =
+      match[4] !== undefined
+        ? '"'
+        : match[5] !== undefined
+          ? "'"
+          : match[6] !== undefined
+            ? '()'
+            : '';
+    matches.push({ full: match[0], alt: match[1] ?? '', src, title, titleDelim });
+  }
+  return { masked, blocks, matches };
 }
 
 function isValidUploadFilename(filename: string): boolean {
   if (!filename || filename.startsWith('.')) return false;
   return /^[a-zA-Z0-9\-_.]+$/.test(filename);
+}
+
+function managedUploadFilename(src: string): string | null {
+  const prefix = src.startsWith('/api/uploads/')
+    ? '/api/uploads/'
+    : src.startsWith('/uploads/')
+      ? '/uploads/'
+      : null;
+  if (!prefix) return null;
+  const filename = src.slice(prefix.length);
+  return isValidUploadFilename(filename) ? filename : null;
+}
+
+export type ImageExtractionPlan = {
+  masked: string;
+  blocks: readonly string[];
+  matches: readonly ImageMatch[];
+  referencedUploadFilenames: ReadonlySet<string>;
+};
+
+/** Parse once, before storage I/O; rendering uses this same authorized plan. */
+export function prepareImageExtraction(
+  markdown: string,
+  authorizedUploadFilenames: ReadonlySet<string>,
+): ImageExtractionPlan {
+  const parsed = findImageMatches(markdown);
+  const referencedUploadFilenames = new Set<string>();
+  for (const { src } of parsed.matches) {
+    const filename = managedUploadFilename(src);
+    if (filename && authorizedUploadFilenames.has(filename)) {
+      referencedUploadFilenames.add(filename);
+    }
+  }
+  return { ...parsed, referencedUploadFilenames };
 }
 
 function resolveMimeType(header: string): string | null {
@@ -90,46 +146,26 @@ export interface ExtractedImages {
 }
 
 /**
- * Scans markdown for images, extracts them from disk or decodes base64,
+ * Renders a prepared image plan using loaded managed uploads or decoded base64,
  * and rewrites references to use relative ./assets/ paths.
  *
  * Handles three image source types:
- * 1. Server URLs: /api/uploads/filename.png → read from uploads/ directory
+ * 1. Server URLs: /api/uploads/filename.png → read from managed upload storage
  * 2. Base64 data URIs: data:image/png;base64,... → decode to buffer
  * 3. External URLs: https://... → left as-is (not downloaded)
  *
  * Code blocks and inline code are masked before scanning to prevent
  * image syntax inside code from being corrupted.
  */
-export async function extractImages(
-  markdown: string,
-  uploadsDir: string,
-  authorizedUploadFilenames: ReadonlySet<string>,
-): Promise<ExtractedImages> {
-  const { masked, blocks } = maskCodeBlocks(markdown);
-
+export function extractImages(
+  plan: ImageExtractionPlan,
+  storedUploads: ReadonlyMap<string, Buffer>,
+): ExtractedImages {
   const assets = new Map<string, Buffer>();
   const urlToAssetName = new Map<string, string>();
   const contentHashToAssetName = new Map<string, string>();
+  const { masked, blocks, matches, referencedUploadFilenames } = plan;
   let result = masked;
-
-  const matches: ImageMatch[] = [];
-  let match: RegExpExecArray | null;
-  // biome-ignore lint/suspicious/noAssignInExpressions: standard regex exec pattern
-  while ((match = IMAGE_REGEX.exec(masked)) !== null) {
-    const src = extractSrcFromMatch(match);
-    if (!src) continue;
-    const title = match[4] ?? match[5] ?? match[6] ?? '';
-    const titleDelim =
-      match[4] !== undefined
-        ? '"'
-        : match[5] !== undefined
-          ? "'"
-          : match[6] !== undefined
-            ? '()'
-            : '';
-    matches.push({ full: match[0], alt: match[1] ?? '', src, title, titleDelim });
-  }
 
   for (const { full, alt, src, title, titleDelim } of matches) {
     let buffer: Buffer | null = null;
@@ -156,16 +192,16 @@ export async function extractImages(
         continue;
       }
     } else if (src.startsWith('/api/uploads/') || src.startsWith('/uploads/')) {
-      const filename = src.startsWith('/api/uploads/')
-        ? src.replace('/api/uploads/', '')
-        : src.replace('/uploads/', '');
-      if (!isValidUploadFilename(filename) || !authorizedUploadFilenames.has(filename)) continue;
+      const filename = managedUploadFilename(src);
+      if (!filename || !referencedUploadFilenames.has(filename)) {
+        continue;
+      }
 
-      const filePath = path.join(uploadsDir, filename);
-      try {
-        buffer = await readFile(filePath);
+      const storedUpload = storedUploads.get(filename);
+      if (storedUpload) {
+        buffer = storedUpload;
         assetName = filename;
-      } catch {
+      } else {
         continue;
       }
     } else {
@@ -195,8 +231,8 @@ export async function extractImages(
     if (hashToName) {
       finalName = hashToName;
     } else if (assets.has(finalName) && !assets.get(finalName)?.equals(buffer)) {
-      const ext = path.extname(assetName);
-      const base = path.basename(assetName, ext);
+      const ext = extname(assetName);
+      const base = basename(assetName, ext);
       let counter = 1;
       while (assets.has(finalName) && !assets.get(finalName)?.equals(buffer)) {
         finalName = `${base}-${counter}${ext}`;

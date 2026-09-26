@@ -22,7 +22,7 @@ Metakip is made up of containerized application services, so an experienced oper
 - The Metakip API service.
 - The Metakip collaboration service.
 - The built web application.
-- Persistent storage for the database and uploads.
+- Persistent storage for PostgreSQL and either local uploads or a private Cloudflare R2 bucket.
 
 The API and collaboration services must be reachable through the public web origin. PostgreSQL should remain private to the application services.
 

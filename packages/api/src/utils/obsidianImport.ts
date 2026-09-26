@@ -13,7 +13,7 @@ import { bindWikiLinkTargets, markdownToYjsState } from '@metakip/shared/markdow
 import { type ConnectionDraft, normalizeTagSlug } from '@metakip/shared/yjs-helpers';
 import { sql } from 'drizzle-orm';
 import { db } from '../db/connection';
-import { executeQuery, query } from '../db/query';
+import { executeQuery } from '../db/query';
 import { ensureDocumentInputSize, ensureYdocSize } from './documentSize';
 import { normalizeFolderName } from './folderName';
 import {
@@ -208,16 +208,22 @@ export async function importObsidianVault(
       }
 
       const filename = `${randomUUID()}.${extension === 'jpeg' ? 'jpg' : extension}`;
-      const uploadId = await materializeUploadFile(filename, buffer, async () => {
-        const uploadResult = await query<{ id: string }>(
-          sql`insert into uploads (filename, original_name, mime_type, size, uploaded_by)
-           values (${filename}, ${path.basename(file.path)}, ${expectedMime}, ${buffer.length}, ${userId})
-           returning id`,
-        );
-        const id = uploadResult.rows[0]?.id;
-        if (!id) throw new Error('Failed to create upload');
-        return id;
-      });
+      const uploadId = await materializeUploadFile(
+        filename,
+        buffer,
+        async (tx) => {
+          const uploadResult = await executeQuery<{ id: string }>(
+            tx,
+            sql`insert into uploads (filename, original_name, mime_type, size, uploaded_by)
+               values (${filename}, ${path.basename(file.path)}, ${expectedMime}, ${buffer.length}, ${userId})
+               returning id`,
+          );
+          const id = uploadResult.rows[0]?.id;
+          if (!id) throw new Error('Failed to create upload');
+          return id;
+        },
+        { contentType: expectedMime },
+      );
 
       const url = `/api/uploads/${filename}`;
       urlToUploadId.set(url, uploadId);

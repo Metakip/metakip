@@ -31,7 +31,6 @@ import {
 import { notifyShareRecompute } from './share-notify';
 import { getEntityMetaUserIds, mergeMetaUserIds } from './shareRecipients';
 import { purgeFolderSubtrees } from './trashLifecycle';
-import { drainUploadDeletionQueueBestEffort } from './uploadCleanup';
 
 async function getActiveFolder(folderId: string, executor: QueryExecutor) {
   const result = await executeQuery<FolderDatabaseRowWithOwner>(
@@ -440,6 +439,5 @@ export async function permanentlyDeleteFolder(folderId: string, userId: string) 
     }
     return purgeFolderSubtrees(tx, [folderId]);
   });
-  await drainUploadDeletionQueueBestEffort();
   return result;
 }

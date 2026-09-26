@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -582,11 +581,26 @@ func applyContentBoundaryOperation(
 }
 
 func uncertainWriteOutcome(err error, editID string, idempotencyKey string) error {
-	var requestError *cliError
-	if errors.Is(err, context.DeadlineExceeded) ||
-		errorCode(err) == "network_error" ||
-		errorCode(err) == "invalid_response" ||
-		(errors.As(err, &requestError) && requestError.StatusCode == http.StatusServiceUnavailable && requestError.Code != "collaboration_busy") {
+	if errorCode(err) == "collaboration_busy" {
+		return err
+	}
+	return uncertainMutationOutcome(
+		err,
+		editID,
+		idempotencyKey,
+		"edit_outcome_uncertain",
+		"The edit may have succeeded. Check the page before issuing another edit",
+	)
+}
+
+func uncertainMutationOutcome(
+	err error,
+	editID string,
+	idempotencyKey string,
+	code string,
+	message string,
+) error {
+	if mutationOutcomeUncertain(err) {
 		details := &uncertainEditDetails{IdempotencyKey: idempotencyKey, EditID: editID}
 		detailLines := make([]string, 0, 2)
 		if details.EditID != "" {
@@ -596,11 +610,12 @@ func uncertainWriteOutcome(err error, editID string, idempotencyKey string) erro
 			detailLines = append(detailLines, "Idempotency key: "+details.IdempotencyKey)
 		}
 		return &cliError{
-			Code:         "edit_outcome_uncertain",
-			Message:      "The edit may have succeeded. Check the page before issuing another edit",
-			Details:      details,
-			Cause:        err,
-			Presentation: cliErrorPresentation{HumanDetailLines: detailLines},
+			Code:             code,
+			Message:          message,
+			Details:          details,
+			Cause:            err,
+			Presentation:     cliErrorPresentation{HumanDetailLines: detailLines},
+			OutcomeUncertain: true,
 		}
 	}
 	return err

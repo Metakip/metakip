@@ -4,11 +4,11 @@ import { HTTPException } from 'hono/http-exception';
 import JSZip from 'jszip';
 import { db } from '../db/connection';
 import { executeQuery } from '../db/query';
-import { uploadsDir } from '../env';
-import { extractImages, pageToMarkdown } from './export-helpers';
+import { extractImages, pageToMarkdown, prepareImageExtraction } from './export-helpers';
 import { allocateFilename, attachmentContentDisposition } from './filename';
 import { getPageById } from './pageRepository';
 import { ensurePageAccess, lockEntityAccess } from './share-access';
+import { readStoredUploads } from './uploadStorage';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -76,7 +76,11 @@ export async function exportPageForUser(pageId: string, userId: string): Promise
     },
     restrictedWikiLinkText: 'Restricted page',
   });
-  const extracted = await extractImages(markdown, uploadsDir, authorizedUploadFilenames);
+  const imagePlan = prepareImageExtraction(markdown, authorizedUploadFilenames);
+  const extracted = extractImages(
+    imagePlan,
+    await readStoredUploads(imagePlan.referencedUploadFilenames),
+  );
 
   if (extracted.assets.size === 0) {
     return {

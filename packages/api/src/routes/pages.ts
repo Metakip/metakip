@@ -64,10 +64,7 @@ import {
 } from '../utils/share-access';
 import { notifyShareRecompute } from '../utils/share-notify';
 import { getEntityMetaUserIds, mergeMetaUserIds } from '../utils/shareRecipients';
-import {
-  drainUploadDeletionQueueBestEffort,
-  purgeUnreferencedUploadsForPages,
-} from '../utils/uploadCleanup';
+import { purgeUnreferencedUploadsForPages } from '../utils/uploadCleanup';
 import { getUniqueWorkspacePageLookup } from '../utils/wiki-link-lookup';
 
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -289,8 +286,6 @@ pagesRoute.delete('/trash/empty-all', async (c) => {
     }
     return pageIds.length;
   });
-  await drainUploadDeletionQueueBestEffort();
-
   return c.json({ deleted: true, count });
 });
 

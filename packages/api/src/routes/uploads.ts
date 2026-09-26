@@ -1,33 +1,14 @@
-import { randomUUID } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
-import path from 'node:path';
+import { MCP_INTERNAL_AUTH_HEADER } from '@metakip/shared/node/mcp-internal-auth';
 import { sql } from 'drizzle-orm';
 import { Hono } from 'hono';
-import { bodyLimit } from 'hono/body-limit';
 import { HTTPException } from 'hono/http-exception';
-import { auth } from '../auth';
 import { db } from '../db/connection';
 import { executeQuery, type QueryExecutor } from '../db/query';
-import { uploadsDir } from '../env';
-import {
-  actorColumns,
-  ensureActorPageAccess,
-  getRequestActor,
-  persistGuestIdentity,
-} from '../utils/guestAccess';
-import {
-  hasValidImageSignature,
-  IMAGE_EXTENSION_BY_MIME,
-  isSafeImageMime,
-  MAX_IMAGE_SIZE_BYTES,
-} from '../utils/image-upload';
-import { lockEntityAccess, lockWorkspaceAccess } from '../utils/share-access';
-import { materializeUploadFile } from '../utils/uploadMaterialization';
+import { authenticateV1Request } from '../middleware/v1Auth';
+import { lockWorkspaceAccess } from '../utils/share-access';
+import { getUploadStorage, isUploadNotFoundError } from '../utils/uploadStorage';
 
 const uploadsRoute = new Hono();
-const MAX_UPLOAD_REQUEST_BYTES = MAX_IMAGE_SIZE_BYTES + 256 * 1024;
-
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 type UploadRow = {
   id: string;
@@ -108,102 +89,11 @@ const getUploadWorkspaceOwnerIds = async (
   return result.rows.map((row) => row.owner_id);
 };
 
-uploadsRoute.post(
-  '/',
-  bodyLimit({
-    maxSize: MAX_UPLOAD_REQUEST_BYTES,
-    onError: (c) => c.json({ message: 'Request body is too large' }, 413),
-  }),
-  async (c) => {
-    const actor = await getRequestActor(c);
-    if (actor.kind === 'guest') {
-      throw new HTTPException(403, { message: 'Guest editors cannot upload files' });
-    }
-    const body = await c.req.parseBody().catch((error: unknown) => {
-      if (error instanceof Error && error.name === 'BodyLimitError') throw error;
-      return null;
-    });
-    if (!body || typeof body !== 'object') {
-      throw new HTTPException(400, { message: 'Invalid form data' });
-    }
-
-    const file = (body as Record<string, unknown>).file;
-    const pageId = (body as Record<string, unknown>).pageId;
-
-    if (typeof pageId !== 'string' || !UUID_PATTERN.test(pageId)) {
-      throw new HTTPException(400, { message: 'Page ID is required' });
-    }
-
-    await ensureActorPageAccess(actor, pageId, 'edit');
-
-    if (!(file instanceof File)) {
-      throw new HTTPException(400, { message: 'File is required' });
-    }
-
-    if (!isSafeImageMime(file.type)) {
-      throw new HTTPException(400, { message: 'Only JPEG, PNG, GIF, and WebP images are allowed' });
-    }
-
-    if (file.size > MAX_IMAGE_SIZE_BYTES) {
-      throw new HTTPException(400, { message: 'File must be 10MB or less' });
-    }
-
-    const buffer = Buffer.from(await file.arrayBuffer());
-    if (!hasValidImageSignature(buffer, file.type)) {
-      throw new HTTPException(400, {
-        message: 'File contents do not match the selected image type',
-      });
-    }
-
-    const extension = IMAGE_EXTENSION_BY_MIME.get(file.type);
-    if (!extension) {
-      throw new HTTPException(400, { message: 'Unsupported image type' });
-    }
-    const filename = `${randomUUID()}.${extension}`;
-    await materializeUploadFile(filename, buffer, async () => {
-      await db.transaction(async (tx) => {
-        await lockEntityAccess(tx, 'page', pageId);
-        await ensureActorPageAccess(actor, pageId, 'edit', tx);
-        await persistGuestIdentity(actor, tx);
-        const uploader = actorColumns(actor);
-        const uploadResult = await executeQuery<{ id: string }>(
-          tx,
-          sql`insert into uploads
-           (filename, original_name, mime_type, size, uploaded_by, uploaded_by_guest_id)
-         values (${filename}, ${file.name}, ${file.type}, ${file.size}, ${uploader.userId}, ${uploader.guestId})
-         returning id`,
-        );
-        const uploadId = uploadResult.rows[0]?.id;
-        if (!uploadId) {
-          throw new HTTPException(500, { message: 'Failed to create upload' });
-        }
-
-        await executeQuery(
-          tx,
-          sql`insert into upload_page_refs (upload_id, page_id)
-         values (${uploadId}, ${pageId})
-         on conflict (upload_id, page_id) do nothing`,
-        );
-      });
-    });
-
-    return c.json({ url: `/api/uploads/${filename}` });
-  },
-);
-
-uploadsRoute.get('/:filename', async (c) => {
-  const filename = c.req.param('filename');
-
-  // Validate filename - only allow alphanumeric, dash, underscore, dot
-  if (!/^[a-zA-Z0-9\-_.]+$/.test(filename)) {
-    throw new HTTPException(400, { message: 'Invalid filename' });
-  }
-
-  c.header('Cache-Control', 'no-store');
-  const session = await auth.api.getSession({ headers: c.req.raw.headers });
-  const user = session?.user as { id: string } | undefined;
-
-  const materialized = await db.transaction(async (tx) => {
+const authorizeUploadDownload = async (
+  filename: string,
+  user: { id: string } | undefined,
+): Promise<{ upload: UploadRow; cacheControl: string }> =>
+  db.transaction(async (tx) => {
     const candidateUpload = await getUploadByFilename(filename, tx);
     if (!candidateUpload) {
       throw new HTTPException(404, { message: 'Not found' });
@@ -212,8 +102,8 @@ uploadsRoute.get('/:filename', async (c) => {
     // Every operation that can change an upload's referenced pages or their
     // access state takes the corresponding workspace lock. Hold all current
     // owners in stable order, then re-read the reference set before checking
-    // access so a revoke, public-access change, move, copy, or purge cannot linearize
-    // between authorization and byte materialization.
+    // access so a revoke, public-access change, move, copy, or purge cannot
+    // invalidate this authorization while it is being established.
     const ownerIds = await getUploadWorkspaceOwnerIds(tx, candidateUpload.id);
     for (const ownerId of ownerIds) {
       await lockWorkspaceAccess(tx, ownerId);
@@ -227,7 +117,7 @@ uploadsRoute.get('/:filename', async (c) => {
     }
 
     const upload = await getUploadByFilename(filename, tx);
-    if (!upload) {
+    if (!upload || upload.id !== candidateUpload.id) {
       throw new HTTPException(404, { message: 'Not found' });
     }
 
@@ -244,18 +134,52 @@ uploadsRoute.get('/:filename', async (c) => {
       throw new HTTPException(404, { message: 'Not found' });
     }
 
-    try {
-      const fileBuffer = await readFile(path.join(uploadsDir, filename));
-      return { upload, fileBuffer, cacheControl };
-    } catch {
-      throw new HTTPException(404, { message: 'File not found' });
-    }
+    return { upload, cacheControl };
   });
 
-  c.header('Cache-Control', materialized.cacheControl);
-  return c.body(materialized.fileBuffer, 200, {
-    'Content-Type': materialized.upload.mime_type,
-    'Content-Length': materialized.upload.size.toString(),
+const readUploadBytes = async (filename: string): Promise<Buffer> => {
+  try {
+    return await getUploadStorage().get(filename);
+  } catch (error) {
+    if (isUploadNotFoundError(error)) {
+      throw new HTTPException(404, { message: 'File not found' });
+    }
+    throw new HTTPException(503, { message: 'File storage is unavailable', cause: error });
+  }
+};
+
+uploadsRoute.get('/:filename', async (c) => {
+  const filename = c.req.param('filename');
+
+  // Validate filename - only allow alphanumeric, dash, underscore, dot
+  if (!/^[a-zA-Z0-9\-_.]+$/.test(filename)) {
+    throw new HTTPException(400, { message: 'Invalid filename' });
+  }
+
+  c.header('Cache-Control', 'no-store');
+  const principal = await authenticateV1Request(c.req.raw);
+  if (!principal && (c.req.header('authorization') || c.req.header(MCP_INTERNAL_AUTH_HEADER))) {
+    throw new HTTPException(401, { message: 'Unauthorized' });
+  }
+  if (principal && principal.kind !== 'session' && !principal.scopes.has('pages:read')) {
+    throw new HTTPException(403, { message: 'Token requires pages:read' });
+  }
+  const user = principal ? { id: principal.userId } : undefined;
+
+  // Gate remote storage work behind an initial access check, but never hold a
+  // database connection or workspace lock while reading the object. Recheck
+  // afterward so access revoked during the read cannot return protected bytes.
+  const initialAuthorization = await authorizeUploadDownload(filename, user);
+  const fileBuffer = await readUploadBytes(filename);
+  const authorized = await authorizeUploadDownload(filename, user);
+  if (authorized.upload.id !== initialAuthorization.upload.id) {
+    throw new HTTPException(404, { message: 'Not found' });
+  }
+
+  c.header('Cache-Control', authorized.cacheControl);
+  return c.body(new Uint8Array(fileBuffer), 200, {
+    'Content-Type': authorized.upload.mime_type,
+    'Content-Length': authorized.upload.size.toString(),
     'Content-Security-Policy': "default-src 'none'; sandbox",
     'X-Content-Type-Options': 'nosniff',
     'Cross-Origin-Resource-Policy': 'same-origin',

@@ -830,11 +830,17 @@ export const uploadDeletionQueue = pgTable(
     filename: text('filename').notNull().unique(),
     attempts: integer('attempts').default(0).notNull(),
     lastError: text('last_error'),
+    deleteAfter: timestamp('delete_after').defaultNow().notNull(),
+    claimToken: uuid('claim_token'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
   (table) => ({
-    updatedAtIdx: index('upload_deletion_queue_updated_at_id_idx').on(table.updatedAt, table.id),
+    readyIdx: index('upload_deletion_queue_ready_idx').on(
+      table.deleteAfter,
+      table.updatedAt,
+      table.id,
+    ),
   }),
 );
 

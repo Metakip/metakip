@@ -22,10 +22,7 @@ function createCommands(document: string, anchor = 0, head = document.length, re
   });
   const commands = createEditorFormattingCommands({
     editor,
-    identityLifecycle: { isActive: () => true },
-    isAnonymous: false,
     keepVisible: vi.fn(),
-    pageId: 'page-1',
     reposition: vi.fn(),
     updateActiveStates: vi.fn(),
   });
@@ -336,10 +333,7 @@ describe('editor formatting commands', () => {
     });
     const commands = createEditorFormattingCommands({
       editor,
-      identityLifecycle: { isActive: () => true },
-      isAnonymous: false,
       keepVisible: vi.fn(),
-      pageId: 'page-1',
       reposition: vi.fn(),
       updateActiveStates: vi.fn(),
     });
@@ -370,50 +364,33 @@ describe('editor formatting commands', () => {
     editor.destroy();
   });
 
-  it('drops a delayed image upload after its identity retires', async () => {
-    let identityActive = true;
-    let resolveUpload: ((response: Response) => void) | undefined;
-    const upload = new Promise<Response>((resolve) => {
-      resolveUpload = resolve;
-    });
-    const fetchSpy = vi.fn(() => upload);
-    vi.stubGlobal('fetch', fetchSpy);
+  it('routes an image picker selection through the managed uploader', () => {
+    const uploadImage = vi.fn();
     const editor = new EditorView({
       state: EditorState.create({ doc: 'Existing content' }),
     });
     const commands = createEditorFormattingCommands({
       editor,
-      identityLifecycle: { isActive: () => identityActive },
-      isAnonymous: false,
       keepVisible: vi.fn(),
-      pageId: 'page-1',
       reposition: vi.fn(),
       updateActiveStates: vi.fn(),
+      uploadImage,
     });
     const fileInput = document.createElement('input');
     vi.spyOn(fileInput, 'click').mockImplementation(() => undefined);
     const createElementSpy = vi.spyOn(document, 'createElement').mockReturnValue(fileInput);
 
     commands.handleImageUploadFromSlash();
+    const selectedFile = new File(['image'], 'diagram.png', { type: 'image/png' });
     Object.defineProperty(fileInput, 'files', {
       configurable: true,
-      value: [new File(['private image'], 'private.png', { type: 'image/png' })],
+      value: [selectedFile],
     });
     fileInput.dispatchEvent(new Event('change'));
 
-    expect(fetchSpy).toHaveBeenCalledOnce();
-    identityActive = false;
-    resolveUpload?.(
-      new Response(JSON.stringify({ url: '/uploads/private.png' }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      }),
-    );
-    await upload;
-
+    expect(uploadImage).toHaveBeenCalledWith(selectedFile);
     expect(editor.state.doc.toString()).toBe('Existing content');
     createElementSpy.mockRestore();
-    vi.unstubAllGlobals();
     editor.destroy();
   });
 });

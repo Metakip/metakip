@@ -1,12 +1,11 @@
+import { API_IDEMPOTENCY_REPLAY_SECONDS } from '@metakip/shared';
 import { sql } from 'drizzle-orm';
 import { HTTPException } from 'hono/http-exception';
-import { query } from '../../db/query';
+import { executeQuery, type QueryExecutor, query } from '../../db/query';
 import { type V1Principal, v1IdempotencyPrincipal } from '../../middleware/v1Auth';
 
 const RESERVATION_SECONDS = 5 * 60;
 const IDEMPOTENCY_RETRY_AFTER_SECONDS = 1;
-
-type StoredResponse = { etag: string };
 
 export type IdempotencyReservation = {
   recordId: string;
@@ -14,7 +13,9 @@ export type IdempotencyReservation = {
   requestHash: string;
 };
 
-type IdempotencyRecord<T extends StoredResponse> = {
+type StoredContentResponse = { etag: string };
+
+type IdempotencyRecord<T extends object> = {
   request_hash: string;
   response: T | null;
 };
@@ -51,8 +52,7 @@ function idempotencyConflict(
     cause: { code, ...(retryAfterSeconds === undefined ? {} : { retryAfterSeconds }) },
   });
 }
-
-export async function reserveIdempotency<T extends StoredResponse>(
+export async function reserveIdempotency<T extends object>(
   principal: V1Principal,
   key: string,
   requestHash: string,
@@ -121,7 +121,27 @@ export async function releaseIdempotency(
   );
 }
 
-export async function runIdempotentContentCommand<T extends StoredResponse>(
+export async function completeIdempotency<T extends object>(
+  reservation: IdempotencyReservation,
+  response: T,
+  executor: QueryExecutor,
+): Promise<void> {
+  const persisted = await executeQuery(
+    executor,
+    sql`update api_idempotency_records
+        set response = ${JSON.stringify(response)}::jsonb,
+            expires_at = now() + (${API_IDEMPOTENCY_REPLAY_SECONDS} * interval '1 second')
+        where id = ${reservation.recordId}
+          and idempotency_key = ${reservation.key}
+          and request_hash = ${reservation.requestHash}
+          and response is null`,
+  );
+  if (persisted.rowCount !== 1) {
+    throw idempotencyConflict('idempotency_reservation_missing', 'Idempotency reservation expired');
+  }
+}
+
+export async function runIdempotentMutationReservation<T extends object>(
   principal: V1Principal,
   key: string | null,
   requestHash: string,
@@ -143,4 +163,13 @@ export async function runIdempotentContentCommand<T extends StoredResponse>(
     }
     throw error;
   }
+}
+
+export async function runIdempotentContentCommand<T extends StoredContentResponse>(
+  principal: V1Principal,
+  key: string | null,
+  requestHash: string,
+  command: (reservation: IdempotencyReservation | null) => Promise<T>,
+): Promise<T> {
+  return runIdempotentMutationReservation(principal, key, requestHash, command);
 }

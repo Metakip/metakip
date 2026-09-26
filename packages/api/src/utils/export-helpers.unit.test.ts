@@ -3,13 +3,24 @@ import os from 'node:os';
 import path from 'node:path';
 import { parseMarkdownFrontmatter } from '@metakip/shared';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { extractImages as extractAuthorizedImages, serializeFrontmatter } from './export-helpers';
+import {
+  extractImages as extractAuthorizedImages,
+  prepareImageExtraction,
+  serializeFrontmatter,
+} from './export-helpers';
+import { LocalUploadStorage, readStoredUploads } from './uploadStorage';
 
 describe('export-helpers / extractImages', () => {
   let tmpDir: string;
   const authorizedUploadFilenames = new Set(['test-image.png', 'photo.jpg']);
-  const extractImages = (markdown: string, uploadsDir: string) =>
-    extractAuthorizedImages(markdown, uploadsDir, authorizedUploadFilenames);
+  const extractImages = async (markdown: string, uploadsDir: string) => {
+    const plan = prepareImageExtraction(markdown, authorizedUploadFilenames);
+    const storedUploads = await readStoredUploads(
+      plan.referencedUploadFilenames,
+      new LocalUploadStorage(uploadsDir),
+    );
+    return extractAuthorizedImages(plan, storedUploads);
+  };
 
   beforeAll(async () => {
     const dirPath = path.join(os.tmpdir(), 'extract-images-test');
@@ -41,9 +52,36 @@ describe('export-helpers / extractImages', () => {
 
   it('leaves server images unchanged when the page does not reference the upload', async () => {
     const md = '![test](/api/uploads/test-image.png)';
-    const result = await extractAuthorizedImages(md, tmpDir, new Set());
+    const result = extractAuthorizedImages(
+      prepareImageExtraction(md, new Set()),
+      new Map([['test-image.png', Buffer.from('image')]]),
+    );
     expect(result.markdown).toBe(md);
     expect(result.assets.size).toBe(0);
+  });
+
+  it('plans only managed uploads referenced by the markdown', () => {
+    const plan = prepareImageExtraction(
+      '![test](/api/uploads/test-image.png)',
+      authorizedUploadFilenames,
+    );
+    expect([...plan.referencedUploadFilenames]).toEqual(['test-image.png']);
+  });
+
+  it('keeps page authorization separate when plans share a workspace-wide image map', () => {
+    const markdown = '![one](/api/uploads/test-image.png) ![two](/api/uploads/photo.jpg)';
+    const firstPage = prepareImageExtraction(markdown, new Set(['test-image.png']));
+    const secondPage = prepareImageExtraction(markdown, new Set(['photo.jpg']));
+    const images = new Map([
+      ['test-image.png', Buffer.from('first image')],
+      ['photo.jpg', Buffer.from('second image')],
+    ]);
+    expect(extractAuthorizedImages(firstPage, images).markdown).toBe(
+      '![one](./assets/test-image.png) ![two](/api/uploads/photo.jpg)',
+    );
+    expect(extractAuthorizedImages(secondPage, images).markdown).toBe(
+      '![one](/api/uploads/test-image.png) ![two](./assets/photo.jpg)',
+    );
   });
 
   it('extracts base64 images to assets with hash filename', async () => {
@@ -109,6 +147,13 @@ describe('export-helpers / extractImages', () => {
     const md = '![my **bold** image](/api/uploads/test-image.png)';
     const result = await extractImages(md, tmpDir);
     expect(result.markdown).toBe('![my **bold** image](./assets/test-image.png)');
+  });
+
+  it('extracts managed images with escaped brackets in their alt text', async () => {
+    const md = String.raw`![Graph \[v2\]](/api/uploads/test-image.png)`;
+    const result = await extractImages(md, tmpDir);
+    expect(result.markdown).toBe(String.raw`![Graph \[v2\]](./assets/test-image.png)`);
+    expect(result.assets.has('test-image.png')).toBe(true);
   });
 
   it('rejects path traversal in server URLs', async () => {

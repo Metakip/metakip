@@ -136,9 +136,9 @@ func reportRunError(runtime *runtimeState, err error) int {
 	if errors.As(err, &renderedError) && renderedError.AlreadyRendered {
 		return exitCode(err)
 	}
-	// A canceled request may have reached the server. Preserve the typed
-	// uncertain-write outcome instead of reducing it to an interruption.
-	if errorCode(err) == "edit_outcome_uncertain" {
+	// A canceled mutation may have reached the server. Preserve a typed
+	// uncertain outcome instead of reducing it to an interruption.
+	if errors.As(err, &renderedError) && renderedError.OutcomeUncertain {
 		runtime.printError(err)
 		return exitCode(err)
 	}

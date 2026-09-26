@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -73,24 +72,15 @@ func lifecycleFailureItem(reference, id, sourceID string, err error) lifecycleIt
 	return item
 }
 
-func lifecycleMutationOutcomeUncertain(err error) bool {
-	var requestError *cliError
-	return errors.Is(err, context.DeadlineExceeded) ||
-		errorCode(err) == "network_error" ||
-		errorCode(err) == "invalid_response" ||
-		(errors.As(err, &requestError) &&
-			requestError.StatusCode >= http.StatusInternalServerError &&
-			requestError.StatusCode <= 599)
-}
-
 func uncertainLifecycleMutationOutcome(err error) error {
-	if !lifecycleMutationOutcomeUncertain(err) {
+	if !mutationOutcomeUncertain(err) {
 		return err
 	}
 	return &cliError{
-		Code:    "outcome_uncertain",
-		Message: "The request may have succeeded. Check the item before retrying",
-		Cause:   err,
+		Code:             "outcome_uncertain",
+		Message:          "The request may have succeeded. Check the item before retrying",
+		Cause:            err,
+		OutcomeUncertain: true,
 	}
 }
 
@@ -385,7 +375,7 @@ func runResolvedLifecycleSelection[T any](
 ) lifecycleItemResult {
 	actionResult, actionErr := action(c, selection.item, selection.id)
 	if actionErr != nil {
-		if lifecycleMutationOutcomeUncertain(actionErr) {
+		if mutationOutcomeUncertain(actionErr) {
 			result.Items[selection.index] = lifecycleOutcomeUncertainItem(
 				selection.reference,
 				selection.id,

@@ -2,9 +2,9 @@ import { extractWikiLinkTargetIds } from '@metakip/shared/yjs-helpers';
 import { sql } from 'drizzle-orm';
 import JSZip from 'jszip';
 import { query } from '../db/query';
-import { uploadsDir } from '../env';
-import { extractImages, pageToMarkdown } from './export-helpers';
+import { extractImages, pageToMarkdown, prepareImageExtraction } from './export-helpers';
 import { allocateFilename } from './filename';
+import { readStoredUploads } from './uploadStorage';
 
 type PageExportRow = {
   id: string;
@@ -66,24 +66,33 @@ export async function exportAllPages(userId: string): Promise<Buffer> {
   const usedNames = new Set<string>();
   const allAssets = new Map<string, Buffer>();
 
-  for (let i = 0; i < pages.length; i++) {
-    const page = pages[i];
-    if (!page) continue;
+  const preparedPages = pages.map((page, index) => {
     const title =
       typeof page.title === 'string' && page.title.trim().length > 0
         ? page.title.trim()
         : 'Untitled';
-    const filename = allocateFilename(title, '.md', usedNames, `Untitled ${i + 1}`);
+    const filename = allocateFilename(title, '.md', usedNames, `Untitled ${index + 1}`);
 
-    let content = pageToMarkdown(page.ydoc, page.properties, page.icon, {
+    const content = pageToMarkdown(page.ydoc, page.properties, page.icon, {
       resolveWikiLinkTarget: (targetId) => {
         const target = exportTargets.get(targetId.toLowerCase());
         return target?.ownerId === page.ownerId ? { title: target.title } : null;
       },
       restrictedWikiLinkText: 'Restricted page',
     });
-    const extracted = await extractImages(content, uploadsDir, new Set(page.uploadFilenames));
-    content = extracted.markdown;
+    return {
+      imagePlan: prepareImageExtraction(content, new Set(page.uploadFilenames)),
+      filename,
+    };
+  });
+
+  const referencedUploadFilenames = new Set(
+    preparedPages.flatMap(({ imagePlan }) => [...imagePlan.referencedUploadFilenames]),
+  );
+  const storedUploads = await readStoredUploads(referencedUploadFilenames);
+
+  for (const { imagePlan, filename } of preparedPages) {
+    const extracted = extractImages(imagePlan, storedUploads);
 
     for (const [assetName, assetBuffer] of extracted.assets) {
       if (!allAssets.has(assetName)) {
@@ -91,7 +100,7 @@ export async function exportAllPages(userId: string): Promise<Buffer> {
       }
     }
 
-    zip.file(filename, content);
+    zip.file(filename, extracted.markdown);
   }
 
   for (const [assetName, assetBuffer] of allAssets) {

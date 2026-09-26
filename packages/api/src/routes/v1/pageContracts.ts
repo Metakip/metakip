@@ -6,6 +6,8 @@ import {
   exactEditCommandResponseSchema,
   exactEditsRequestSchema,
   v1CreatePageRequestSchema,
+  v1ImageUploadRequestSchema,
+  v1ImageUploadResponseSchema,
   v1PageListResponseSchema,
   v1PageResolutionResponseSchema,
   v1PageResponseSchema,
@@ -15,12 +17,15 @@ import { z } from 'zod';
 import {
   jsonContent,
   markdownContent,
+  multipartContent,
   uuidPathParameter,
   type V1OperationContract,
 } from './apiContract';
 
 export const createPageRequestSchema = v1CreatePageRequestSchema;
 export const updatePageRequestSchema = v1UpdatePageRequestSchema;
+export const imageUploadRequestSchema = v1ImageUploadRequestSchema;
+export const imageUploadResponseSchema = v1ImageUploadResponseSchema;
 
 export { exactEditsRequestSchema };
 export const exactEditsResponseSchema = exactEditCommandResponseSchema;
@@ -39,6 +44,13 @@ export type ContentBoundaryOperationRequest = ContentBoundaryOperation;
 export type PageResponse = z.infer<typeof pageResponseSchema>;
 
 const pageIdParameter = uuidPathParameter('pageId');
+const idempotencyKeyParameter = {
+  name: 'Idempotency-Key',
+  in: 'header',
+  schema: { type: 'string', minLength: 1, maxLength: 200, pattern: '\\S' },
+  description:
+    'Use the same key to retry the same request. Completed responses are replayed for 24 hours; incomplete reservations expire after 5 minutes.',
+} as const;
 const etagHeader = {
   ETag: {
     description: 'Revision identifier for the returned page content.',
@@ -178,6 +190,24 @@ export const pageOperations = {
       '200': { description: 'Updated page metadata.', content: jsonContent(pageResponseSchema) },
     },
   },
+  uploadImage: {
+    method: 'post',
+    routePath: '/:id/images',
+    openApiPath: '/pages/{pageId}/images',
+    summary: 'Upload An Image To A Page',
+    description:
+      'Uploads a JPEG, PNG, GIF, or WebP image, attaches it to the page, and returns stable Markdown for insertion. The maximum image size is 10 MB.',
+    tags: pagesTag,
+    requiredScopes: ['pages:write'],
+    parameters: [pageIdParameter, idempotencyKeyParameter],
+    request: { required: true, ...multipartContent(imageUploadRequestSchema) },
+    responses: {
+      '201': {
+        description: 'The managed image and Markdown reference.',
+        content: jsonContent(imageUploadResponseSchema),
+      },
+    },
+  },
   readContent: {
     method: 'get',
     routePath: '/:id/content',
@@ -234,16 +264,7 @@ export const pageOperations = {
       'Replaces one or more exact passages without replacing the full page. Each old passage must occur exactly once, and missing or overlapping matches are rejected. Use `Idempotency-Key` when retrying the same request.',
     tags: pagesTag,
     requiredScopes: ['pages:write'],
-    parameters: [
-      pageIdParameter,
-      {
-        name: 'Idempotency-Key',
-        in: 'header',
-        schema: { type: 'string', minLength: 1, maxLength: 200, pattern: '\\S' },
-        description:
-          'Use the same key to retry the same request. Completed responses are replayed for 24 hours; incomplete reservations expire after 5 minutes.',
-      },
-    ],
+    parameters: [pageIdParameter, idempotencyKeyParameter],
     request: { required: true, ...jsonContent(exactEditsRequestSchema) },
     responses: {
       '200': {
@@ -262,16 +283,7 @@ export const pageOperations = {
       'Adds markdown at the beginning or end of the current page content. The operation runs against the latest content and returns the new `ETag`. Use `Idempotency-Key` when retrying the same request.',
     tags: pagesTag,
     requiredScopes: ['pages:write'],
-    parameters: [
-      pageIdParameter,
-      {
-        name: 'Idempotency-Key',
-        in: 'header',
-        schema: { type: 'string', minLength: 1, maxLength: 200, pattern: '\\S' },
-        description:
-          'Use the same key to retry the same request. Completed responses are replayed for 24 hours; incomplete reservations expire after 5 minutes.',
-      },
-    ],
+    parameters: [pageIdParameter, idempotencyKeyParameter],
     request: { required: true, ...jsonContent(contentBoundaryOperationSchema) },
     responses: {
       '200': {
