@@ -1,5 +1,5 @@
 import type { MarkdownExtension } from '@lezer/markdown';
-import { parseWikiLinkTarget } from '@metakip/shared';
+import { parseWikiLinkTarget } from '@metakip/shared/wiki-link';
 
 const OPEN_BRACKET = 91;
 const BACKSLASH = 92;

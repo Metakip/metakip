@@ -1,11 +1,17 @@
 import { markdown } from '@codemirror/lang-markdown';
+import { forceParsing, syntaxTreeAvailable } from '@codemirror/language';
 import { EditorState } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { GFM } from '@lezer/markdown';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { yCollab } from 'y-codemirror.next';
 import * as Y from 'yjs';
 import { livePreview } from './livePreview';
+import {
+  buildLivePreviewDecorations,
+  expandPreviewRangeForBlockMath,
+} from './livePreviewDecorations';
+import { buildTableWrappers } from './livePreviewTables';
 import { mathMarkdownExtension, wikiLinkMarkdownExtension } from './markdownSyntax';
 
 function createView(doc: string): EditorView {
@@ -97,6 +103,53 @@ describe('CodeMirror Live Preview', () => {
     view.destroy();
   });
 
+  it('does not accumulate duplicate decorations when selections and text change', () => {
+    const view = createView('Before **bold** after #topic');
+    for (let index = 0; index < 5; index += 1) {
+      view.dispatch({ selection: { anchor: 10 } });
+      expect(view.dom.textContent).toContain('**bold**');
+      view.dispatch({ selection: { anchor: 0 } });
+      expect(view.dom.textContent).not.toContain('**');
+      expect(view.dom.querySelectorAll('.cm-md-tag')).toHaveLength(1);
+    }
+    view.dispatch({ changes: { from: 0, insert: 'New ' } });
+    expect(view.dom.querySelectorAll('.cm-md-tag')).toHaveLength(1);
+    expect(view.state.doc.toString()).toBe('New Before **bold** after #topic');
+    view.destroy();
+  });
+
+  it('builds a preview for the requested region instead of decorating the entire document', () => {
+    const source = Array.from({ length: 250 }, (_, index) => `**line ${index}** #tag`).join('\n');
+    const view = createView(source);
+    const first = view.state.doc.line(1);
+    const fullDocumentCopy = vi.spyOn(view.state.doc, 'toString');
+    const decorations = buildLivePreviewDecorations(view, {}, first.from, first.to);
+    let count = 0;
+    decorations.between(0, source.length, () => {
+      count += 1;
+    });
+    expect(count).toBeGreaterThan(0);
+    expect(count).toBeLessThan(10);
+    expect(fullDocumentCopy).not.toHaveBeenCalled();
+    view.destroy();
+  });
+
+  it('renders a distant heading after incremental parsing reaches it', () => {
+    const source = `${'An ordinary line.\n'.repeat(1000)}## Far **heading** #topic`;
+    const view = createView(source);
+    expect(forceParsing(view, source.length, 1000)).toBe(true);
+    expect(syntaxTreeAvailable(view.state, source.length)).toBe(true);
+    const lastLine = view.state.doc.lineAt(source.length);
+    const decorations = buildLivePreviewDecorations(view, {}, lastLine.from, lastLine.to);
+    const classes: string[] = [];
+    decorations.between(lastLine.from, lastLine.to, (_from, _to, value) => {
+      if (typeof value.spec.class === 'string') classes.push(value.spec.class);
+    });
+    expect(classes).toContain('cm-md-heading cm-md-heading-2');
+    expect(classes).toContain('cm-md-strong');
+    view.destroy();
+  });
+
   it('renders inline math with KaTeX until it is selected', () => {
     const view = createView('Value: $x^2$');
     expect(view.dom.querySelector('.katex')).not.toBeNull();
@@ -113,6 +166,31 @@ describe('CodeMirror Live Preview', () => {
 
     expect(view.dom.querySelectorAll('.cm-md-math-block')).toHaveLength(1);
     expect(view.dom.querySelector('.cm-md-code-block')).not.toBeNull();
+    view.destroy();
+  });
+
+  it('refreshes display-math decorations atomically when the requested region starts inside a block', () => {
+    const source = 'Before\n\n$$\nx^2\n+y\n$$\n\nAfter';
+    const view = createView(source);
+    const body = source.indexOf('x^2');
+    const closingFence = source.lastIndexOf('$$');
+    const region = expandPreviewRangeForBlockMath(view, { from: body, to: body + 1 });
+    expect(region).toEqual({
+      from: source.indexOf('$$'),
+      to: closingFence + 2,
+    });
+
+    const decorations = buildLivePreviewDecorations(view, {}, body, body + 1);
+    const hiddenLines: number[] = [];
+    decorations.between(region.from, region.to, (from, _to, value) => {
+      if (value.spec.class === 'cm-md-math-hidden-line') hiddenLines.push(from);
+    });
+    expect(hiddenLines).toEqual([
+      source.indexOf('$$'),
+      source.indexOf('x^2'),
+      source.indexOf('+y'),
+      closingFence,
+    ]);
     view.destroy();
   });
 
@@ -137,6 +215,75 @@ describe('CodeMirror Live Preview', () => {
     expect(view.dom.querySelector('.cm-md-table')).not.toBeNull();
     expect(view.dom.querySelectorAll('.cm-md-table-cell')).toHaveLength(4);
     expect(view.dom.querySelectorAll('.cm-md-align-center')).toHaveLength(2);
+    expect(view.dom.querySelectorAll('.cm-md-table-last-row')).toHaveLength(1);
+    expect(buildTableWrappers(view)).toBe(buildTableWrappers(view));
+    view.dispatch({ changes: { from: view.state.doc.length, insert: '\n\nAfter' } });
+    expect(view.dom.querySelector('.cm-md-table')).not.toBeNull();
+    expect(view.dom.querySelector('.cm-md-table')?.textContent).not.toContain('After');
+    view.destroy();
+  });
+
+  it.each([
+    ['| A | B | C |', '| --- | --- | --- |', 3],
+    ['A | B | C', '--- | --- | ---', 3],
+    ['| A | | C |', '| --- | --- | --- |', 3],
+    ['| A | B |', '| --- | --- |', 2],
+  ])('keeps table column tracks tied to the header: %s', (header, separator, columns) => {
+    const view = createView(`${header}\n${separator}\n| one | two |`);
+    const table = view.dom.querySelector<HTMLElement>('.cm-md-table');
+    expect(table?.style.getPropertyValue('--cm-table-columns').trim()).toBe(String(columns));
+    expect(table?.querySelectorAll('.cm-md-table-row .cm-md-table-cell')).toHaveLength(2);
+    view.destroy();
+  });
+
+  it('updates the column schema when the table header and separator change', () => {
+    const source = '| A | B |\n| --- | --- |\n| one | two |';
+    const view = createView(source);
+    view.dispatch({
+      changes: {
+        from: 0,
+        to: source.length,
+        insert: '| A | B | C |\n| --- | --- | --- |\n| one | two | three |',
+      },
+    });
+    expect(
+      view.dom
+        .querySelector<HTMLElement>('.cm-md-table')
+        ?.style.getPropertyValue('--cm-table-columns')
+        .trim(),
+    ).toBe('3');
+    view.destroy();
+  });
+
+  it('keeps separate table wrappers correct when one table changes', () => {
+    const firstTable = '| A | B |\n| --- | --- |\n| one | two |';
+    const secondTable = '| C | D |\n| --- | --- |\n| three | four |';
+    const source = `${firstTable}\n\nBetween tables.\n\n${secondTable}`;
+    const view = createView(source);
+    expect(view.dom.querySelectorAll('.cm-md-table')).toHaveLength(2);
+
+    const replacement = '| A | B | C |\n| --- | --- | --- |\n| one | two | three |';
+    view.dispatch({
+      changes: {
+        from: 0,
+        to: firstTable.length,
+        insert: replacement,
+      },
+    });
+
+    const columns = [...view.dom.querySelectorAll<HTMLElement>('.cm-md-table')].map((table) =>
+      table.style.getPropertyValue('--cm-table-columns').trim(),
+    );
+    expect(columns).toEqual(['3', '2']);
+    expect(buildTableWrappers(view)).toBe(buildTableWrappers(view));
+    view.destroy();
+  });
+
+  it('places surplus cells on a full-width continuation row', () => {
+    const view = createView('| A | B |\n| --- | --- |\n| one | two | extra |');
+    const cells = view.dom.querySelectorAll('.cm-md-table-row .cm-md-table-cell');
+    expect(cells).toHaveLength(3);
+    expect(cells[2]).toHaveClass('cm-md-table-overflow-cell');
     view.destroy();
   });
 

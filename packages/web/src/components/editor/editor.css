@@ -1,3 +1,10 @@
+.scroll-smooth:has(.codemirror-editor) {
+  /* CodeMirror owns scroll anchoring while correcting estimated row heights. */
+  overflow-anchor: none;
+  /* Do not animate CodeMirror's scrollTop corrections. */
+  scroll-behavior: auto;
+}
+
 .codemirror-editor {
   min-height: 500px;
   padding: 1rem;
@@ -697,15 +704,21 @@
 }
 
 .codemirror-editor .cm-md-table {
-  display: table;
+  display: block;
   width: 100%;
-  margin: 0 0 1rem;
-  border-collapse: collapse;
-  table-layout: auto;
 }
 
 .codemirror-editor .cm-md-table > .cm-line {
-  display: table-row;
+  display: grid;
+  grid-template-columns: repeat(var(--cm-table-columns), minmax(0, 1fr));
+}
+
+.codemirror-editor .cm-md-table > .cm-md-table-last-row {
+  padding-bottom: 1rem;
+}
+
+.codemirror-editor .cm-md-table-overflow-cell {
+  grid-column: 1 / -1;
 }
 
 /* Replacement placeholders must not generate anonymous cells between real cells. */
@@ -716,11 +729,12 @@
 }
 
 .codemirror-editor .cm-md-table-cell {
-  display: table-cell;
-  min-width: 5rem;
+  display: block;
+  min-width: 0;
   border: 1px solid #e5e7eb;
   padding: 0.5rem 0.75rem;
   text-align: left;
+  overflow-wrap: anywhere;
 }
 
 .codemirror-editor .cm-md-table-empty-cell {

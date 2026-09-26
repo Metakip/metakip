@@ -160,6 +160,14 @@ describe('editor formatting commands', () => {
     editor.destroy();
   });
 
+  it('never formats a distant code block from an incomplete large selection', () => {
+    const source = `${'A paragraph.\n'.repeat(6000)}\n\`\`\`\nliteral code\n\`\`\`\n`;
+    const { commands, editor } = createCommands(source);
+    commands.handleBold();
+    expect(editor.state.doc.toString()).toContain('```\nliteral code\n```');
+    editor.destroy();
+  });
+
   it('keeps setext heading underlines and thematic breaks intact', () => {
     const source = 'Title\n-----\n\n---\n\nParagraph';
     const { commands, editor } = createCommands(source);
