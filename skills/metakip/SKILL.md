@@ -59,6 +59,13 @@ metakip --json page view "Page title"
 returned page ID with `page view` or another page command. Page IDs are canonical. A title is only
 a convenience for interactive lookup. If a title is ambiguous, choose from the returned candidates and retry with the page ID; never guess.
 
+## Markdown authoring conventions
+
+- Metakip renders `$...$` as inline math. When writing literal currency amounts, escape each
+  dollar sign as `\$` (for example, `\$20`); use unescaped dollar signs only for intentional math.
+- Keep citation markers such as `[1]` as plain text. Use `[[Page]]` for Metakip page links and
+  `[label](url)` for ordinary Markdown links.
+
 ## Create pages
 
 ```bash
