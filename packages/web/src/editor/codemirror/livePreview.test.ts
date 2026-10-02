@@ -1,11 +1,13 @@
 import { markdown } from '@codemirror/lang-markdown';
-import { forceParsing, syntaxTreeAvailable } from '@codemirror/language';
+import { forceParsing, syntaxHighlighting, syntaxTreeAvailable } from '@codemirror/language';
 import { EditorState } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { GFM } from '@lezer/markdown';
 import { describe, expect, it, vi } from 'vitest';
 import { yCollab } from 'y-codemirror.next';
 import * as Y from 'yjs';
+import '../../components/editor/editor.css';
+import { editorHighlightStyle } from './highlightStyle';
 import { livePreview } from './livePreview';
 import {
   buildLivePreviewDecorations,
@@ -16,11 +18,13 @@ import { mathMarkdownExtension, wikiLinkMarkdownExtension } from './markdownSynt
 
 function createView(doc: string): EditorView {
   const parent = document.body.appendChild(document.createElement('div'));
+  parent.className = 'codemirror-editor';
   return new EditorView({
     parent,
     state: EditorState.create({
       doc,
       extensions: [
+        syntaxHighlighting(editorHighlightStyle, { fallback: true }),
         markdown({ extensions: [GFM, wikiLinkMarkdownExtension, mathMarkdownExtension] }),
         livePreview(),
       ],
@@ -200,6 +204,27 @@ describe('CodeMirror Live Preview', () => {
     expect(view.dom.textContent).not.toContain('https://example.com');
     expect(view.dom.querySelector('.cm-md-strong')).not.toBeNull();
     expect(view.dom.querySelector('a[href="https://example.com"]')).not.toBeNull();
+    view.destroy();
+  });
+
+  it('keeps unresolved bracketed citation markers as plain text', () => {
+    const view = createView('Citation [1] and [2]');
+    expect(view.dom.textContent).toContain('Citation [1] and [2]');
+    expect(view.dom.querySelector('.cm-md-unsafe-link')).toBeNull();
+    expect(view.dom.querySelector('a')).toBeNull();
+    expect(view.dom.querySelectorAll('.cm-md-plain-link-mark')).toHaveLength(4);
+    const line = view.dom.querySelector<HTMLElement>('.cm-line');
+    expect(line).not.toBeNull();
+    for (const bracket of view.dom.querySelectorAll<HTMLElement>('.cm-md-plain-link-mark')) {
+      expect(getComputedStyle(bracket).color).toBe(getComputedStyle(line as HTMLElement).color);
+    }
+    const citationText = [...view.dom.querySelectorAll<HTMLElement>('.cm-line span')].find(
+      (element) => element.textContent === '1',
+    );
+    expect(citationText).toBeDefined();
+    expect(citationText ? getComputedStyle(citationText).textDecorationLine : '').not.toContain(
+      'underline',
+    );
     view.destroy();
   });
 

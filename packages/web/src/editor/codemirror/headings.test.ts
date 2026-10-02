@@ -10,6 +10,12 @@ describe('editor headings', () => {
     ]);
   });
 
+  it('preserves citation brackets in heading text', () => {
+    expect(extractEditorHeadings('## Citation [1]')).toEqual([
+      { id: 'citation-[1]', text: 'Citation [1]', level: 2, from: 0 },
+    ]);
+  });
+
   it('removes formatting markers while preserving visible text', () => {
     expect(extractEditorHeadings('# **Bold** and `code`')).toEqual([
       { id: 'bold-and-code', text: 'Bold and code', level: 1, from: 0 },

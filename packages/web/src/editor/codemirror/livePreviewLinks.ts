@@ -58,15 +58,31 @@ export function addLinkPreviewDecoration(
   if (node.name === 'Link' && !selectionTouches(state, node.from, node.to)) {
     let child = node.node.firstChild;
     let href = '';
+    let hasDestination = false;
     let labelEnd = node.to;
     while (child) {
       if (child.name === 'LinkMark' && state.sliceDoc(child.from, child.to) === ']')
         labelEnd = child.from;
       if (child.name === 'URL') {
+        hasDestination = true;
         href = state.sliceDoc(child.from, child.to);
         if (href.startsWith('<') && href.endsWith('>')) href = href.slice(1, -1);
       }
       child = child.nextSibling;
+    }
+    // Lezer also parses unresolved reference-like text such as [1] as Link.
+    // Keep the brackets as plain text and color them like surrounding text, not metadata.
+    if (!hasDestination) {
+      child = node.node.firstChild;
+      while (child) {
+        if (child.name === 'LinkMark') {
+          ranges.push(
+            Decoration.mark({ class: 'cm-md-plain-link-mark' }).range(child.from, child.to),
+          );
+        }
+        child = child.nextSibling;
+      }
+      return true;
     }
     if (node.node.firstChild)
       ranges.push(Decoration.replace({}).range(node.from, node.node.firstChild.to));

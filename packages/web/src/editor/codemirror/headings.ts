@@ -42,7 +42,12 @@ function hiddenHeadingSourceRanges(
   const add = (from: number, to: number, replacement?: string): void => {
     if (from < to) ranges.push({ from, to, ...(replacement !== undefined ? { replacement } : {}) });
   };
-  const visit = (node: HeadingSyntaxNode, parentName = ''): void => {
+  const visit = (
+    node: HeadingSyntaxNode,
+    parentName = '',
+    parentLinkHasDestination = false,
+  ): void => {
+    if (node.name === 'LinkMark' && parentName === 'Link' && !parentLinkHasDestination) return;
     if (HIDDEN_HEADING_MARKS.has(node.name)) {
       add(node.from, node.to);
       return;
@@ -80,9 +85,17 @@ function hiddenHeadingSourceRanges(
       }
       return;
     }
+    let linkHasDestination = false;
+    if (node.name === 'Link') {
+      let linkChild = node.firstChild;
+      while (linkChild) {
+        if (linkChild.name === 'URL') linkHasDestination = true;
+        linkChild = linkChild.nextSibling;
+      }
+    }
     let child = node.firstChild;
     while (child) {
-      visit(child, node.name);
+      visit(child, node.name, linkHasDestination);
       child = child.nextSibling;
     }
   };

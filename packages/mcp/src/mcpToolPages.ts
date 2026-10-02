@@ -18,6 +18,9 @@ import {
   mcpReplacePageSchema,
 } from './types';
 
+const markdownAuthoringGuidance =
+  ' For authored Markdown, escape literal currency symbols as `\\$` because `$...$` renders as inline math; use `$...$` only intentionally. Keep citation markers such as `[1]` as plain text; use `[[Page]]` for Metakip page links and `[label](url)` for ordinary links.';
+
 export type UpdatePageInput = {
   title?: string | undefined;
   icon?: string | null | undefined;
@@ -74,7 +77,7 @@ export function registerPageTools(
   registerTool(
     server,
     'create_page',
-    'Use this when the user asks to create a new Metakip page. The title is separate page metadata; do not repeat it as a Markdown H1 unless the user explicitly requests that H1. This changes stored content.',
+    `Use this when the user asks to create a new Metakip page. The title is separate page metadata; do not repeat it as a Markdown H1 unless the user explicitly requests that H1. This changes stored content.${markdownAuthoringGuidance}`,
     {
       title: z.string().optional(),
       parentId: z.string().uuid().nullable().optional(),
@@ -103,7 +106,7 @@ export function registerPageTools(
   registerTool(
     server,
     'replace_page',
-    'Use this when the user explicitly asks to replace all Markdown in a page. The page title is separate metadata; do not add a duplicate H1 matching it unless explicitly requested. This overwrites the current page content.',
+    `Use this when the user explicitly asks to replace all Markdown in a page. The page title is separate metadata; do not add a duplicate H1 matching it unless explicitly requested. This overwrites the current page content.${markdownAuthoringGuidance}`,
     { reference: z.string().min(1), markdown: z.string() },
     destructiveAnnotations,
     mcpReplacePageSchema,
@@ -112,7 +115,7 @@ export function registerPageTools(
   registerTool(
     server,
     'edit_page_exact',
-    'Use this when the user asks to replace an exact Markdown passage. It is conflict-aware and safe to retry with the same idempotencyKey.',
+    `Use this when the user asks to replace an exact Markdown passage. It is conflict-aware and safe to retry with the same idempotencyKey.${markdownAuthoringGuidance}`,
     {
       reference: z.string().min(1),
       oldText: z.string(),
@@ -127,7 +130,7 @@ export function registerPageTools(
   registerTool(
     server,
     'append_to_page',
-    'Use this when the user asks to append Markdown to a page. Provide a stable idempotencyKey so a retry cannot append the content twice.',
+    `Use this when the user asks to append Markdown to a page. Provide a stable idempotencyKey so a retry cannot append the content twice.${markdownAuthoringGuidance}`,
     {
       reference: z.string().min(1),
       content: z.string().min(1),
@@ -141,7 +144,7 @@ export function registerPageTools(
   registerTool(
     server,
     'prepend_to_page',
-    'Use this when the user asks to prepend Markdown to a page. Provide a stable idempotencyKey so a retry cannot prepend the content twice.',
+    `Use this when the user asks to prepend Markdown to a page. Provide a stable idempotencyKey so a retry cannot prepend the content twice.${markdownAuthoringGuidance}`,
     {
       reference: z.string().min(1),
       content: z.string().min(1),
