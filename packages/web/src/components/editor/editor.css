@@ -137,6 +137,11 @@
   cursor: text;
 }
 
+.codemirror-editor .cm-md-plain-link-mark,
+.codemirror-editor .cm-md-plain-link-mark * {
+  color: inherit;
+}
+
 /* A decorative external-link icon; no extra text enters selections or the Markdown. */
 .codemirror-editor a.cm-md-link::after {
   content: "";
