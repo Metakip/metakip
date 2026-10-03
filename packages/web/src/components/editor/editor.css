@@ -137,6 +137,8 @@
   cursor: text;
 }
 
+.codemirror-editor .cm-md-plain-link,
+.codemirror-editor .cm-md-plain-link *,
 .codemirror-editor .cm-md-plain-link-mark,
 .codemirror-editor .cm-md-plain-link-mark * {
   color: inherit;
