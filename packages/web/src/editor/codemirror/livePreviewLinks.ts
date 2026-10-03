@@ -73,6 +73,7 @@ export function addLinkPreviewDecoration(
     // Lezer also parses unresolved reference-like text such as [1] as Link.
     // Keep the brackets as plain text and color them like surrounding text, not metadata.
     if (!hasDestination) {
+      ranges.push(Decoration.mark({ class: 'cm-md-plain-link' }).range(node.from, node.to));
       child = node.node.firstChild;
       while (child) {
         if (child.name === 'LinkMark') {
