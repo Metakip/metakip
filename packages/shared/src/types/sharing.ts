@@ -135,8 +135,9 @@ export interface PermissionSnapshotMessage {
 }
 
 const permissionRank = (permission: SharePermission | null): number => {
-  if (permission === 'admin') return 3;
-  if (permission === 'edit') return 2;
+  if (permission === 'admin') return 4;
+  if (permission === 'edit') return 3;
+  if (permission === 'commenter') return 2;
   if (permission === 'view') return 1;
   return 0;
 };

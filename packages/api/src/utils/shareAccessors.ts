@@ -17,7 +17,7 @@ type SourceRow = {
 };
 
 const permissionRank = (permission: SharePermission): number =>
-  permission === 'admin' ? 3 : permission === 'edit' ? 2 : 1;
+  permission === 'admin' ? 4 : permission === 'edit' ? 3 : permission === 'commenter' ? 2 : 1;
 
 export async function getAccessSourcesByEntityIds(
   entityType: ShareEntityType,

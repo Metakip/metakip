@@ -1,7 +1,9 @@
 import type { EditorView } from '@codemirror/view';
 import {
+  type CommentAnchor,
   deriveCapabilities,
   normalizeWikiLinkLookupKey,
+  type PageCommentThread,
   type ParsedWikiLinkTarget,
   type SharePermission,
 } from '@metakip/shared';
@@ -11,6 +13,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { useIsReadOnly, useSetReadOnly } from '../../contexts/EditorReadOnlyContext';
 import { useIdentityLifecycle } from '../../contexts/IdentityLifecycleContext';
 import { useSetCapabilities, useShareContext } from '../../contexts/ShareContext';
+import { commentAnchorKey } from '../../editor/codemirror/commentAnchors';
 import { type EditorHeading, scrollToEditorHeading } from '../../editor/codemirror/headings';
 import {
   fetchWikiLinkPresentations,
@@ -26,6 +29,8 @@ import { useFloatingToolbar } from '../../hooks/useFloatingToolbar';
 import { useSlashMenu } from '../../hooks/useSlashMenu';
 import { useWikiLinkSuggestions } from '../../hooks/useWikiLinkSuggestions';
 import { LoadingIndicator } from '../ui/LoadingIndicator';
+import { InlineCommentCard } from './InlineCommentCard';
+import { InlineCommentComposer } from './InlineCommentComposer';
 import { TableOfContents } from './TableOfContents';
 import { useEditorActiveStates } from './useEditorActiveStates';
 import './editor.css';
@@ -36,6 +41,7 @@ import { createEditorFormattingCommands } from './editorFormattingCommands';
 import { createEditorTableCommands } from './editorTableCommands';
 import { FloatingToolbar } from './FloatingToolbar';
 import { SlashMenu } from './SlashMenu';
+import { useEditorComments } from './useEditorComments';
 import { useEditorShortcuts } from './useEditorShortcuts';
 import { WikiLinkSuggestions } from './WikiLinkSuggestions';
 
@@ -49,10 +55,21 @@ interface CodeMirrorEditorProps {
   onWikiLinkClick?: (target: WikiLinkNavigationTarget) => void;
   onPermissionSnapshot?: (permission: SharePermission | null, accessRevision: string) => void;
   requestedHeadingId?: string;
+  commentAnchors?: readonly CommentAnchor[];
+  commentThreads?: readonly PageCommentThread[];
+  hideInlineCommentCards?: boolean;
+  canComment?: boolean;
+  canModerateComments?: boolean;
+  activeCommentAnchor?: CommentAnchor | null;
+  onCommentAnchorHoverChange?: (anchor: CommentAnchor | null) => void;
+  onCommentSelection?: (anchor: CommentAnchor | null) => void;
+  onCreateComment?: (anchor: CommentAnchor, body: string) => Promise<void>;
 }
 
 const WIKI_LINK_PRESENTATION_REVALIDATION_MS = 30_000;
 const INITIAL_SYNC_TIMEOUT_MS = 10_000;
+const EMPTY_COMMENT_THREADS: readonly PageCommentThread[] = [];
+const EMPTY_COMMENT_ANCHORS: readonly CommentAnchor[] = [];
 
 export function CodeMirrorEditor({
   pageId,
@@ -64,8 +81,18 @@ export function CodeMirrorEditor({
   onWikiLinkClick,
   onPermissionSnapshot,
   requestedHeadingId,
+  commentAnchors = EMPTY_COMMENT_ANCHORS,
+  commentThreads = EMPTY_COMMENT_THREADS,
+  hideInlineCommentCards = false,
+  canComment = false,
+  canModerateComments = false,
+  activeCommentAnchor = null,
+  onCommentAnchorHoverChange,
+  onCommentSelection,
+  onCreateComment,
 }: CodeMirrorEditorProps) {
   const editorRef = useRef<EditorView | null>(null);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [initialContentReadyEditor, setInitialContentReadyEditor] = useState<EditorView | null>(
     null,
   );
@@ -73,6 +100,7 @@ export function CodeMirrorEditor({
   const [initialSyncAttempt, setInitialSyncAttempt] = useState(0);
   const [headings, setHeadings] = useState<readonly EditorHeading[]>([]);
   const [activeHeadingId, setActiveHeadingId] = useState('');
+  const [isTableOfContentsHovered, setIsTableOfContentsHovered] = useState(false);
   const initialContentReadyRef = useRef(false);
   const { isAnonymous } = useShareContext();
   const { data: session } = useAuth();
@@ -110,6 +138,15 @@ export function CodeMirrorEditor({
     ...(onStatusChange ? { onStatusChange } : {}),
     ...(onDocumentReloadRequired ? { onDocumentReloadRequired } : {}),
     ...(onPermissionSnapshot ? { onPermissionSnapshot } : {}),
+  });
+  const editorComments = useEditorComments({
+    wrapperRef,
+    commentAnchors,
+    commentThreads,
+    activeCommentAnchor,
+    canComment,
+    ...(onCommentAnchorHoverChange ? { onCommentAnchorHoverChange } : {}),
+    ...(onCommentSelection ? { onCommentSelection } : {}),
   });
 
   const {
@@ -196,6 +233,11 @@ export function CodeMirrorEditor({
       [],
     ),
     resolveHeadingWikiLink,
+    commentAnchors: editorComments.activeCommentAnchors,
+    onDocumentChange: editorComments.updateInlineCommentPositions,
+    ...(onCommentSelection || onCreateComment
+      ? { onCommentSelection: editorComments.handleCommentSelection }
+      : {}),
     readOnly: isReadOnly,
     ...(imageUploader ? { onImageUpload: imageUploader } : {}),
   });
@@ -352,10 +394,11 @@ export function CodeMirrorEditor({
 
   useEffect(() => {
     editorRef.current = editor;
+    editorComments.setEditor(editor);
     return () => {
       if (editorRef.current === editor) editorRef.current = null;
     };
-  }, [editor]);
+  }, [editor, editorComments.setEditor]);
 
   useEffect(() => {
     if (!editor) return;
@@ -379,9 +422,12 @@ export function CodeMirrorEditor({
     };
   }, [editor, updateActiveStates]);
 
+  const commentSelection = editorComments.commentSelection;
+
   return (
     <div
-      className={`editor-wrapper min-h-[500px] relative ${isReadOnly ? '' : 'editor-scroll-past-end'} ${isEditorReady ? '' : 'flex items-center justify-center'}`}
+      ref={wrapperRef}
+      className={`editor-wrapper relative min-h-[500px] ${isReadOnly ? '' : 'editor-scroll-past-end'} ${isEditorReady ? '' : 'flex items-center justify-center'}`}
     >
       {editorLoadState.status === 'error' ? (
         <div className="flex max-w-md flex-col items-center gap-3 p-8 text-center" role="alert">
@@ -419,41 +465,89 @@ export function CodeMirrorEditor({
             commands={slashCommands}
             onClose={closeSlashMenu}
           />
-          <FloatingToolbar
-            visible={visible}
-            position={position}
-            onInteractionStart={keepVisible}
-            onBold={editorCommands.command('bold').execute}
-            onItalic={editorCommands.command('italic').execute}
-            onStrike={editorCommands.command('strikethrough').execute}
-            onCode={editorCommands.command('code').execute}
-            onLink={editorCommands.command('link').execute}
-            onBlockquote={editorCommands.command('blockquote').execute}
-            onH1={editorCommands.command('h1').execute}
-            onH2={editorCommands.command('h2').execute}
-            onH3={editorCommands.command('h3').execute}
-            onH4={editorCommands.command('h4').execute}
-            onH5={editorCommands.command('h5').execute}
-            onH6={editorCommands.command('h6').execute}
-            onBulletList={editorCommands.command('bullet-list').execute}
-            onOrderedList={editorCommands.command('ordered-list').execute}
-            onTaskList={editorCommands.command('task-list').execute}
-            onInsertTable={editorCommands.command('table').execute}
-            onAddRowBefore={editorCommands.command('add-row-before').execute}
-            onAddRowAfter={editorCommands.command('add-row-after').execute}
-            onAddColBefore={editorCommands.command('add-column-before').execute}
-            onAddColAfter={editorCommands.command('add-column-after').execute}
-            onDeleteRow={editorCommands.command('delete-row').execute}
-            onDeleteCol={editorCommands.command('delete-column').execute}
-            onDeleteTable={editorCommands.command('delete-table').execute}
-            {...activeStates}
-          />
         </>
       )}
+      {isEditorReady && (!isReadOnly || canComment) && (
+        <FloatingToolbar
+          visible={
+            visible &&
+            !editorComments.isCommentComposerOpen &&
+            (!isReadOnly || commentSelection !== null)
+          }
+          position={position}
+          onInteractionStart={keepVisible}
+          onAddComment={() => editorComments.setIsCommentComposerOpen(true)}
+          canComment={canComment && commentSelection !== null}
+          commentOnly={isReadOnly}
+          onBold={editorCommands.command('bold').execute}
+          onItalic={editorCommands.command('italic').execute}
+          onStrike={editorCommands.command('strikethrough').execute}
+          onCode={editorCommands.command('code').execute}
+          onLink={editorCommands.command('link').execute}
+          onBlockquote={editorCommands.command('blockquote').execute}
+          onH1={editorCommands.command('h1').execute}
+          onH2={editorCommands.command('h2').execute}
+          onH3={editorCommands.command('h3').execute}
+          onH4={editorCommands.command('h4').execute}
+          onH5={editorCommands.command('h5').execute}
+          onH6={editorCommands.command('h6').execute}
+          onBulletList={editorCommands.command('bullet-list').execute}
+          onOrderedList={editorCommands.command('ordered-list').execute}
+          onTaskList={editorCommands.command('task-list').execute}
+          onInsertTable={editorCommands.command('table').execute}
+          onAddRowBefore={editorCommands.command('add-row-before').execute}
+          onAddRowAfter={editorCommands.command('add-row-after').execute}
+          onAddColBefore={editorCommands.command('add-column-before').execute}
+          onAddColAfter={editorCommands.command('add-column-after').execute}
+          onDeleteRow={editorCommands.command('delete-row').execute}
+          onDeleteCol={editorCommands.command('delete-column').execute}
+          onDeleteTable={editorCommands.command('delete-table').execute}
+          {...activeStates}
+        />
+      )}
       <div ref={setContainer} className={`codemirror-editor ${isEditorReady ? '' : 'invisible'}`} />
+      {!hideInlineCommentCards &&
+        !isTableOfContentsHovered &&
+        editorComments.inlineCommentPositions.map(({ thread, top, right }) => {
+          const anchor = thread.anchor;
+          if (thread.comments.length === 0) return null;
+          const anchorKey = commentAnchorKey(anchor);
+          return (
+            <InlineCommentCard
+              key={thread.id}
+              pageId={pageId}
+              thread={thread}
+              anchorKey={anchorKey}
+              currentUserId={currentUserId}
+              canComment={canComment}
+              canModerate={canModerateComments}
+              active={editorComments.activeCommentAnchorKey === anchorKey}
+              onHoverChange={(hovered) =>
+                onCommentAnchorHoverChange?.(hovered ? thread.anchor : null)
+              }
+              onHeightChange={editorComments.handleInlineCommentCardHeightChange}
+              style={{ top, right }}
+            />
+          );
+        })}
+      {editorComments.isCommentComposerOpen &&
+        commentSelection &&
+        onCreateComment &&
+        canComment && (
+          <InlineCommentComposer
+            key={`${commentSelection.anchor.prefix ?? ''}:${commentSelection.anchor.quote}:${commentSelection.anchor.suffix ?? ''}`}
+            position={commentSelection.position}
+            onSubmit={async (body) => {
+              await onCreateComment(commentSelection.anchor, body);
+              editorComments.clearCommentSelection();
+            }}
+            onCancel={editorComments.closeCommentComposer}
+          />
+        )}
       <TableOfContents
         headings={headings}
         activeHeadingId={activeHeadingId}
+        onHoverChange={setIsTableOfContentsHovered}
         onHeadingSelect={(heading) => {
           if (editor) scrollToEditorHeading(editor, heading);
         }}

@@ -24,7 +24,7 @@ function isNullableString(value: unknown): value is string | null {
 }
 
 function isPermission(value: unknown): value is SharePermission {
-  return value === 'view' || value === 'edit' || value === 'admin';
+  return value === 'view' || value === 'commenter' || value === 'edit' || value === 'admin';
 }
 
 function isPublicPermission(value: unknown): value is 'view' | 'edit' {
@@ -40,7 +40,8 @@ function isCapabilitySet(value: unknown): value is CapabilitySet {
     isRecord(value) &&
     typeof value.canEdit === 'boolean' &&
     typeof value.canDelete === 'boolean' &&
-    typeof value.canCopy === 'boolean'
+    typeof value.canCopy === 'boolean' &&
+    typeof value.canComment === 'boolean'
   );
 }
 

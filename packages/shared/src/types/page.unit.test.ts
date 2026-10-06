@@ -6,22 +6,27 @@ describe('deriveCapabilities', () => {
     {
       role: 'no access',
       permission: null,
-      expected: { canEdit: false, canDelete: false, canCopy: false },
+      expected: { canEdit: false, canDelete: false, canCopy: false, canComment: false },
     },
     {
       role: 'viewer',
       permission: 'view' as const,
-      expected: { canEdit: false, canDelete: false, canCopy: true },
+      expected: { canEdit: false, canDelete: false, canCopy: true, canComment: false },
+    },
+    {
+      role: 'commenter',
+      permission: 'commenter' as const,
+      expected: { canEdit: false, canDelete: false, canCopy: true, canComment: true },
     },
     {
       role: 'editor',
       permission: 'edit' as const,
-      expected: { canEdit: true, canDelete: false, canCopy: true },
+      expected: { canEdit: true, canDelete: false, canCopy: true, canComment: true },
     },
     {
       role: 'admin',
       permission: 'admin' as const,
-      expected: { canEdit: true, canDelete: true, canCopy: true },
+      expected: { canEdit: true, canDelete: true, canCopy: true, canComment: true },
     },
   ] satisfies Array<{
     role: string;
@@ -36,6 +41,7 @@ describe('deriveCapabilities', () => {
       canEdit: true,
       canDelete: true,
       canCopy: true,
+      canComment: true,
     });
   });
 });

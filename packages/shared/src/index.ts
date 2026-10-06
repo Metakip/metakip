@@ -5,6 +5,7 @@ export * from './constants/requestLimits.js';
 export * from './logger.js';
 export * from './types/api.js';
 export * from './types/bulkRemoval.js';
+export * from './types/comments.js';
 export * from './types/import.js';
 export * from './types/internalContentCommand.js';
 export * from './types/mcp.js';

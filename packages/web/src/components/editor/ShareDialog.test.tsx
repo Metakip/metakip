@@ -137,6 +137,7 @@ function adminSummary(): ShareSummary {
       canEdit: true,
       canDelete: true,
       canCopy: true,
+      canComment: true,
     },
     permissionDetails: [],
     inheritedAccessors: [],

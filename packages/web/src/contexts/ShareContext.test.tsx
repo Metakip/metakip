@@ -19,12 +19,14 @@ const VIEW_CAPABILITIES: CapabilitySet = {
   canEdit: false,
   canDelete: false,
   canCopy: true,
+  canComment: false,
 };
 
 const EDIT_CAPABILITIES: CapabilitySet = {
   canEdit: true,
   canDelete: false,
   canCopy: true,
+  canComment: true,
 };
 
 function ContextProbe({

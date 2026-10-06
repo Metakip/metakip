@@ -10,7 +10,8 @@ import {
 } from '../test-support/sharingOracle';
 import { createTestFolder, createTestPage, createTestUser } from '../test-utils';
 
-const roles: readonly OraclePermission[] = [null, 'view', 'edit', 'admin'];
+const roles: readonly OraclePermission[] = [null, 'view', 'commenter', 'edit', 'admin'];
+const workspaceRoles: readonly OraclePermission[] = [null, 'view', 'edit', 'admin'];
 const publicPermissions: readonly OraclePublicPermission[] = [null, 'view', 'edit'];
 
 type MutableWorld = {
@@ -61,7 +62,7 @@ describe('seeded sharing state machine', () => {
       for (let step = 0; step < 150; step += 1) {
         const axis = Math.floor(random() * 10);
         if (axis === 0) {
-          const permission = roles[Math.floor(random() * roles.length)] ?? null;
+          const permission = workspaceRoles[Math.floor(random() * workspaceRoles.length)] ?? null;
           world.workspace = permission;
           await query(
             'DELETE FROM workspace_members WHERE workspace_owner_id = $1 AND member_id = $2',

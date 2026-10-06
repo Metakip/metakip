@@ -71,7 +71,10 @@ export function toFolderResponse(input: FolderResponseInput): FolderResponse {
     icon: input.icon,
     ownerId: input.ownerId,
     permission:
-      input.permission === 'view' || input.permission === 'edit' || input.permission === 'admin'
+      input.permission === 'view' ||
+      input.permission === 'commenter' ||
+      input.permission === 'edit' ||
+      input.permission === 'admin'
         ? input.permission
         : null,
     createdAt:

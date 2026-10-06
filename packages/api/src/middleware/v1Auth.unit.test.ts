@@ -1,3 +1,4 @@
+import type { ApiTokenScope } from '@metakip/shared';
 import {
   createMcpInternalCredential,
   hashMcpAccessToken,
@@ -14,7 +15,7 @@ vi.mock('../db/query', () => ({ executeQuery: vi.fn(), query: queryMock }));
 
 import { requireV1Auth, requireV1Scope } from './v1Auth';
 
-function createTestApp(requiredScope?: 'pages:read' | 'pages:write'): Hono {
+function createTestApp(requiredScope?: ApiTokenScope): Hono {
   const app = new Hono();
   app.use('*', requireV1Auth);
   if (requiredScope) app.use('*', requireV1Scope(requiredScope));
@@ -22,7 +23,7 @@ function createTestApp(requiredScope?: 'pages:read' | 'pages:write'): Hono {
   return app;
 }
 
-function mcpCredential(scopes: ('pages:read' | 'pages:write')[]): string {
+function mcpCredential(scopes: ApiTokenScope[]): string {
   return createMcpInternalCredential(
     {
       userId: 'user-1',
@@ -171,20 +172,44 @@ describe('v1 authentication boundaries', () => {
       .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [{ id: 'session-1' }] })
       .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ id: 'session-1' }] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ id: 'session-1' }] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [{ id: 'session-1' }] })
+      .mockResolvedValueOnce({ rows: [] })
       .mockResolvedValueOnce({ rows: [{ id: 'session-1' }] });
 
-    const readOnlyResponse = await createTestApp('pages:write').request('/test', {
+    const commentScopeResponse = await createTestApp('pages:write').request('/test', {
       headers: { 'X-Metakip-MCP-Authorization': mcpCredential(['pages:read']) },
     });
 
-    expect(readOnlyResponse.status).toBe(403);
-    await expect(readOnlyResponse.json()).resolves.toEqual({
+    expect(commentScopeResponse.status).toBe(403);
+    await expect(commentScopeResponse.json()).resolves.toEqual({
       error: { code: 'insufficient_scope', message: 'Token requires pages:write' },
     });
 
+    const commentRequiredResponse = await createTestApp('pages:comment').request('/test', {
+      headers: { 'X-Metakip-MCP-Authorization': mcpCredential(['pages:read']) },
+    });
+    expect(commentRequiredResponse.status).toBe(403);
+    await expect(commentRequiredResponse.json()).resolves.toEqual({
+      error: { code: 'insufficient_scope', message: 'Token requires pages:comment' },
+    });
+
+    const commentGrantsReadResponse = await createTestApp('pages:read').request('/test', {
+      headers: { 'X-Metakip-MCP-Authorization': mcpCredential(['pages:comment']) },
+    });
+    expect(commentGrantsReadResponse.status).toBe(200);
+
+    const writeGrantsCommentResponse = await createTestApp('pages:comment').request('/test', {
+      headers: { 'X-Metakip-MCP-Authorization': mcpCredential(['pages:write']) },
+    });
+    expect(writeGrantsCommentResponse.status).toBe(200);
+
     const writableResponse = await createTestApp('pages:write').request('/test', {
       headers: {
-        'X-Metakip-MCP-Authorization': mcpCredential(['pages:read', 'pages:write']),
+        'X-Metakip-MCP-Authorization': mcpCredential(['pages:write']),
       },
     });
 

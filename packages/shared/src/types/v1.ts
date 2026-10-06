@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 export const v1UuidSchema = z.uuid();
-export const v1PermissionSchema = z.enum(['view', 'edit', 'admin']).nullable();
+export const v1PermissionSchema = z.enum(['view', 'commenter', 'edit', 'admin']).nullable();
 export const v1CoverSchema = z
   .object({ type: z.string(), value: z.string().nullable() })
   .nullable();

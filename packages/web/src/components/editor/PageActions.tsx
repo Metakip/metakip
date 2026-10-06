@@ -1,5 +1,5 @@
 import type { Page } from '@metakip/shared';
-import { Share, Star } from 'lucide-react';
+import { MessageSquare, Share, Star } from 'lucide-react';
 import { useState } from 'react';
 import { useShareContext } from '../../contexts/ShareContext';
 import { useFavorites, useToggleFavorite } from '../../hooks/use-favorites';
@@ -9,9 +9,20 @@ import { ShareDialog } from './ShareDialog';
 interface PageActionsProps {
   pageId: string;
   page?: Pick<Page, 'icon' | 'id' | 'ownerId' | 'title'> | undefined;
+  canComment?: boolean;
+  commentsOpen?: boolean;
+  commentsCount?: number;
+  onToggleComments?: () => void;
 }
 
-export function PageActions({ pageId, page }: PageActionsProps) {
+export function PageActions({
+  pageId,
+  page,
+  canComment = false,
+  commentsOpen = false,
+  commentsCount = 0,
+  onToggleComments,
+}: PageActionsProps) {
   const { isAnonymous } = useShareContext();
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const { data: favorites } = useFavorites();
@@ -47,6 +58,26 @@ export function PageActions({ pageId, page }: PageActionsProps) {
           <Star size={20} fill={isFavorite ? 'currentColor' : 'none'} />
         </button>
       </Tooltip>
+      {canComment && onToggleComments && (
+        <Tooltip
+          label={`Comments${commentsCount > 0 ? ` · ${commentsCount} open` : ''}`}
+          position="bottom"
+        >
+          <button
+            type="button"
+            onClick={onToggleComments}
+            aria-label={commentsOpen ? 'Close comments' : 'Open comments'}
+            aria-pressed={commentsOpen}
+            className={`relative cursor-pointer rounded-md p-2 transition-colors ${
+              commentsOpen
+                ? 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200'
+                : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800'
+            }`}
+          >
+            <MessageSquare size={20} />
+          </button>
+        </Tooltip>
+      )}
       {page && (
         <>
           <Tooltip label="Share" position="bottom">

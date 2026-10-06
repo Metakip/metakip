@@ -46,7 +46,12 @@ export function createAccessVerifier(pool: Pool, logger: Logger) {
     const access = states.get(credentialPagePermissionKey(candidate));
     if (!access) throw new CollabVerificationError('Missing access row');
     const permission = access.permission;
-    if (permission !== 'view' && permission !== 'edit' && permission !== 'admin') {
+    if (
+      permission !== 'view' &&
+      permission !== 'commenter' &&
+      permission !== 'edit' &&
+      permission !== 'admin'
+    ) {
       logger.debug(
         `[auth] user=${userId} denied access to page=${documentName} (invalid permission)`,
       );

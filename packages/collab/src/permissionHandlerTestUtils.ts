@@ -52,7 +52,10 @@ export function createConnection(overrides?: {
   }
   const user = input.user ?? { id: 'user-1' };
   const permission =
-    input.permission === 'view' || input.permission === 'edit' || input.permission === 'admin'
+    input.permission === 'view' ||
+    input.permission === 'commenter' ||
+    input.permission === 'edit' ||
+    input.permission === 'admin'
       ? input.permission
       : null;
   const context: CollabSession = createCollabSession(

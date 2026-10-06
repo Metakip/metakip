@@ -3,7 +3,7 @@ import {
   deriveCapabilities,
   type FolderDetailPayload,
   getAnonymousName,
-  type PublicPermission,
+  type SharePermission,
 } from '@metakip/shared';
 import {
   createContext,
@@ -17,7 +17,7 @@ import {
 import { useAuth } from '../hooks/useAuth';
 import { getAnonymousId } from '../utils/anonymous-cookie';
 
-export type AccessPermission = PublicPermission | null;
+export type AccessPermission = SharePermission | null;
 
 interface ShareContextType {
   isAnonymous: boolean;
@@ -42,13 +42,15 @@ const DEFAULT_CAPABILITIES: CapabilitySet = {
   canEdit: false,
   canDelete: false,
   canCopy: false,
+  canComment: false,
 };
 
 function capabilitiesEqual(left: CapabilitySet, right: CapabilitySet): boolean {
   return (
     left.canEdit === right.canEdit &&
     left.canDelete === right.canDelete &&
-    left.canCopy === right.canCopy
+    left.canCopy === right.canCopy &&
+    left.canComment === right.canComment
   );
 }
 

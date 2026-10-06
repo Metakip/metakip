@@ -1,4 +1,8 @@
 import {
+  type CommentAnchor,
+  type CommentListStatus,
+  type CommentThreadStatus,
+  MCP_COMMENT_SCOPE,
   MCP_READ_SCOPE,
   MCP_WRITE_SCOPE,
   type McpContentOperation,
@@ -16,6 +20,8 @@ import {
   type McpReplacePage,
   type McpTrashList,
   type McpWhoami,
+  type PageCommentThread,
+  type PageCommentThreadsResponse,
 } from '@metakip/shared';
 import type { McpInternalAuthContext } from '@metakip/shared/node/mcp-internal-auth';
 
@@ -113,6 +119,42 @@ export type McpPageBackend = {
   ): Promise<McpContentOperation>;
 };
 
+export type McpCommentsBackend = {
+  listPageComments(
+    reference: string,
+    input: { status?: CommentListStatus; cursor?: string; limit?: number },
+    options?: McpRequestOptions,
+  ): Promise<PageCommentThreadsResponse>;
+  addPageComment(
+    reference: string,
+    input: { body: string; anchor: CommentAnchor },
+    options?: McpRequestOptions,
+  ): Promise<PageCommentThread>;
+  replyToComment(
+    reference: string,
+    threadId: string,
+    body: string,
+    options?: McpRequestOptions,
+  ): Promise<PageCommentThread>;
+  editComment(
+    reference: string,
+    commentId: string,
+    body: string,
+    options?: McpRequestOptions,
+  ): Promise<PageCommentThread>;
+  deleteComment(
+    reference: string,
+    commentId: string,
+    options?: McpRequestOptions,
+  ): Promise<PageCommentThread>;
+  setCommentThreadStatus(
+    reference: string,
+    threadId: string,
+    status: CommentThreadStatus,
+    options?: McpRequestOptions,
+  ): Promise<PageCommentThread>;
+};
+
 export type McpFolderBackend = {
   listFolders(
     input: { cursor?: string | undefined; limit?: number | undefined },
@@ -188,10 +230,14 @@ export type McpImportExportBackend = {
 
 export type McpRequestBackend = McpIdentityBackend &
   McpPageBackend &
+  McpCommentsBackend &
   McpFolderBackend &
   McpTrashLifecycleBackend &
   McpImportExportBackend & {
+    readonly canReadPages: boolean;
     readonly canWrite: boolean;
+    readonly canReadComments: boolean;
+    readonly canWriteComments: boolean;
   };
 
 export class McpBackendError extends Error {
@@ -208,4 +254,4 @@ export class McpBackendError extends Error {
   }
 }
 
-export { MCP_READ_SCOPE, MCP_WRITE_SCOPE };
+export { MCP_COMMENT_SCOPE, MCP_READ_SCOPE, MCP_WRITE_SCOPE };

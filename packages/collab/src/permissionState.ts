@@ -41,7 +41,7 @@ export function applyPermissionState(
   context.permission = incoming.permission;
   context.accessRevision = incoming.accessRevision;
   if (connection) {
-    connection.readOnly = incoming.permission === 'view' || incoming.permission === null;
+    connection.readOnly = incoming.permission !== 'edit' && incoming.permission !== 'admin';
   }
   return { applied: true, previousPermission, previousReadOnly };
 }

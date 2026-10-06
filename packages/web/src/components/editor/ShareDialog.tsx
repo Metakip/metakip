@@ -33,7 +33,7 @@ type ShareDialogProps = {
 };
 
 const permissionOptions: Array<{
-  value: Exclude<SharePermission, 'admin'> | 'private';
+  value: 'view' | 'edit' | 'private';
   label: string;
 }> = [
   { value: 'private', label: 'Restricted' },
@@ -94,6 +94,7 @@ function CollaboratorIdentity({
 function permissionLabel(permission: SharePermission): string {
   if (permission === 'admin') return 'Admin';
   if (permission === 'edit') return 'Edit';
+  if (permission === 'commenter') return 'Comment';
   return 'View';
 }
 
@@ -280,6 +281,7 @@ export function ShareDialog({ entityType, entityId, title, onClose }: ShareDialo
                     ariaLabel="Permission for new collaborator"
                     options={[
                       { value: 'view', label: 'View' },
+                      { value: 'commenter', label: 'Comment' },
                       { value: 'edit', label: 'Edit' },
                       ...(isOwner ? [{ value: 'admin' as const, label: 'Admin' }] : []),
                     ]}
@@ -488,6 +490,7 @@ export function ShareDialog({ entityType, entityId, title, onClose }: ShareDialo
                         value={entry.permission}
                         options={[
                           { value: 'view', label: 'View' },
+                          { value: 'commenter', label: 'Comment' },
                           { value: 'edit', label: 'Edit' },
                           ...(isOwner ? [{ value: 'admin' as const, label: 'Admin' }] : []),
                           { value: 'remove', label: 'Remove' },

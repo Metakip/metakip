@@ -365,7 +365,10 @@ export const shares = pgTable(
     recipientUserId: uuid('recipient_user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    permission: text('permission').notNull().default('view').$type<'view' | 'edit' | 'admin'>(),
+    permission: text('permission')
+      .notNull()
+      .default('view')
+      .$type<'view' | 'commenter' | 'edit' | 'admin'>(),
     createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
   },
@@ -377,6 +380,79 @@ export const shares = pgTable(
       table.entityId,
       table.recipientUserId,
     ),
+    permissionCheck: check(
+      'shares_permission_check',
+      sql`${table.permission} in ('view', 'commenter', 'edit', 'admin')`,
+    ),
+  }),
+);
+
+export const pageCommentThreads = pgTable(
+  'page_comment_threads',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    pageId: uuid('page_id')
+      .references(() => pages.id, { onDelete: 'cascade' })
+      .notNull(),
+    anchor: customType<{
+      data: { quote: string; prefix: string | null; suffix: string | null };
+      notNull: true;
+      default: false;
+    }>({
+      dataType() {
+        return 'jsonb';
+      },
+    })('anchor').notNull(),
+    status: text('status').notNull().default('open').$type<'open' | 'resolved'>(),
+    createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    resolvedBy: uuid('resolved_by').references(() => users.id, { onDelete: 'set null' }),
+    resolvedAt: timestamp('resolved_at'),
+  },
+  (table) => ({
+    pageCreatedIdx: index('page_comment_threads_page_created_idx').on(
+      table.pageId,
+      table.createdAt,
+      table.id,
+    ),
+    pageStatusUpdatedIdx: index('page_comment_threads_page_status_updated_idx').on(
+      table.pageId,
+      table.status,
+      table.updatedAt,
+    ),
+    statusCheck: check(
+      'page_comment_threads_status_check',
+      sql`${table.status} in ('open', 'resolved')`,
+    ),
+    resolutionCheck: check(
+      'page_comment_threads_resolution_check',
+      sql`(${table.status} = 'open' and ${table.resolvedAt} is null and ${table.resolvedBy} is null)
+        or (${table.status} = 'resolved' and ${table.resolvedAt} is not null)`,
+    ),
+  }),
+);
+
+export const pageComments = pgTable(
+  'page_comments',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    threadId: uuid('thread_id')
+      .references(() => pageCommentThreads.id, { onDelete: 'cascade' })
+      .notNull(),
+    authorId: uuid('author_id').references(() => users.id, { onDelete: 'set null' }),
+    body: text('body').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    deletedAt: timestamp('deleted_at'),
+  },
+  (table) => ({
+    threadCreatedIdx: index('page_comments_thread_created_idx').on(
+      table.threadId,
+      table.createdAt,
+      table.id,
+    ),
+    bodyLength: check('page_comments_body_length_check', sql`char_length(${table.body}) <= 10000`),
   }),
 );
 

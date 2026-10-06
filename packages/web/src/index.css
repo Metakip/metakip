@@ -86,6 +86,23 @@
   [role="button"][aria-disabled="true"] {
     cursor: default;
   }
+  :where(
+      [aria-label="Comments"],
+      [data-comment-anchor-key],
+      [role="dialog"][aria-label="Add comment to selection"]
+    )
+    button:active,
+  button[aria-label="Open comments"]:active,
+  button[aria-label="Close comments"]:active,
+  button[aria-label="Add comment to selection"]:active,
+  body:has(button[aria-label^="More actions for comment by"][aria-expanded="true"])
+    [role="menu"]
+    button:active,
+  body:has(button[aria-label="Comment status filter"][aria-expanded="true"])
+    [role="listbox"]
+    button:active {
+    scale: 1;
+  }
   *:focus-visible {
     @apply outline-none ring-2 ring-zinc-400 ring-offset-2 dark:ring-zinc-500 dark:ring-offset-zinc-950;
   }

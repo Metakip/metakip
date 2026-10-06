@@ -17,6 +17,7 @@ type KebabMenuProps = {
   items: KebabMenuItem[];
   triggerClassName?: string;
   menuClassName?: string;
+  ariaLabel?: string;
   onOpenChange?: (isOpen: boolean) => void;
 };
 
@@ -30,6 +31,7 @@ export function KebabMenu({
   items,
   triggerClassName,
   menuClassName,
+  ariaLabel = 'Open menu',
   onOpenChange,
 }: KebabMenuProps) {
   const kebab = useFloatingMenu();
@@ -57,7 +59,7 @@ export function KebabMenu({
         ref={kebab.refs.setReference}
         type="button"
         id={menuId}
-        aria-label="Open menu"
+        aria-label={ariaLabel}
         className={`${triggerClassName ?? ''} ${kebab.isOpen ? 'opacity-100 bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100' : ''}`}
         {...kebab.getReferenceProps({ onClick: (e) => e.stopPropagation() })}
       >

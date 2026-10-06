@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { hasApiTokenScope } from '../utils/apiToken.js';
 import {
   v1FolderListResponseSchema,
   v1FolderResolutionResponseSchema,
@@ -12,12 +13,12 @@ import {
 } from './v1.js';
 
 export const MCP_READ_SCOPE = 'pages:read' as const;
+export const MCP_COMMENT_SCOPE = 'pages:comment' as const;
 export const MCP_WRITE_SCOPE = 'pages:write' as const;
-export type McpScope = typeof MCP_READ_SCOPE | typeof MCP_WRITE_SCOPE;
+export type McpScope = typeof MCP_READ_SCOPE | typeof MCP_COMMENT_SCOPE | typeof MCP_WRITE_SCOPE;
 
-export function hasMcpWriteWithoutRead(scopes: Iterable<string>): boolean {
-  const scopeSet = new Set(scopes);
-  return scopeSet.has(MCP_WRITE_SCOPE) && !scopeSet.has(MCP_READ_SCOPE);
+export function hasMcpScope(scopes: Iterable<string>, requiredScope: McpScope): boolean {
+  return hasApiTokenScope(scopes, requiredScope);
 }
 
 const mcpIdSchema = z.string().min(1);
@@ -74,7 +75,7 @@ export const mcpIdentitySchema = z
     email: z.string(),
     image: z.string().nullable(),
     authentication: z.enum(['mcp', 'oauth', 'token']),
-    scopes: z.array(z.enum([MCP_READ_SCOPE, MCP_WRITE_SCOPE])),
+    scopes: z.array(z.enum([MCP_READ_SCOPE, MCP_COMMENT_SCOPE, MCP_WRITE_SCOPE])),
   })
   .strict();
 

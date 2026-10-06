@@ -66,6 +66,7 @@ function folderEntity(permission: 'view' | 'edit') {
       canEdit: permission === 'edit',
       canDelete: false,
       canCopy: true,
+      canComment: permission === 'edit',
     },
     pages: [],
     folders: [],

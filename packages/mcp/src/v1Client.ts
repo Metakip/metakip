@@ -1,4 +1,8 @@
+import { hasMcpScope } from '@metakip/shared';
 import type {
+  CommentAnchor,
+  CommentListStatus,
+  CommentThreadStatus,
   McpContentOperation,
   McpEmptied,
   McpExactEdit,
@@ -13,10 +17,14 @@ import type {
   McpReadPage,
   McpReplacePage,
   McpTrashList,
+  PageCommentThread,
+  PageCommentThreadsResponse,
 } from './types';
 import {
   type BinaryExport,
   type ImportFile,
+  MCP_COMMENT_SCOPE,
+  MCP_READ_SCOPE,
   MCP_WRITE_SCOPE,
   type McpActor,
   type McpRequestBackend,
@@ -25,6 +33,7 @@ import {
   mcpIdentitySchema,
   mcpWhoamiSchema,
 } from './types';
+import { V1CommentClient } from './v1ClientComments';
 import { V1FolderClient } from './v1ClientFolders';
 import { V1ImportExportClient } from './v1ClientImportExport';
 import { V1LifecycleClient } from './v1ClientLifecycle';
@@ -42,10 +51,14 @@ export type V1ClientOptions = V1ClientTransportOptions & {
 };
 
 export class V1Client extends V1ClientTransport implements McpRequestBackend {
+  readonly canReadPages: boolean;
   readonly canWrite: boolean;
+  readonly canReadComments: boolean;
+  readonly canWriteComments: boolean;
   private readonly actor: McpActor;
   private readonly io: V1ClientIO;
   private readonly pages: V1PageClient;
+  private readonly comments: V1CommentClient;
   private readonly folders: V1FolderClient;
   private readonly trash: V1TrashClient;
   private readonly lifecycle: V1LifecycleClient;
@@ -54,7 +67,10 @@ export class V1Client extends V1ClientTransport implements McpRequestBackend {
   constructor(options: V1ClientOptions) {
     super(options);
     this.actor = options.actor;
-    this.canWrite = options.actor.authContext.scopes.includes(MCP_WRITE_SCOPE);
+    this.canReadPages = hasMcpScope(options.actor.authContext.scopes, MCP_READ_SCOPE);
+    this.canWrite = hasMcpScope(options.actor.authContext.scopes, MCP_WRITE_SCOPE);
+    this.canReadComments = hasMcpScope(options.actor.authContext.scopes, MCP_COMMENT_SCOPE);
+    this.canWriteComments = hasMcpScope(options.actor.authContext.scopes, MCP_COMMENT_SCOPE);
     this.io = {
       send: (actor, path, requestOptions, signal) => this.send(actor, path, requestOptions, signal),
       readJson: (response) => this.readJson(response),
@@ -65,6 +81,7 @@ export class V1Client extends V1ClientTransport implements McpRequestBackend {
       discardResponse: (response) => this.discardResponse(response),
     };
     this.pages = new V1PageClient(this.io);
+    this.comments = new V1CommentClient(this.io);
     this.folders = new V1FolderClient(this.io);
     this.trash = new V1TrashClient(this.io);
     this.lifecycle = new V1LifecycleClient(
@@ -106,6 +123,57 @@ export class V1Client extends V1ClientTransport implements McpRequestBackend {
 
   async readPage(reference: string, options?: McpRequestOptions): Promise<McpReadPage> {
     return this.pages.readPage(this.actor, reference, options);
+  }
+
+  async listPageComments(
+    reference: string,
+    input: { status?: CommentListStatus; cursor?: string; limit?: number },
+    options?: McpRequestOptions,
+  ): Promise<PageCommentThreadsResponse> {
+    return this.comments.listPageComments(this.actor, reference, input, options);
+  }
+
+  async addPageComment(
+    reference: string,
+    input: { body: string; anchor: CommentAnchor },
+    options?: McpRequestOptions,
+  ): Promise<PageCommentThread> {
+    return this.comments.addPageComment(this.actor, reference, input, options);
+  }
+
+  async replyToComment(
+    reference: string,
+    threadId: string,
+    body: string,
+    options?: McpRequestOptions,
+  ): Promise<PageCommentThread> {
+    return this.comments.replyToComment(this.actor, reference, threadId, body, options);
+  }
+
+  async editComment(
+    reference: string,
+    commentId: string,
+    body: string,
+    options?: McpRequestOptions,
+  ): Promise<PageCommentThread> {
+    return this.comments.editComment(this.actor, reference, commentId, body, options);
+  }
+
+  async deleteComment(
+    reference: string,
+    commentId: string,
+    options?: McpRequestOptions,
+  ): Promise<PageCommentThread> {
+    return this.comments.deleteComment(this.actor, reference, commentId, options);
+  }
+
+  async setCommentThreadStatus(
+    reference: string,
+    threadId: string,
+    status: CommentThreadStatus,
+    options?: McpRequestOptions,
+  ): Promise<PageCommentThread> {
+    return this.comments.setCommentThreadStatus(this.actor, reference, threadId, status, options);
   }
 
   async listFolders(

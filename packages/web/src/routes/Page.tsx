@@ -1,21 +1,24 @@
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import { WebSocketStatus } from '@hocuspocus/provider';
 import {
+  type CommentAnchor,
   deriveCapabilities,
   type Folder,
   type FolderTreeNode,
   type PageDetailPayload,
   type PageTreeNode,
+  pageCommentThreadsResponseSchema,
   parsePageDetailPayload,
   type SharePermission,
 } from '@metakip/shared';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FileQuestion, LogIn, RefreshCw, ShieldOff } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { BacklinksPanel } from '../components/editor/BacklinksPanel';
 import { Breadcrumbs } from '../components/editor/Breadcrumbs';
 import { CodeMirrorEditor } from '../components/editor/CodeMirrorEditor';
+import { CommentsPanel } from '../components/editor/CommentsPanel';
 import { PageActions } from '../components/editor/PageActions';
 import { PageIcon } from '../components/editor/PageIcon';
 import { PageLoadingState } from '../components/editor/PageLoadingState';
@@ -34,9 +37,14 @@ import type { WikiLinkNavigationTarget } from '../editor/wikiLinkPresentations';
 import { useFolderTree } from '../hooks/use-folders';
 import { type RecentPage, usePageTree } from '../hooks/use-pages';
 import { getLogger } from '../logger-init';
-import { ApiError } from '../utils/api';
+import { ApiError, apiFetch } from '../utils/api';
 import { resetDocumentMetadata } from '../utils/documentMeta';
 import { getHeadingId } from '../utils/headingNavigation';
+import {
+  createPageComment,
+  invalidatePageCommentQueries,
+  pageCommentHighlightsQueryKey,
+} from '../utils/pageCommentMutations';
 import { buildPagePath, extractUuidFromSlug, getWorkspacePathPrefix } from '../utils/url';
 
 const API_BASE = '/api';
@@ -66,37 +74,30 @@ export default function Page() {
     undefined,
   );
   const [editorGeneration, setEditorGeneration] = useState(0);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [selectedCommentAnchor, setSelectedCommentAnchor] = useState<CommentAnchor | null>(null);
+  const [activeCommentAnchor, setActiveCommentAnchor] = useState<CommentAnchor | null>(null);
   const accessRecordedRef = useRef<string | null>(null);
-  const isFirstMount = useRef(true);
   const prevPageIdRef = useRef<string | undefined>(pageId);
   const queryClient = useQueryClient();
   const { isAnonymous, accessPermission } = useShareContext();
   const setAccessPermission = useSetAccessPermission();
   const setCapabilities = useSetCapabilities();
 
-  // Clear state on page navigation.
-  // Skip when pageId transitions from undefined → UUID (initialization, not navigation)
-  // and skip on the very first mount.
+  // Clear state on page navigation, but not while the initial page ID resolves.
   useEffect(() => {
     const prevPageId = prevPageIdRef.current;
-
-    if (isFirstMount.current) {
-      isFirstMount.current = false;
-      prevPageIdRef.current = pageId;
-      return;
-    }
-
-    if (prevPageId === undefined && pageId !== undefined) {
-      prevPageIdRef.current = pageId;
-      return;
-    }
-
     prevPageIdRef.current = pageId;
+    if (prevPageId === undefined || prevPageId === pageId) return;
+
     // Don't reset provider here — CodeMirrorEditor manages its own lifecycle.
     // This effect runs AFTER CodeMirrorEditor's onProviderReady (child effects
     // fire first), so setProvider(null) would overwrite the new provider.
     setCollabStatus(WebSocketStatus.Connecting);
     setCollabPermission(undefined);
+    setCommentsOpen(false);
+    setSelectedCommentAnchor(null);
+    setActiveCommentAnchor(null);
   }, [pageId]);
 
   const {
@@ -132,8 +133,72 @@ export default function Page() {
         : deriveCapabilities(collabPermission),
     [collabPermission],
   );
-  const readOnly =
-    collabPermission === undefined || pagePermission === null || pagePermission === 'view';
+  const readOnly = collabPermission === undefined || !effectiveCapabilities.canEdit;
+  const canLoadComments =
+    !!pageId && !isAnonymous && effectiveCapabilities.canComment && collabPermission !== undefined;
+  useEffect(() => {
+    if (effectiveCapabilities.canComment) return;
+    setCommentsOpen(false);
+    setSelectedCommentAnchor(null);
+    setActiveCommentAnchor(null);
+  }, [effectiveCapabilities.canComment]);
+  const commentsQuery = useInfiniteQuery({
+    queryKey: pageCommentHighlightsQueryKey(pageId),
+    initialPageParam: null as string | null,
+    queryFn: async ({ pageParam }) => {
+      const params = new URLSearchParams({ status: 'open', limit: '100' });
+      if (pageParam) params.set('cursor', pageParam);
+      return pageCommentThreadsResponseSchema.parse(
+        await apiFetch<unknown>(`/v1/pages/${pageId}/comments?${params.toString()}`),
+      );
+    },
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    enabled: canLoadComments,
+    staleTime: 15_000,
+  });
+  useEffect(() => {
+    if (
+      !commentsQuery.isFetchNextPageError ||
+      !(commentsQuery.error instanceof ApiError) ||
+      commentsQuery.error.status !== 409
+    ) {
+      return;
+    }
+    void queryClient.resetQueries({
+      queryKey: pageCommentHighlightsQueryKey(pageId),
+      exact: true,
+    });
+  }, [commentsQuery.error, commentsQuery.isFetchNextPageError, pageId, queryClient]);
+  useEffect(() => {
+    if (
+      !canLoadComments ||
+      !commentsQuery.hasNextPage ||
+      commentsQuery.isFetching ||
+      commentsQuery.isFetchNextPageError
+    ) {
+      return;
+    }
+    void commentsQuery.fetchNextPage({ cancelRefetch: false });
+  }, [
+    canLoadComments,
+    commentsQuery.fetchNextPage,
+    commentsQuery.hasNextPage,
+    commentsQuery.isFetchNextPageError,
+    commentsQuery.isFetching,
+  ]);
+  const commentThreads = useMemo(
+    () => (canLoadComments ? (commentsQuery.data?.pages.flatMap((page) => page.data) ?? []) : []),
+    [canLoadComments, commentsQuery.data?.pages],
+  );
+  const hasCommentThreads = commentThreads.length > 0;
+  const commentAnchors = useMemo(
+    () => [
+      ...commentThreads.map((thread) => thread.anchor),
+      ...(commentsOpen && selectedCommentAnchor ? [selectedCommentAnchor] : []),
+      ...(activeCommentAnchor ? [activeCommentAnchor] : []),
+    ],
+    [activeCommentAnchor, commentThreads, commentsOpen, selectedCommentAnchor],
+  );
   useEffect(() => {
     if (!page) return;
     setAccessPermission(contextAccessPermission);
@@ -316,6 +381,20 @@ export default function Page() {
     [navigate],
   );
 
+  const openComments = (anchor: CommentAnchor | null = selectedCommentAnchor) => {
+    setSelectedCommentAnchor(anchor);
+    setCommentsOpen(true);
+  };
+
+  const createInlineComment = useCallback(
+    async (anchor: CommentAnchor, body: string) => {
+      if (!pageId) throw new Error('Page is not available');
+      await createPageComment(pageId, body, anchor);
+      await invalidatePageCommentQueries(queryClient, pageId);
+    },
+    [pageId, queryClient],
+  );
+
   if (!pageId) {
     return (
       <div className="max-w-4xl mx-auto px-6 py-8 md:py-12 text-zinc-400 animate-fade-in">
@@ -386,69 +465,113 @@ export default function Page() {
 
   return (
     <EditorReadOnlyProvider readOnly={readOnly}>
-      <div className="max-w-4xl mx-auto px-6 animate-fade-in">
-        <div className="sticky top-0 z-10 -mx-6 px-6 py-2 bg-zinc-50 dark:bg-zinc-950 md:-mt-12">
-          <div className="flex items-center justify-between text-sm font-medium text-zinc-500 dark:text-zinc-400 md:pt-5">
-            {isAnonymous ? (
-              <button
-                type="button"
-                onClick={() => navigate('/login')}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer"
-              >
-                <LogIn size={14} />
-                Sign in
-              </button>
-            ) : (
-              <div>
-                <Breadcrumbs pages={flatPages} folders={flatFolders} currentPageId={pageId} />
-              </div>
-            )}
-            <div className="flex items-center gap-2">
-              {collabPermission === 'view' && !effectiveCapabilities.canEdit && (
-                <span className="flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 rounded-full">
-                  View only
-                </span>
+      <div className="flex w-full min-w-0 items-start justify-center gap-4">
+        <main
+          className={`w-full min-w-0 max-w-4xl px-6 animate-fade-in ${commentsOpen ? 'flex-1' : 'mx-auto'} ${commentsOpen || hasCommentThreads ? 'xl:-translate-x-[51.5px]' : ''}`}
+        >
+          <div className="sticky top-0 z-10 -mx-6 px-6 py-2 bg-zinc-50 dark:bg-zinc-950 md:-mt-12">
+            <div className="flex items-center justify-between text-sm font-medium text-zinc-500 dark:text-zinc-400 md:pt-5">
+              {isAnonymous ? (
+                <button
+                  type="button"
+                  onClick={() => navigate('/login')}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer"
+                >
+                  <LogIn size={14} />
+                  Sign in
+                </button>
+              ) : (
+                <div>
+                  <Breadcrumbs pages={flatPages} folders={flatFolders} currentPageId={pageId} />
+                </div>
               )}
-              {!isAnonymous && <PageActions pageId={pageId} page={page} />}
-              {isAnonymous && <ThemeToggle />}
-              <PageStatus provider={provider} collabStatus={collabStatus} />
+              <div className="flex items-center gap-2">
+                {collabPermission === 'view' && !effectiveCapabilities.canEdit && (
+                  <span className="flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 rounded-full">
+                    View only
+                  </span>
+                )}
+                {collabPermission === 'commenter' && (
+                  <span className="flex items-center gap-1.5 rounded-full bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                    Comment access
+                  </span>
+                )}
+                {!isAnonymous && (
+                  <PageActions
+                    pageId={pageId}
+                    page={page}
+                    canComment={effectiveCapabilities.canComment}
+                    commentsOpen={commentsOpen}
+                    commentsCount={commentThreads.length}
+                    onToggleComments={() => {
+                      if (commentsOpen) setCommentsOpen(false);
+                      else openComments();
+                    }}
+                  />
+                )}
+                {isAnonymous && <ThemeToggle />}
+                <PageStatus provider={provider} collabStatus={collabStatus} />
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="mb-6">
-          <div className="relative flex-1 flex items-center mt-16">
-            <div className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center justify-center w-[42px] h-[42px]">
-              <EditorReadOnlyProvider readOnly={readOnly}>
-                <PageIcon pageId={pageId} initialIcon={page?.icon ?? null} />
-              </EditorReadOnlyProvider>
-            </div>
-            <div className="pl-[54px] w-full">
-              <PageTitle
-                pageId={pageId}
-                initialTitle={page?.title ?? 'Untitled'}
-                ydoc={provider?.document ?? null}
-                usePublicEndpoint={isAnonymous}
-              />
+          <div className="mb-6">
+            <div className="relative flex-1 flex items-center mt-16">
+              <div className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center justify-center w-[42px] h-[42px]">
+                <EditorReadOnlyProvider readOnly={readOnly}>
+                  <PageIcon pageId={pageId} initialIcon={page?.icon ?? null} />
+                </EditorReadOnlyProvider>
+              </div>
+              <div className="pl-[54px] w-full">
+                <PageTitle
+                  pageId={pageId}
+                  initialTitle={page?.title ?? 'Untitled'}
+                  ydoc={provider?.document ?? null}
+                  usePublicEndpoint={isAnonymous}
+                />
+              </div>
             </div>
           </div>
-        </div>
-        <EditorReadOnlyProvider readOnly={readOnly}>
-          <PropertiesPanel pageId={pageId} properties={page?.properties ?? null} />
-        </EditorReadOnlyProvider>
-        {page && pageId ? (
-          <CodeMirrorEditor
-            key={`${pageId}:${editorGeneration}`}
+          <EditorReadOnlyProvider readOnly={readOnly}>
+            <PropertiesPanel pageId={pageId} properties={page?.properties ?? null} />
+          </EditorReadOnlyProvider>
+          {page && pageId ? (
+            <CodeMirrorEditor
+              key={`${pageId}:${editorGeneration}`}
+              pageId={pageId}
+              onDocumentReloadRequired={handleDocumentReloadRequired}
+              onProviderReady={setProvider}
+              onStatusChange={handleStatusChange}
+              onWikiLinkClick={handleWikiLinkClick}
+              onPermissionSnapshot={setCollabPermission}
+              commentAnchors={commentAnchors}
+              commentThreads={commentThreads}
+              hideInlineCommentCards={commentsOpen && effectiveCapabilities.canComment}
+              activeCommentAnchor={activeCommentAnchor}
+              onCommentAnchorHoverChange={setActiveCommentAnchor}
+              canComment={effectiveCapabilities.canComment && !isAnonymous}
+              canModerateComments={page.capabilities.canDelete}
+              onCommentSelection={setSelectedCommentAnchor}
+              onCreateComment={createInlineComment}
+              {...(requestedHeadingId ? { requestedHeadingId } : {})}
+            />
+          ) : null}
+          {!isAnonymous && <BacklinksPanel pageId={pageId} />}
+        </main>
+        {commentsOpen && effectiveCapabilities.canComment && (
+          <CommentsPanel
             pageId={pageId}
-            onDocumentReloadRequired={handleDocumentReloadRequired}
-            onProviderReady={setProvider}
-            onStatusChange={handleStatusChange}
-            onWikiLinkClick={handleWikiLinkClick}
-            onPermissionSnapshot={setCollabPermission}
-            {...(requestedHeadingId ? { requestedHeadingId } : {})}
+            selectedAnchor={selectedCommentAnchor}
+            canModerate={page.capabilities.canDelete}
+            activeCommentAnchor={activeCommentAnchor}
+            onCommentAnchorHoverChange={setActiveCommentAnchor}
+            onClose={() => {
+              setActiveCommentAnchor(null);
+              setCommentsOpen(false);
+            }}
+            onClearSelection={() => setSelectedCommentAnchor(null)}
           />
-        ) : null}
-        {!isAnonymous && <BacklinksPanel pageId={pageId} />}
+        )}
       </div>
     </EditorReadOnlyProvider>
   );

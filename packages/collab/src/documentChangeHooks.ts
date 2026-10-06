@@ -54,7 +54,7 @@ export function createDocumentChangeHooks(options: {
         options.titles.setPendingBaseline(documentName, admission.titleRevision);
       }
       if (!writer) return;
-      if (!admission && (writer.permission === 'view' || writer.permission === null)) return;
+      if (!admission && writer.permission !== 'edit' && writer.permission !== 'admin') return;
 
       const estimatedSize = options.getDocumentSizeEstimate(documentName) + update.byteLength;
       if (estimatedSize > options.maxDocumentBytes) {

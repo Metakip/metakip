@@ -152,6 +152,26 @@ describe('FloatingToolbar', () => {
     expect(screen.getByTitle('Bold (Ctrl+B)').parentElement).not.toHaveClass('invisible');
   });
 
+  it('adds a comment action without replacing formatting controls', () => {
+    const onAddComment = vi.fn();
+    render(<FloatingToolbar {...createProps({ canComment: true, onAddComment })} />);
+
+    expect(screen.getByTitle('Bold (Ctrl+B)')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Add comment to selection' }));
+    expect(onAddComment).toHaveBeenCalledOnce();
+  });
+
+  it('shows only the comment action in comment-only mode', () => {
+    render(
+      <FloatingToolbar
+        {...createProps({ commentOnly: true, canComment: true, onAddComment: vi.fn() })}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Add comment to selection' })).toBeInTheDocument();
+    expect(screen.queryByTitle('Bold (Ctrl+B)')).not.toBeInTheDocument();
+  });
+
   it('shows controls for a collapsed table caret without expanding the selection', () => {
     vi.useFakeTimers();
     floatingMocks.isPositioned = true;

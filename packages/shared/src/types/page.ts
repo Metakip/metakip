@@ -46,8 +46,8 @@ export interface PageTreeNode extends Page {
 }
 
 export type ShareEntityType = 'folder' | 'page';
-export type SharePermission = 'view' | 'edit' | 'admin';
-export type PublicPermission = Exclude<SharePermission, 'admin'>;
+export type SharePermission = 'view' | 'commenter' | 'edit' | 'admin';
+export type PublicPermission = 'view' | 'edit';
 export type InheritancePolicy = 'inherit' | 'restricted';
 
 export interface EntityShare {
@@ -120,6 +120,7 @@ export interface CapabilitySet {
   canEdit: boolean;
   canDelete: boolean;
   canCopy: boolean;
+  canComment: boolean;
 }
 
 interface PublicPageFields {
@@ -225,24 +226,28 @@ export function deriveCapabilities(
   isOwner = false,
 ): CapabilitySet {
   if (isOwner) {
-    return { canEdit: true, canDelete: true, canCopy: true };
+    return { canEdit: true, canDelete: true, canCopy: true, canComment: true };
   }
   switch (permission) {
     case 'admin':
-      return { canEdit: true, canDelete: true, canCopy: true };
+      return { canEdit: true, canDelete: true, canCopy: true, canComment: true };
     case 'edit':
-      return { canEdit: true, canDelete: false, canCopy: true };
+      return { canEdit: true, canDelete: false, canCopy: true, canComment: true };
+    case 'commenter':
+      return { canEdit: false, canDelete: false, canCopy: true, canComment: true };
     case 'view':
       return {
         canEdit: false,
         canDelete: false,
         canCopy: true,
+        canComment: false,
       };
     default:
       return {
         canEdit: false,
         canDelete: false,
         canCopy: false,
+        canComment: false,
       };
   }
 }

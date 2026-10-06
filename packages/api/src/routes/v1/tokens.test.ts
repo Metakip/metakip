@@ -147,8 +147,35 @@ describe('v1 API tokens', () => {
     expect(await response.json()).toMatchObject({ error: { code: 'insufficient_scope' } });
   });
 
+  it('lets comment-level tokens read but not edit pages', async () => {
+    const app = await createTestApp();
+    const user = await createTestUser();
+    const session = await createTestSession(user.id);
+    const createdResponse = await app.request('/api/v1/tokens', {
+      method: 'POST',
+      headers: { Cookie: session.Cookie, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Comment access', scopes: ['pages:comment'] }),
+    });
+    expect(createdResponse.status).toBe(201);
+    const created = (await createdResponse.json()) as { token: string; scopes: string[] };
+    expect(created.scopes).toEqual(['pages:comment']);
+
+    const pagesResponse = await app.request('/api/v1/pages', {
+      headers: { Authorization: `Bearer ${created.token}` },
+    });
+    expect(pagesResponse.status).toBe(200);
+
+    const pageResponse = await app.request('/api/v1/pages', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${created.token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title: 'Denied page' }),
+    });
+    expect(pageResponse.status).toBe(403);
+    expect(await pageResponse.json()).toMatchObject({ error: { code: 'insufficient_scope' } });
+  });
+
   it('allows write tokens to create an Untitled page with initial Markdown', async () => {
-    const { app, token } = await createToken(['pages:read', 'pages:write']);
+    const { app, token } = await createToken(['pages:write']);
     const response = await app.request('/api/v1/pages', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },

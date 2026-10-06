@@ -1,0 +1,1 @@
+ALTER TABLE "page_comment_threads" ALTER COLUMN "anchor" SET NOT NULL;
