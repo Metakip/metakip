@@ -68,7 +68,7 @@ describe('OAuthAuthorize', () => {
     );
 
     const writeScope = await screen.findByRole('checkbox', {
-      name: 'Modify pages and folders',
+      name: 'Modify pages and folders (includes comment access)',
     });
     expect(writeScope).toBeChecked();
 
@@ -77,7 +77,11 @@ describe('OAuthAuthorize', () => {
     await user.click(screen.getByRole('button', { name: 'Switch request' }));
 
     await waitFor(() =>
-      expect(screen.getByRole('checkbox', { name: 'Modify pages and folders' })).toBeChecked(),
+      expect(
+        screen.getByRole('checkbox', {
+          name: 'Modify pages and folders (includes comment access)',
+        }),
+      ).toBeChecked(),
     );
   });
 
@@ -98,7 +102,9 @@ describe('OAuthAuthorize', () => {
     );
 
     expect(await screen.findByRole('heading', { name: 'Test application' })).toBeInTheDocument();
-    expect(screen.queryByText('Modify pages and folders')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Modify pages and folders (includes comment access)'),
+    ).not.toBeInTheDocument();
     expect(fetch).toHaveBeenCalledWith('/api/auth/oauth2/public-client?client_id=client-1');
 
     await user.click(screen.getByRole('button', { name: 'Connect' }));
@@ -136,6 +142,41 @@ describe('OAuthAuthorize', () => {
       expect(mocks.consent).toHaveBeenCalledWith({
         accept: true,
         scope: 'pages:read offline_access',
+      }),
+    );
+  });
+
+  it('displays and grants the comment permission level with implied page read access', async () => {
+    const user = userEvent.setup();
+    mocks.consent.mockResolvedValue({ error: { message: 'Stop before redirect' } });
+
+    render(
+      <MemoryRouter
+        initialEntries={['/oauth/authorize?client_id=client-1&scope=pages%3Acomment+openid']}
+      >
+        <Routes>
+          <Route path="/oauth/authorize" element={<OAuthAuthorize />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole('heading', { name: 'Test application' })).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'This application is requesting access to your Metakip pages, folders, and comments.',
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('checkbox', { name: 'Read and comment on pages and folders' }),
+    ).toBeChecked();
+    expect(screen.getByRole('button', { name: 'Connect' })).toBeEnabled();
+
+    await user.click(screen.getByRole('button', { name: 'Connect' }));
+
+    await waitFor(() =>
+      expect(mocks.consent).toHaveBeenCalledWith({
+        accept: true,
+        scope: 'pages:comment openid',
       }),
     );
   });

@@ -14,7 +14,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 function isPermission(value: unknown): value is SharePermission {
-  return value === 'view' || value === 'edit' || value === 'admin';
+  return value === 'view' || value === 'commenter' || value === 'edit' || value === 'admin';
 }
 
 function hasOptionalString(record: Record<string, unknown>, key: string): boolean {

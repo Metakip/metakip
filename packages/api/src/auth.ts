@@ -60,7 +60,14 @@ function createMcpPlugins(): BetterAuthPlugin[] {
         // algorithm allowlist makes DPoP proof validation fail closed and
         // prevents new DPoP-bound tokens from being issued for this resource.
         dpop: { signingAlgorithms: [] },
-        scopes: ['openid', 'profile', 'offline_access', 'pages:read', 'pages:write'],
+        scopes: [
+          'openid',
+          'profile',
+          'offline_access',
+          'pages:read',
+          'pages:comment',
+          'pages:write',
+        ],
         allowDynamicClientRegistration: true,
         allowUnauthenticatedClientRegistration: true,
       }),

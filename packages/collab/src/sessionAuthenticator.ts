@@ -108,7 +108,7 @@ export function createSessionAuthenticator(options: SessionAuthenticatorOptions)
       const access = await assertPageAccess(documentName, user.id, authenticated.credential);
       permission = access.permission;
       accessRevision = access.accessRevision;
-      if (permission === 'view') connectionConfig.readOnly = true;
+      if (permission !== 'edit' && permission !== 'admin') connectionConfig.readOnly = true;
     }
 
     logger.info(`[auth] authenticated user=${user.id} (${user.email}) permission=${permission}`);

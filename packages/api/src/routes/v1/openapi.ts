@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { z } from 'zod';
 import { buildOpenApiPaths } from './apiContract';
+import { commentOperations } from './commentContracts';
 import { folderOperations } from './folderContracts';
 import { lifecycleOperations } from './lifecycleContracts';
 import { getMeOperation } from './meContract';
@@ -51,6 +52,11 @@ export const openApiV1 = {
       'x-metakip-docs-slug': 'folders',
     },
     {
+      name: 'Comments',
+      description: 'Read and manage comments anchored to selected page text.',
+      'x-metakip-docs-slug': 'comments',
+    },
+    {
       name: 'Lifecycle',
       description: 'Copy, move, trash, restore, and permanently delete pages and folders.',
       'x-metakip-docs-slug': 'lifecycle',
@@ -91,6 +97,7 @@ export const openApiV1 = {
   paths: buildOpenApiPaths([
     getMeOperation,
     ...Object.values(pageOperations),
+    ...Object.values(commentOperations),
     ...Object.values(folderOperations),
     ...lifecycleOperations,
     ...Object.values(tokenOperations),

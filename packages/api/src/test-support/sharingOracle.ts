@@ -1,4 +1,4 @@
-export type OraclePermission = null | 'view' | 'edit' | 'admin';
+export type OraclePermission = null | 'view' | 'commenter' | 'edit' | 'admin';
 export type OraclePublicPermission = null | 'view' | 'edit';
 
 export interface OracleNode {
@@ -30,8 +30,10 @@ export interface SharingOracleDecision {
 const rank = (permission: OraclePermission): number => {
   switch (permission) {
     case 'admin':
-      return 3;
+      return 4;
     case 'edit':
+      return 3;
+    case 'commenter':
       return 2;
     case 'view':
       return 1;

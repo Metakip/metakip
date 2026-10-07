@@ -1,3 +1,4 @@
+import type { SharePermission } from '@metakip/shared';
 import type { KeyboardEvent } from 'react';
 import type { SidebarCapabilities, SidebarPlacement } from './sidebarCapabilities';
 
@@ -9,7 +10,7 @@ export type SidebarEditingTarget =
 export type SidebarEntityAuthorization = {
   ownerId?: string | null | undefined;
   createdBy?: string | null | undefined;
-  userPermission?: 'view' | 'edit' | 'admin' | null | undefined;
+  userPermission?: SharePermission | null | undefined;
   parentId?: string | null | undefined;
 };
 

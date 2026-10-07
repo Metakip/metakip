@@ -1,3 +1,4 @@
+import type { SharePermission } from '@metakip/shared';
 import { Copy, Download, Edit2, EyeOff, FolderInput, Share, Star, Trash2 } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
@@ -30,7 +31,7 @@ type PageContextMenuProps = {
     icon?: string | null;
     ownerId?: string | null | undefined;
     createdBy?: string | null | undefined;
-    userPermission?: 'view' | 'edit' | 'admin' | null | undefined;
+    userPermission?: SharePermission | null | undefined;
     shareSource?: 'direct' | 'public' | 'workspace' | undefined;
     canMove?: boolean | undefined;
   };

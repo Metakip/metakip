@@ -55,7 +55,7 @@ describe('ApiTokensPanel', () => {
     expect(screen.getByRole('combobox', { name: 'Expiry' })).toHaveTextContent('No expiry');
     await user.type(screen.getByLabelText('Token name'), 'Build agent');
     await user.click(screen.getByRole('combobox', { name: 'Token access' }));
-    await user.click(screen.getByRole('option', { name: 'Read and write' }));
+    await user.click(screen.getByRole('option', { name: 'Read, comment, and write' }));
     await user.click(screen.getByRole('combobox', { name: 'Expiry' }));
     await user.click(screen.getByRole('option', { name: '30 days' }));
     const beforeCreate = Date.now();
@@ -64,12 +64,33 @@ describe('ApiTokensPanel', () => {
     expect(hooks.create).toHaveBeenCalledOnce();
     const request = hooks.create.mock.calls[0]?.[0] as {
       name: string;
-      canWrite: boolean;
+      access: 'read' | 'comment' | 'write';
       expiresAt: string | null;
     };
-    expect(request).toMatchObject({ name: 'Build agent', canWrite: true });
+    expect(request).toMatchObject({
+      name: 'Build agent',
+      access: 'write',
+    });
     expect(new Date(request.expiresAt ?? '').getTime()).toBeGreaterThanOrEqual(
       beforeCreate + 30 * 24 * 60 * 60 * 1000,
+    );
+  });
+
+  it('allows creating a comment-level token', async () => {
+    const user = userEvent.setup();
+    render(<ApiTokensPanel />);
+
+    await user.type(screen.getByLabelText('Token name'), 'Comment agent');
+    await user.click(screen.getByRole('combobox', { name: 'Token access' }));
+    await user.click(screen.getByRole('option', { name: 'Read and comment' }));
+    await user.click(screen.getByRole('button', { name: 'Create token' }));
+
+    expect(hooks.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'Comment agent',
+        access: 'comment',
+      }),
+      expect.any(Object),
     );
   });
 });

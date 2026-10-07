@@ -3,7 +3,7 @@ import {
   type ApiTokenAuditResult,
   type ApiTokenScope,
   getApiLogger,
-  hasMcpWriteWithoutRead,
+  hasApiTokenScope,
   isApiTokenScope,
   parseApiTokenId,
 } from '@metakip/shared';
@@ -101,7 +101,7 @@ async function authenticateMcpInternalRequest(request: Request): Promise<V1Princ
     return null;
   }
   const context = verifyMcpInternalCredential(credential, secret);
-  if (!context || hasMcpWriteWithoutRead(context.scopes)) return null;
+  if (!context) return null;
   if (context.accessTokenExpiresAt <= Math.floor(Date.now() / 1000)) return null;
   const revoked = await query<{ token_hash: string }>(
     sql`select token_hash
@@ -184,7 +184,7 @@ export function requireV1Scopes(scopes: readonly ApiTokenScope[]) {
     const principal = c.get('v1Principal');
     const missingScope =
       principal.kind === 'token' || principal.kind === 'mcp'
-        ? scopes.find((scope) => !principal.scopes.has(scope))
+        ? scopes.find((scope) => !hasApiTokenScope(principal.scopes, scope))
         : undefined;
     if (missingScope) {
       return c.json(

@@ -10,6 +10,7 @@ import { Compartment, EditorState, Prec } from '@codemirror/state';
 import { dropCursor, EditorView, highlightSpecialChars, keymap } from '@codemirror/view';
 import type { HocuspocusProvider } from '@hocuspocus/provider';
 import { GFM } from '@lezer/markdown';
+import type { CommentAnchor } from '@metakip/shared';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { yCollab, yUndoManagerKeymap } from 'y-codemirror.next';
 import * as Y from 'yjs';
@@ -23,6 +24,7 @@ import {
 import { moveToAdjacentTableCell } from '../components/editor/editorTableCommands';
 import { inlineFormattingState } from '../components/editor/inlineFormattingCommands';
 import { collaborationCursors } from '../editor/codemirror/collaborationCursors';
+import { anchorFromSelection, commentAnchorHighlight } from '../editor/codemirror/commentAnchors';
 import { type HeadingSyntax, parseEditorHeadingSyntax } from '../editor/codemirror/headingSyntax';
 import {
   type EditorHeading,
@@ -77,6 +79,12 @@ interface UseCodeMirrorProps {
   onImageUpload?: ImageUploader;
   onOutlineChange?: (headings: readonly EditorHeading[], activeHeadingId: string) => void;
   resolveHeadingWikiLink?: HeadingWikiLinkResolver;
+  commentAnchors: readonly CommentAnchor[];
+  onDocumentChange?: (view: EditorView) => void;
+  onCommentSelection?: (
+    anchor: CommentAnchor | null,
+    position: { left: number; right: number; top: number; bottom: number } | null,
+  ) => void;
 }
 
 function handleDividerInput(view: EditorView, from: number, to: number, text: string): boolean {
@@ -197,6 +205,9 @@ export function useCodeMirror({
   onSlashMenuSuggest,
   onOutlineChange,
   resolveHeadingWikiLink,
+  commentAnchors,
+  onDocumentChange,
+  onCommentSelection,
   onImageUpload,
   readOnly = false,
 }: UseCodeMirrorProps) {
@@ -207,6 +218,7 @@ export function useCodeMirror({
   });
   const [initializationAttempt, setInitializationAttempt] = useState(0);
   const readOnlyCompartmentRef = useRef(new Compartment());
+  const commentAnchorsCompartmentRef = useRef(new Compartment());
   const readOnlyRef = useRef(readOnly);
   const onChangeRef = useRef(onChange);
   const onWikiLinkSuggestRef = useRef(onWikiLinkSuggest);
@@ -215,6 +227,9 @@ export function useCodeMirror({
   const onOutlineChangeRef = useRef(onOutlineChange);
   const resolveHeadingWikiLinkRef = useRef(resolveHeadingWikiLink);
   const onImageUploadRef = useRef(onImageUpload);
+  const onDocumentChangeRef = useRef(onDocumentChange);
+  const onCommentSelectionRef = useRef(onCommentSelection);
+  const commentAnchorsRef = useRef(commentAnchors);
   const imageUploadsRef = useRef<ReturnType<typeof createImageUploads> | null>(null);
   const refreshHeadingResolverRef = useRef<() => void>(() => {});
   onChangeRef.current = onChange;
@@ -224,6 +239,9 @@ export function useCodeMirror({
   onOutlineChangeRef.current = onOutlineChange;
   resolveHeadingWikiLinkRef.current = resolveHeadingWikiLink;
   onImageUploadRef.current = onImageUpload;
+  onDocumentChangeRef.current = onDocumentChange;
+  onCommentSelectionRef.current = onCommentSelection;
+  commentAnchorsRef.current = commentAnchors;
   readOnlyRef.current = readOnly;
 
   const retryInitialization = useCallback(() => {
@@ -366,11 +384,28 @@ export function useCodeMirror({
           EditorState.readOnly.of(readOnlyRef.current),
           EditorView.editable.of(!readOnlyRef.current),
         ]),
+        commentAnchorsCompartmentRef.current.of(commentAnchorHighlight(commentAnchorsRef.current)),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) publishOutline(update.view, true);
           else if (update.viewportChanged) publishOutline(update.view, false);
-          if (update.docChanged) onChangeRef.current?.(update.state.doc.toString());
+          if (update.docChanged) {
+            onChangeRef.current?.(update.state.doc.toString());
+            onDocumentChangeRef.current?.(update.view);
+          }
           if (!update.docChanged && !update.selectionSet && !update.viewportChanged) return;
+          if (update.docChanged || update.selectionSet) {
+            const selection = update.state.selection.main;
+            const anchor = selection.empty
+              ? null
+              : anchorFromSelection(update.state.doc.toString(), selection.from, selection.to);
+            const coords = anchor ? update.view.coordsAtPos(selection.to) : null;
+            onCommentSelectionRef.current?.(
+              anchor,
+              coords
+                ? { left: coords.left, right: coords.right, top: coords.top, bottom: coords.bottom }
+                : null,
+            );
+          }
           const selection = update.state.selection.main;
           const trigger = getEditorSuggestionTrigger(update.state);
           if (!trigger) {
@@ -491,6 +526,15 @@ export function useCodeMirror({
     provider,
     resolveHeadingWikiLink,
   ]);
+
+  useEffect(() => {
+    if (!editor) return;
+    editor.dispatch({
+      effects: commentAnchorsCompartmentRef.current.reconfigure(
+        commentAnchorHighlight(commentAnchors),
+      ),
+    });
+  }, [editor, commentAnchors]);
 
   useEffect(() => {
     if (!editor) return;

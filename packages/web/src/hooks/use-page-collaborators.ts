@@ -16,6 +16,7 @@ function isCollaboratorDisplay(value: unknown): value is CollaboratorDisplay {
     (typeof candidate.name === 'string' || candidate.name === null) &&
     (typeof candidate.avatarUrl === 'string' || candidate.avatarUrl === null) &&
     (candidate.permission === 'view' ||
+      candidate.permission === 'commenter' ||
       candidate.permission === 'edit' ||
       candidate.permission === 'admin') &&
     typeof candidate.isOwner === 'boolean'

@@ -37,7 +37,7 @@ const mocks = vi.hoisted(() => ({
     items: Array<{ id: string; type: 'page' | 'folder' }>;
   },
   share: {
-    capabilities: { canEdit: true, canDelete: true, canCopy: true },
+    capabilities: { canEdit: true, canDelete: true, canCopy: true, canComment: true },
     isAnonymous: false,
     publicEntity: {
       accessScope: 'account' as const,
@@ -54,7 +54,7 @@ const mocks = vi.hoisted(() => ({
         publicPermission: 'view' | 'edit';
         createdBy?: string | null;
         ownerId?: string | null;
-        userPermission: 'view' | 'edit' | 'admin';
+        userPermission: 'view' | 'commenter' | 'edit' | 'admin';
       }>,
       pages: [] as Array<{
         accessScope: 'public' | 'account';
@@ -65,7 +65,7 @@ const mocks = vi.hoisted(() => ({
         publicPermission: 'view' | 'edit';
         createdBy?: string | null;
         ownerId?: string | null;
-        userPermission: 'view' | 'edit' | 'admin';
+        userPermission: 'view' | 'commenter' | 'edit' | 'admin';
       }>,
     },
   },
@@ -193,7 +193,12 @@ describe('FolderEntry access refresh', () => {
     mocks.foldersFetching = false;
     mocks.foldersFetchStatus = 'idle';
     mocks.clipboardState = { action: null, items: [] };
-    mocks.share.capabilities = { canEdit: true, canDelete: true, canCopy: true };
+    mocks.share.capabilities = {
+      canEdit: true,
+      canDelete: true,
+      canCopy: true,
+      canComment: true,
+    };
     mocks.share.isAnonymous = false;
     mocks.share.publicEntity.folders = [];
     mocks.share.publicEntity.pages = [];
@@ -256,7 +261,12 @@ describe('FolderEntry access refresh', () => {
   it('allows editors to paste copies but not cut items', () => {
     mocks.pagesError = null;
     mocks.foldersError = null;
-    mocks.share.capabilities = { canEdit: true, canDelete: false, canCopy: true };
+    mocks.share.capabilities = {
+      canEdit: true,
+      canDelete: false,
+      canCopy: true,
+      canComment: true,
+    };
     mocks.clipboardState = { action: 'copy', items: [{ id: 'page-1', type: 'page' }] };
 
     const rendered = render(

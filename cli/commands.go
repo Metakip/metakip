@@ -80,15 +80,16 @@ type SkillUpdateCmd struct {
 }
 
 type PageCmd struct {
-	Copy   PageCopyCmd   `cmd:"" help:"Copy pages."`
-	Create PageCreateCmd `cmd:"" help:"Create a page."`
-	Delete PageDeleteCmd `cmd:"" help:"Move pages to Trash."`
-	Edit   PageEditCmd   `cmd:"" help:"Edit a page's Markdown."`
-	List   PageListCmd   `cmd:"" help:"List accessible pages."`
-	Move   PageMoveCmd   `cmd:"" help:"Move pages."`
-	Search PageSearchCmd `cmd:"" help:"Search page titles."`
-	Update PageUpdateCmd `cmd:"" help:"Update a page's title or icon."`
-	View   PageViewCmd   `cmd:"" help:"View a page's Markdown."`
+	Comments PageCommentsCmd `cmd:"" help:"Read and manage page comments."`
+	Copy     PageCopyCmd     `cmd:"" help:"Copy pages."`
+	Create   PageCreateCmd   `cmd:"" help:"Create a page."`
+	Delete   PageDeleteCmd   `cmd:"" help:"Move pages to Trash."`
+	Edit     PageEditCmd     `cmd:"" help:"Edit a page's Markdown."`
+	List     PageListCmd     `cmd:"" help:"List accessible pages."`
+	Move     PageMoveCmd     `cmd:"" help:"Move pages."`
+	Search   PageSearchCmd   `cmd:"" help:"Search page titles."`
+	Update   PageUpdateCmd   `cmd:"" help:"Update a page's title or icon."`
+	View     PageViewCmd     `cmd:"" help:"View a page's Markdown."`
 }
 
 type FolderCmd struct {

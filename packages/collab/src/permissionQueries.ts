@@ -28,7 +28,10 @@ export type PrincipalPagePermissionCandidate =
   | { kind: 'anonymous'; pageId: string };
 
 function normalizePermission(permission: string | null): SharePermission | null {
-  return permission === 'admin' || permission === 'edit' || permission === 'view'
+  return permission === 'admin' ||
+    permission === 'edit' ||
+    permission === 'commenter' ||
+    permission === 'view'
     ? permission
     : null;
 }

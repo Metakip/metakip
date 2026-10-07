@@ -53,7 +53,6 @@ tokensRoute.post(tokenOperations.create.routePath, v1JsonBodyLimit, async (c) =>
   const name = candidate.name;
   const requestedScopes = candidate.scopes ?? ['pages:read'];
   const scopes = [...new Set(requestedScopes)] as ApiTokenScope[];
-  if (!scopes.includes('pages:read')) scopes.unshift('pages:read');
 
   let expiresAt: Date | null = null;
   if (candidate.expiresAt !== undefined && candidate.expiresAt !== null) {

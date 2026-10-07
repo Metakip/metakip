@@ -6,7 +6,8 @@ import {
   type OraclePublicPermission,
 } from '../test-support/sharingOracle';
 
-const roles: readonly OraclePermission[] = [null, 'view', 'edit', 'admin'];
+const roles: readonly OraclePermission[] = [null, 'view', 'commenter', 'edit', 'admin'];
+const workspaceRoles: readonly OraclePermission[] = [null, 'view', 'edit', 'admin'];
 const publicPermissions: readonly OraclePublicPermission[] = [null, 'view', 'edit'];
 
 type RoleVector = {
@@ -38,9 +39,6 @@ type ShareSeed = {
   recipientId: string;
   permission: Exclude<OraclePermission, null>;
 };
-
-const roleAt = (vector: number, axis: number): OraclePermission =>
-  roles[Math.floor(vector / 4 ** axis) % roles.length] ?? null;
 
 const inChunks = <T>(values: readonly T[], size: number): T[][] => {
   const chunks: T[][] = [];
@@ -74,7 +72,7 @@ async function insertShares(shares: readonly ShareSeed[]): Promise<void> {
 }
 
 describe('sharing SQL permission matrix', () => {
-  it('matches the independent oracle for all 110,592 depth-two page and folder cells', async () => {
+  it('matches the independent oracle for all 216,000 depth-two page and folder cells', async () => {
     const structures: Structure[] = [];
     let structureIndex = 0;
     for (const targetPublic of publicPermissions) {
@@ -99,14 +97,23 @@ describe('sharing SQL permission matrix', () => {
       }
     }
 
-    const roleVectors: RoleVector[] = Array.from({ length: 4 ** 4 }, (_, index) => ({
-      index,
-      userId: crypto.randomUUID(),
-      workspace: roleAt(index, 0),
-      target: roleAt(index, 1),
-      parent: roleAt(index, 2),
-      grandparent: roleAt(index, 3),
-    }));
+    const roleVectors: RoleVector[] = [];
+    for (const workspace of workspaceRoles) {
+      for (const target of roles) {
+        for (const parent of roles) {
+          for (const grandparent of roles) {
+            roleVectors.push({
+              index: roleVectors.length,
+              userId: crypto.randomUUID(),
+              workspace,
+              target,
+              parent,
+              grandparent,
+            });
+          }
+        }
+      }
+    }
 
     const userIds = [
       ...structures.map((structure) => structure.ownerId),
@@ -332,7 +339,7 @@ describe('sharing SQL permission matrix', () => {
     const actual = pageBatches.flatMap((batch) => batch.rows);
     const actualFolders = folderBatches.flatMap((batch) => batch.rows);
 
-    expect(actual).toHaveLength(55_296);
+    expect(actual).toHaveLength(108_000);
     for (const row of actual) {
       const structure = structures[row.structure_index];
       const vector = roleVectors[row.role_index];
@@ -364,7 +371,7 @@ describe('sharing SQL permission matrix', () => {
       );
     }
 
-    expect(actualFolders).toHaveLength(55_296);
+    expect(actualFolders).toHaveLength(108_000);
     for (const row of actualFolders) {
       const structure = structures[row.structure_index];
       const vector = roleVectors[row.role_index];

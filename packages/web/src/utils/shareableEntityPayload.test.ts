@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { parseShareableEntityPayload } from './shareableEntityPayload';
 
-const capabilities = { canEdit: false, canDelete: false, canCopy: true };
+const capabilities = { canEdit: false, canDelete: false, canCopy: true, canComment: false };
 
 describe('parseShareableEntityPayload', () => {
   it('accepts a complete public page response', () => {

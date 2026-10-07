@@ -37,7 +37,7 @@ describe('OAuth authorization routing', () => {
     expect(authHandler).toHaveBeenCalledTimes(1);
   });
 
-  it('delegates invalid MCP scope combinations to Better Auth for its redirect', async () => {
+  it('delegates write scopes to Better Auth unchanged', async () => {
     const response = await authRoutes.request(
       '/auth/oauth2/authorize?client_id=client-1&scope=pages%3Awrite&state=state-1',
     );
@@ -48,12 +48,10 @@ describe('OAuth authorization routing', () => {
     );
     const delegatedRequest = authHandler.mock.calls[0]?.[0];
     expect(delegatedRequest).toBeInstanceOf(Request);
-    expect(new URL(delegatedRequest?.url ?? '').searchParams.get('scope')).toContain(
-      'metakip:invalid-pages-scope-combination',
-    );
+    expect(new URL(delegatedRequest?.url ?? '').searchParams.get('scope')).toBe('pages:write');
   });
 
-  it('rewrites invalid form-encoded POST scopes before delegation', async () => {
+  it('passes form-encoded POST scopes through unchanged', async () => {
     await authRoutes.request('/auth/oauth2/authorize', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -61,23 +59,17 @@ describe('OAuth authorization routing', () => {
     });
 
     const delegatedRequest = authHandler.mock.calls[0]?.[0];
-    await expect(delegatedRequest?.text()).resolves.toContain(
-      'metakip%3Ainvalid-pages-scope-combination',
-    );
+    await expect(delegatedRequest?.text()).resolves.toBe('client_id=client-1&scope=pages%3Awrite');
   });
 
-  it('returns invalid_scope for a query-only invalid authorize POST', async () => {
+  it('delegates query-only authorize POSTs without a body encoding', async () => {
     const response = await authRoutes.request(
       '/auth/oauth2/authorize?client_id=client-1&scope=pages%3Awrite',
       { method: 'POST' },
     );
 
-    expect(response.status).toBe(400);
-    await expect(response.json()).resolves.toEqual({
-      error: 'invalid_scope',
-      error_description: 'pages:write requires pages:read',
-    });
-    expect(authHandler).not.toHaveBeenCalled();
+    expect(response.status).toBe(302);
+    expect(authHandler).toHaveBeenCalledOnce();
   });
 
   it.each([

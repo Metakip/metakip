@@ -43,12 +43,15 @@ describe('CodeMirror outline parsing', () => {
     vi.stubGlobal('Worker', TestOutlineWorker);
     const parent = document.body.appendChild(document.createElement('div'));
     const onOutlineChange = vi.fn();
+    const onDocumentChange = vi.fn();
     let title = 'Initial title';
     const resolveHeadingWikiLink = () => title;
     const hook = renderHook(() =>
       useCodeMirror({
         initialValue: '# [[Project]]',
+        commentAnchors: [],
         onOutlineChange,
+        onDocumentChange,
         resolveHeadingWikiLink,
       }),
     );
@@ -58,6 +61,7 @@ describe('CodeMirror outline parsing', () => {
     expect(worker).toBeDefined();
     await waitFor(() => expect(worker?.requests).toHaveLength(1));
     act(() => hook.result.current.editor?.dispatch({ changes: { from: 0, insert: 'Before\n' } }));
+    expect(onDocumentChange).toHaveBeenCalledWith(hook.result.current.editor);
     await waitFor(() => expect(worker?.requests).toHaveLength(2));
 
     act(() => worker?.respond(0));

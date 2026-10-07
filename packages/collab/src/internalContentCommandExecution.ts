@@ -435,7 +435,11 @@ async function executeAuthorizedPageDocument(
     idempotencyPrincipal: principal.idempotencyPrincipal,
   } satisfies AuthenticatedCredential;
   const access = await options.access.assertPageAccess(pageId, user.id, credential);
-  if (command.action !== 'read-markdown' && access.permission === 'view') {
+  if (
+    command.action !== 'read-markdown' &&
+    access.permission !== 'edit' &&
+    access.permission !== 'admin'
+  ) {
     throw new ContentCommandError(403, 'Page is read-only');
   }
   const session = createCollabSession({

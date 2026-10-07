@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createMcpOAuthScopePolicy, MCP_OAUTH_MAX_REQUEST_BODY_BYTES } from './oauthScopePolicy';
+import { createMcpOAuthRequestGuard, MCP_OAUTH_MAX_REQUEST_BODY_BYTES } from './oauthScopePolicy';
 
 describe('MCP OAuth scope policy compatibility adapter', () => {
-  it('delegates invalid authorize scopes to Better Auth with redirect validation intact', async () => {
+  it('delegates write-only authorize scopes to Better Auth', async () => {
     const authHandler = vi.fn(async (request: Request) => new Response(request.url));
-    const policy = createMcpOAuthScopePolicy(authHandler);
+    const guard = createMcpOAuthRequestGuard(authHandler);
 
-    const response = await policy.authorize(
+    const response = await guard.authorize(
       new Request(
         'https://app.example.test/api/auth/oauth2/authorize?client_id=client&redirect_uri=https%3A%2F%2Fclient.example%2Fcallback&response_type=code&scope=pages%3Awrite',
       ),
@@ -15,14 +15,14 @@ describe('MCP OAuth scope policy compatibility adapter', () => {
     expect(response.status).toBe(200);
     const delegatedUrl = await response.text();
     expect(delegatedUrl).toContain('redirect_uri=https%3A%2F%2Fclient.example%2Fcallback');
-    expect(delegatedUrl).toContain('metakip%3Ainvalid-pages-scope-combination');
+    expect(delegatedUrl).toContain('scope=pages%3Awrite');
   });
 
-  it('rejects invalid consent scopes without silently dropping the request', async () => {
-    const authHandler = vi.fn(async () => new Response('unexpected'));
-    const policy = createMcpOAuthScopePolicy(authHandler);
+  it('allows higher scopes without listing their implied lower scopes', async () => {
+    const authHandler = vi.fn(async () => new Response('delegated'));
+    const guard = createMcpOAuthRequestGuard(authHandler);
 
-    const response = await policy.consent(
+    const response = await guard.consent(
       new Request('https://app.example.test/api/auth/oauth2/consent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -30,23 +30,35 @@ describe('MCP OAuth scope policy compatibility adapter', () => {
       }),
     );
 
-    expect(response.status).toBe(400);
-    await expect(response.json()).resolves.toEqual({
-      error: 'invalid_scope',
-      error_description: 'pages:write requires pages:read',
-    });
-    expect(authHandler).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    expect(authHandler).toHaveBeenCalledOnce();
   });
 
-  it('applies the policy to authorize scopes supplied in the POST query', async () => {
+  it('allows comment access without listing the implied read scope', async () => {
+    const authHandler = vi.fn(async () => new Response('delegated'));
+    const guard = createMcpOAuthRequestGuard(authHandler);
+
+    const response = await guard.consent(
+      new Request('https://app.example.test/api/auth/oauth2/consent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'scope=pages%3Acomment',
+      }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(authHandler).toHaveBeenCalledTimes(1);
+  });
+
+  it('passes authorize scopes supplied in a POST query through unchanged', async () => {
     let delegatedRequest: Request | undefined;
     const authHandler = vi.fn(async (request: Request) => {
       delegatedRequest = request;
       return new Response('delegated');
     });
-    const policy = createMcpOAuthScopePolicy(authHandler);
+    const guard = createMcpOAuthRequestGuard(authHandler);
 
-    const response = await policy.authorize(
+    const response = await guard.authorize(
       new Request(
         'https://app.example.test/api/auth/oauth2/authorize?client_id=client&scope=pages%3Awrite',
         {
@@ -58,30 +70,22 @@ describe('MCP OAuth scope policy compatibility adapter', () => {
     );
 
     expect(response.status).toBe(200);
-    expect(new URL(delegatedRequest?.url ?? '').searchParams.get('scope')).toContain(
-      'metakip:invalid-pages-scope-combination',
-    );
-    await expect(delegatedRequest?.text()).resolves.toContain(
-      'metakip%3Ainvalid-pages-scope-combination',
-    );
+    expect(new URL(delegatedRequest?.url ?? '').searchParams.get('scope')).toBe('pages:write');
+    await expect(delegatedRequest?.text()).resolves.toBe('response_type=code');
   });
 
-  it('returns invalid_scope for a query-only invalid POST without a body encoding', async () => {
-    const authHandler = vi.fn(async () => new Response('unexpected'));
-    const policy = createMcpOAuthScopePolicy(authHandler);
+  it('delegates query-only POST authorize requests without a body encoding', async () => {
+    const authHandler = vi.fn(async () => new Response('delegated'));
+    const guard = createMcpOAuthRequestGuard(authHandler);
 
-    const response = await policy.authorize(
+    const response = await guard.authorize(
       new Request('https://app.example.test/api/auth/oauth2/authorize?scope=pages%3Awrite', {
         method: 'POST',
       }),
     );
 
-    expect(response.status).toBe(400);
-    await expect(response.json()).resolves.toEqual({
-      error: 'invalid_scope',
-      error_description: 'pages:write requires pages:read',
-    });
-    expect(authHandler).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    expect(authHandler).toHaveBeenCalledOnce();
   });
 
   it.each([
@@ -89,9 +93,9 @@ describe('MCP OAuth scope policy compatibility adapter', () => {
     ['application/x-www-form-urlencoded', `scope=pages%3Awrite&padding=${'x'.repeat(70_000)}`],
   ])('rejects oversized %s authorize bodies before delegation', async (contentType, body) => {
     const authHandler = vi.fn(async () => new Response('unexpected'));
-    const policy = createMcpOAuthScopePolicy(authHandler);
+    const guard = createMcpOAuthRequestGuard(authHandler);
 
-    const response = await policy.authorize(
+    const response = await guard.authorize(
       new Request('https://app.example.test/api/auth/oauth2/authorize', {
         method: 'POST',
         headers: { 'Content-Type': contentType },

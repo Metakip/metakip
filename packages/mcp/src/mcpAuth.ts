@@ -6,7 +6,13 @@ import {
   parseMcpInternalAuthContext,
 } from '@metakip/shared/node/mcp-internal-auth';
 import type { McpHttpHandler } from '@modelcontextprotocol/server';
-import { MCP_READ_SCOPE, MCP_WRITE_SCOPE, type McpActor, type McpScope } from './types';
+import {
+  MCP_COMMENT_SCOPE,
+  MCP_READ_SCOPE,
+  MCP_WRITE_SCOPE,
+  type McpActor,
+  type McpScope,
+} from './types';
 
 type VerifiedMcpClaims = {
   sub?: unknown;
@@ -103,7 +109,8 @@ function contextFromClaims(token: string, claims: VerifiedMcpClaims): McpInterna
       ? scopeClaim
           .split(' ')
           .filter(
-            (scope): scope is McpScope => scope === MCP_READ_SCOPE || scope === MCP_WRITE_SCOPE,
+            (scope): scope is McpScope =>
+              scope === MCP_READ_SCOPE || scope === MCP_COMMENT_SCOPE || scope === MCP_WRITE_SCOPE,
           )
       : [];
   const clientId =
@@ -154,8 +161,8 @@ export function createMcpRequestAuthenticator(
       issuer: options.authIssuer,
       audience: options.resource,
       jwksUrl: options.authJwksUrl,
-      requiredScopes: [MCP_READ_SCOPE],
-      challengeScopes: [MCP_READ_SCOPE, MCP_WRITE_SCOPE],
+      requiredScopes: [],
+      challengeScopes: [MCP_READ_SCOPE, MCP_COMMENT_SCOPE, MCP_WRITE_SCOPE],
       dpop: { signingAlgorithms: [] },
     },
     async (request, claims) => {

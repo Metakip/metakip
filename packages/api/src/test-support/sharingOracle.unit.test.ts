@@ -5,14 +5,24 @@ import {
   type OraclePublicPermission,
 } from './sharingOracle';
 
-const roles: readonly OraclePermission[] = [null, 'view', 'edit', 'admin'];
+const roles: readonly OraclePermission[] = [null, 'view', 'commenter', 'edit', 'admin'];
+const workspaceRoles: readonly OraclePermission[] = [null, 'view', 'edit', 'admin'];
 const publicPermissions: readonly OraclePublicPermission[] = [null, 'view', 'edit'];
-const rank = (permission: OraclePermission) => roles.indexOf(permission);
+const rank = (permission: OraclePermission) =>
+  permission === 'admin'
+    ? 4
+    : permission === 'edit'
+      ? 3
+      : permission === 'commenter'
+        ? 2
+        : permission === 'view'
+          ? 1
+          : 0;
 
 describe('independent sharing permission oracle', () => {
-  it('exhausts the 55,296 depth-two permission cells', () => {
+  it('exhausts the 108,000 depth-two permission cells', () => {
     let checked = 0;
-    for (const workspace of roles) {
+    for (const workspace of workspaceRoles) {
       for (const targetGrant of roles) {
         for (const parentGrant of roles) {
           for (const grandparentGrant of roles) {
@@ -61,7 +71,7 @@ describe('independent sharing permission oracle', () => {
       }
     }
 
-    expect(checked).toBe(55_296);
+    expect(checked).toBe(108_000);
   }, 30_000);
 
   it('keeps target grants active through every boundary combination', () => {

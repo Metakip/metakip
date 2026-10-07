@@ -12,7 +12,7 @@ describe('useCreateApiToken', () => {
     const created = {
       id: 'token-id',
       name: 'Agent',
-      scopes: ['pages:read'],
+      scopes: ['pages:comment'],
       expiresAt: null,
       lastUsedAt: null,
       createdAt: '2026-07-26T00:00:00.000Z',
@@ -34,7 +34,7 @@ describe('useCreateApiToken', () => {
     await act(async () => {
       mutationResult = await result.current.mutateAsync({
         name: 'Agent',
-        canWrite: false,
+        access: 'comment',
         expiresAt: null,
       });
     });
@@ -55,5 +55,11 @@ describe('useCreateApiToken', () => {
     expect(JSON.stringify(cached)).not.toContain(created.token);
     expect(createdSecret).toBe(created.token);
     expect(mutationResult).not.toHaveProperty('token');
+    expect(apiFetch).toHaveBeenCalledWith(
+      '/v1/tokens',
+      expect.objectContaining({
+        body: JSON.stringify({ name: 'Agent', scopes: ['pages:comment'], expiresAt: null }),
+      }),
+    );
   });
 });

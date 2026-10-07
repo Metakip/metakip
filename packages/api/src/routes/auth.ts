@@ -9,7 +9,7 @@ import { auth } from '../auth';
 import { query } from '../db/query';
 import { betterAuthIssuer, betterAuthJwksUrl, mcpResource } from '../env';
 import {
-  createMcpOAuthScopePolicy,
+  createMcpOAuthRequestGuard,
   MCP_OAUTH_MAX_REQUEST_BODY_BYTES,
   oversizedOAuthRequestResponse,
 } from '../mcp/oauthScopePolicy';
@@ -83,7 +83,7 @@ async function handleRevoke(c: Context): Promise<Response> {
   return emptyRevocationResponse();
 }
 
-const mcpOAuthScopePolicy = createMcpOAuthScopePolicy(handleAuth);
+const mcpOAuthRequestGuard = createMcpOAuthRequestGuard(handleAuth);
 
 const mcpOAuthBodyLimit = bodyLimit({
   maxSize: MCP_OAUTH_MAX_REQUEST_BODY_BYTES,
@@ -93,9 +93,9 @@ const mcpOAuthBodyLimit = bodyLimit({
 router.use('/auth/*', mcpOAuthBodyLimit);
 
 router.on(['GET', 'POST'], '/auth/oauth2/authorize', (c) =>
-  mcpOAuthScopePolicy.authorize(c.req.raw),
+  mcpOAuthRequestGuard.authorize(c.req.raw),
 );
-router.post('/auth/oauth2/consent', (c) => mcpOAuthScopePolicy.consent(c.req.raw));
+router.post('/auth/oauth2/consent', (c) => mcpOAuthRequestGuard.consent(c.req.raw));
 router.post('/auth/oauth2/revoke', handleRevoke);
 router.on(['GET', 'POST'], '/auth/jwks', (c) => handleAuth(c.req.raw));
 router.on(['GET', 'POST'], '/auth/oauth2/*', (c) => handleAuth(c.req.raw));

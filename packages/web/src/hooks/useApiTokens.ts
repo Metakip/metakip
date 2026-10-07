@@ -36,13 +36,18 @@ export function useApiTokens() {
 export function useCreateApiToken(onCreatedSecret: (secret: string) => void) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (request: { name: string; canWrite: boolean; expiresAt: string | null }) => {
+    mutationFn: async (request: {
+      name: string;
+      access: 'read' | 'comment' | 'write';
+      expiresAt: string | null;
+    }) => {
+      const scopes = [`pages:${request.access}`];
       const created = await apiFetch<CreatedApiToken>('/v1/tokens', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: request.name,
-          scopes: request.canWrite ? ['pages:read', 'pages:write'] : ['pages:read'],
+          scopes,
           expiresAt: request.expiresAt,
         }),
       });

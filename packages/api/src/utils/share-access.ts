@@ -3,27 +3,34 @@ import { HTTPException } from 'hono/http-exception';
 import { executeQuery, type QueryExecutor, query } from '../db/query';
 
 export type ShareEntityType = 'folder' | 'page';
-export type SharePermission = 'view' | 'edit' | 'admin';
+export type SharePermission = 'view' | 'commenter' | 'edit' | 'admin';
 
-type AccessMode = 'view' | 'edit' | 'admin';
+type AccessMode = 'view' | 'commenter' | 'edit' | 'admin';
 
 const permissionRank = (permission: SharePermission) =>
-  permission === 'admin' ? 3 : permission === 'edit' ? 2 : 1;
+  permission === 'admin' ? 4 : permission === 'edit' ? 3 : permission === 'commenter' ? 2 : 1;
 const hasRequiredPermission = (permission: SharePermission, mode: AccessMode) => {
   return permissionRank(permission) >= permissionRank(mode);
 };
 
 const accessModeLabel = (mode: AccessMode) =>
-  mode === 'admin' ? 'admin' : mode === 'edit' ? 'edit' : 'view';
+  mode === 'admin'
+    ? 'admin'
+    : mode === 'edit'
+      ? 'edit'
+      : mode === 'commenter'
+        ? 'commenter'
+        : 'view';
 
 export const parsePermission = (value: unknown): SharePermission => {
   if (value === 'admin') return 'admin';
   if (value === 'edit') return 'edit';
+  if (value === 'commenter') return 'commenter';
   if (value === 'view') return 'view';
   throw new HTTPException(400, { message: 'Invalid permission' });
 };
 
-export const parsePublicPermission = (value: unknown): AccessMode => {
+export const parsePublicPermission = (value: unknown): 'view' | 'edit' => {
   if (value === 'edit') return 'edit';
   if (value === 'view') return 'view';
   throw new HTTPException(400, { message: 'Invalid public permission' });

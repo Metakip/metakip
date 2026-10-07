@@ -3,6 +3,7 @@ import type {
   BulkRemovalOperation,
   BulkRemovalRequest,
   BulkRemovalResult,
+  SharePermission,
 } from '@metakip/shared';
 import { MAX_BULK_REMOVAL_OPERATIONS_PER_REQUEST } from '@metakip/shared';
 import { useIsMutating, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -39,7 +40,7 @@ export interface BulkRemovalCandidate {
   type: 'page' | 'folder';
   ownerId?: string | null | undefined;
   createdBy?: string | null | undefined;
-  userPermission?: 'view' | 'edit' | 'admin' | null | undefined;
+  userPermission?: SharePermission | null | undefined;
   shareSource?: 'direct' | 'public' | 'workspace' | undefined;
 }
 

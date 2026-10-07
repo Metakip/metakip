@@ -33,7 +33,14 @@ type Model = {
 
 type TestApp = Awaited<ReturnType<typeof createTestApp>>;
 
-const accountPermissions: readonly OraclePermission[] = [null, 'view', 'edit', 'admin'];
+const accountPermissions: readonly OraclePermission[] = [
+  null,
+  'view',
+  'commenter',
+  'edit',
+  'admin',
+];
+const workspacePermissions: readonly OraclePermission[] = [null, 'view', 'edit', 'admin'];
 const publicPermissions: readonly OraclePublicPermission[] = [null, 'view', 'edit'];
 
 const seededRandom = (initialSeed: number) => {
@@ -369,7 +376,7 @@ describe('sharing topology state machine', () => {
     for (let step = 0; step < 80; step += 1) {
       const axis = Math.floor(random() * 7);
       if (axis === 0) {
-        const permission = pick(accountPermissions, random);
+        const permission = pick(workspacePermissions, random);
         await setWorkspaceAccess(model, owner.id, recipient.id, permission);
         trace.push(`workspace=${permission ?? 'none'}`);
       } else if (axis === 1) {

@@ -10,12 +10,14 @@ interface TableOfContentsProps {
   headings: readonly EditorHeading[];
   activeHeadingId: string;
   onHeadingSelect: (heading: EditorHeading) => void;
+  onHoverChange?: (isHovered: boolean) => void;
 }
 
 export function TableOfContents({
   headings,
   activeHeadingId,
   onHeadingSelect,
+  onHoverChange,
 }: TableOfContentsProps) {
   const [isHovered, setIsHovered] = useState(false);
   const headingTree = useMemo(() => {
@@ -113,8 +115,14 @@ export function TableOfContents({
         'fixed right-2 top-1/2 -translate-y-1/2 z-30',
         'transition-all duration-300 ease-out',
       )}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={() => {
+        setIsHovered(true);
+        onHoverChange?.(true);
+      }}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        onHoverChange?.(false);
+      }}
     >
       <div
         className={clsx(

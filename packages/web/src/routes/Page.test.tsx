@@ -14,11 +14,13 @@ const EDIT_CAPABILITIES: CapabilitySet = {
   canEdit: true,
   canDelete: false,
   canCopy: true,
+  canComment: true,
 };
 const VIEW_CAPABILITIES: CapabilitySet = {
   canEdit: false,
   canDelete: false,
   canCopy: true,
+  canComment: false,
 };
 
 const mocks = vi.hoisted(() => ({
@@ -28,17 +30,20 @@ const mocks = vi.hoisted(() => ({
       canEdit: true,
       canDelete: false,
       canCopy: true,
+      canComment: true,
     },
-    accessPermission: 'edit' as 'view' | 'edit' | null,
+    accessPermission: 'edit' as 'view' | 'commenter' | 'edit' | 'admin' | null,
   },
   setAccessPermission: vi.fn(),
   setCapabilities: vi.fn(),
   loggerError: vi.fn(),
-  snapshotPermission: 'edit' as 'view' | 'edit' | 'admin' | null,
+  snapshotPermission: 'edit' as 'view' | 'commenter' | 'edit' | 'admin' | null,
   statusChange: null as ((status: WebSocketStatus) => void) | null,
   permissionSnapshot: null as
-    | ((permission: 'view' | 'edit' | 'admin' | null, revision: string) => void)
+    | ((permission: 'view' | 'commenter' | 'edit' | 'admin' | null, revision: string) => void)
     | null,
+  commentSelection: null as ((anchor: { quote: string } | null) => void) | null,
+  toggleComments: null as (() => void) | null,
   wikiLinkClick: null as ((target: { id: string; title: string; heading?: string }) => void) | null,
 }));
 
@@ -61,7 +66,15 @@ vi.mock('../components/editor/BacklinksPanel', () => ({
 }));
 vi.mock('../components/editor/Breadcrumbs', () => ({ Breadcrumbs: () => null }));
 vi.mock('../components/editor/PageActions', () => ({
-  PageActions: () => <div data-testid="page-actions" />,
+  PageActions: ({ onToggleComments }: { onToggleComments?: () => void }) => {
+    mocks.toggleComments = onToggleComments ?? null;
+    return <div data-testid="page-actions" />;
+  },
+}));
+vi.mock('../components/editor/CommentsPanel', () => ({
+  CommentsPanel: ({ selectedAnchor }: { selectedAnchor: { quote: string } | null }) => (
+    <div data-testid="comments-panel" data-selected-quote={selectedAnchor?.quote ?? ''} />
+  ),
 }));
 vi.mock('../components/editor/PageIcon', () => ({
   PageIcon: () => {
@@ -85,25 +98,36 @@ vi.mock('../components/editor/CodeMirrorEditor', async () => {
   const { useEffect } = await import('react');
   return {
     CodeMirrorEditor: ({
+      hideInlineCommentCards,
       onPermissionSnapshot,
       onStatusChange,
       onWikiLinkClick,
+      onCommentSelection,
     }: {
+      hideInlineCommentCards: boolean;
       onPermissionSnapshot: (
-        permission: 'view' | 'edit' | 'admin' | null,
+        permission: 'view' | 'commenter' | 'edit' | 'admin' | null,
         revision: string,
       ) => void;
       onStatusChange: (status: WebSocketStatus) => void;
       onWikiLinkClick: (target: { id: string; title: string; heading?: string }) => void;
+      onCommentSelection: (anchor: { quote: string } | null) => void;
     }) => {
       const readOnly = useIsReadOnly();
       mocks.statusChange = onStatusChange;
       mocks.permissionSnapshot = onPermissionSnapshot;
       mocks.wikiLinkClick = onWikiLinkClick;
+      mocks.commentSelection = onCommentSelection;
       useEffect(() => {
         onPermissionSnapshot(mocks.snapshotPermission, '1');
       }, [onPermissionSnapshot]);
-      return <div data-testid="page-body" data-read-only={String(readOnly)} />;
+      return (
+        <div
+          data-testid="page-body"
+          data-read-only={String(readOnly)}
+          data-hide-inline-comment-cards={String(hideInlineCommentCards)}
+        />
+      );
     },
   };
 });
@@ -217,6 +241,8 @@ describe('Page permission presentation', () => {
     mocks.statusChange = null;
     mocks.permissionSnapshot = null;
     mocks.wikiLinkClick = null;
+    mocks.commentSelection = null;
+    mocks.toggleComments = null;
   });
 
   afterEach(() => {
@@ -291,11 +317,25 @@ describe('Page permission presentation', () => {
           }),
         } as Response;
       }
+      if (url.startsWith('/api/v1/pages/') && url.includes('/comments?')) {
+        return {
+          ok: true,
+          status: 200,
+          json: async () => ({ data: [], nextCursor: null }),
+        } as Response;
+      }
       throw new Error(`Unexpected request: ${url}`);
     });
     vi.stubGlobal('fetch', fetchMock);
     await renderPage();
     await screen.findByTestId('page-body');
+
+    act(() => mocks.commentSelection?.({ quote: 'Text from the previous page' }));
+    act(() => mocks.toggleComments?.());
+    expect(screen.getByTestId('comments-panel')).toHaveAttribute(
+      'data-selected-quote',
+      'Text from the previous page',
+    );
 
     await act(async () => {
       mocks.wikiLinkClick?.({
@@ -311,6 +351,30 @@ describe('Page permission presentation', () => {
     expect(screen.getByTestId('location')).toHaveTextContent(
       `/renamed-target-${WIKI_TARGET_ID}#release-milestones`,
     );
+    await waitFor(() => expect(screen.queryByTestId('comments-panel')).not.toBeInTheDocument());
+  });
+
+  it('closes comments when live permission removes comment access', async () => {
+    vi.stubGlobal('fetch', mockPageFetch('edit'));
+    await renderPage();
+    await screen.findByTestId('page-body');
+
+    act(() => mocks.toggleComments?.());
+    expect(screen.getByTestId('comments-panel')).toBeInTheDocument();
+    expect(screen.getByTestId('page-body')).toHaveAttribute(
+      'data-hide-inline-comment-cards',
+      'true',
+    );
+
+    act(() => mocks.permissionSnapshot?.('view', '2'));
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('comments-panel')).not.toBeInTheDocument();
+      expect(screen.getByTestId('page-body')).toHaveAttribute(
+        'data-hide-inline-comment-cards',
+        'false',
+      );
+    });
   });
 
   it('fails closed without labeling unresolved permission as confirmed View access', async () => {

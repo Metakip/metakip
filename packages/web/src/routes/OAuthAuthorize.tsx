@@ -5,8 +5,11 @@ import { useAuth } from '../hooks/useAuth';
 import { authClient } from '../lib/auth-client';
 
 const READ_SCOPE = 'pages:read';
+const COMMENT_SCOPE = 'pages:comment';
 const WRITE_SCOPE = 'pages:write';
 const PROTOCOL_SCOPES = new Set(['openid', 'profile', 'offline_access']);
+const PAGE_SCOPES_ORDER = [READ_SCOPE, COMMENT_SCOPE, WRITE_SCOPE];
+const PAGE_SCOPES = new Set(PAGE_SCOPES_ORDER);
 
 type PublicClient = {
   client_id?: string;
@@ -17,12 +20,13 @@ type PublicClient = {
 
 function scopeLabel(scope: string): string {
   if (scope === READ_SCOPE) return 'Read pages and folders';
-  if (scope === WRITE_SCOPE) return 'Modify pages and folders';
+  if (scope === COMMENT_SCOPE) return 'Read and comment on pages and folders';
+  if (scope === WRITE_SCOPE) return 'Modify pages and folders (includes comment access)';
   return scope;
 }
 
 function isPermissionScope(scope: string): boolean {
-  return scope === READ_SCOPE || scope === WRITE_SCOPE;
+  return PAGE_SCOPES.has(scope);
 }
 
 function isSupportedConsentScope(scope: string): boolean {
@@ -73,6 +77,10 @@ export default function OAuthAuthorize() {
     () => requestedScopes.filter(isPermissionScope),
     [requestedScopes],
   );
+  const requestsPageAccess = requestedScopes.some((scope) => PAGE_SCOPES.has(scope));
+  const requestsCommentAccess = requestedScopes.some(
+    (scope) => scope === COMMENT_SCOPE || scope === WRITE_SCOPE,
+  );
   const requestsOfflineAccess = requestedScopes.includes('offline_access');
   const [client, setClient] = useState<PublicClient | null>(null);
   const [selectedScopes, setSelectedScopes] = useState<string[]>(() =>
@@ -82,6 +90,7 @@ export default function OAuthAuthorize() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const clientWebsite = useMemo(() => safeClientWebsite(client?.client_uri), [client?.client_uri]);
+  const canConnect = selectedScopes.some((scope) => PAGE_SCOPES.has(scope));
 
   useEffect(() => {
     setSelectedScopes(
@@ -138,8 +147,13 @@ export default function OAuthAuthorize() {
     setIsSubmitting(true);
     setSubmitError(null);
     try {
+      const selectedPageScope = [...PAGE_SCOPES_ORDER]
+        .reverse()
+        .find((scope) => requestedScopes.includes(scope) && selectedScopes.includes(scope));
       const grantedScopes = requestedScopes.filter(
-        (scope) => PROTOCOL_SCOPES.has(scope) || selectedScopes.includes(scope),
+        (scope) =>
+          PROTOCOL_SCOPES.has(scope) ||
+          (scope === selectedPageScope && selectedPageScope !== undefined),
       );
       // The Better Auth client forwards the signed flat page query. Never accept
       // an independent nested oauth_query that could differ from this UI.
@@ -209,7 +223,13 @@ export default function OAuthAuthorize() {
               </p>
             ) : null}
             <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
-              This application is requesting access to your Metakip pages and folders.
+              {requestsPageAccess && requestsCommentAccess
+                ? 'This application is requesting access to your Metakip pages, folders, and comments.'
+                : requestsCommentAccess
+                  ? 'This application is requesting access to your Metakip comments.'
+                  : requestsPageAccess
+                    ? 'This application is requesting access to your Metakip pages and folders.'
+                    : 'This application is requesting account and session access.'}
             </p>
             <div className="mt-6 space-y-3">
               {requestedPermissionScopes.map((scope) => (
@@ -220,7 +240,13 @@ export default function OAuthAuthorize() {
                   <input
                     type="checkbox"
                     checked={selectedScopes.includes(scope)}
-                    disabled={scope === READ_SCOPE || isSubmitting}
+                    disabled={
+                      isSubmitting ||
+                      (scope === READ_SCOPE &&
+                        (selectedScopes.includes(COMMENT_SCOPE) ||
+                          selectedScopes.includes(WRITE_SCOPE))) ||
+                      (scope === COMMENT_SCOPE && selectedScopes.includes(WRITE_SCOPE))
+                    }
                     onChange={(event) =>
                       setSelectedScopes((current) =>
                         event.target.checked
@@ -262,7 +288,7 @@ export default function OAuthAuthorize() {
               </button>
               <button
                 type="button"
-                disabled={isSubmitting || !selectedScopes.includes(READ_SCOPE)}
+                disabled={isSubmitting || !canConnect}
                 onClick={() => void submit(true)}
                 className="cursor-pointer rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-700 dark:hover:bg-zinc-600"
               >

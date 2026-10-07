@@ -12,7 +12,7 @@ import { Dropdown } from '../ui/FormControls';
 
 export function ApiTokensPanel() {
   const [name, setName] = useState('');
-  const [access, setAccess] = useState<'read' | 'write'>('read');
+  const [access, setAccess] = useState<'read' | 'comment' | 'write'>('read');
   const [expiryDays, setExpiryDays] = useState('');
   const [createdSecret, setCreatedSecret] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -26,7 +26,7 @@ export function ApiTokensPanel() {
     createMutation.mutate(
       {
         name: name.trim(),
-        canWrite: access === 'write',
+        access,
         expiresAt: expiryDays
           ? new Date(Date.now() + Number(expiryDays) * 24 * 60 * 60 * 1000).toISOString()
           : null,
@@ -98,7 +98,7 @@ export function ApiTokensPanel() {
         </div>
       )}
 
-      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_9rem_8rem_auto] sm:items-end">
+      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_11rem_8rem_auto] sm:items-end">
         <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300">
           Token name
           <input
@@ -117,7 +117,8 @@ export function ApiTokensPanel() {
             ariaLabel="Token access"
             options={[
               { value: 'read', label: 'Read only' },
-              { value: 'write', label: 'Read and write' },
+              { value: 'comment', label: 'Read and comment' },
+              { value: 'write', label: 'Read, comment, and write' },
             ]}
             className="mt-1 w-full"
             triggerClassName="h-10 w-full px-3 text-[15px]"
@@ -166,8 +167,16 @@ export function ApiTokensPanel() {
                 {token.name}
               </p>
               <p className="text-xs text-zinc-500 dark:text-zinc-400">
-                {token.scopes.includes('pages:write') ? 'Read and write' : 'Read only'} ·{' '}
-                {token.lastUsedAt ? `Last used ${formatDate(token.lastUsedAt)}` : 'Never used'}
+                {[
+                  token.scopes.includes('pages:write')
+                    ? 'Pages: read, comment, and write'
+                    : token.scopes.includes('pages:comment')
+                      ? 'Pages: read and comment'
+                      : token.scopes.includes('pages:read')
+                        ? 'Pages: read'
+                        : 'Pages: no access',
+                ].join(' · ')}{' '}
+                · {token.lastUsedAt ? `Last used ${formatDate(token.lastUsedAt)}` : 'Never used'}
                 {token.expiresAt ? ` · Expires ${formatDate(token.expiresAt)}` : ' · No expiry'}
               </p>
             </div>

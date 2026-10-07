@@ -48,7 +48,7 @@ export type CollaborationLifecycleControllerOptions = {
   navigate: Navigate;
   queryClient: QueryClient;
   setReadOnly: (readOnly: boolean) => void;
-  setAccessPermission: (permission: 'view' | 'edit' | null) => void;
+  setAccessPermission: (permission: SharePermission | null) => void;
   setCapabilities: (capabilities: ReturnType<typeof deriveCapabilities>) => void;
   invalidateWorkspaceAccess: () => void;
 };
@@ -285,6 +285,7 @@ export class CollaborationLifecycleController {
     const validPermission =
       permission === null ||
       permission === 'view' ||
+      permission === 'commenter' ||
       permission === 'edit' ||
       permission === 'admin';
     if (!validPermission || typeof accessRevision !== 'string' || !/^\d+$/.test(accessRevision)) {
@@ -319,7 +320,9 @@ export class CollaborationLifecycleController {
     const isPermissionTransition =
       previousRevision === null || revision > previousRevision || previousPermission !== permission;
     const isSelfLeaveTransition = isPermissionTransition && consumeSelfLeave(this.options.pageId);
-    this.options.setReadOnly(permission === null || permission === 'view');
+    this.options.setReadOnly(
+      permission === null || permission === 'view' || permission === 'commenter',
+    );
     this.options.setAccessPermission(permission === 'admin' ? 'edit' : permission);
     this.options.setCapabilities(deriveCapabilities(permission));
     this.syncPagePermission(permission);

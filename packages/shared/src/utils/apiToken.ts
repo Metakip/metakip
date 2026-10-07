@@ -1,7 +1,19 @@
 export const API_TOKEN_PREFIX = 'mdn';
-export const API_TOKEN_SCOPES = ['pages:read', 'pages:write'] as const;
+export const API_TOKEN_SCOPES = ['pages:read', 'pages:comment', 'pages:write'] as const;
 
 export type ApiTokenScope = (typeof API_TOKEN_SCOPES)[number];
+
+export function hasApiTokenScope(
+  grantedScopes: Iterable<string>,
+  requiredScope: ApiTokenScope,
+): boolean {
+  const scopes = new Set(grantedScopes);
+  if (scopes.has(requiredScope)) return true;
+  if (requiredScope === 'pages:read') {
+    return scopes.has('pages:comment') || scopes.has('pages:write');
+  }
+  return requiredScope === 'pages:comment' && scopes.has('pages:write');
+}
 
 const API_TOKEN_PATTERN = /^mdn_([0-9a-f]{32})_[A-Za-z0-9_-]{43}$/;
 

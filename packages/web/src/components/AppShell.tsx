@@ -73,31 +73,19 @@ function AppShellContent({ contentState }: { contentState: AppShellContentState 
 
   return (
     <div className="flex h-screen w-full bg-zinc-50 dark:bg-zinc-950 overflow-hidden text-zinc-900 dark:text-zinc-50 font-sans">
-      {!isAnonymous && (
-        <>
-          {/* Layout Spacer - ensures center content animates smoothly when sidebar is pinned/unpinned */}
-          <div
-            className={clsx(
-              'hidden md:block transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex-shrink-0 overflow-hidden',
-              collapsed ? 'w-0' : 'w-[252px]',
-            )}
-          />
-
-          {collapsed && !isHovered && (
-            <button
-              type="button"
-              className="hidden md:block fixed left-0 top-0 bottom-0 w-16 z-50 bg-transparent border-none p-0 cursor-pointer"
-              onMouseEnter={() => setIsHovered(true)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  setIsHovered(true);
-                }
-              }}
-              aria-label="Show sidebar"
-            />
-          )}
-        </>
+      {!isAnonymous && collapsed && !isHovered && (
+        <button
+          type="button"
+          className="hidden md:block fixed left-0 top-0 bottom-0 w-16 z-50 bg-transparent border-none p-0 cursor-pointer"
+          onMouseEnter={() => setIsHovered(true)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setIsHovered(true);
+            }
+          }}
+          aria-label="Show sidebar"
+        />
       )}
 
       {!isAnonymous && isMobileMenuOpen && (
