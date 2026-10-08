@@ -92,6 +92,6 @@ export const USE_CASE_PAGE = {
   footerTitle: 'Next step',
   footerLinks: [
     { kind: 'app', label: 'Open Metakip' },
-    { kind: 'internal', label: 'Read The Features', path: '/features' },
+    { kind: 'internal', label: 'Read The Features', path: '/#features' },
   ],
 } satisfies MarketingHtmlPageDefinition;

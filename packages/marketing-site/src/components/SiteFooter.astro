@@ -1,0 +1,134 @@
+---
+// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
+import { Image } from 'astro:assets';
+import type { MarkdownInstance } from 'astro';
+// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
+import brandMark from '../assets/metakip-mark.png';
+import { DOCS_ORIGIN, GITHUB_URL } from '../data/siteConfig';
+// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
+import AppLink from './AppLink.astro';
+import '../styles/siteFooter.css';
+
+const modules = import.meta.glob<MarkdownInstance<Record<string, unknown>>>(
+  '../content/footerNotes/*.md',
+  { eager: true },
+);
+const noteConfigs = [
+  { filename: 'from-the-terminal', x: 10, y: 60, angle: -4 },
+  { filename: 'meeting-notes', x: 30, y: 38, angle: 3 },
+  { filename: 'ideas', x: 50, y: 68, angle: -3 },
+  { filename: 'daily-notes', x: 70, y: 40, angle: 4 },
+  { filename: 'yours-to-keep', x: 90, y: 62, angle: -4 },
+] as const;
+// biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
+const notes = noteConfigs.map(({ filename, x, y, angle }) => {
+  const note = modules[`../content/footerNotes/${filename}.md`];
+  if (!note) throw new Error(`Missing footer note: ${filename}`);
+  const source = note.rawContent().trim();
+  return {
+    filename: `${filename}.md`,
+    preview: source
+      .split('\n')
+      .filter((line) => line.trim().length > 0)
+      .slice(0, 4),
+    position: `--note-x: ${x}%; --note-y: ${y}%; --note-angle: ${angle}deg;`,
+  };
+});
+// biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
+const resources = [
+  { label: 'Documentation', href: DOCS_ORIGIN },
+  { label: 'GitHub', href: GITHUB_URL },
+  { label: 'MCP', href: `${DOCS_ORIGIN}/agents/mcp/` },
+  { label: 'CLI', href: `${DOCS_ORIGIN}/agents/metakip-cli/` },
+];
+---
+
+<footer class="site-footer" id="footer" data-note-footer transition:persist="site-footer" transition:animate="none">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-intro">
+        <h2>Your next thought<br />belongs <span>here.</span></h2>
+        <p class="footer-description">One knowledge base for you, your team, and your agents.</p>
+        <AppLink class="footer-cta">Open Metakip</AppLink>
+      </div>
+      <nav class="footer-navigation" aria-label="Footer navigation">
+        <div>
+          <h3>(Explore)</h3>
+          <a href="/use-cases">Use Cases</a>
+          <a href="/pricing">Pricing</a>
+          <a href="/changelog">Changelog</a>
+        </div>
+        <div>
+          <h3>(Resources)</h3>
+          {resources.map(({ label, href }) => (
+            <a href={href} target="_blank" rel="noopener noreferrer">
+              {label}<span aria-hidden="true">↗</span>
+            </a>
+          ))}
+        </div>
+      </nav>
+    </div>
+
+    <div class="footer-note-scene" data-note-scene aria-hidden="true">
+      {notes.map(({ filename, preview, position }, index) => (
+        <div
+          class:list={[
+            'footer-note',
+            ['ideas.md', 'yours-to-keep.md'].includes(filename) &&
+              'footer-note-contrast',
+          ]}
+          style={position}
+          data-note={index}
+        >
+          <span class="footer-note-paper">
+            <span class="footer-note-content" aria-hidden="true">
+              {preview.map((line) => (
+                <span class:list={['footer-note-line', /^#/.test(line) && 'is-heading', /^# Content stays portable\.$/.test(line) && 'is-long-heading', /^-/.test(line) && 'is-list']}>
+                  {line || '\u00a0'}
+                </span>
+              ))}
+            </span>
+          </span>
+        </div>
+      ))}
+    </div>
+
+    <div class="footer-bottom">
+      <div class="footer-wordmark" aria-label="Metakip">
+        <Image
+          class="footer-mark"
+          src={brandMark}
+          widths={[48, 96, 104]}
+          sizes="(max-width: 767px) 48px, 7.5vw"
+          format="webp"
+          quality={100}
+          alt=""
+          loading="lazy"
+        />
+        <span>Metakip</span>
+      </div>
+      <div class="footer-theme-control" role="group" aria-label="Color theme">
+        <button class="footer-theme-option" type="button" data-theme-option="light" aria-label="Light theme" title="Light theme" aria-pressed="false">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41-1.41"></path><path d="m19.07 4.93-1.41-1.41"></path>
+          </svg>
+        </button>
+        <button class="footer-theme-option" type="button" data-theme-option="dark" aria-label="Dark theme" title="Dark theme" aria-pressed="false">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+          </svg>
+        </button>
+        <button class="footer-theme-option" type="button" data-theme-option="system" aria-label="Use system theme" title="Use system theme" aria-pressed="false">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect width="20" height="14" x="2" y="3" rx="2"></rect><line x1="8" x2="16" y1="21" y2="21"></line><line x1="12" x2="12" y1="17" y2="21"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  import { initNoteFooter } from '../scripts/noteFooter';
+  document.querySelectorAll<HTMLElement>('[data-note-footer]').forEach(initNoteFooter);
+</script>

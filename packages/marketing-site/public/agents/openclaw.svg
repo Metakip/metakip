@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <defs>
+    <linearGradient id="claw" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ff625a" />
+      <stop offset="1" stop-color="#a51f28" />
+    </linearGradient>
+  </defs>
+  <g fill="url(#claw)">
+    <path d="M60 13c-25 0-41 19-41 43 0 20 12 37 28 43v9h11v-8c3 1 7 1 10 0v8h11v-9c16-6 28-23 28-43 0-24-16-43-47-43Z" />
+    <path d="M20 47C7 41 1 48 5 59c4 10 15 11 24 1 6-7 3-12-9-13Z" />
+    <path d="M100 47c13-6 19 1 15 12-4 10-15 11-24 1-6-7-3-12 9-13Z" />
+  </g>
+  <g stroke="#db3f3c" stroke-linecap="round" stroke-width="3">
+    <path d="M46 16 35 7" />
+    <path d="m74 16 11-9" />
+  </g>
+  <g fill="#151515">
+    <circle cx="46" cy="37" r="5" />
+    <circle cx="74" cy="37" r="5" />
+  </g>
+  <g fill="#fff">
+    <circle cx="47" cy="36" r="1.8" />
+    <circle cx="75" cy="36" r="1.8" />
+  </g>
+</svg>

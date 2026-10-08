@@ -1,0 +1,206 @@
+---
+// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
+import { Image } from 'astro:assets';
+// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
+import human from '../assets/hero-human-retro.png';
+// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
+import brandMark from '../assets/metakip-mark.png';
+
+// Official brand assets are stored locally; source URLs are in hero-assets.md.
+// biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
+const agents = [
+  { name: 'Pi', src: '/agents/pi.svg', x: 420, y: 60 },
+  { name: 'ChatGPT', src: '/agents/chatgpt.svg', x: 613, y: 60 },
+  { name: 'Muse', src: '/agents/muse.svg', x: 806, y: 60 },
+  { name: 'Grok', src: '/agents/grok.svg', x: 999, y: 60 },
+  {
+    name: 'Hermes',
+    src: '/agents/nous-girl.png',
+    x: 420,
+    y: 210,
+  },
+  { name: 'Claude', src: '/agents/claude.svg', x: 613, y: 210 },
+  { name: 'OpenClaw', src: '/agents/openclaw.svg', x: 806, y: 210 },
+  { name: 'OpenCode', src: '/agents/opencode.svg', x: 999, y: 210 },
+];
+
+// Flexible branches leave the shared axis with a smooth horizontal tangent.
+// biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
+const branchPath = (x: number, y: number): string => {
+  const branchX = x - 60;
+  const endX = x - 28;
+  const distance = endX - branchX;
+  const control2X = Math.max(x - 85, branchX + distance * 0.5);
+  return `M${branchX} 135 C${branchX + distance * 0.4} 135 ${control2X} ${y} ${endX} ${y}`;
+};
+---
+
+<div class="collaboration-scene" role="img" aria-label="A person and eight AI agents connected to the Metakip workspace.">
+ <div class="collaboration-canvas">
+  <Image class="human-figure" src={human} alt="" widths={[320, 640]} sizes="(max-width: 1280px) 25vw, 320px" format="webp" quality={100} loading="eager" fetchpriority="high" />
+  <svg class="agent-connections" viewBox="0 0 1400 360" fill="none" aria-hidden="true">
+    <path class="connection-source" d="M241 105H270Q278 105 284 111L302 129Q308 135 316 135" />
+    <path class="connection-trunk" d="M316 135H1101" />
+    <path class="connection-destination" d="M1176 165H1147Q1139 165 1133 159L1115 141Q1109 135 1101 135" />
+    {agents.map(({ x, y }) => (
+      <g>
+        <path d={branchPath(x, y)} />
+      </g>
+    ))}
+    <rect class="connection-junction" x="312" y="131" width="8" height="8" rx="1" />
+    <rect class="connection-junction" x="1097" y="131" width="8" height="8" rx="1" />
+  </svg>
+  {agents.map(({ name, src, x, y }) => (
+    <div class="agent-node" style={`--agent-x:${x / 14}%;--agent-y:${y / 3.6}%`} aria-hidden="true">
+     <div class="agent-orbit">
+      <div class:list={['agent-logo', name === 'Hermes' && 'agent-logo-hermes']}>
+        <img src={src} width="36" height="36" alt="" loading="eager" />
+      </div>
+      <span>{name}</span>
+     </div>
+    </div>
+  ))}
+  <div class="metakip-node" aria-hidden="true">
+    <div class="metakip-logo">
+      <Image
+        src={brandMark}
+        widths={[64, 128, 256, 512]}
+        sizes="16vw"
+        format="webp"
+        quality={100}
+        alt=""
+        loading="eager"
+      />
+    </div>
+  </div>
+ </div>
+</div>
+
+<style>
+  .collaboration-scene {
+    position: relative;
+    width: 100%;
+    margin: 0 0 24px;
+    padding-top: 56px;
+    overflow: visible;
+    color: var(--text);
+  }
+
+  .collaboration-canvas { position: relative; aspect-ratio: 1400 / 360; }
+  .agent-orbit { position: relative; display: grid; justify-items: center; gap: clamp(4px, 0.7vw, 8px); }
+  .collaboration-scene :global(.human-figure) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 25%;
+    height: auto;
+    filter: none;
+    image-rendering: pixelated;
+  }
+
+  .agent-connections {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    stroke: color-mix(in srgb, var(--muted) 60%, var(--background));
+    stroke-width: 1.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .connection-source,
+  .connection-destination {
+    stroke: var(--text);
+    stroke-width: 2;
+  }
+
+  .connection-junction {
+    fill: var(--text);
+    stroke: none;
+  }
+
+  .agent-node {
+    --agent-size: clamp(22px, 4vw, 44px);
+    position: absolute;
+    top: var(--agent-y);
+    left: var(--agent-x);
+    display: grid;
+    justify-items: center;
+    gap: clamp(4px, 0.7vw, 8px);
+    transform: translate(-50%, calc(var(--agent-size) / -2));
+  }
+
+  .metakip-node {
+    position: absolute;
+    top: 45.83%;
+    right: 0;
+    width: 16%;
+    display: grid;
+    justify-items: center;
+    gap: 0;
+    padding-block: 8px;
+    background: var(--background);
+    transform: translateY(-50%);
+  }
+
+  .agent-logo {
+    display: grid;
+    width: var(--agent-size);
+    height: var(--agent-size);
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #ffffff;
+  }
+
+  .agent-logo img {
+    display: block;
+    width: 75%;
+    height: 75%;
+    object-fit: contain;
+    filter: none;
+  }
+
+  .agent-logo-hermes img {
+    width: 100%;
+    height: 100%;
+  }
+
+  .metakip-logo {
+    position: relative;
+    display: grid;
+    width: 100%;
+    aspect-ratio: 512 / 470;
+    place-items: center;
+  }
+
+  .metakip-logo > img:first-child {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: none;
+  }
+
+  .metakip-logo img {
+    filter: none;
+  }
+
+  :global(.dark) .metakip-logo img {
+    filter: invert(1);
+  }
+
+  .agent-orbit > span {
+    padding: 2px 5px;
+    background: var(--background);
+    font-family: 'Geist Mono', monospace;
+    font-size: clamp(6px, 0.9vw, 10px);
+    line-height: 1.2;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 560px) {
+    .collaboration-scene { padding-top: 54px; }
+  }
+</style>

@@ -1,7 +1,5 @@
 type Theme = 'light' | 'dark' | 'system';
 
-const THEME_ORDER: readonly Theme[] = ['light', 'dark', 'system'];
-
 const isTheme = (value: string | null): value is Theme =>
   value === 'light' || value === 'dark' || value === 'system';
 
@@ -11,40 +9,48 @@ const readTheme = (): Theme => {
 };
 
 export const initializeThemeController = (): void => {
+  const systemTheme = matchMedia('(prefers-color-scheme: dark)');
+  const boundOptions = new WeakSet<HTMLButtonElement>();
+  const applyTheme = (theme: Theme, persist: boolean): void => {
+    const isDark = theme === 'dark' || (theme === 'system' && systemTheme.matches);
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.classList.toggle('dark', isDark);
+    document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', isDark ? '#090909' : '#ffffff');
+    document.querySelectorAll<HTMLLinkElement>('[data-theme-icon]').forEach((icon) => {
+      const size = icon.dataset.themeIcon;
+      if (size) icon.href = `/icon-${isDark ? 'dark' : 'light'}-${size}.png`;
+    });
+    document.querySelectorAll<HTMLButtonElement>('[data-theme-option]').forEach((option) => {
+      option.setAttribute('aria-pressed', String(option.dataset.themeOption === theme));
+    });
+    if (persist) localStorage.setItem('metakip-theme', theme);
+    window.dispatchEvent(new CustomEvent('metakip-theme-change', { detail: isDark }));
+  };
   const initialize = (): void => {
-    const themeButton = document.querySelector<HTMLButtonElement>('[data-theme-button]');
-    const themeColorMeta = document.querySelector('meta[name="theme-color"]');
-    const systemTheme = matchMedia('(prefers-color-scheme: dark)');
-
-    if (!themeButton) throw new Error('Theme button is required');
-    if (!themeColorMeta) throw new Error('Theme color metadata is required');
-
-    const updateThemeButton = (theme: Theme): void => {
-      themeButton.setAttribute('title', `Theme: ${theme}`);
-    };
-    const applyTheme = (theme: Theme, persist: boolean): void => {
-      const isDark = theme === 'dark' || (theme === 'system' && systemTheme.matches);
-      document.documentElement.dataset.theme = theme;
-      document.documentElement.classList.toggle('dark', isDark);
-      document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
-      themeColorMeta.setAttribute('content', isDark ? '#090909' : '#ffffff');
-      if (persist) localStorage.setItem('metakip-theme', theme);
-      updateThemeButton(theme);
-      window.dispatchEvent(new CustomEvent('metakip-theme-change', { detail: isDark }));
-    };
-
-    themeButton.addEventListener('click', () => {
-      const currentTheme = readTheme();
-      const nextTheme = THEME_ORDER[(THEME_ORDER.indexOf(currentTheme) + 1) % THEME_ORDER.length];
-      if (!nextTheme) throw new Error('Theme order is missing a next theme');
-      applyTheme(nextTheme, true);
+    const themeOptions = document.querySelectorAll<HTMLButtonElement>('[data-theme-option]');
+    if (themeOptions.length !== 3) throw new Error('Three theme options are required');
+    themeOptions.forEach((themeOption) => {
+      if (!boundOptions.has(themeOption)) {
+        boundOptions.add(themeOption);
+        themeOption.addEventListener('click', () => {
+          const selectedTheme = themeOption.dataset.themeOption ?? null;
+          if (!isTheme(selectedTheme)) throw new Error('Theme option is invalid');
+          applyTheme(selectedTheme, true);
+        });
+      }
     });
-    systemTheme.addEventListener('change', () => {
-      if (readTheme() === 'system') applyTheme('system', false);
-    });
-
     applyTheme(readTheme(), false);
   };
+
+  systemTheme.addEventListener('change', () => {
+    if (readTheme() === 'system') applyTheme('system', false);
+  });
+  // Reapply before painting the new document to avoid a light-theme flash.
+  document.addEventListener('astro:after-swap', () => applyTheme(readTheme(), false));
+  document.addEventListener('astro:page-load', initialize);
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initialize, { once: true });

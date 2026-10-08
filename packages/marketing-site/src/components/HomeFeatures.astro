@@ -1,0 +1,320 @@
+---
+// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
+import { Image } from 'astro:assets';
+// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
+import heroImage from '../assets/metakip-dark.png';
+// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
+import heroLightImage from '../assets/metakip-light.png';
+// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
+import AppLink from './AppLink.astro';
+// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
+import FeatureSection from './FeatureSection.astro';
+import '../styles/marketingPage.css';
+// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
+import { FEATURE_GROUPS } from '../data/features';
+// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
+import { PRODUCT_SUMMARY } from '../data/product';
+import { DOCS_ORIGIN, SITE_ORIGIN } from '../data/siteConfig';
+
+// biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
+const CLI_GUIDE = `${DOCS_ORIGIN}/agents/metakip-cli/`;
+// biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
+const MCP_GUIDE = `${DOCS_ORIGIN}/agents/mcp/`;
+// biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
+const INSTALL_COMMANDS = [
+  {
+    label: 'Linux / macOS',
+    command: `curl -fsSL ${SITE_ORIGIN}/install.sh | sh`,
+    ariaLabel: 'Copy Linux and macOS install command',
+  },
+  {
+    label: 'Windows',
+    command: `irm ${SITE_ORIGIN}/install.ps1 | iex`,
+    ariaLabel: 'Copy Windows install command',
+  },
+];
+---
+
+<section id="features" class="page marketing-page" aria-labelledby="features-title">
+  <article>
+    <header class="feature-hero">
+      <div class="feature-hero-copy">
+        <h1 id="features-title">The collaborative knowledge base for humans and agents.</h1>
+        <p class="lede marketing-lede">{PRODUCT_SUMMARY}</p>
+        <div class="actions" role="group" aria-label="Get started or choose an interface">
+          <AppLink class="action-button">Get Started</AppLink>
+
+          <div class="cli-popover-container" data-cli-popover-container>
+            <a
+              class="action-button"
+              href={CLI_GUIDE}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-haspopup="dialog"
+              aria-expanded="false"
+              data-cli-trigger
+            >
+              <svg class="action-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 17 6-6-6-6"></path><path d="M12 19h8"></path></svg>
+              <span>CLI</span>
+            </a>
+
+            <div class="cli-popover" role="dialog" aria-label="Install the CLI" hidden data-cli-popover>
+              <div class="cli-popover-title">
+                <span>Install the CLI</span>
+                <a
+                  href={CLI_GUIDE}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Open CLI Documentation"
+                  title="Open CLI Documentation"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  </svg>
+                </a>
+              </div>
+
+              {INSTALL_COMMANDS.map(({ label, command, ariaLabel }) => (
+                <div class="cli-command">
+                  <p class="cli-command-label">{label}</p>
+                  <div class="cli-command-row">
+                    <code>{command}</code>
+                    <button class="copy-button" type="button" data-copy-command={command} aria-label={ariaLabel} title="Copy command">
+                      <svg data-copy-icon width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+                      </svg>
+                      <svg data-copied-icon style="display: none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="m5 12 4 4L19 6"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <a class="action-button" href={MCP_GUIDE} target="_blank" rel="noopener noreferrer">
+            <svg class="action-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="4" y="8" width="16" height="12" rx="3"></rect>
+              <path d="M12 4v4M9 13h.01M15 13h.01M9 17h6M2 13v3M22 13v3"></path>
+            </svg>
+            <span>MCP</span>
+          </a>
+        </div>
+      </div>
+      <figure class="feature-hero-visual">
+        <Image
+          class="hero-image-light"
+          src={heroLightImage}
+          alt="A light-theme Metakip welcome page with page properties and introductory content."
+          width={heroLightImage.width}
+          height={heroLightImage.height}
+          loading="lazy"
+          decoding="async"
+        />
+        <Image
+          class="hero-image-dark"
+          src={heroImage}
+          alt="A dark-theme Metakip welcome page with page properties and introductory content."
+          width={heroImage.width}
+          height={heroImage.height}
+          loading="lazy"
+          decoding="async"
+        />
+      </figure>
+    </header>
+
+    <div class="feature-content">
+      {FEATURE_GROUPS.map((feature) => <FeatureSection feature={feature} />)}
+
+    </div>
+  </article>
+</section>
+
+<style>
+  .feature-content {
+    width: min(72rem, calc(100% - 2.5rem));
+    margin: 0 auto;
+  }
+
+  .page {
+    padding: 0 0 2rem;
+    scroll-margin-top: 5rem;
+  }
+
+  .feature-hero {
+    display: grid;
+    width: min(72rem, calc(100% - 2.5rem));
+    grid-template-columns: 1fr;
+    align-items: start;
+    gap: 3rem;
+    margin: 0 auto 5rem;
+  }
+
+  .feature-hero-copy {
+    min-width: 0;
+    max-width: 48rem;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .feature-hero-copy h1,
+  .feature-hero-copy .lede {
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  .feature-hero-copy .actions {
+    width: fit-content;
+    margin: 1.25rem auto 0;
+  }
+
+  .feature-hero-visual {
+    width: min(100%, 58rem);
+    margin: 0 auto;
+  }
+
+  .feature-hero-visual img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .feature-hero-visual .hero-image-light {
+    border: 1px solid #181818;
+  }
+
+  .feature-hero-visual .hero-image-dark {
+    border: 1px solid #ffffff;
+  }
+
+  .feature-hero-visual .hero-image-dark {
+    display: none;
+  }
+
+  :global(.dark) .feature-hero-visual .hero-image-light {
+    display: none;
+  }
+
+  :global(.dark) .feature-hero-visual .hero-image-dark {
+    display: block;
+  }
+
+  .lede {
+    max-width: 48rem;
+  }
+
+  @media (max-width: 560px) {
+    .reading-width {
+      width: min(100% - 2rem, 42rem);
+    }
+
+    .feature-content {
+      width: min(100% - 2rem, 72rem);
+    }
+
+    .feature-hero {
+      width: min(100% - 2rem, 42rem);
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+      margin-bottom: 4rem;
+    }
+
+    .page {
+      padding-top: 0;
+    }
+  }
+</style>
+
+<script>
+  let cleanupHero: (() => void) | undefined;
+  const initializeHero = (): void => {
+    cleanupHero?.();
+    const cliContainer = document.querySelector<HTMLElement>('[data-cli-popover-container]');
+    if (!cliContainer) return;
+    const controller = new AbortController();
+    const { signal } = controller;
+    const heroImageLight = document.querySelector<HTMLImageElement>('.hero-image-light');
+    const heroImageDark = document.querySelector<HTMLImageElement>('.hero-image-dark');
+    const updateHeroImageLoading = (): void => {
+      const activeImage = document.documentElement.classList.contains('dark')
+        ? heroImageDark
+        : heroImageLight;
+      const shouldLoadEagerly =
+        activeImage !== null && activeImage.getBoundingClientRect().top < window.innerHeight;
+      if (heroImageLight) heroImageLight.loading = shouldLoadEagerly && activeImage === heroImageLight ? 'eager' : 'lazy';
+      if (heroImageDark) heroImageDark.loading = shouldLoadEagerly && activeImage === heroImageDark ? 'eager' : 'lazy';
+    };
+    updateHeroImageLoading();
+    window.addEventListener('resize', updateHeroImageLoading, { signal });
+    window.addEventListener('metakip-theme-change', updateHeroImageLoading, { signal });
+    const cliTrigger = document.querySelector<HTMLAnchorElement>('[data-cli-trigger]');
+    const cliPopover = document.querySelector<HTMLElement>('[data-cli-popover]');
+    let hidePopoverTimeout: number | undefined;
+
+    function showPopover() {
+      window.clearTimeout(hidePopoverTimeout);
+      if (!cliPopover || !cliTrigger) return;
+      cliPopover.hidden = false;
+      cliTrigger.setAttribute('aria-expanded', 'true');
+    }
+
+    function hidePopover() {
+      if (!cliPopover || !cliTrigger) return;
+      cliPopover.hidden = true;
+      cliTrigger.setAttribute('aria-expanded', 'false');
+    }
+
+    function schedulePopoverHide() {
+      hidePopoverTimeout = window.setTimeout(hidePopover, 150);
+    }
+
+    cliContainer.addEventListener('mouseenter', showPopover, { signal });
+    cliContainer.addEventListener('mouseleave', schedulePopoverHide, { signal });
+    cliContainer.addEventListener('focusin', showPopover, { signal });
+    cliContainer.addEventListener('focusout', (event) => {
+      if (!(event.relatedTarget instanceof Node) || !cliContainer.contains(event.relatedTarget)) {
+        schedulePopoverHide();
+      }
+    }, { signal });
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') hidePopover();
+    }, { signal });
+
+    document.querySelectorAll<HTMLButtonElement>('[data-copy-command]').forEach((button) => {
+      const copyIcon = button.querySelector<SVGElement>('[data-copy-icon]');
+      const copiedIcon = button.querySelector<SVGElement>('[data-copied-icon]');
+
+      const setCopyState = (copied: boolean) => {
+        if (copyIcon) copyIcon.style.display = copied ? 'none' : '';
+        if (copiedIcon) copiedIcon.style.display = copied ? '' : 'none';
+      };
+
+      button.addEventListener('click', async () => {
+        const command = button.getAttribute('data-copy-command');
+        if (!command) return;
+        try {
+          await navigator.clipboard.writeText(command);
+          setCopyState(true);
+          button.setAttribute('aria-label', 'Command copied');
+          window.setTimeout(() => {
+            setCopyState(false);
+            button.setAttribute('aria-label', 'Copy command');
+          }, 2000);
+        } catch {
+          setCopyState(false);
+          button.setAttribute('aria-label', 'Copy failed; select the command manually');
+          button.setAttribute('title', 'Copy failed; select the command manually');
+        }
+      }, { signal });
+    });
+    cleanupHero = () => {
+      controller.abort();
+      window.clearTimeout(hidePopoverTimeout);
+    };
+  };
+  document.addEventListener('astro:before-swap', () => cleanupHero?.());
+  document.addEventListener('astro:page-load', initializeHero);
+</script>

@@ -39,7 +39,7 @@ export const PRICING_PAGE = {
         value:
           'We are not publishing paid tiers or usage limits while we learn which hosted workflows matter most. When pricing changes, this page will explain what is included and what it costs.',
       }),
-      link: { kind: 'internal', label: 'Read The Features', path: '/features' },
+      link: { kind: 'internal', label: 'Read The Features', path: '/#features' },
     },
   ],
   closing: 'Start with a page and see whether Metakip fits your workflow.',

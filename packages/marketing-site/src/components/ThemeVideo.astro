@@ -33,48 +33,50 @@ const {
   <source src={lightUrl} type={type} />
 </video>
 
-<script is:inline>
-  (() => {
-    const script = document.currentScript;
-    const video = script?.previousElementSibling;
+<script>
+  let videoController: AbortController | undefined;
+  const initializeVideos = (): void => {
+    videoController?.abort();
+    const controller = new AbortController();
+    videoController = controller;
+    const { signal } = controller;
+    document.querySelectorAll<HTMLVideoElement>('.feature-video').forEach((video) => {
+      const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+      const updateAutoplay = () => {
+        video.autoplay = !reducedMotion.matches;
+        if (reducedMotion.matches) video.pause();
+      };
+      const updateVideoSource = (isDark: boolean): void => {
+        const sourceUrl = isDark ? video.dataset.darkSrc : video.dataset.lightSrc;
+        const sourceType = video.dataset.videoType;
 
-    if (!(video instanceof HTMLVideoElement)) {
-      throw new Error('Theme video controller must follow a video element');
-    }
+        if (!sourceUrl || !sourceType) throw new Error('Missing source metadata for theme video');
+        if (video.dataset.loadedSource === sourceUrl) return;
 
-    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-    const updateAutoplay = () => {
-      video.autoplay = !reducedMotion.matches;
-      if (reducedMotion.matches) video.pause();
-    };
-    const updateVideoSource = (isDark) => {
-      const sourceUrl = isDark ? video.dataset.darkSrc : video.dataset.lightSrc;
-      const sourceType = video.dataset.videoType;
+        const source = video.querySelector('source');
+        if (!(source instanceof HTMLSourceElement)) {
+          throw new Error('Theme video source element is required');
+        }
 
-      if (!sourceUrl || !sourceType) throw new Error('Missing source metadata for theme video');
-      if (video.dataset.loadedSource === sourceUrl) return;
+        source.src = sourceUrl;
+        source.type = sourceType;
+        video.dataset.loadedSource = sourceUrl;
+        video.load();
+      };
 
-      const source = video.querySelector('source');
-      if (!(source instanceof HTMLSourceElement)) {
-        throw new Error('Theme video source element is required');
-      }
-
-      source.src = sourceUrl;
-      source.type = sourceType;
-      video.dataset.loadedSource = sourceUrl;
-      video.load();
-    };
-
-    updateAutoplay();
-    updateVideoSource(document.documentElement.classList.contains('dark'));
-    window.addEventListener('metakip-theme-change', (event) => {
-      if (!(event instanceof CustomEvent) || typeof event.detail !== 'boolean') {
-        throw new Error('Invalid theme change event');
-      }
-      updateVideoSource(event.detail);
+      updateAutoplay();
+      updateVideoSource(document.documentElement.classList.contains('dark'));
+      window.addEventListener('metakip-theme-change', (event) => {
+        if (!(event instanceof CustomEvent) || typeof event.detail !== 'boolean') {
+          throw new Error('Invalid theme change event');
+        }
+        updateVideoSource(event.detail);
+      }, { signal });
+      reducedMotion.addEventListener('change', updateAutoplay, { signal });
     });
-    reducedMotion.addEventListener('change', updateAutoplay);
-  })();
+  };
+  document.addEventListener('astro:before-swap', () => videoController?.abort());
+  document.addEventListener('astro:page-load', initializeVideos);
 </script>
 
 <style>

@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && node scripts/copy-installers.mjs && node scripts/generate-social-image.mjs",
+    "build": "astro build && node scripts/copy-installers.mjs",
     "preview": "astro preview",
     "typecheck": "astro check"
   },
