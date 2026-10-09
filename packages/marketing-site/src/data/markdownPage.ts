@@ -28,11 +28,11 @@ export const renderMarkdownPage = ({
 }: MarketingPageDefinition): string => {
   const renderedSections = sections
     .map(
-      ({ title: sectionTitle, body, link }) => `## ${sectionTitle}
+      ({ title: sectionTitle, body, links }) => `## ${sectionTitle}
 
 ${richTextToMarkdown(body)}
 
-${renderMarkdownLink(link)}`,
+${links.map(renderMarkdownLink).join(' · ')}`,
     )
     .join('\n\n');
   const renderedAppendix = appendix

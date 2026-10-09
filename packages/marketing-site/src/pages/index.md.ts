@@ -11,15 +11,8 @@ const questions = FAQS.map(({ question, answer }) => `**${question}**\n\n${answe
 const markdown = renderMarkdownPage({
   title: 'The collaborative knowledge base for humans and agents.',
   intro: [PRODUCT_SUMMARY],
-  closing: 'Start in the browser. Add the CLI when you want a terminal in the loop.',
-  sections: [
-    ...FEATURE_GROUPS.map(({ id, title, body, link }) => ({
-      id,
-      title,
-      body,
-      link,
-    })),
-  ],
+  closing: 'Start in the browser. Add the CLI or MCP when you want an agent in the loop.',
+  sections: FEATURE_GROUPS,
   appendix: [{ title: 'Before You Start', body: questions }],
   footerTitle: 'Next step',
   footerLinks: [

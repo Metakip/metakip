@@ -1,6 +1,6 @@
 import type { FeatureImageId } from './featureMedia';
-import type { MarketingLink } from './marketingContent';
-import { type RichText, richText } from './richText';
+import type { MarketingSectionWithId } from './marketingContent';
+import { richText } from './richText';
 import { DOCS_ORIGIN } from './siteConfig';
 
 export type FeatureMediaAsset =
@@ -18,12 +18,8 @@ export type FeatureMediaAsset =
 
 export type FeatureMedia = readonly FeatureMediaAsset[];
 
-export type FeatureGroup = {
-  id: string;
-  title: string;
-  body: RichText;
+export type FeatureGroup = MarketingSectionWithId & {
   media: FeatureMedia;
-  link: MarketingLink;
 };
 
 export const FEATURE_GROUPS = [
@@ -39,11 +35,18 @@ export const FEATURE_GROUPS = [
       { kind: 'image', imageId: 'browser-page' },
       { kind: 'image', imageId: 'terminal-page' },
     ],
-    link: {
-      kind: 'external',
-      label: 'Read About The CLI →',
-      url: `${DOCS_ORIGIN}/agents/metakip-cli/`,
-    },
+    links: [
+      {
+        kind: 'external',
+        label: 'Read About The CLI →',
+        url: `${DOCS_ORIGIN}/agents/metakip-cli/`,
+      },
+      {
+        kind: 'external',
+        label: 'Read About The MCP →',
+        url: `${DOCS_ORIGIN}/agents/mcp/`,
+      },
+    ],
   },
   {
     id: 'real-time',
@@ -63,11 +66,13 @@ export const FEATURE_GROUPS = [
       },
       { kind: 'image', imageId: 'invite-access' },
     ],
-    link: {
-      kind: 'external',
-      label: 'Read About Sharing →',
-      url: `${DOCS_ORIGIN}/getting-started/share-a-page/`,
-    },
+    links: [
+      {
+        kind: 'external',
+        label: 'Read About Sharing →',
+        url: `${DOCS_ORIGIN}/getting-started/share-a-page/`,
+      },
+    ],
   },
   {
     id: 'connected-knowledge',
@@ -90,11 +95,13 @@ export const FEATURE_GROUPS = [
         alt: 'A Metakip page showing linked knowledge and backlinks.',
       },
     ],
-    link: {
-      kind: 'external',
-      label: 'Read About Pages And Folders →',
-      url: `${DOCS_ORIGIN}/getting-started/organize-pages-and-folders/`,
-    },
+    links: [
+      {
+        kind: 'external',
+        label: 'Read About Pages And Folders →',
+        url: `${DOCS_ORIGIN}/getting-started/organize-pages-and-folders/`,
+      },
+    ],
   },
   {
     id: 'careful-agents',
@@ -113,11 +120,13 @@ export const FEATURE_GROUPS = [
         alt: 'A Metakip API token set up with scoped access.',
       },
     ],
-    link: {
-      kind: 'external',
-      label: 'Read About Agent Access →',
-      url: `${DOCS_ORIGIN}/agents/use-metakip-with-ai-assistants/`,
-    },
+    links: [
+      {
+        kind: 'external',
+        label: 'Read About Agent Access →',
+        url: `${DOCS_ORIGIN}/agents/use-metakip-with-ai-assistants/`,
+      },
+    ],
   },
   {
     id: 'portable-knowledge',
@@ -131,11 +140,13 @@ export const FEATURE_GROUPS = [
       { kind: 'image', imageId: 'obsidian-import' },
       { kind: 'image', imageId: 'workspace-export' },
     ],
-    link: {
-      kind: 'external',
-      label: 'Read About Self-Hosting →',
-      url: `${DOCS_ORIGIN}/self-hosting/`,
-    },
+    links: [
+      {
+        kind: 'external',
+        label: 'Read About Self-Hosting →',
+        url: `${DOCS_ORIGIN}/self-hosting/`,
+      },
+    ],
   },
 ] satisfies readonly FeatureGroup[];
 

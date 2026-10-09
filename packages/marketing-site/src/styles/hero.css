@@ -1,0 +1,182 @@
+/* A continuous full-width hero surface follows the monochrome site palette. */
+.home-page .page-shell {
+  --hero-accent: var(--text);
+  --hero-accent-text: var(--text);
+  --preview-surface: #fafafa;
+  --pill-surface: #f5f5f5;
+  --pill-hover: #e5e5e5;
+  position: relative;
+  display: flow-root;
+  width: 100%;
+  min-height: 100dvh;
+  padding: 28px 0 0;
+  overflow: clip;
+  background: var(--background);
+  color: var(--text);
+}
+
+.dark .home-page .page-shell {
+  --preview-surface: #111111;
+  --pill-surface: #111111;
+  --pill-hover: #222222;
+}
+
+.home-page .actions {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--pill-surface);
+}
+
+.home-page .action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 112px;
+  min-height: 36px;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.home-page .action-button:hover {
+  background: var(--pill-hover);
+}
+.home-page .action-button::after {
+  content: "↗";
+  font-size: 16px;
+}
+.home-page .action-icon {
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+.home-page .action-button:hover .action-icon {
+  color: var(--text);
+}
+.home-page .actions > .action-button:first-child {
+  min-width: 120px;
+  justify-content: center;
+  gap: 10px;
+  border-color: var(--hero-accent);
+  background: var(--hero-accent);
+  color: var(--background);
+}
+.home-page .actions > .action-button:first-child:hover {
+  background: var(--accent-hover);
+}
+.home-page .actions > .action-button:first-child .action-icon {
+  color: var(--background);
+}
+.home-page a:focus-visible,
+.home-page button:focus-visible {
+  outline: 2px solid var(--hero-accent-text);
+  outline-offset: 4px;
+}
+
+.home-page .cli-popover-container {
+  position: relative;
+  display: inline-flex;
+}
+.home-page .cli-popover {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 50%;
+  width: 340px;
+  max-width: calc(100vw - 32px);
+  padding: 18px;
+  transform: translateX(-50%);
+  border: 1px solid var(--line);
+  background: var(--background);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 15%);
+  text-align: left;
+}
+.home-page .cli-popover[hidden] {
+  display: none;
+}
+.home-page .cli-popover-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.home-page .cli-popover-title a {
+  color: var(--muted);
+}
+.home-page .cli-command + .cli-command {
+  margin-top: 14px;
+}
+.home-page .cli-command-label {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.home-page .cli-command-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  background: var(--preview-surface);
+}
+.home-page .cli-command-row code {
+  min-width: 0;
+  flex: 1;
+  overflow-x: auto;
+  font-family: "Geist Mono", monospace;
+  font-size: 11px;
+}
+.home-page .copy-button {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+.home-page .copy-button:hover {
+  color: var(--text);
+}
+
+@media (max-width: 899px) {
+  .home-page .page-shell {
+    padding-top: 20px;
+  }
+}
+
+@media (max-width: 560px) {
+  .home-page .actions {
+    width: 100%;
+    gap: 4px;
+  }
+  .home-page .action-button {
+    min-width: 0;
+    flex: 1 1 0;
+    justify-content: center;
+    gap: 8px;
+    padding-inline: 8px;
+  }
+  .home-page .cli-popover-container {
+    min-width: 0;
+    flex: 1 1 0;
+  }
+  .home-page .cli-popover-container .action-button {
+    width: 100%;
+  }
+}

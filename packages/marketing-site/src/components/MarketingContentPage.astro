@@ -26,7 +26,11 @@ const { page } = Astro.props;
           <h2 id={section.id}>{section.title}</h2>
           <div>
             <p class="marketing-content-body"><RichText content={section.body} /></p>
-            <MarketingLink class="marketing-docs-link" link={section.link} />
+            <div class="marketing-docs-links">
+              {section.links.map((link) => (
+                <MarketingLink class="marketing-docs-link" link={link} />
+              ))}
+            </div>
           </div>
         </section>
       ))}

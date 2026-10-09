@@ -10,6 +10,10 @@
     document.documentElement.classList.toggle('dark', isDark);
     document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
     themeColorMeta.setAttribute('content', isDark ? '#090909' : '#ffffff');
+    document.querySelectorAll('[data-theme-icon]').forEach((icon) => {
+      const size = icon.getAttribute('data-theme-icon');
+      if (size) icon.setAttribute('href', `/icon-${isDark ? 'dark' : 'light'}-${size}.png`);
+    });
   })();
 </script>
 
