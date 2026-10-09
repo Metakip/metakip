@@ -21,7 +21,11 @@ const {
   <div class="feature-copy">
     <h2 id={feature.id}>{feature.title}</h2>
     <p class="feature-body"><RichText content={feature.body} /></p>
-    <MarketingLink class="marketing-docs-link" link={feature.link} />
+    <div class="marketing-docs-links">
+      {feature.links.map((link) => (
+        <MarketingLink class="marketing-docs-link" link={link} />
+      ))}
+    </div>
   </div>
   <FeatureMedia media={feature.media} />
 </section>

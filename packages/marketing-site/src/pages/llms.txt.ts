@@ -13,8 +13,8 @@ export const prerender = true;
 const formatSectionLines = (sections: readonly MarketingSection[]): string =>
   sections
     .map(
-      ({ title, body, link }) =>
-        `- ${title} — ${renderMarkdownLink(link)}: ${richTextToPlainText(body)}`,
+      ({ title, body, links }) =>
+        `- ${title} — ${links.map(renderMarkdownLink).join(' · ')}: ${richTextToPlainText(body)}`,
     )
     .join('\n');
 const featureLines = formatSectionLines(FEATURE_GROUPS);

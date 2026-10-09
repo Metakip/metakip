@@ -22,9 +22,17 @@
 
 .marketing-docs-link {
   display: inline-block;
-  margin-top: 1.25rem;
+  margin-top: 0;
   color: var(--muted);
   font-size: 0.8125rem;
+}
+
+.marketing-docs-links {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  column-gap: 1.25rem;
+  margin-top: 1.25rem;
 }
 
 .marketing-docs-link:hover {

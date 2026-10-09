@@ -11,11 +11,13 @@ export const USE_CASES = [
       value:
         'Capture notes, ideas, plans, and reference material on pages you can connect and revisit. Import markdown files or an Obsidian vault, then use folders, tags, links, and backlinks to keep your knowledge navigable.',
     }),
-    link: {
-      kind: 'external',
-      label: 'Read About Importing Notes →',
-      url: `${DOCS_ORIGIN}/getting-started/bring-your-notes/`,
-    } satisfies MarketingLink,
+    links: [
+      {
+        kind: 'external',
+        label: 'Read About Importing Notes →',
+        url: `${DOCS_ORIGIN}/getting-started/bring-your-notes/`,
+      } satisfies MarketingLink,
+    ],
   },
   {
     id: 'teams',
@@ -25,11 +27,13 @@ export const USE_CASES = [
       value:
         'Share project notes, decisions, research, and plans with the people who need them. View, Edit, and Admin access make sharing clear, while real-time editing keeps collaboration in one place.',
     }),
-    link: {
-      kind: 'external',
-      label: 'Read About Sharing →',
-      url: `${DOCS_ORIGIN}/getting-started/share-a-page/`,
-    } satisfies MarketingLink,
+    links: [
+      {
+        kind: 'external',
+        label: 'Read About Sharing →',
+        url: `${DOCS_ORIGIN}/getting-started/share-a-page/`,
+      } satisfies MarketingLink,
+    ],
   },
   {
     id: 'writers-researchers',
@@ -46,11 +50,13 @@ export const USE_CASES = [
         value: ', then follow backlinks to retrace how an idea, source, or decision fits together.',
       },
     ),
-    link: {
-      kind: 'external',
-      label: 'Read About Pages And Folders →',
-      url: `${DOCS_ORIGIN}/getting-started/organize-pages-and-folders/`,
-    } satisfies MarketingLink,
+    links: [
+      {
+        kind: 'external',
+        label: 'Read About Pages And Folders →',
+        url: `${DOCS_ORIGIN}/getting-started/organize-pages-and-folders/`,
+      } satisfies MarketingLink,
+    ],
   },
   {
     id: 'developers',
@@ -60,11 +66,13 @@ export const USE_CASES = [
       value:
         'Write in the browser, work from a terminal with the CLI, and connect scripts through the API. The same pages remain available across each interface, so technical context does not get trapped in one tool.',
     }),
-    link: {
-      kind: 'external',
-      label: 'Read About The CLI →',
-      url: `${DOCS_ORIGIN}/agents/metakip-cli/`,
-    } satisfies MarketingLink,
+    links: [
+      {
+        kind: 'external',
+        label: 'Read About The CLI →',
+        url: `${DOCS_ORIGIN}/agents/metakip-cli/`,
+      } satisfies MarketingLink,
+    ],
   },
   {
     id: 'ai-assisted',
@@ -74,11 +82,13 @@ export const USE_CASES = [
       value:
         'Give an AI assistant read access to the pages it needs instead of copying context into a second store. Add write access when the workflow calls for it, and use exact edits when a change should be controlled.',
     }),
-    link: {
-      kind: 'external',
-      label: 'Read About Agent Access →',
-      url: `${DOCS_ORIGIN}/agents/use-metakip-with-ai-assistants/`,
-    } satisfies MarketingLink,
+    links: [
+      {
+        kind: 'external',
+        label: 'Read About Agent Access →',
+        url: `${DOCS_ORIGIN}/agents/use-metakip-with-ai-assistants/`,
+      } satisfies MarketingLink,
+    ],
   },
 ] as const;
 

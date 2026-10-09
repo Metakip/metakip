@@ -8,7 +8,7 @@ export type MarketingLink =
 export interface MarketingSection {
   title: string;
   body: RichText;
-  link: MarketingLink;
+  links: readonly MarketingLink[];
 }
 
 export interface MarketingSectionWithId extends MarketingSection {
