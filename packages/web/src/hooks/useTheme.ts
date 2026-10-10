@@ -34,6 +34,12 @@ function applyTheme(theme: Theme) {
   document
     .querySelector('meta[name="theme-color"]')
     ?.setAttribute('content', dark ? DARK_THEME_COLOR : LIGHT_THEME_COLOR);
+  document.querySelectorAll<HTMLLinkElement>('[data-theme-icon]').forEach((icon) => {
+    const size = icon.getAttribute('data-theme-icon');
+    if (size) {
+      icon.href = `/icon-${dark ? 'dark' : 'light'}-${size}.png`;
+    }
+  });
   localStorage.setItem(THEME_KEY, theme);
 }
 

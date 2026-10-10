@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#ffffff" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-light-192.png" data-theme-icon="192" />
     <script>
       (() => {
         try {
@@ -26,14 +27,16 @@
           if (themeColor) {
             themeColor.setAttribute('content', isDark ? '#09090b' : '#ffffff');
           }
+          document.querySelectorAll('[data-theme-icon]').forEach((icon) => {
+            const size = icon.getAttribute('data-theme-icon');
+            if (size) icon.setAttribute('href', `/icon-${isDark ? 'dark' : 'light'}-${size}.png`);
+          });
         } catch (_e) {}
       })();
     </script>
     <meta name="application-name" content="Metakip" />
     <meta name="apple-mobile-web-app-title" content="Metakip" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
-    <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <meta name="robots" content="noindex, nofollow" />

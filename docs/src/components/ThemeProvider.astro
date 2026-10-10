@@ -15,6 +15,10 @@
       document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
       localStorage.setItem(key, theme);
       document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#09090b' : '#ffffff');
+      document.querySelectorAll('link[data-theme-icon]').forEach((icon) => {
+        const href = icon.getAttribute(`data-theme-icon-${dark ? 'dark' : 'light'}`);
+        if (href) icon.setAttribute('href', href);
+      });
       document.querySelectorAll('starlight-theme-toggle').forEach((toggle) => {
         toggle.setAttribute('data-theme', theme);
       });

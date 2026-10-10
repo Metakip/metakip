@@ -2,6 +2,16 @@
 import '../styles/fonts.css';
 // biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
 import { ClientRouter, slide } from 'astro:transitions';
+// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
+import appleTouchIcon from '../../../shared/assets/app-favicon/apple-touch-icon.png';
+// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
+import darkIcon192 from '../../../shared/assets/app-favicon/icon-dark-192.png';
+// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
+import darkIcon512 from '../../../shared/assets/app-favicon/icon-dark-512.png';
+// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
+import lightIcon192 from '../../../shared/assets/app-favicon/icon-light-192.png';
+// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
+import lightIcon512 from '../../../shared/assets/app-favicon/icon-light-512.png';
 import { SITE_ORIGIN } from '../data/siteConfig';
 // biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
 import SiteFooter from './SiteFooter.astro';
@@ -72,20 +82,24 @@ const structuredDataJson = structuredData ? serializeStructuredData(structuredDa
             rel="icon"
             type="image/png"
             sizes="192x192"
-            href="/icon-light-192.png"
+            href={lightIcon192.src}
             data-theme-icon="192"
+            data-theme-icon-light={lightIcon192.src}
+            data-theme-icon-dark={darkIcon192.src}
         />
         <link
             rel="icon"
             type="image/png"
             sizes="512x512"
-            href="/icon-light-512.png"
+            href={lightIcon512.src}
             data-theme-icon="512"
+            data-theme-icon-light={lightIcon512.src}
+            data-theme-icon-dark={darkIcon512.src}
         />
         <link
             rel="apple-touch-icon"
             sizes="180x180"
-            href="/apple-touch-icon.png"
+            href={appleTouchIcon.src}
         />
         <link
             rel="preload"

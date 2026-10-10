@@ -38,7 +38,7 @@ import { useFolderTree } from '../hooks/use-folders';
 import { type RecentPage, usePageTree } from '../hooks/use-pages';
 import { getLogger } from '../logger-init';
 import { ApiError, apiFetch } from '../utils/api';
-import { resetDocumentMetadata } from '../utils/documentMeta';
+import { getApplicationFaviconHref, resetDocumentMetadata } from '../utils/documentMeta';
 import { getHeadingId } from '../utils/headingNavigation';
 import {
   createPageComment,
@@ -302,10 +302,12 @@ export default function Page() {
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><text y="28" font-size="28">${icon}</text></svg>`;
       const dataUrl = `data:image/svg+xml,${encodeURIComponent(svg)}`;
       if (existingLink) {
+        existingLink.removeAttribute('data-theme-icon');
         existingLink.href = dataUrl;
       }
     } else if (existingLink) {
-      existingLink.href = '/vite.svg';
+      existingLink.dataset.themeIcon = '192';
+      existingLink.href = getApplicationFaviconHref();
     }
 
     let canonicalLink = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');

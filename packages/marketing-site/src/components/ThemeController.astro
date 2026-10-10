@@ -11,8 +11,8 @@
     document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
     themeColorMeta.setAttribute('content', isDark ? '#090909' : '#ffffff');
     document.querySelectorAll('[data-theme-icon]').forEach((icon) => {
-      const size = icon.getAttribute('data-theme-icon');
-      if (size) icon.setAttribute('href', `/icon-${isDark ? 'dark' : 'light'}-${size}.png`);
+      const href = icon.getAttribute(`data-theme-icon-${isDark ? 'dark' : 'light'}`);
+      if (href) icon.setAttribute('href', href);
     });
   })();
 </script>
