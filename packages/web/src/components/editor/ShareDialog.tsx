@@ -23,6 +23,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { getInitial } from '../../utils/avatar';
 import { consumeSelfLeave, markSelfLeave } from '../../utils/leave-page';
 import { showErrorToast, showSuccessToast } from '../../utils/toast';
+import { PendingInvitationRow } from '../PendingInvitationRow';
 import { ChoiceGroup, Dropdown, TextBox } from '../ui/FormControls';
 
 type ShareDialogProps = {
@@ -55,6 +56,13 @@ type AccessEntry = {
   source: string;
   isOwner: boolean;
 };
+
+function permissionLabel(permission: SharePermission): string {
+  if (permission === 'admin') return 'Admin';
+  if (permission === 'edit') return 'Edit';
+  if (permission === 'commenter') return 'Comment';
+  return 'View';
+}
 
 function CollaboratorIdentity({
   name,
@@ -91,13 +99,6 @@ function CollaboratorIdentity({
   );
 }
 
-function permissionLabel(permission: SharePermission): string {
-  if (permission === 'admin') return 'Admin';
-  if (permission === 'edit') return 'Edit';
-  if (permission === 'commenter') return 'Comment';
-  return 'View';
-}
-
 export function ShareDialog({ entityType, entityId, title, onClose }: ShareDialogProps) {
   const identityLifecycle = useIdentityLifecycle();
   const { data: session } = useAuth();
@@ -131,6 +132,7 @@ export function ShareDialog({ entityType, entityId, title, onClose }: ShareDialo
   const canGrant = isOwner || isAdmin;
   const isLimitedSummary = summary?.visibility === 'limited';
   const collaborators = summary?.collaborators ?? [];
+  const pendingInvitations = summary?.pendingInvitations ?? [];
 
   const accessEntries: AccessEntry[] = (summary?.accessSources ?? []).map((source, index) => ({
     key: `${source.kind}:${source.grantId ?? source.folderId ?? source.userId}:${index}`,
@@ -273,7 +275,7 @@ export function ShareDialog({ entityType, entityId, title, onClose }: ShareDialo
                     className="h-6"
                     inputClassName="h-6 py-0 text-sm"
                     data-testid="share-email-input"
-                    aria-label="Existing user's email address"
+                    aria-label="Email address to invite"
                   />
                   <Dropdown
                     value={grantPermission}
@@ -450,88 +452,97 @@ export function ShareDialog({ entityType, entityId, title, onClose }: ShareDialo
                   );
                 })
               )
-            ) : accessEntries.length === 0 ? (
+            ) : accessEntries.length === 0 && pendingInvitations.length === 0 ? (
               <p className="px-3 py-2.5 text-center text-xs text-zinc-500 dark:text-zinc-400">
                 No one has access yet.
               </p>
             ) : (
-              accessEntries.map((entry) => {
-                const isCurrentUser = entry.id === currentUserId;
-                const displayName = isCurrentUser ? 'You' : entry.name;
-                const isTargetOwner = entry.isOwner;
-                const isTargetAdmin = entry.permission === 'admin';
-                const canChangePermission =
-                  canGrant &&
-                  entry.isManageable &&
-                  !isTargetOwner &&
-                  !(summary?.userPermission === 'admin' && isTargetAdmin);
-                const canSelfRemove = Boolean(
-                  isCurrentUser &&
-                    !isTargetOwner &&
+              <>
+                {accessEntries.map((entry) => {
+                  const isCurrentUser = entry.id === currentUserId;
+                  const displayName = isCurrentUser ? 'You' : entry.name;
+                  const isTargetOwner = entry.isOwner;
+                  const isTargetAdmin = entry.permission === 'admin';
+                  const canChangePermission =
+                    canGrant &&
                     entry.isManageable &&
-                    entry.kind === 'direct' &&
-                    entry.grantId,
-                );
+                    !isTargetOwner &&
+                    !(summary?.userPermission === 'admin' && isTargetAdmin);
+                  const canSelfRemove = Boolean(
+                    isCurrentUser &&
+                      !isTargetOwner &&
+                      entry.isManageable &&
+                      entry.kind === 'direct' &&
+                      entry.grantId,
+                  );
 
-                return (
-                  <div
-                    key={entry.key}
-                    className="grid grid-cols-[minmax(0,1.2fr)_0.5fr_0.7fr] items-center gap-2 border-b border-zinc-200 px-3 py-1.5 last:border-b-0 dark:border-zinc-800"
-                  >
-                    <CollaboratorIdentity
-                      name={entry.name}
-                      avatarUrl={entry.avatarUrl}
-                      displayName={displayName}
-                    />
-                    {entry.isOwner ? (
-                      <span className="text-xs text-zinc-600 dark:text-zinc-300">Owner</span>
-                    ) : entry.grantId && canChangePermission ? (
-                      <Dropdown
-                        value={entry.permission}
-                        options={[
-                          { value: 'view', label: 'View' },
-                          { value: 'commenter', label: 'Comment' },
-                          { value: 'edit', label: 'Edit' },
-                          ...(isOwner ? [{ value: 'admin' as const, label: 'Admin' }] : []),
-                          { value: 'remove', label: 'Remove' },
-                        ]}
-                        ariaLabel={`Permission for ${displayName}`}
-                        onChange={(permission) => {
-                          if (permission === 'remove') {
-                            if (canSelfRemove && entry.grantId) {
-                              setPendingLeaveGrantId(entry.grantId);
-                            } else if (entry.grantId) {
-                              handleRemove(entry.grantId);
-                            }
-                          } else if (entry.grantId) {
-                            updateGrantPermissionMutation.mutate({
-                              grantId: entry.grantId,
-                              permission,
-                            });
-                          }
-                        }}
-                        className="w-fit"
-                        triggerClassName="px-1.5 text-xs"
+                  return (
+                    <div
+                      key={entry.key}
+                      className="grid grid-cols-[minmax(0,1.2fr)_0.5fr_0.7fr] items-center gap-2 border-b border-zinc-200 px-3 py-1.5 last:border-b-0 dark:border-zinc-800"
+                    >
+                      <CollaboratorIdentity
+                        name={entry.name}
+                        avatarUrl={entry.avatarUrl}
+                        displayName={displayName}
                       />
-                    ) : canSelfRemove && entry.grantId ? (
-                      <button
-                        type="button"
-                        onClick={() => setPendingLeaveGrantId(entry.grantId)}
-                        className="text-xs font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
-                      >
-                        Leave
-                      </button>
-                    ) : (
-                      <span className="text-xs text-zinc-600 dark:text-zinc-300">
-                        {permissionLabel(entry.permission)}
+                      {entry.isOwner ? (
+                        <span className="text-xs text-zinc-600 dark:text-zinc-300">Owner</span>
+                      ) : entry.grantId && canChangePermission ? (
+                        <Dropdown
+                          value={entry.permission}
+                          options={[
+                            { value: 'view', label: 'View' },
+                            { value: 'commenter', label: 'Comment' },
+                            { value: 'edit', label: 'Edit' },
+                            ...(isOwner ? [{ value: 'admin' as const, label: 'Admin' }] : []),
+                            { value: 'remove', label: 'Remove' },
+                          ]}
+                          ariaLabel={`Permission for ${displayName}`}
+                          onChange={(permission) => {
+                            if (permission === 'remove') {
+                              if (canSelfRemove && entry.grantId) {
+                                setPendingLeaveGrantId(entry.grantId);
+                              } else if (entry.grantId) {
+                                handleRemove(entry.grantId);
+                              }
+                            } else if (entry.grantId) {
+                              updateGrantPermissionMutation.mutate({
+                                grantId: entry.grantId,
+                                permission,
+                              });
+                            }
+                          }}
+                          className="w-fit"
+                          triggerClassName="px-1.5 text-xs"
+                        />
+                      ) : canSelfRemove && entry.grantId ? (
+                        <button
+                          type="button"
+                          onClick={() => setPendingLeaveGrantId(entry.grantId)}
+                          className="text-xs font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 cursor-pointer"
+                        >
+                          Leave
+                        </button>
+                      ) : (
+                        <span className="text-xs text-zinc-600 dark:text-zinc-300">
+                          {permissionLabel(entry.permission)}
+                        </span>
+                      )}
+                      <span className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate">
+                        {formatSource(entry.source, entry)}
                       </span>
-                    )}
-                    <span className="text-[11px] text-zinc-500 dark:text-zinc-400 truncate">
-                      {formatSource(entry.source, entry)}
-                    </span>
-                  </div>
-                );
-              })
+                    </div>
+                  );
+                })}
+                {pendingInvitations.map((invitation) => (
+                  <PendingInvitationRow
+                    key={invitation.id}
+                    invitation={invitation}
+                    permissionLabel={permissionLabel(invitation.permission)}
+                  />
+                ))}
+              </>
             )}
           </div>
         </div>

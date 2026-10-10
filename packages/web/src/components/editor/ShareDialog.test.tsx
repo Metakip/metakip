@@ -35,6 +35,7 @@ function adminSummary(): ShareSummary {
     publicAccess: { permission: 'private', url: '/shared-page-page-1' },
     inheritance: { policy: 'inherit' },
     grants: [],
+    pendingInvitations: [],
     collaborators: [
       {
         userId: 'owner-1',
@@ -355,9 +356,7 @@ describe('ShareDialog admin self-removal', () => {
 
     expect(screen.getByRole('dialog', { name: 'Share Shared page' })).toBeInTheDocument();
     expect(screen.getByRole('switch', { name: 'Restrict inherited access' })).not.toBeChecked();
-    expect(
-      screen.getByRole('textbox', { name: "Existing user's email address" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Email address to invite' })).toBeInTheDocument();
     expect(screen.getByRole('group', { name: 'Public access' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Restricted', pressed: true })).toBeInTheDocument();
   });

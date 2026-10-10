@@ -9,6 +9,7 @@ import {
 } from '../../hooks/use-workspace';
 import { useAuth } from '../../hooks/useAuth';
 import { getInitial } from '../../utils/avatar';
+import { PendingInvitationRow } from '../PendingInvitationRow';
 import { Dropdown, TextBox } from '../ui/FormControls';
 
 const ROLE_LABELS = { viewer: 'Viewer', editor: 'Editor', admin: 'Admin' } as const;
@@ -16,7 +17,7 @@ const ROLE_LABELS = { viewer: 'Viewer', editor: 'Editor', admin: 'Admin' } as co
 export function WorkspaceMembersPanel() {
   const { data: session } = useAuth();
   const currentUserId = session?.user?.id;
-  const { data: members, isLoading, error, refetch } = useWorkspaceMembers();
+  const { data: membersResponse, isLoading, error, refetch } = useWorkspaceMembers();
   const inviteMutation = useInviteToWorkspace();
   const changeRoleMutation = useChangeMemberRole();
   const removeMemberMutation = useRemoveWorkspaceMember();
@@ -35,7 +36,7 @@ export function WorkspaceMembersPanel() {
     return <p className="text-sm text-zinc-500 dark:text-zinc-400">Loading members...</p>;
   }
 
-  if (error && !members) {
+  if (error && !membersResponse) {
     return (
       <div
         role="alert"
@@ -58,7 +59,8 @@ export function WorkspaceMembersPanel() {
     );
   }
 
-  const memberList = members ?? [];
+  const memberList = membersResponse?.members ?? [];
+  const pendingInvitations = membersResponse?.pendingInvitations ?? [];
 
   return (
     <div className="space-y-4">
@@ -118,7 +120,7 @@ export function WorkspaceMembersPanel() {
           </div>
         </div>
 
-        {memberList.length === 0 ? (
+        {memberList.length === 0 && pendingInvitations.length === 0 ? (
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
             No members yet. Invite someone above.
           </p>
@@ -199,6 +201,13 @@ export function WorkspaceMembersPanel() {
                 </div>
               );
             })}
+            {pendingInvitations.map((invitation) => (
+              <PendingInvitationRow
+                key={invitation.id}
+                invitation={invitation}
+                permissionLabel={ROLE_LABELS[invitation.permission]}
+              />
+            ))}
           </div>
         )}
       </div>

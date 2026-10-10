@@ -134,14 +134,16 @@ export function useGrantEntityAccess() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: grantEntityAccess,
-    onSuccess: (data, { entityType, entityId }) => {
-      queryClient.invalidateQueries({ queryKey: shareQueryKeys.summary(entityType, entityId) });
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['shared-with-me'] });
       queryClient.invalidateQueries({ queryKey: ['pageTree'] });
       queryClient.invalidateQueries({ queryKey: ['folderTree'] });
       queryClient.invalidateQueries({ queryKey: ['pageCollaborators'] });
       queryClient.invalidateQueries({ queryKey: ['folderCollaborators'] });
       if (data?.message) showSuccessToast(data.message);
+    },
+    onSettled: (_data, _error, { entityType, entityId }) => {
+      queryClient.invalidateQueries({ queryKey: shareQueryKeys.summary(entityType, entityId) });
     },
     meta: { errorMessage: 'Failed to grant access' },
   });
