@@ -15,6 +15,14 @@ import {
   unique,
   uuid,
 } from 'drizzle-orm/pg-core';
+import {
+  invitationEmailAttempts,
+  invitationSendAttempts,
+  pendingInvitations,
+} from './invitationSchema';
+import { users } from './userSchema';
+
+export { invitationEmailAttempts, invitationSendAttempts, pendingInvitations, users };
 
 // Custom bytea type for binary data
 const bytea = customType<{ data: Buffer; notNull: false; default: false }>({
@@ -97,19 +105,6 @@ export const dataMigrations = pgTable('data_migrations', {
   name: text('name').primaryKey(),
   completedAt: timestamp('completed_at').defaultNow().notNull(),
 });
-
-export const users = pgTable('users', {
-  id: uuid('id').defaultRandom().primaryKey(),
-  email: text('email').notNull().unique(),
-  name: text('name').notNull(),
-  emailVerified: boolean('email_verified').default(false),
-  image: text('image'),
-  avatarUrl: text('avatar_url'),
-  onboardingCompletedAt: timestamp('onboarding_completed_at'),
-  createdAt: timestamp('created_at').defaultNow(),
-  updatedAt: timestamp('updated_at').defaultNow(),
-});
-
 export const apiTokens = pgTable(
   'api_tokens',
   {

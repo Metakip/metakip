@@ -23,10 +23,10 @@ import {
 } from './db/schema';
 import { betterAuthIssuer, mcpResource } from './env';
 import { publicFrontendUrl } from './utils/publicWebUrl';
-import { createWelcomePageForUser } from './utils/welcomePage';
+import { ensureAccountSetupComplete } from './utils/welcomePage';
 
 type CreateAuthOptions = {
-  provisionWelcomePage?: typeof createWelcomePageForUser;
+  provisionWelcomePage?: typeof ensureAccountSetupComplete;
 };
 
 type BetterAuthMcpPlugin = ReturnType<typeof mcp>;
@@ -80,7 +80,7 @@ function createMcpPlugins(): BetterAuthPlugin[] {
 }
 
 export function createAuth(options: CreateAuthOptions = {}) {
-  const provisionWelcomePage = options.provisionWelcomePage ?? createWelcomePageForUser;
+  const provisionWelcomePage = options.provisionWelcomePage ?? ensureAccountSetupComplete;
 
   return betterAuth({
     baseURL: publicFrontendUrl,

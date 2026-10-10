@@ -15,6 +15,7 @@ import exportRoute from './routes/export';
 import favoritesRoute from './routes/favorites';
 import foldersRoute, { foldersPublicRoute } from './routes/folders';
 import importRoute from './routes/import';
+import invitationsRoute from './routes/invitations';
 import obsidianImportRoute from './routes/obsidian-import';
 import onboardingRoute from './routes/onboarding';
 import pagesRoute, { pagesPublicRoute } from './routes/pages';
@@ -33,6 +34,7 @@ import pagesV1Route from './routes/v1/pages';
 import tokensV1Route from './routes/v1/tokens';
 import versionsRoute from './routes/versions';
 import workspaceRoute from './routes/workspace';
+import { requestLogPath } from './utils/requestLogPath';
 
 export async function createApp() {
   await setupLogger();
@@ -70,6 +72,17 @@ export async function createApp() {
     honoLogger({
       category: ['metakip', 'http'],
       skip: (c) => c.req.path === '/api/health',
+      format: (c, responseTime) => {
+        const path = requestLogPath(c.req.path);
+        return {
+          method: c.req.method,
+          url: path,
+          path,
+          status: c.res.status,
+          responseTime,
+          contentLength: c.res.headers.get('content-length') ?? undefined,
+        };
+      },
     }),
   );
   app.use('*', timing());
@@ -119,6 +132,7 @@ export async function createApp() {
   app.route('/api/import', importRoute);
   app.route('/api/import/obsidian', obsidianImportRoute);
   app.route('/api/onboarding', onboardingRoute);
+  app.route('/api/invitations', invitationsRoute);
   app.route('/api/tags', tagsRoute);
   app.route('/api/backlinks', backlinksRoute);
   app.route('/api/bulk-removal', bulkRemovalRoute);

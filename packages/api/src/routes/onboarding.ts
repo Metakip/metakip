@@ -1,7 +1,9 @@
 import { sql } from 'drizzle-orm';
 import { Hono } from 'hono';
+import { db } from '../db/connection';
 import { query } from '../db/query';
 import { requireAuth } from '../middleware/auth';
+import { completeOnboarding } from '../utils/onboarding';
 
 const onboardingRoute = new Hono();
 
@@ -18,11 +20,7 @@ onboardingRoute.get('/', async (c) => {
 
 onboardingRoute.post('/complete', async (c) => {
   const user = c.get('user');
-  await query(
-    sql`update users
-        set onboarding_completed_at = coalesce(onboarding_completed_at, now()), updated_at = now()
-        where id = ${user.id}`,
-  );
+  await completeOnboarding(db, user.id);
 
   return c.json({ completed: true });
 });

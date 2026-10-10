@@ -3,14 +3,9 @@ import { HTTPException } from 'hono/http-exception';
 import type { AccessiblePageRow } from '../../utils/pageRepository';
 import type { PageResponse } from './pageContracts';
 
-const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+export { requireUuid } from '../../utils/uuid';
 
 export type PageRow = AccessiblePageRow;
-
-export function requireUuid(value: string, label: string): string {
-  if (!UUID_PATTERN.test(value)) throw new HTTPException(400, { message: `Invalid ${label}` });
-  return value;
-}
 
 export function toIso(value: Date | string): string {
   return new Date(value).toISOString();

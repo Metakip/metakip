@@ -1,17 +1,19 @@
+import type { WorkspaceRole } from '@metakip/shared';
 import { sql } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { db } from '../db/connection';
 import { executeQuery, query } from '../db/query';
 import { requireAuth } from '../middleware/auth';
-import { lockWorkspaceAccessMutation } from '../utils/share-access';
+import { grantOrInviteWorkspaceMember } from '../utils/invitationAccess';
+import { listPendingInvitations } from '../utils/pendingInvitations';
+import { parseJsonRequestBody } from '../utils/requestBody';
+import { lockWorkspaceAccess, lockWorkspaceAccessMutation } from '../utils/share-access';
 import { notifyWorkspaceEvent } from '../utils/share-notify';
 
 const workspaceRoute = new Hono();
 
 workspaceRoute.use('*', requireAuth);
-
-type WorkspaceRole = 'viewer' | 'editor' | 'admin';
 
 const parseWorkspaceRole = (value: unknown, defaultRole?: WorkspaceRole): WorkspaceRole => {
   if (value === undefined && defaultRole) return defaultRole;
@@ -43,24 +45,33 @@ workspaceRoute.get('/memberships', async (c) => {
  */
 workspaceRoute.get('/members', async (c) => {
   const user = c.get('user') as { id: string };
-
-  const result = await query(
-    sql`SELECT
-       wm.id,
-       wm.workspace_owner_id AS "workspaceOwnerId",
-       wm.member_id AS "memberId",
-       u.name AS "memberName",
-       u.email AS "memberEmail",
-       u.avatar_url AS "memberAvatarUrl",
-       wm.role,
-       wm.created_at AS "createdAt"
-     FROM workspace_members wm
-     JOIN users u ON u.id = wm.member_id
-     WHERE wm.workspace_owner_id = ${user.id}
-     ORDER BY wm.created_at ASC`,
-  );
-
-  return c.json(result.rows);
+  const snapshot = await db.transaction(async (tx) => {
+    await lockWorkspaceAccess(tx, user.id);
+    const result = await executeQuery(
+      tx,
+      sql`SELECT
+         wm.id,
+         wm.workspace_owner_id AS "workspaceOwnerId",
+         wm.member_id AS "memberId",
+         u.name AS "memberName",
+         u.email AS "memberEmail",
+         u.avatar_url AS "memberAvatarUrl",
+         wm.role,
+         wm.created_at AS "createdAt"
+       FROM workspace_members wm
+       JOIN users u ON u.id = wm.member_id
+       WHERE wm.workspace_owner_id = ${user.id}
+       ORDER BY wm.created_at ASC`,
+    );
+    return {
+      members: result.rows,
+      pendingInvitations: await listPendingInvitations('workspace', user.id, tx, {
+        actorId: user.id,
+        fullAccess: true,
+      }),
+    };
+  });
+  return c.json(snapshot);
 });
 
 /**
@@ -69,7 +80,7 @@ workspaceRoute.get('/members', async (c) => {
  */
 workspaceRoute.post('/members/invite', async (c) => {
   const user = c.get('user') as { id: string };
-  const body = await c.req.json().catch(() => null);
+  const body = await parseJsonRequestBody(c);
   if (!body || typeof body !== 'object') {
     throw new HTTPException(400, { message: 'Invalid body' });
   }
@@ -80,55 +91,27 @@ workspaceRoute.post('/members/invite', async (c) => {
   }
 
   const role = parseWorkspaceRole(rawRole, 'editor');
-
-  // Find the user by email
-  const userResult = await query(
-    sql`SELECT id, name FROM users WHERE lower(email) = lower(${email.trim()}) LIMIT 1`,
-  );
-  const targetUser = userResult.rows[0] as { id: string; name: string } | undefined;
-  if (!targetUser) {
-    throw new HTTPException(404, { message: 'User not found' });
-  }
-
-  // Can't invite yourself
-  if (targetUser.id === user.id) {
-    throw new HTTPException(400, { message: 'Cannot invite yourself' });
-  }
-
-  // Membership uniqueness is directional: each user owns an independent workspace.
-  const existingResult = await query(
-    sql`SELECT id FROM workspace_members
-     WHERE workspace_owner_id = ${user.id} AND member_id = ${targetUser.id}
-     LIMIT 1`,
-  );
-  if (existingResult.rowCount && existingResult.rowCount > 0) {
-    throw new HTTPException(409, { message: 'User is already a member of this workspace' });
-  }
-
-  const inviteMessage = `Added ${targetUser.name ?? email} as ${role} to workspace`;
-
-  await db.transaction(async (tx) => {
-    await lockWorkspaceAccessMutation(tx, user.id);
-    const insertResult = await executeQuery(
-      tx,
-      sql`INSERT INTO workspace_members (workspace_owner_id, member_id, role)
-       VALUES (${user.id}, ${targetUser.id}, ${role})
-       ON CONFLICT (workspace_owner_id, member_id) DO NOTHING
-       RETURNING id`,
-    );
-
-    if (!insertResult.rowCount || insertResult.rowCount === 0) {
-      throw new HTTPException(409, { message: 'User is already a member of this workspace' });
-    }
-
-    await notifyWorkspaceEvent('member_added', user.id, targetUser.id, inviteMessage, tx);
+  const result = await grantOrInviteWorkspaceMember({
+    ownerId: user.id,
+    actorId: user.id,
+    email,
+    role,
   });
-
+  if (result.kind === 'invitation') {
+    return c.json(
+      {
+        ok: true,
+        invitation: result.invitation,
+        message: `Invitation queued for ${result.invitation.email}`,
+      },
+      202,
+    );
+  }
   return c.json({
     ok: true,
-    memberId: targetUser.id,
-    name: targetUser.name,
-    message: inviteMessage,
+    memberId: result.recipientId,
+    name: result.recipientName,
+    message: result.message,
   });
 });
 
@@ -139,7 +122,7 @@ workspaceRoute.post('/members/invite', async (c) => {
 workspaceRoute.patch('/members/:memberId/role', async (c) => {
   const user = c.get('user') as { id: string };
   const memberId = c.req.param('memberId');
-  const body = await c.req.json().catch(() => null);
+  const body = await parseJsonRequestBody(c);
   if (!body || typeof body !== 'object') {
     throw new HTTPException(400, { message: 'Invalid body' });
   }

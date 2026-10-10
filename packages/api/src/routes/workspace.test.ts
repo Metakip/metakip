@@ -22,6 +22,23 @@ describe('workspace API', () => {
     expect(res.status).toBe(401);
   });
 
+  it.each([
+    ['POST', '/api/workspace/members/invite'],
+    ['PATCH', `/api/workspace/members/${crypto.randomUUID()}/role`],
+  ] as const)('returns 400 for malformed JSON on %s workspace requests', async (method, path) => {
+    const app = await createTestApp();
+    const owner = await createTestUser();
+    const session = await createTestSession(owner.id);
+    const response = await app.request(path, {
+      method,
+      headers: { 'Content-Type': 'application/json', Cookie: session.Cookie },
+      body: '{',
+    });
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ message: 'Malformed JSON body' });
+  });
+
   it('lists workspaces the current user has joined', async () => {
     const app = await createTestApp();
     const owner = await createTestUser();
@@ -77,6 +94,48 @@ describe('workspace API', () => {
       [owner.id, recipient.id],
     );
     expect(membership.rowCount).toBe(1);
+  });
+
+  it('creates a pending invitation when the email has no account', async () => {
+    const app = await createTestApp();
+    const owner = await createTestUser();
+    const session = await createTestSession(owner.id);
+
+    const res = await app.request('/api/workspace/members/invite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Cookie: session.Cookie },
+      body: JSON.stringify({ email: 'New.Member@Example.com', role: 'viewer' }),
+    });
+
+    expect(res.status).toBe(202);
+    expect(await res.json()).toEqual(
+      expect.objectContaining({
+        message: 'Invitation queued for new.member@example.com',
+        invitation: expect.objectContaining({ deliveryStatus: 'pending' }),
+      }),
+    );
+    const invitations = await query<{ email: string; permission: string }>(
+      `select email, permission from pending_invitations
+       where target_type = 'workspace' and target_id = $1`,
+      [owner.id],
+    );
+    expect(invitations.rows).toEqual([{ email: 'new.member@example.com', permission: 'viewer' }]);
+
+    const membersResponse = await app.request('/api/workspace/members', {
+      headers: { Cookie: session.Cookie },
+    });
+    expect(membersResponse.status).toBe(200);
+    expect(await membersResponse.json()).toMatchObject({
+      members: expect.any(Array),
+      pendingInvitations: [
+        expect.objectContaining({
+          targetType: 'workspace',
+          email: 'new.member@example.com',
+          permission: 'viewer',
+          canManage: true,
+        }),
+      ],
+    });
   });
 
   it("allows two users to join each other's separate workspaces", async () => {

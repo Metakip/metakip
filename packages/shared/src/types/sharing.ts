@@ -1,4 +1,47 @@
-import type { ShareEntityType, SharePermission } from './page.js';
+import type { ShareEntityType, SharePermission, WorkspaceRole } from './access.js';
+
+export type InvitationTargetType = 'workspace' | ShareEntityType;
+export type InvitationLifecycleStatus =
+  | 'pending'
+  | 'accepted'
+  | 'declined'
+  | 'revoked'
+  | 'superseded';
+export type InvitationClaimStatus = InvitationLifecycleStatus | 'expired';
+export type InvitationDeliveryStatus = 'pending' | 'sent' | 'failed';
+
+interface PendingInvitationBase {
+  id: string;
+  targetId: string;
+  email: string;
+  canManage: boolean;
+  deliveryStatus: InvitationDeliveryStatus;
+  expiresAt: string;
+  createdAt: string;
+}
+
+export type PendingWorkspaceInvitation = PendingInvitationBase & {
+  targetType: 'workspace';
+  permission: WorkspaceRole;
+};
+
+export type PendingEntityInvitation = PendingInvitationBase & {
+  targetType: ShareEntityType;
+  permission: SharePermission;
+};
+
+export type PendingInvitation = PendingWorkspaceInvitation | PendingEntityInvitation;
+
+interface InvitationClaimBase {
+  status: InvitationClaimStatus;
+  targetTitle: string;
+  inviterName: string;
+  email: string;
+}
+
+export type InvitationClaim =
+  | (InvitationClaimBase & { targetType: 'workspace'; permission: WorkspaceRole })
+  | (InvitationClaimBase & { targetType: ShareEntityType; permission: SharePermission });
 
 /**
  * Discriminated action for a share-related realtime event.

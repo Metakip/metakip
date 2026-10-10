@@ -45,6 +45,25 @@ describe('sharing API', () => {
     ).toBe(401);
   });
 
+  it.each([
+    ['PATCH', (id: string) => `/api/shares/entity/page/${id}/inheritance`],
+    ['PATCH', (id: string) => `/api/shares/entity/page/${id}/public-access`],
+    ['POST', (id: string) => `/api/shares/entity/page/${id}/grants`],
+    ['PATCH', (id: string) => `/api/shares/grants/${id}`],
+  ] as const)('returns 400 for malformed JSON on %s sharing requests', async (method, path) => {
+    const app = await createTestApp();
+    const user = await createTestUser();
+    const session = await createTestSession(user.id);
+    const response = await app.request(path(crypto.randomUUID()), {
+      method,
+      headers: jsonHeaders(session.Cookie),
+      body: '{',
+    });
+
+    expect(response.status).toBe(400);
+    expect(await response.json()).toEqual({ message: 'Malformed JSON body' });
+  });
+
   it('creates permanent grants for existing accounts without delivery claims', async () => {
     const app = await createTestApp();
     const owner = await createTestUser({ email: 'grant-owner@example.com' });
@@ -61,7 +80,7 @@ describe('sharing API', () => {
 
     expect(grantResponse.status).toBe(200);
     const grantBody = (await grantResponse.json()) as { message: string };
-    expect(grantBody.message).toContain('Granted edit access');
+    expect(grantBody.message).toContain('Granted Editor access');
     expect(grantBody.message.toLowerCase()).not.toContain('email');
     expect(grantBody.message.toLowerCase()).not.toContain('invitation sent');
 
@@ -100,7 +119,7 @@ describe('sharing API', () => {
     ]);
   });
 
-  it('rejects grants to unknown email addresses', async () => {
+  it('creates pending invitations for unknown email addresses', async () => {
     const app = await createTestApp();
     const owner = await createTestUser();
     const ownerSession = await createTestSession(owner.id);
@@ -112,13 +131,185 @@ describe('sharing API', () => {
       body: JSON.stringify({ email: 'missing-user@example.com', permission: 'view' }),
     });
 
-    expect(response.status).toBe(404);
-    expect(await response.json()).toEqual({ message: 'User not found' });
+    expect(response.status).toBe(202);
+    expect(await response.json()).toEqual(
+      expect.objectContaining({
+        ok: true,
+        message: 'Invitation queued for missing-user@example.com',
+        invitation: expect.objectContaining({ deliveryStatus: 'pending' }),
+      }),
+    );
     const count = await query<{ count: string }>(
       'select count(*)::text as count from shares where entity_id = $1',
       [page.id],
     );
     expect(count.rows[0]?.count).toBe('0');
+    const invitations = await query<{ count: string }>(
+      'select count(*)::text as count from pending_invitations where target_type = $1 and target_id = $2 and email = $3',
+      ['page', page.id, 'missing-user@example.com'],
+    );
+    expect(invitations.rows[0]?.count).toBe('1');
+  });
+
+  it('revokes pending invitations when their sender loses Admin access', async () => {
+    const app = await createTestApp();
+    const owner = await createTestUser({ email: 'owner@example.com' });
+    const admin = await createTestUser({ email: 'admin@example.com' });
+    const ownerSession = await createTestSession(owner.id);
+    const adminSession = await createTestSession(admin.id);
+    const page = await createTestPage(owner.id, { title: 'Managed page' });
+    const grantResponse = await app.request(`/api/shares/entity/page/${page.id}/grants`, {
+      method: 'POST',
+      headers: jsonHeaders(ownerSession.Cookie),
+      body: JSON.stringify({ email: admin.email, permission: 'admin' }),
+    });
+    expect(grantResponse.status).toBe(200);
+    const grant = await query<{ id: string }>(
+      `select id from shares where entity_type = 'page' and entity_id = $1
+       and recipient_user_id = $2`,
+      [page.id, admin.id],
+    );
+    const grantId = grant.rows[0]?.id;
+    if (!grantId) throw new Error('Admin grant fixture did not return an ID');
+
+    const invitationResponse = await app.request(`/api/shares/entity/page/${page.id}/grants`, {
+      method: 'POST',
+      headers: jsonHeaders(adminSession.Cookie),
+      body: JSON.stringify({ email: 'admin-invite@example.com', permission: 'edit' }),
+    });
+    expect(invitationResponse.status).toBe(202);
+
+    const demotion = await app.request(`/api/shares/grants/${grantId}`, {
+      method: 'PATCH',
+      headers: jsonHeaders(ownerSession.Cookie),
+      body: JSON.stringify({ permission: 'edit' }),
+    });
+    expect(demotion.status).toBe(200);
+    const invitation = await query<{ id: string; status: string }>(
+      `select id, status from pending_invitations
+       where target_type = 'page' and target_id = $1 and invited_by = $2`,
+      [page.id, admin.id],
+    );
+    expect(invitation.rows[0]?.status).toBe('revoked');
+    const invitationId = invitation.rows[0]?.id;
+    if (!invitationId) throw new Error('Invitation fixture did not return an ID');
+    const summary = await app.request(`/api/shares/entity/page/${page.id}`, {
+      headers: { Cookie: ownerSession.Cookie },
+    });
+    expect(summary.status).toBe(200);
+    expect(await summary.json()).toMatchObject({ pendingInvitations: [] });
+    const retainedInvitation = await query<{ status: string }>(
+      'select status from pending_invitations where id = $1',
+      [invitationId],
+    );
+    expect(retainedInvitation.rows[0]?.status).toBe('revoked');
+  });
+
+  it.each([
+    'page',
+    'folder',
+  ] as const)('protects owner-only Admin invitations from replacement on a %s', async (entityType) => {
+    const app = await createTestApp();
+    const owner = await createTestUser();
+    const admin = await createTestUser();
+    const ownerSession = await createTestSession(owner.id);
+    const adminSession = await createTestSession(admin.id);
+    const entity =
+      entityType === 'page' ? await createTestPage(owner.id) : await createTestFolder(owner.id);
+    const path = `/api/shares/entity/${entityType}/${entity.id}/grants`;
+    expect(
+      (
+        await app.request(path, {
+          method: 'POST',
+          headers: jsonHeaders(ownerSession.Cookie),
+          body: JSON.stringify({ email: admin.email, permission: 'admin' }),
+        })
+      ).status,
+    ).toBe(200);
+    expect(
+      (
+        await app.request(path, {
+          method: 'POST',
+          headers: jsonHeaders(ownerSession.Cookie),
+          body: JSON.stringify({ email: 'protected-invite@example.com', permission: 'admin' }),
+        })
+      ).status,
+    ).toBe(202);
+
+    const before = await query<{
+      id: string;
+      token_hash: string;
+      invited_by: string;
+      permission: string;
+    }>(
+      'select id, token_hash, invited_by, permission from pending_invitations where target_id = $1',
+      [entity.id],
+    );
+    await query(
+      `update invitation_send_attempts set attempted_at = now() - interval '20 minutes'
+         where invitation_id = $1`,
+      [before.rows[0]?.id],
+    );
+
+    const replacement = await app.request(path, {
+      method: 'POST',
+      headers: jsonHeaders(adminSession.Cookie),
+      body: JSON.stringify({ email: 'protected-invite@example.com', permission: 'edit' }),
+    });
+    expect(replacement.status).toBe(403);
+    expect(await replacement.json()).toEqual({
+      message: 'Only the Owner can manage Admin invitations',
+    });
+    const after = await query(
+      'select id, token_hash, invited_by, permission from pending_invitations where target_id = $1',
+      [entity.id],
+    );
+    expect(after.rows).toEqual(before.rows);
+
+    // The same replacement remains available to the owner.
+    expect(
+      (
+        await app.request(path, {
+          method: 'POST',
+          headers: jsonHeaders(ownerSession.Cookie),
+          body: JSON.stringify({ email: 'protected-invite@example.com', permission: 'edit' }),
+        })
+      ).status,
+    ).toBe(202);
+  });
+
+  it('marks Owner-only Admin invitations as unmanageable for Admin viewers', async () => {
+    const app = await createTestApp();
+    const owner = await createTestUser({ email: 'capability-owner@example.com' });
+    const admin = await createTestUser({ email: 'capability-admin@example.com' });
+    const ownerSession = await createTestSession(owner.id);
+    const adminSession = await createTestSession(admin.id);
+    const page = await createTestPage(owner.id, { title: 'Capability page' });
+    const adminGrant = await app.request(`/api/shares/entity/page/${page.id}/grants`, {
+      method: 'POST',
+      headers: jsonHeaders(ownerSession.Cookie),
+      body: JSON.stringify({ email: admin.email, permission: 'admin' }),
+    });
+    expect(adminGrant.status).toBe(200);
+    const invitation = await app.request(`/api/shares/entity/page/${page.id}/grants`, {
+      method: 'POST',
+      headers: jsonHeaders(ownerSession.Cookie),
+      body: JSON.stringify({ email: 'future-admin@example.com', permission: 'admin' }),
+    });
+    expect(invitation.status).toBe(202);
+
+    const adminSummary = await app.request(`/api/shares/entity/page/${page.id}`, {
+      headers: { Cookie: adminSession.Cookie },
+    });
+    expect(await adminSummary.json()).toMatchObject({
+      pendingInvitations: [expect.objectContaining({ canManage: false })],
+    });
+    const ownerSummary = await app.request(`/api/shares/entity/page/${page.id}`, {
+      headers: { Cookie: ownerSession.Cookie },
+    });
+    expect(await ownerSummary.json()).toMatchObject({
+      pendingInvitations: [expect.objectContaining({ canManage: true })],
+    });
   });
 
   it('updates and revokes direct grants under the entity access lock', async () => {
@@ -132,11 +323,11 @@ describe('sharing API', () => {
     const grantResponse = await app.request(`/api/shares/entity/page/${page.id}/grants`, {
       method: 'POST',
       headers: jsonHeaders(ownerSession.Cookie),
-      body: JSON.stringify({ email: recipient.email, permission: 'view' }),
+      body: JSON.stringify({ email: recipient.email, permission: 'commenter' }),
     });
     expect(await grantResponse.json()).toEqual({
       ok: true,
-      message: `Granted view access to ${recipient.email} on ${page.title}`,
+      message: `Granted Commenter access to ${recipient.email} on ${page.title}`,
     });
     const grant = await query<{ id: string }>(
       'select id from shares where entity_type = $1 and entity_id = $2 and recipient_user_id = $3',
