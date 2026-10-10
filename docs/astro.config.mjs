@@ -41,7 +41,7 @@ export default defineConfig({
     starlight({
       title: 'Metakip Docs',
       description: 'Learn Metakip, build with the API, and bring your own agents.',
-      favicon: 'https://metakip.com/icon-192.png',
+      favicon: 'https://app.metakip.com/icon-light-192.png',
       editLink: {
         baseUrl: 'https://github.com/Metakip/metakip/edit/master/docs/',
       },

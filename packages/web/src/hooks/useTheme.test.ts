@@ -5,6 +5,7 @@ import { useTheme } from './useTheme';
 describe('useTheme', () => {
   let store: Record<string, string> = {};
   let themeColor: HTMLMetaElement;
+  let favicon: HTMLLinkElement;
 
   beforeEach(() => {
     store = {};
@@ -12,6 +13,10 @@ describe('useTheme', () => {
     themeColor.name = 'theme-color';
     themeColor.content = '#ffffff';
     document.head.append(themeColor);
+    favicon = document.createElement('link');
+    favicon.rel = 'icon';
+    favicon.dataset.themeIcon = '192';
+    document.head.append(favicon);
     Object.defineProperty(window, 'localStorage', {
       value: {
         getItem: (key: string) => store[key] ?? null,
@@ -36,6 +41,7 @@ describe('useTheme', () => {
   afterEach(() => {
     store = {};
     themeColor.remove();
+    favicon.remove();
   });
 
   it('defaults to "system" theme when nothing is stored', () => {
@@ -98,6 +104,16 @@ describe('useTheme', () => {
 
     act(() => result.current.setTheme('light'));
     expect(themeColor.content).toBe('#ffffff');
+  });
+
+  it('updates the favicon to match the selected theme', () => {
+    const { result } = renderHook(() => useTheme());
+
+    act(() => result.current.setTheme('dark'));
+    expect(favicon.getAttribute('href')).toBe('/icon-dark-192.png');
+
+    act(() => result.current.setTheme('light'));
+    expect(favicon.getAttribute('href')).toBe('/icon-light-192.png');
   });
 
   it('cycles through light -> dark -> system -> light', () => {

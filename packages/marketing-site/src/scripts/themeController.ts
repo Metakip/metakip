@@ -20,8 +20,8 @@ export const initializeThemeController = (): void => {
       .querySelector('meta[name="theme-color"]')
       ?.setAttribute('content', isDark ? '#090909' : '#ffffff');
     document.querySelectorAll<HTMLLinkElement>('[data-theme-icon]').forEach((icon) => {
-      const size = icon.dataset.themeIcon;
-      if (size) icon.href = `/icon-${isDark ? 'dark' : 'light'}-${size}.png`;
+      const href = icon.getAttribute(`data-theme-icon-${isDark ? 'dark' : 'light'}`);
+      if (href) icon.href = href;
     });
     document.querySelectorAll<HTMLButtonElement>('[data-theme-option]').forEach((option) => {
       option.setAttribute('aria-pressed', String(option.dataset.themeOption === theme));

@@ -1,4 +1,8 @@
 ---
+// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
+import appleTouchIcon from '../../../packages/shared/assets/app-favicon/apple-touch-icon.png';
+import darkIcon192 from '../../../packages/shared/assets/app-favicon/icon-dark-192.png';
+import lightIcon192 from '../../../packages/shared/assets/app-favicon/icon-light-192.png';
 import { getApiReferencePageMetadata } from '../lib/apiReferenceMarkdown';
 
 const { head, entry, lastUpdated } = Astro.locals.starlightRoute;
@@ -44,7 +48,7 @@ const graph: Record<string, unknown>[] = [
     '@id': organizationId,
     name: 'Metakip',
     url: 'https://metakip.com',
-    logo: 'https://metakip.com/icon-192.png',
+    logo: new URL(lightIcon192.src, siteUrl).toString(),
     sameAs: ['https://github.com/Metakip/metakip'],
   },
   {
@@ -91,6 +95,18 @@ const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': grap
 
 const pageHead = head.map((item) => {
   if (item.tag === 'title') return { ...item, content: pageTitle };
+  if (item.tag === 'link' && item.attrs?.rel === 'shortcut icon') {
+    return {
+      ...item,
+      attrs: {
+        ...item.attrs,
+        href: lightIcon192.src,
+        'data-theme-icon': '192',
+        'data-theme-icon-light': lightIcon192.src,
+        'data-theme-icon-dark': darkIcon192.src,
+      },
+    };
+  }
   if (item.tag !== 'meta') return item;
 
   const name = item.attrs?.name;
@@ -108,6 +124,7 @@ const pageHead = head.map((item) => {
 ---
 
 {pageHead.map(({ tag: Tag, attrs, content }) => <Tag {...attrs} set:html={content} />)}
+<link rel="apple-touch-icon" sizes="180x180" href={appleTouchIcon.src} />
 <link rel="alternate" type="text/markdown" href={markdownUrl} />
 <meta name="twitter:title" content={pageTitle} />
 <meta name="twitter:description" content={pageDescription} />
