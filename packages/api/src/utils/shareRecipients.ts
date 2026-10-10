@@ -1,7 +1,6 @@
+import type { ShareEntityType } from '@metakip/shared';
 import { sql } from 'drizzle-orm';
 import { executeQuery, type QueryExecutor } from '../db/query';
-
-type ShareEntityType = 'folder' | 'page';
 
 /**
  * Return signed-in accounts whose access or navigation can be affected by an

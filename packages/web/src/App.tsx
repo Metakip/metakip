@@ -10,6 +10,7 @@ import { ExplorerLoadingState } from './components/workspace/ExplorerLoadingStat
 import { AuthSessionProvider } from './hooks/useAuth';
 import Dashboard from './routes/Dashboard';
 import FolderEntry from './routes/FolderEntry';
+import Invitation from './routes/Invitation';
 import Login from './routes/Login';
 import OAuthAuthorize from './routes/OAuthAuthorize';
 import Onboarding from './routes/Onboarding';
@@ -42,6 +43,7 @@ function ApplicationRoutes() {
       <Route path="/app" element={<LegacyWorkspaceRedirect />} />
       <Route path="/app/*" element={<LegacyWorkspaceRedirect />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/invite/:token" element={<Invitation />} />
       <Route path="/oauth/authorize" element={<OAuthAuthorize />} />
       <Route
         path="/onboarding"

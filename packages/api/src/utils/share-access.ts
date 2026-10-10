@@ -1,11 +1,11 @@
+import type { ShareEntityType, SharePermission } from '@metakip/shared';
 import { sql } from 'drizzle-orm';
 import { HTTPException } from 'hono/http-exception';
 import { executeQuery, type QueryExecutor, query } from '../db/query';
 
-export type ShareEntityType = 'folder' | 'page';
-export type SharePermission = 'view' | 'commenter' | 'edit' | 'admin';
+export type { ShareEntityType, SharePermission } from '@metakip/shared';
 
-type AccessMode = 'view' | 'commenter' | 'edit' | 'admin';
+type AccessMode = SharePermission;
 
 const permissionRank = (permission: SharePermission) =>
   permission === 'admin' ? 4 : permission === 'edit' ? 3 : permission === 'commenter' ? 2 : 1;
@@ -113,7 +113,7 @@ export const lockWorkspaceAccess = async (
   );
 };
 
-export const lockWorkspaceAccessMutation = async (
+export const lockWorkspaceAccessExclusive = async (
   executor: QueryExecutor,
   workspaceOwnerId: string,
 ): Promise<void> => {
@@ -121,6 +121,17 @@ export const lockWorkspaceAccessMutation = async (
     executor,
     sql`select pg_advisory_xact_lock(hashtextextended(${`workspace-access:${workspaceOwnerId}`}, 0))`,
   );
+};
+
+export const recordWorkspaceAccessMutation = async (
+  executor: QueryExecutor,
+  workspaceOwnerId: string,
+): Promise<void> => {
+  // Callers must already hold the exclusive workspace access lock. Keeping
+  // revision advancement separate lets invitation-only writes serialize with
+  // access changes without advertising a permission change that never happened.
+  // A deferred database trigger also cancels invalid invitations at commit,
+  // after the caller's permission changes, while this workspace is still locked.
   await executeQuery(
     executor,
     sql`insert into workspace_access_versions (workspace_owner_id, version)
@@ -128,6 +139,14 @@ export const lockWorkspaceAccessMutation = async (
      on conflict (workspace_owner_id) do update
      set version = nextval('workspace_access_revision_seq')`,
   );
+};
+
+export const lockWorkspaceAccessMutation = async (
+  executor: QueryExecutor,
+  workspaceOwnerId: string,
+): Promise<void> => {
+  await lockWorkspaceAccessExclusive(executor, workspaceOwnerId);
+  await recordWorkspaceAccessMutation(executor, workspaceOwnerId);
 };
 
 type EntityAccessTarget = { entityType: ShareEntityType; entityId: string };
@@ -311,8 +330,25 @@ export const lockEntityAccessMutation = async (
   return lockedEntity.ownerId;
 };
 
+export const lockEntityAccessExclusive = async (
+  executor: QueryExecutor,
+  entityType: ShareEntityType,
+  entityId: string,
+): Promise<string> => {
+  const entities = await lockStableEntityAccess(
+    executor,
+    [{ entityType, entityId }],
+    [],
+    lockWorkspaceAccessExclusive,
+    'reject',
+  );
+  const lockedEntity = entities[0];
+  if (!lockedEntity) throw new Error('Entity access lock did not resolve an owner');
+  return lockedEntity.ownerId;
+};
+
 export const ensureCanAdminEntity = async (
-  entityType: 'page' | 'folder',
+  entityType: ShareEntityType,
   entityId: string,
   userId: string,
   executor?: QueryExecutor,

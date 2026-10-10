@@ -58,6 +58,10 @@ cd "$REPO_DIR"
 . "$REPO_DIR/deploy/mcp-public-url.sh"
 # shellcheck source=upload-storage.sh
 . "$REPO_DIR/deploy/upload-storage.sh"
+# shellcheck source=invitation-token-encryption-key.sh
+. "$REPO_DIR/deploy/invitation-token-encryption-key.sh"
+# shellcheck source=resend-email.sh
+. "$REPO_DIR/deploy/resend-email.sh"
 
 echo -e "${YELLOW}[STEP 4/8] Installing Node.js and pnpm...${NC}"
 curl -fsSL https://fnm.vercel.app/install | bash
@@ -79,12 +83,14 @@ else
 fi
 ensureCollaborationSecret .env
 ensureMcpApiInternalSecret .env
+ensureInvitationTokenEncryptionKey .env
 if [ "$created_env" = "true" ]; then
     echo -e "${YELLOW}.env created from .env.production. Edit it now:${NC}"
     nano .env
 fi
 migrateUploadStorage .env
 ensureUploadStorage .env
+ensureResendEmailConfiguration .env
 
 echo -e "${YELLOW}[STEP 6/8] Building application...${NC}"
 pnpm install

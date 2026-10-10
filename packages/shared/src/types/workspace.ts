@@ -1,4 +1,7 @@
-export type WorkspaceRole = 'viewer' | 'editor' | 'admin';
+import type { WorkspaceRole } from './access.js';
+import type { PendingWorkspaceInvitation } from './sharing.js';
+
+export type { WorkspaceRole } from './access.js';
 
 export interface WorkspaceMembership {
   ownerId: string;
@@ -16,4 +19,9 @@ export interface WorkspaceMember {
   memberAvatarUrl: string | null;
   role: WorkspaceRole;
   createdAt: string;
+}
+
+export interface WorkspaceMembersResponse {
+  members: WorkspaceMember[];
+  pendingInvitations: PendingWorkspaceInvitation[];
 }

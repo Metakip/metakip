@@ -10,6 +10,9 @@ export type RetentionCleanupResult = {
   tokenAuditEvents: number;
   oauthClientAssertions: number;
   oauthAccessTokenRevocations: number;
+  invitationEmailAttempts: number;
+  invitationSendAttempts: number;
+  pendingInvitations: number;
 };
 
 async function deleteExpiredIdempotencyBatch(): Promise<number> {
@@ -68,34 +71,123 @@ async function deleteExpiredOAuthAccessTokenRevocationsBatch(): Promise<number> 
   return result.rowCount ?? 0;
 }
 
-export async function drainOperationalRetention(): Promise<RetentionCleanupResult> {
-  let idempotencyRecords = 0;
-  let tokenAuditEvents = 0;
-  let oauthClientAssertions = 0;
-  let oauthAccessTokenRevocations = 0;
-  for (let batch = 0; batch < MAX_BATCHES_PER_RUN; batch += 1) {
-    const [idempotencyBatch, auditBatch, assertionBatch, revocationBatch] = await Promise.all([
-      deleteExpiredIdempotencyBatch(),
-      deleteExpiredTokenAuditBatch(),
-      deleteExpiredOAuthClientAssertionsBatch(),
-      deleteExpiredOAuthAccessTokenRevocationsBatch(),
-    ]);
-    idempotencyRecords += idempotencyBatch;
-    tokenAuditEvents += auditBatch;
-    oauthClientAssertions += assertionBatch;
-    oauthAccessTokenRevocations += revocationBatch;
-    if (
-      idempotencyBatch < RETENTION_BATCH_SIZE &&
-      auditBatch < RETENTION_BATCH_SIZE &&
-      assertionBatch < RETENTION_BATCH_SIZE &&
-      revocationBatch < RETENTION_BATCH_SIZE
+async function deleteRetainedInvitationSendAttemptsBatch(): Promise<number> {
+  const result = await query(sql`with candidates as (
+      select attempt.id
+      from invitation_send_attempts attempt
+      where attempt.status in ('sent', 'failed', 'superseded')
+        and attempt.completed_at < now() - interval '24 hours'
+        and exists (
+          select 1 from invitation_send_attempts newer
+          where newer.invitation_id = attempt.invitation_id
+            and (newer.attempted_at, newer.id) > (attempt.attempted_at, attempt.id)
+        )
+      order by attempt.completed_at, attempt.id
+      limit ${RETENTION_BATCH_SIZE}
+      for update of attempt skip locked
     )
-      break;
+    delete from invitation_send_attempts attempts
+    using candidates
+    where attempts.id = candidates.id`);
+  return result.rowCount ?? 0;
+}
+
+async function deleteExpiredInvitationEmailAttemptsBatch(): Promise<number> {
+  const result = await query(sql`with candidates as (
+      select id from invitation_email_attempts
+      where attempted_at < now() - interval '25 hours'
+      order by attempted_at, id
+      limit ${RETENTION_BATCH_SIZE}
+      for update skip locked
+    )
+    delete from invitation_email_attempts attempts
+    using candidates
+    where attempts.id = candidates.id`);
+  return result.rowCount ?? 0;
+}
+
+async function deleteRetainedPendingInvitationsBatch(): Promise<number> {
+  const result = await query(sql`with candidates as (
+      select invitation.id
+      from pending_invitations invitation
+      where (invitation.status = 'pending'
+             and invitation.expires_at < now() - interval '7 days')
+        or (invitation.status <> 'pending'
+            and invitation.resolved_at < now() - interval '7 days')
+        or (
+          invitation.target_type = 'workspace'
+          and not exists (select 1 from users where users.id = invitation.target_id)
+        )
+        or (
+          invitation.target_type = 'page'
+          and not exists (
+            select 1 from pages
+            where pages.id = invitation.target_id and pages.is_deleted = false
+          )
+        )
+        or (
+          invitation.target_type = 'folder'
+          and not exists (
+            select 1 from folders
+            where folders.id = invitation.target_id and folders.is_deleted = false
+          )
+        )
+      order by invitation.updated_at, invitation.id
+      limit ${RETENTION_BATCH_SIZE}
+      for update of invitation skip locked
+    )
+    delete from pending_invitations invitations
+    using candidates
+    where invitations.id = candidates.id`);
+  return result.rowCount ?? 0;
+}
+
+async function drainCleanupBatches(cleanup: () => Promise<number>): Promise<number> {
+  let deleted = 0;
+  for (let batch = 0; batch < MAX_BATCHES_PER_RUN; batch += 1) {
+    const batchSize = await cleanup();
+    deleted += batchSize;
+    if (batchSize < RETENTION_BATCH_SIZE) break;
   }
+  return deleted;
+}
+
+async function drainInvitationRetention(): Promise<{
+  invitationEmailAttempts: number;
+  invitationSendAttempts: number;
+  pendingInvitations: number;
+}> {
+  // Drain child delivery history before parent invitations so cleanup does
+  // not compete with the invitation foreign-key cascade.
+  const invitationSendAttempts = await drainCleanupBatches(
+    deleteRetainedInvitationSendAttemptsBatch,
+  );
+  const invitationEmailAttempts = await drainCleanupBatches(
+    deleteExpiredInvitationEmailAttemptsBatch,
+  );
+  const pendingInvitations = await drainCleanupBatches(deleteRetainedPendingInvitationsBatch);
+  return { invitationEmailAttempts, invitationSendAttempts, pendingInvitations };
+}
+
+export async function drainOperationalRetention(): Promise<RetentionCleanupResult> {
+  const [
+    idempotencyRecords,
+    tokenAuditEvents,
+    oauthClientAssertions,
+    oauthAccessTokenRevocations,
+    invitationRetention,
+  ] = await Promise.all([
+    drainCleanupBatches(deleteExpiredIdempotencyBatch),
+    drainCleanupBatches(deleteExpiredTokenAuditBatch),
+    drainCleanupBatches(deleteExpiredOAuthClientAssertionsBatch),
+    drainCleanupBatches(deleteExpiredOAuthAccessTokenRevocationsBatch),
+    drainInvitationRetention(),
+  ]);
   return {
     idempotencyRecords,
     tokenAuditEvents,
     oauthClientAssertions,
     oauthAccessTokenRevocations,
+    ...invitationRetention,
   };
 }

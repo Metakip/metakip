@@ -1,13 +1,14 @@
+import type { PublicPermission, ShareEntityType, SharePermission } from '@metakip/shared';
 import { sql } from 'drizzle-orm';
 import { executeQuery, type QueryExecutor, query } from '../db/query';
 import { notifyShareRecompute } from './share-notify';
 
-export type PublicPermission = 'view' | 'edit';
-export type PublicAccessEntityType = 'page' | 'folder';
+export type { PublicPermission } from '@metakip/shared';
+export type PublicAccessEntityType = ShareEntityType;
 export type ResolvedEntityAccess = {
-  accountPermission: 'view' | 'edit' | 'admin' | null;
+  accountPermission: SharePermission | null;
   publicPermission: PublicPermission | null;
-  permission: 'view' | 'edit' | 'admin' | null;
+  permission: SharePermission | null;
   fullAccess: boolean;
 };
 

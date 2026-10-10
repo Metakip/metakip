@@ -1,3 +1,8 @@
+import type { ShareEntityType, SharePermission } from './access.js';
+import type { PendingEntityInvitation } from './sharing.js';
+
+export type { ShareEntityType, SharePermission } from './access.js';
+
 export interface Page {
   id: string;
   parentId: string | null;
@@ -45,8 +50,6 @@ export interface PageTreeNode extends Page {
   workspaceAccess?: boolean;
 }
 
-export type ShareEntityType = 'folder' | 'page';
-export type SharePermission = 'view' | 'commenter' | 'edit' | 'admin';
 export type PublicPermission = 'view' | 'edit';
 export type InheritancePolicy = 'inherit' | 'restricted';
 
@@ -290,6 +293,8 @@ export interface ShareSummary {
     policy: InheritancePolicy;
   };
   grants: EntityShare[];
+  /** Invitations awaiting account creation and acceptance. */
+  pendingInvitations?: PendingEntityInvitation[];
   accessors: EntityAccessor[];
   /** Every account source, including weaker grants hidden by a stronger one. */
   accessSources: EntityAccessSource[];

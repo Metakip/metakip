@@ -1,6 +1,7 @@
 import {
   buildFolderPath as buildSharedFolderPath,
   buildPagePath as buildSharedPagePath,
+  METAKIP_WEBSITE_URL,
   slugifyTitle as slugifySharedTitle,
 } from '@metakip/shared';
 import { find } from 'linkifyjs';
@@ -31,6 +32,13 @@ type WorkspaceLocation = Pick<Location, 'hostname'> &
 
 export function isAppHost(location: WorkspaceLocation = window.location): boolean {
   return location.hostname !== APEX_HOSTNAME;
+}
+
+export function getMarketingWebsiteUrl(location: WorkspaceLocation = window.location): string {
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    return `${location.protocol ?? 'http:'}//${location.hostname}:8888`;
+  }
+  return METAKIP_WEBSITE_URL;
 }
 
 export function getWorkspaceRootPath(location: WorkspaceLocation = window.location): string {

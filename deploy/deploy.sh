@@ -101,6 +101,10 @@ git pull origin master
 . "$REPO_DIR/deploy/mcp-public-url.sh"
 # shellcheck source=upload-storage.sh
 . "$REPO_DIR/deploy/upload-storage.sh"
+# shellcheck source=invitation-token-encryption-key.sh
+. "$REPO_DIR/deploy/invitation-token-encryption-key.sh"
+# shellcheck source=resend-email.sh
+. "$REPO_DIR/deploy/resend-email.sh"
 
 # Existing installations predate the private API-to-collaboration command
 # boundary. Generate its independent credential once during upgrade, and
@@ -109,6 +113,8 @@ ensureCollaborationSecret .env
 ensureMcpApiInternalSecret .env
 migrateUploadStorage .env
 ensureUploadStorage .env
+ensureInvitationTokenEncryptionKey .env
+ensureResendEmailConfiguration .env
 
 echo -e "${YELLOW}[STEP 2/9] Installing dependencies...${NC}"
 pnpm install

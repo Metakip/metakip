@@ -490,12 +490,12 @@ export default function Page() {
               <div className="flex items-center gap-2">
                 {collabPermission === 'view' && !effectiveCapabilities.canEdit && (
                   <span className="flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 rounded-full">
-                    View only
+                    View Access
                   </span>
                 )}
                 {collabPermission === 'commenter' && (
                   <span className="flex items-center gap-1.5 rounded-full bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
-                    Comment access
+                    Comment Access
                   </span>
                 )}
                 {!isAnonymous && (

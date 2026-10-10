@@ -72,10 +72,23 @@ Metakip includes keyboard shortcuts for power users. They are not configurable y
 | Tag | Ctrl + Shift + # | ⌘ + ⇧ + # |
 `;
 
-export async function createWelcomePageForUser(
+export async function ensureAccountSetupComplete(
   executor: QueryExecutor,
   userId: string,
 ): Promise<void> {
+  await executeQuery(
+    executor,
+    sql`select pg_advisory_xact_lock(hashtextextended(${`account-setup:${userId}`}, 0))`,
+  );
+  const account = await executeQuery<{ account_setup_completed_at: Date | null }>(
+    executor,
+    // Allow concurrent grants to reference this account while provisioning.
+    sql`select account_setup_completed_at from users where id = ${userId} for no key update`,
+  );
+  const user = account.rows[0];
+  if (!user) throw new Error('Account setup user not found');
+  if (user.account_setup_completed_at !== null) return;
+
   const { page } = await createPage(executor, {
     actor: { kind: 'user', id: userId },
     parentId: null,
@@ -95,6 +108,13 @@ export async function createWelcomePageForUser(
   await executeQuery(
     executor,
     sql`insert into user_favorites (user_id, entity_type, entity_id)
-        values (${userId}, 'page', ${page.id})`,
+        values (${userId}, 'page', ${page.id})
+        on conflict (user_id, entity_type, entity_id) do nothing`,
+  );
+  await executeQuery(
+    executor,
+    sql`update users
+        set account_setup_completed_at = now(), updated_at = now()
+        where id = ${userId}`,
   );
 }

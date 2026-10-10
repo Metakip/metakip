@@ -10,11 +10,13 @@ export default function Login() {
   const { data: session, isPending, isRefetching } = useAuth();
   const identityLifecycle = useIdentityLifecycle();
   const location = useLocation();
-  const returnLocation = (
-    location.state as {
-      from?: { pathname?: unknown; search?: unknown; hash?: unknown };
-    } | null
-  )?.from;
+  const locationState = location.state as {
+    from?: { pathname?: unknown; search?: unknown; hash?: unknown };
+    invitationEmail?: unknown;
+  } | null;
+  const returnLocation = locationState?.from;
+  const invitationEmail =
+    typeof locationState?.invitationEmail === 'string' ? locationState.invitationEmail : undefined;
   const returnPath =
     typeof returnLocation?.pathname === 'string' && returnLocation.pathname.startsWith('/')
       ? `${returnLocation.pathname}${typeof returnLocation.search === 'string' ? returnLocation.search : ''}${typeof returnLocation.hash === 'string' ? returnLocation.hash : ''}`
@@ -36,6 +38,9 @@ export default function Login() {
     try {
       await authClient.signIn.social({
         provider,
+        ...(provider === 'google' && invitationEmail
+          ? { additionalParams: { login_hint: invitationEmail } }
+          : {}),
         callbackURL: returnPath,
         errorCallbackURL: '/login',
       });
