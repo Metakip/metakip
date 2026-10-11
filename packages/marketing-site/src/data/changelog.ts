@@ -37,6 +37,36 @@ const commitLink = (hash: string): MarketingLink => ({
 
 export const CHANGELOG_ENTRIES: readonly ChangelogEntry[] = [
   {
+    id: 'invite-new-collaborators',
+    date: '2026-10-10',
+    title: 'Invite people who are new to Metakip',
+    details: [
+      'Share pages and workspaces with people whose email is not yet associated with a Metakip account.',
+      'They can create an account with the invited email to claim access; pending invitations can be resent or revoked.',
+    ],
+    links: [pullRequestLink(169)],
+  },
+  {
+    id: 'anchored-page-comments',
+    date: '2026-10-07',
+    title: 'Discuss pages with anchored comments',
+    details: [
+      'Start comment threads on specific passages to discuss a page without changing its content.',
+      'Commenter access is separate from editing, and comment workflows are available in the browser, CLI, API, and MCP.',
+    ],
+    links: [pullRequestLink(167)],
+  },
+  {
+    id: 'clearer-citations-in-markdown',
+    date: '2026-10-03',
+    title: 'Keep citations clear in Markdown previews',
+    details: [
+      'Citation markers such as `[1]` stay readable as plain text in live previews and heading navigation.',
+      'Markdown guidance now clarifies how to write literal dollar signs alongside inline math.',
+    ],
+    links: [pullRequestLink(165), pullRequestLink(166)],
+  },
+  {
     id: 'large-document-editing',
     date: '2026-09-27',
     title: 'Smoother editing for larger pages',
