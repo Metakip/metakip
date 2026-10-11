@@ -4,7 +4,7 @@ import { LoadingIndicator } from '../components/ui/LoadingIndicator';
 import { useIdentityLifecycle } from '../contexts/IdentityLifecycleContext';
 import { useAuth } from '../hooks/useAuth';
 import { authClient } from '../lib/auth-client';
-import { getWorkspaceRootPath } from '../utils/url';
+import { getMarketingWebsiteUrl, getWorkspaceRootPath } from '../utils/url';
 
 export default function Login() {
   const { data: session, isPending, isRefetching } = useAuth();
@@ -34,6 +34,7 @@ export default function Login() {
     return <Navigate to={returnPath} replace />;
   }
 
+  const marketingWebsiteUrl = getMarketingWebsiteUrl();
   const handleSocialSignIn = (provider: 'github' | 'google') => async () => {
     try {
       await authClient.signIn.social({
@@ -105,6 +106,27 @@ export default function Login() {
             Continue with GitHub
           </button>
         </div>
+        <p className="mt-6 text-center text-xs leading-5 text-zinc-500 dark:text-zinc-400">
+          By continuing, you agree to our{' '}
+          <a
+            href={`${marketingWebsiteUrl}/terms`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2 hover:text-zinc-900 dark:hover:text-zinc-100"
+          >
+            Terms of Service
+          </a>{' '}
+          and acknowledge our{' '}
+          <a
+            href={`${marketingWebsiteUrl}/privacy`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2 hover:text-zinc-900 dark:hover:text-zinc-100"
+          >
+            Privacy Policy
+          </a>
+          .
+        </p>
       </div>
     </div>
   );

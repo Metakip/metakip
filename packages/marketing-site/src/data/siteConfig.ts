@@ -7,6 +7,9 @@ export const SITE_PAGES = [
   { href: '/use-cases', label: 'Use Cases', includeInNavigation: true },
   { href: '/pricing', label: 'Pricing', includeInNavigation: true },
   { href: '/changelog', label: 'Changelog', includeInNavigation: false },
+  { href: '/privacy', label: 'Privacy Policy', includeInNavigation: false },
+  { href: '/terms', label: 'Terms of Service', includeInNavigation: false },
+  { href: '/support', label: 'Support', includeInNavigation: false },
 ] as const;
 
 export const SITE_NAVIGATION = SITE_PAGES.filter(({ includeInNavigation }) => includeInNavigation);

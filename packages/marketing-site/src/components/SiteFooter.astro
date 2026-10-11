@@ -41,6 +41,12 @@ const resources = [
   { label: 'MCP', href: `${DOCS_ORIGIN}/agents/mcp/` },
   { label: 'CLI', href: `${DOCS_ORIGIN}/agents/metakip-cli/` },
 ];
+// biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
+const legalLinks = [
+  { label: 'Privacy Policy', href: '/privacy' },
+  { label: 'Terms of Service', href: '/terms' },
+  { label: 'Support', href: '/support' },
+];
 ---
 
 <footer class="site-footer" id="footer" data-note-footer transition:persist="site-footer" transition:animate="none">
@@ -65,6 +71,10 @@ const resources = [
               {label}<span aria-hidden="true">↗</span>
             </a>
           ))}
+        </div>
+        <div>
+          <h3>(Legal &amp; Support)</h3>
+          {legalLinks.map(({ label, href }) => <a href={href}>{label}</a>)}
         </div>
       </nav>
     </div>
