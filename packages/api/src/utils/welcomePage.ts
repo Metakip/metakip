@@ -5,7 +5,7 @@ import { createPage } from './pageCreation';
 
 export const WELCOME_PAGE_TITLE = 'Hey, Welcome to Metakip!';
 
-export const WELCOME_PAGE_CONTENT = `Hi! I'm Atharva, the sole developer behind Metakip. Thank you from the bottom of my heart for deciding to use my app. You can DM me on [X](https://x.com/atharva_again) or [LinkedIn](https://www.linkedin.com/in/atharva-again/), or email me at [atharva.verma18@gmail.com](mailto:atharva.verma18@gmail.com) for feedback or questions. You can also browse the [Metakip documentation](${METAKIP_DOCS_URL}) for guides and feature details.
+export const WELCOME_PAGE_CONTENT = `Hi! I'm Atharva, the sole developer behind Metakip. Thank you from the bottom of my heart for deciding to use my app. You can DM me on [X](https://x.com/atharva_again) or [LinkedIn](https://www.linkedin.com/in/atharva-again/), or email me at [support@metakip.com](mailto:support@metakip.com) for feedback or questions. You can also browse the [Metakip documentation](${METAKIP_DOCS_URL}) for guides and feature details.
 
 Metakip can do almost anything that existing note-taking apps can do.
 

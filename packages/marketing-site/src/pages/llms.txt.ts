@@ -50,6 +50,12 @@ ${pricingLines}
 - [Source Code](${GITHUB_URL}): Metakip source code and project README.
 - [Changelog](${SITE_ORIGIN}/changelog.md): Product updates across the browser app, CLI, API, sharing, and documentation.
 
+## Policies and support
+
+- [Privacy Policy](${SITE_ORIGIN}/privacy.md): How Metakip handles account information, workspace content, integrations, and deletion requests.
+- [Terms of Service](${SITE_ORIGIN}/terms.md): Terms for using the hosted Metakip service.
+- [Support](${SITE_ORIGIN}/support.md): Documentation, issue reporting, and support contact information.
+
 ## Documentation
 
 - [Documentation Home](${DOCS_ORIGIN}/): Guides, API reference, comparisons, and self-hosting documentation.

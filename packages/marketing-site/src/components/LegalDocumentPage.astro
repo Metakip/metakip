@@ -1,0 +1,49 @@
+---
+// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
+import SiteLayout from './SiteLayout.astro';
+import '../styles/marketingPage.css';
+import { getLegalFrontmatter, type LegalDocument } from '../data/legalDocument';
+import { SITE_ORIGIN } from '../data/siteConfig';
+
+interface Props {
+  document: LegalDocument;
+  path: string;
+}
+
+const { document, path } = Astro.props;
+const frontmatter = getLegalFrontmatter(document);
+const { title, description } = frontmatter;
+// biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
+const { intro, updatedAt } = frontmatter;
+const pageUrl = `${SITE_ORIGIN}${path}`;
+const pageTitle = `${title} | Metakip`;
+// biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': `${pageUrl}#webpage`,
+  url: pageUrl,
+  name: pageTitle,
+  description,
+  isPartOf: { '@id': `${SITE_ORIGIN}/#website` },
+};
+// biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
+const { Content } = document;
+---
+
+<SiteLayout
+  title={pageTitle}
+  description={description}
+  url={pageUrl}
+  markdownUrl={`${pageUrl}.md`}
+  structuredData={structuredData}
+>
+  <main class="legal-document marketing-page">
+    <article class="legal-document-content">
+      <h1>{title}</h1>
+      <p class="legal-document-intro">{intro}</p>
+      <p class="legal-document-updated">Last updated: {updatedAt}</p>
+      <Content />
+    </article>
+  </main>
+</SiteLayout>

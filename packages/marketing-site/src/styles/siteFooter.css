@@ -79,7 +79,7 @@
 
 .footer-navigation {
   display: grid;
-  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  grid-template-columns: repeat(3, minmax(120px, 1fr));
   gap: clamp(36px, 5vw, 80px);
   padding-top: 4px;
 }
