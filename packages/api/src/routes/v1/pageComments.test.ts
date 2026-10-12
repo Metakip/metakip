@@ -1,6 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { testQuery } from '../../db/testQuery';
-import { createTestApp, createTestPage, createTestSession, createTestUser } from '../../test-utils';
+import {
+  createTestApp,
+  createTestPage,
+  createTestSession,
+  createTestUser,
+  createTestWorkspaceMember,
+} from '../../test-utils';
 
 const collaboration = vi.hoisted(() => ({ readPageMarkdown: vi.fn() }));
 vi.mock('../../utils/collaborationContentClient', async (importOriginal) => ({
@@ -40,6 +46,23 @@ describe('v1 page comments', () => {
 
     expect(response.status).toBe(400);
     expect(collaboration.readPageMarkdown).not.toHaveBeenCalled();
+  });
+
+  it('allows workspace commenters to comment on pages without a direct page grant', async () => {
+    const app = await createTestApp();
+    const owner = await createTestUser();
+    const commenter = await createTestUser();
+    const page = await createTestPage(owner.id);
+    const session = await createTestSession(commenter.id);
+    await createTestWorkspaceMember(owner.id, commenter.id, 'commenter');
+
+    const response = await app.request(`/api/v1/pages/${page.id}/comments`, {
+      method: 'POST',
+      headers: { ...session, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ body: 'Workspace comment', anchor: { quote: 'comment' } }),
+    });
+
+    expect(response.status).toBe(201);
   });
 
   it('lists comment threads in document order across cursor pages', async () => {

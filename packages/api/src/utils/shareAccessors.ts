@@ -68,7 +68,7 @@ export async function getAccessSourcesByEntityIds(
              union all
 
              select info.entity_id, 'workspace', null, member.member_id,
-                    case member.role when 'viewer' then 'view' when 'editor' then 'edit' else 'admin' end,
+                    case member.role when 'viewer' then 'view' when 'commenter' then 'commenter' when 'editor' then 'edit' else 'admin' end,
                     null, null
              from page_info info
              join workspace_members member on member.workspace_owner_id = info.owner_id
@@ -113,7 +113,7 @@ export async function getAccessSourcesByEntityIds(
              union all
 
              select info.entity_id, 'workspace', null, member.member_id,
-                    case member.role when 'viewer' then 'view' when 'editor' then 'edit' else 'admin' end,
+                    case member.role when 'viewer' then 'view' when 'commenter' then 'commenter' when 'editor' then 'edit' else 'admin' end,
                     null, null
              from folder_info info
              join workspace_members member on member.workspace_owner_id = info.owner_id

@@ -17,7 +17,9 @@ workspaceRoute.use('*', requireAuth);
 
 const parseWorkspaceRole = (value: unknown, defaultRole?: WorkspaceRole): WorkspaceRole => {
   if (value === undefined && defaultRole) return defaultRole;
-  if (value === 'viewer' || value === 'editor' || value === 'admin') return value;
+  if (value === 'viewer' || value === 'commenter' || value === 'editor' || value === 'admin') {
+    return value;
+  }
   throw new HTTPException(400, { message: 'Invalid workspace role' });
 };
 

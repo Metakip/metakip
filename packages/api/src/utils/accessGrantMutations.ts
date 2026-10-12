@@ -16,8 +16,16 @@ export const entityPermissionLabel = (
         ? 'Commenter'
         : 'Viewer';
 
-export const workspaceRoleLabel = (role: WorkspaceRole): 'Admin' | 'Editor' | 'Viewer' =>
-  role === 'admin' ? 'Admin' : role === 'editor' ? 'Editor' : 'Viewer';
+export const workspaceRoleLabel = (
+  role: WorkspaceRole,
+): 'Admin' | 'Commenter' | 'Editor' | 'Viewer' =>
+  role === 'admin'
+    ? 'Admin'
+    : role === 'editor'
+      ? 'Editor'
+      : role === 'commenter'
+        ? 'Commenter'
+        : 'Viewer';
 
 type EntityGrant = {
   actorId: string;

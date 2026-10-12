@@ -96,6 +96,50 @@ describe('workspace API', () => {
     expect(membership.rowCount).toBe(1);
   });
 
+  it('adds an existing user to the workspace as a commenter', async () => {
+    const app = await createTestApp();
+    const owner = await createTestUser();
+    const recipient = await createTestUser();
+    const session = await createTestSession(owner.id);
+
+    const response = await app.request('/api/workspace/members/invite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Cookie: session.Cookie },
+      body: JSON.stringify({ email: recipient.email, role: 'commenter' }),
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      message: `Added ${recipient.name} as Commenter to workspace`,
+    });
+    const membership = await query<{ role: string }>(
+      'SELECT role FROM workspace_members WHERE workspace_owner_id = $1 AND member_id = $2',
+      [owner.id, recipient.id],
+    );
+    expect(membership.rows[0]?.role).toBe('commenter');
+  });
+
+  it('changes an existing workspace member to commenter', async () => {
+    const app = await createTestApp();
+    const owner = await createTestUser();
+    const member = await createTestUser();
+    const session = await createTestSession(owner.id);
+    await createTestWorkspaceMember(owner.id, member.id, 'editor');
+
+    const response = await app.request(`/api/workspace/members/${member.id}/role`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Cookie: session.Cookie },
+      body: JSON.stringify({ role: 'commenter' }),
+    });
+
+    expect(response.status).toBe(200);
+    const membership = await query<{ role: string }>(
+      'SELECT role FROM workspace_members WHERE workspace_owner_id = $1 AND member_id = $2',
+      [owner.id, member.id],
+    );
+    expect(membership.rows[0]?.role).toBe('commenter');
+  });
+
   it('creates a pending invitation when the email has no account', async () => {
     const app = await createTestApp();
     const owner = await createTestUser();
@@ -104,7 +148,7 @@ describe('workspace API', () => {
     const res = await app.request('/api/workspace/members/invite', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Cookie: session.Cookie },
-      body: JSON.stringify({ email: 'New.Member@Example.com', role: 'viewer' }),
+      body: JSON.stringify({ email: 'New.Member@Example.com', role: 'commenter' }),
     });
 
     expect(res.status).toBe(202);
@@ -119,7 +163,9 @@ describe('workspace API', () => {
        where target_type = 'workspace' and target_id = $1`,
       [owner.id],
     );
-    expect(invitations.rows).toEqual([{ email: 'new.member@example.com', permission: 'viewer' }]);
+    expect(invitations.rows).toEqual([
+      { email: 'new.member@example.com', permission: 'commenter' },
+    ]);
 
     const membersResponse = await app.request('/api/workspace/members', {
       headers: { Cookie: session.Cookie },
@@ -131,7 +177,7 @@ describe('workspace API', () => {
         expect.objectContaining({
           targetType: 'workspace',
           email: 'new.member@example.com',
-          permission: 'viewer',
+          permission: 'commenter',
           canManage: true,
         }),
       ],

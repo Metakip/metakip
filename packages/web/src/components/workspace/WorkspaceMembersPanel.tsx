@@ -1,3 +1,4 @@
+import type { WorkspaceRole } from '@metakip/shared';
 import { Mail, UserRound } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
@@ -12,7 +13,12 @@ import { getInitial } from '../../utils/avatar';
 import { PendingInvitationRow } from '../PendingInvitationRow';
 import { Dropdown, TextBox } from '../ui/FormControls';
 
-const ROLE_LABELS = { viewer: 'Viewer', editor: 'Editor', admin: 'Admin' } as const;
+const ROLE_LABELS: Record<WorkspaceRole, string> = {
+  viewer: 'Viewer',
+  commenter: 'Commenter',
+  editor: 'Editor',
+  admin: 'Admin',
+};
 
 export function WorkspaceMembersPanel() {
   const { data: session } = useAuth();
@@ -23,7 +29,7 @@ export function WorkspaceMembersPanel() {
   const removeMemberMutation = useRemoveWorkspaceMember();
 
   const [email, setEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState<'viewer' | 'editor' | 'admin'>('editor');
+  const [inviteRole, setInviteRole] = useState<WorkspaceRole>('editor');
 
   const handleInvite = (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,6 +96,7 @@ export function WorkspaceMembersPanel() {
               ariaLabel="Role for new workspace member"
               options={[
                 { value: 'viewer', label: 'Viewer' },
+                { value: 'commenter', label: 'Commenter' },
                 { value: 'editor', label: 'Editor' },
                 { value: 'admin', label: 'Admin' },
               ]}
@@ -174,6 +181,7 @@ export function WorkspaceMembersPanel() {
                       value={member.role}
                       options={[
                         { value: 'viewer', label: 'Viewer' },
+                        { value: 'commenter', label: 'Commenter' },
                         { value: 'editor', label: 'Editor' },
                         { value: 'admin', label: 'Admin' },
                         { value: 'remove', label: 'Remove' },
@@ -187,7 +195,7 @@ export function WorkspaceMembersPanel() {
                         } else {
                           changeRoleMutation.mutate({
                             memberId: member.memberId,
-                            role: role as 'viewer' | 'editor' | 'admin',
+                            role: role as WorkspaceRole,
                           });
                         }
                       }}
