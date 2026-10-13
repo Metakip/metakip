@@ -52,7 +52,7 @@ export const pendingInvitations = pgTable(
     expiryIdx: index('pending_invitations_expiry_idx').on(table.expiresAt),
     targetPermissionCheck: check(
       'pending_invitations_target_permission_check',
-      sql`(${table.targetType} = 'workspace' and ${table.permission} in ('viewer', 'editor', 'admin'))
+      sql`(${table.targetType} = 'workspace' and ${table.permission} in ('viewer', 'commenter', 'editor', 'admin'))
             or (${table.targetType} in ('page', 'folder') and ${table.permission} in ('view', 'commenter', 'edit', 'admin'))`,
     ),
     statusCheck: check(

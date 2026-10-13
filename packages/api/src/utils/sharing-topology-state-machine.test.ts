@@ -6,6 +6,10 @@ import {
   type OraclePublicPermission,
 } from '../test-support/sharingOracle';
 import {
+  workspacePermissions,
+  workspaceRoleForPermission,
+} from '../test-support/workspaceRoleFixtures';
+import {
   createTestApp,
   createTestFolder,
   createTestPage,
@@ -40,7 +44,6 @@ const accountPermissions: readonly OraclePermission[] = [
   'edit',
   'admin',
 ];
-const workspacePermissions: readonly OraclePermission[] = [null, 'view', 'edit', 'admin'];
 const publicPermissions: readonly OraclePublicPermission[] = [null, 'view', 'edit'];
 
 const seededRandom = (initialSeed: number) => {
@@ -304,11 +307,7 @@ async function setWorkspaceAccess(
     await query(
       `insert into workspace_members (workspace_owner_id, member_id, role)
        values ($1, $2, $3)`,
-      [
-        ownerId,
-        recipientId,
-        permission === 'view' ? 'viewer' : permission === 'edit' ? 'editor' : 'admin',
-      ],
+      [ownerId, recipientId, workspaceRoleForPermission(permission)],
     );
   }
   model.workspace = permission;
@@ -372,6 +371,17 @@ describe('sharing topology state machine', () => {
     const trace: string[] = [];
 
     await assertModel(model, recipient.id, app, recipientSession.Cookie, 'initial topology');
+
+    for (const permission of ['commenter', 'edit', 'commenter', null] as const) {
+      await setWorkspaceAccess(model, owner.id, recipient.id, permission);
+      await assertModel(
+        model,
+        recipient.id,
+        app,
+        recipientSession.Cookie,
+        `workspace role transition to ${permission ?? 'none'}`,
+      );
+    }
 
     for (let step = 0; step < 80; step += 1) {
       const axis = Math.floor(random() * 7);

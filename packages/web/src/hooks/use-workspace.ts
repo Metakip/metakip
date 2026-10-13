@@ -1,4 +1,4 @@
-import type { WorkspaceMembership, WorkspaceMembersResponse } from '@metakip/shared';
+import type { WorkspaceMembership, WorkspaceMembersResponse, WorkspaceRole } from '@metakip/shared';
 import { type QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '../utils/api';
 import { isBulkRemovalInProgress } from '../utils/bulkRemovalState';
@@ -64,7 +64,7 @@ async function inviteToWorkspace({
   role,
 }: {
   email: string;
-  role: 'viewer' | 'editor' | 'admin';
+  role: WorkspaceRole;
 }): Promise<{ message?: string }> {
   return apiFetch<{ message?: string }>('/workspace/members/invite', {
     method: 'POST',
@@ -95,7 +95,7 @@ async function changeMemberRole({
   role,
 }: {
   memberId: string;
-  role: 'viewer' | 'editor' | 'admin';
+  role: WorkspaceRole;
 }): Promise<{ message?: string }> {
   return apiFetch<{ message?: string }>(`/workspace/members/${memberId}/role`, {
     method: 'PATCH',

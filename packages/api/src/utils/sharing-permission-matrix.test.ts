@@ -5,9 +5,12 @@ import {
   type OraclePermission,
   type OraclePublicPermission,
 } from '../test-support/sharingOracle';
+import {
+  workspacePermissions,
+  workspaceRoleForPermission,
+} from '../test-support/workspaceRoleFixtures';
 
 const roles: readonly OraclePermission[] = [null, 'view', 'commenter', 'edit', 'admin'];
-const workspaceRoles: readonly OraclePermission[] = [null, 'view', 'edit', 'admin'];
 const publicPermissions: readonly OraclePublicPermission[] = [null, 'view', 'edit'];
 
 type RoleVector = {
@@ -72,7 +75,7 @@ async function insertShares(shares: readonly ShareSeed[]): Promise<void> {
 }
 
 describe('sharing SQL permission matrix', () => {
-  it('matches the independent oracle for all 216,000 depth-two page and folder cells', async () => {
+  it('matches the independent oracle for all 270,000 depth-two page and folder cells', async () => {
     const structures: Structure[] = [];
     let structureIndex = 0;
     for (const targetPublic of publicPermissions) {
@@ -98,7 +101,7 @@ describe('sharing SQL permission matrix', () => {
     }
 
     const roleVectors: RoleVector[] = [];
-    for (const workspace of workspaceRoles) {
+    for (const workspace of workspacePermissions) {
       for (const target of roles) {
         for (const parent of roles) {
           for (const grandparent of roles) {
@@ -218,19 +221,16 @@ describe('sharing SQL permission matrix', () => {
       ],
     );
 
+    const memberVectors = roleVectors.filter(
+      (vector): vector is RoleVector & { workspace: Exclude<OraclePermission, null> } =>
+        vector.workspace !== null,
+    );
     const memberships = structures.flatMap((structure) =>
-      roleVectors
-        .filter((vector) => vector.workspace !== null)
-        .map((vector) => ({
-          ownerId: structure.ownerId,
-          memberId: vector.userId,
-          role:
-            vector.workspace === 'view'
-              ? 'viewer'
-              : vector.workspace === 'edit'
-                ? 'editor'
-                : 'admin',
-        })),
+      memberVectors.map((vector) => ({
+        ownerId: structure.ownerId,
+        memberId: vector.userId,
+        role: workspaceRoleForPermission(vector.workspace),
+      })),
     );
     for (const batch of inChunks(memberships, 10_000)) {
       await query(
@@ -287,7 +287,7 @@ describe('sharing SQL permission matrix', () => {
     }
     await insertShares(shares);
     // Bulk fixtures bypass normal autovacuum cadence. Fresh statistics keep
-    // the 55k canonical-function probes on indexed plans in CI as well as
+    // the 68k canonical-function probes on indexed plans in CI as well as
     // developer machines.
     await query('ANALYZE users, folders, folder_closure, pages, shares, workspace_members');
 
@@ -338,8 +338,9 @@ describe('sharing SQL permission matrix', () => {
     );
     const actual = pageBatches.flatMap((batch) => batch.rows);
     const actualFolders = folderBatches.flatMap((batch) => batch.rows);
+    const expectedRowCount = structures.length * roleVectors.length;
 
-    expect(actual).toHaveLength(108_000);
+    expect(actual).toHaveLength(expectedRowCount);
     for (const row of actual) {
       const structure = structures[row.structure_index];
       const vector = roleVectors[row.role_index];
@@ -371,7 +372,7 @@ describe('sharing SQL permission matrix', () => {
       );
     }
 
-    expect(actualFolders).toHaveLength(108_000);
+    expect(actualFolders).toHaveLength(expectedRowCount);
     for (const row of actualFolders) {
       const structure = structures[row.structure_index];
       const vector = roleVectors[row.role_index];

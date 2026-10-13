@@ -544,10 +544,17 @@ export const workspaceMembers = pgTable(
     memberId: uuid('member_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    role: text('role').notNull().default('editor').$type<'viewer' | 'editor' | 'admin'>(),
+    role: text('role')
+      .notNull()
+      .default('editor')
+      .$type<'viewer' | 'commenter' | 'editor' | 'admin'>(),
     createdAt: timestamp('created_at').defaultNow(),
   },
   (table) => ({
+    roleCheck: check(
+      'workspace_members_role_check',
+      sql`${table.role} in ('viewer', 'commenter', 'editor', 'admin')`,
+    ),
     ownerMemberUnique: unique('workspace_members_owner_member_unique').on(
       table.workspaceOwnerId,
       table.memberId,

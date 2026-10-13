@@ -8,10 +8,13 @@ import {
   type OraclePermission,
   type OraclePublicPermission,
 } from '../test-support/sharingOracle';
+import {
+  workspacePermissions,
+  workspaceRoleForPermission,
+} from '../test-support/workspaceRoleFixtures';
 import { createTestFolder, createTestPage, createTestUser } from '../test-utils';
 
 const roles: readonly OraclePermission[] = [null, 'view', 'commenter', 'edit', 'admin'];
-const workspaceRoles: readonly OraclePermission[] = [null, 'view', 'edit', 'admin'];
 const publicPermissions: readonly OraclePublicPermission[] = [null, 'view', 'edit'];
 
 type MutableWorld = {
@@ -62,18 +65,17 @@ describe('seeded sharing state machine', () => {
       for (let step = 0; step < 150; step += 1) {
         const axis = Math.floor(random() * 10);
         if (axis === 0) {
-          const permission = workspaceRoles[Math.floor(random() * workspaceRoles.length)] ?? null;
+          const permission =
+            workspacePermissions[Math.floor(random() * workspacePermissions.length)] ?? null;
           world.workspace = permission;
           await query(
             'DELETE FROM workspace_members WHERE workspace_owner_id = $1 AND member_id = $2',
             [owner.id, recipient.id],
           );
           if (permission !== null) {
-            const role =
-              permission === 'view' ? 'viewer' : permission === 'edit' ? 'editor' : 'admin';
             await query(
               'INSERT INTO workspace_members (workspace_owner_id, member_id, role) VALUES ($1, $2, $3)',
-              [owner.id, recipient.id, role],
+              [owner.id, recipient.id, workspaceRoleForPermission(permission)],
             );
           }
           trace.push(`workspace=${permission ?? 'none'}`);
