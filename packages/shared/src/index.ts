@@ -14,6 +14,7 @@ export * from './types/pageContent.js';
 export * from './types/sharing.js';
 export * from './types/user.js';
 export * from './types/v1.js';
+export * from './types/v1Sharing.js';
 export * from './types/wikiLink.js';
 export * from './types/workspace.js';
 

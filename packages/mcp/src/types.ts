@@ -2,6 +2,7 @@ import {
   type CommentAnchor,
   type CommentListStatus,
   type CommentThreadStatus,
+  type InheritancePolicy,
   MCP_COMMENT_SCOPE,
   MCP_READ_SCOPE,
   MCP_WRITE_SCOPE,
@@ -22,6 +23,18 @@ import {
   type McpWhoami,
   type PageCommentThread,
   type PageCommentThreadsResponse,
+  type PublicPermission,
+  type ShareEntityType,
+  type SharePermission,
+  type V1ResentShareInvitation,
+  type V1ShareGrantResponse,
+  type V1ShareInheritance,
+  type V1ShareMutation,
+  type V1SharePublicAccess,
+  type V1SharingSummary,
+  type V1WorkspaceMemberAdded,
+  type V1WorkspaceSharingSummary,
+  type WorkspaceRole,
 } from '@metakip/shared';
 import type { McpInternalAuthContext } from '@metakip/shared/node/mcp-internal-auth';
 
@@ -171,6 +184,80 @@ export type McpFolderBackend = {
   ): Promise<McpFolder>;
 };
 
+export type McpSharingBackend = {
+  getSharingSummary(
+    entityType: ShareEntityType,
+    reference: string,
+    options?: McpRequestOptions,
+  ): Promise<V1SharingSummary>;
+  grantEntityAccess(
+    entityType: ShareEntityType,
+    reference: string,
+    input: { email: string; permission: SharePermission },
+    options?: McpRequestOptions,
+  ): Promise<V1ShareGrantResponse>;
+  updateSharePermission(
+    entityType: ShareEntityType,
+    reference: string,
+    email: string,
+    permission: SharePermission,
+    options?: McpRequestOptions,
+  ): Promise<V1ShareMutation>;
+  revokeShare(
+    entityType: ShareEntityType,
+    reference: string,
+    email: string,
+    options?: McpRequestOptions,
+  ): Promise<V1ShareMutation>;
+  leaveSharedEntity(
+    entityType: ShareEntityType,
+    reference: string,
+    options?: McpRequestOptions,
+  ): Promise<V1ShareMutation>;
+  updatePublicAccess(
+    entityType: ShareEntityType,
+    reference: string,
+    permission: PublicPermission | 'private',
+    options?: McpRequestOptions,
+  ): Promise<V1SharePublicAccess>;
+  updateSharingInheritance(
+    entityType: ShareEntityType,
+    reference: string,
+    policy: InheritancePolicy,
+    options?: McpRequestOptions,
+  ): Promise<V1ShareInheritance>;
+  resendSharingInvitation(
+    entityType: ShareEntityType,
+    reference: string,
+    email: string,
+    options?: McpRequestOptions,
+  ): Promise<V1ResentShareInvitation>;
+  cancelSharingInvitation(
+    entityType: ShareEntityType,
+    reference: string,
+    email: string,
+    options?: McpRequestOptions,
+  ): Promise<V1ShareMutation>;
+  getWorkspaceSharingSummary(options?: McpRequestOptions): Promise<V1WorkspaceSharingSummary>;
+  addWorkspaceMember(
+    email: string,
+    role: WorkspaceRole,
+    options?: McpRequestOptions,
+  ): Promise<V1WorkspaceMemberAdded>;
+  updateWorkspaceMember(
+    email: string,
+    role: WorkspaceRole,
+    options?: McpRequestOptions,
+  ): Promise<V1ShareMutation>;
+  removeWorkspaceMember(email: string, options?: McpRequestOptions): Promise<V1ShareMutation>;
+  leaveWorkspace(ownerId: string, options?: McpRequestOptions): Promise<V1ShareMutation>;
+  resendWorkspaceInvitation(
+    email: string,
+    options?: McpRequestOptions,
+  ): Promise<V1ResentShareInvitation>;
+  cancelWorkspaceInvitation(email: string, options?: McpRequestOptions): Promise<V1ShareMutation>;
+};
+
 export type McpTrashLifecycleBackend = {
   listTrashed(options?: McpRequestOptions): Promise<McpTrashList>;
   movePages(
@@ -232,6 +319,7 @@ export type McpRequestBackend = McpIdentityBackend &
   McpPageBackend &
   McpCommentsBackend &
   McpFolderBackend &
+  McpSharingBackend &
   McpTrashLifecycleBackend &
   McpImportExportBackend & {
     readonly canReadPages: boolean;

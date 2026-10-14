@@ -1,4 +1,5 @@
 import type {
+  InvitationTargetType,
   PendingInvitation,
   ShareEntityType,
   SharePermission,
@@ -7,7 +8,7 @@ import type {
 import { sql } from 'drizzle-orm';
 import { HTTPException } from 'hono/http-exception';
 import { db } from '../db/connection';
-import { executeQuery } from '../db/query';
+import { executeQuery, type QueryExecutor } from '../db/query';
 import {
   addWorkspaceMember,
   entityPermissionLabel,
@@ -23,6 +24,7 @@ import {
   supersedeMatchingPendingInvitations,
   toPendingInvitation,
   transitionInvitationLifecycle,
+  withLockedInvitationByEmail,
   withLockedInvitationById,
 } from './pendingInvitations';
 import {
@@ -179,40 +181,94 @@ export async function grantOrInviteWorkspaceMember(params: {
   };
 }
 
-export async function resendManagedInvitation(
-  invitationId: string,
+async function queueManagedInvitationResend(
+  tx: QueryExecutor,
+  invitation: InvitationRecord,
   actorId: string,
-): Promise<PendingInvitation> {
-  const outcome = await withLockedInvitationById(invitationId, async (tx, invitation) => {
-    await ensureCanManageInvitation(tx, invitation, actorId);
-    const status = await resolveInvitationCommandStatus(tx, invitation);
-    return status === 'pending'
-      ? { kind: 'queued' as const, prepared: await enqueueInvitationResend(tx, invitation) }
-      : { kind: 'unavailable' as const, status };
-  });
+) {
+  await ensureCanManageInvitation(tx, invitation, actorId);
+  const status = await resolveInvitationCommandStatus(tx, invitation);
+  return status === 'pending'
+    ? { kind: 'queued' as const, prepared: await enqueueInvitationResend(tx, invitation) }
+    : { kind: 'unavailable' as const, status };
+}
+
+function completedResend(
+  outcome: Awaited<ReturnType<typeof queueManagedInvitationResend>>,
+): PendingInvitation {
   if (outcome.kind === 'unavailable') {
     throw new HTTPException(409, { message: `Invitation is ${outcome.status}` });
   }
   return toPendingInvitation(outcome.prepared.invitation, true, 'pending');
 }
 
-export async function revokeManagedInvitation(
+export async function resendManagedInvitation(
   invitationId: string,
   actorId: string,
-): Promise<InvitationRecord> {
-  const outcome = await withLockedInvitationById(invitationId, async (tx, invitation) => {
-    await ensureCanManageInvitation(tx, invitation, actorId);
-    const status = await resolveInvitationCommandStatus(tx, invitation);
-    if (status !== 'pending') {
-      return { kind: 'unavailable' as const, status };
-    }
-    return {
-      kind: 'revoked' as const,
-      invitation: await transitionInvitationLifecycle(tx, invitation.id, { status: 'revoked' }),
-    };
-  });
+): Promise<PendingInvitation> {
+  return completedResend(
+    await withLockedInvitationById(invitationId, (tx, invitation) =>
+      queueManagedInvitationResend(tx, invitation, actorId),
+    ),
+  );
+}
+
+export async function resendManagedInvitationByEmail(
+  targetType: InvitationTargetType,
+  targetId: string,
+  email: string,
+  actorId: string,
+): Promise<PendingInvitation> {
+  return completedResend(
+    await withLockedInvitationByEmail(targetType, targetId, email, actorId, (tx, invitation) =>
+      queueManagedInvitationResend(tx, invitation, actorId),
+    ),
+  );
+}
+
+async function revokeLockedInvitation(
+  tx: QueryExecutor,
+  invitation: InvitationRecord,
+  actorId: string,
+) {
+  await ensureCanManageInvitation(tx, invitation, actorId);
+  const status = await resolveInvitationCommandStatus(tx, invitation);
+  if (status !== 'pending') return { kind: 'unavailable' as const, status };
+  return {
+    kind: 'revoked' as const,
+    invitation: await transitionInvitationLifecycle(tx, invitation.id, { status: 'revoked' }),
+  };
+}
+
+function completedRevocation(
+  outcome: Awaited<ReturnType<typeof revokeLockedInvitation>>,
+): InvitationRecord {
   if (outcome.kind === 'unavailable') {
     throw new HTTPException(409, { message: `Invitation is ${outcome.status}` });
   }
   return outcome.invitation;
+}
+
+export async function revokeManagedInvitation(
+  invitationId: string,
+  actorId: string,
+): Promise<InvitationRecord> {
+  return completedRevocation(
+    await withLockedInvitationById(invitationId, (tx, invitation) =>
+      revokeLockedInvitation(tx, invitation, actorId),
+    ),
+  );
+}
+
+export async function revokeManagedInvitationByEmail(
+  targetType: InvitationTargetType,
+  targetId: string,
+  email: string,
+  actorId: string,
+): Promise<InvitationRecord> {
+  return completedRevocation(
+    await withLockedInvitationByEmail(targetType, targetId, email, actorId, (tx, invitation) =>
+      revokeLockedInvitation(tx, invitation, actorId),
+    ),
+  );
 }

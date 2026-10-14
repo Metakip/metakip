@@ -1,56 +1,26 @@
-import {
-  buildFolderPath as buildSharedFolderPath,
-  buildPagePath as buildSharedPagePath,
-  deriveCapabilities,
-  type EntityAccessSource,
-  type EntityShare,
-  type InheritedPublicAccess,
-  type PublicPermission,
-  type SharedWithMeItem,
-  type ShareSummary,
-} from '@metakip/shared';
+import type { SharedWithMeItem } from '@metakip/shared';
 import { sql } from 'drizzle-orm';
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { db } from '../db/connection';
-import { executeQuery, type QueryExecutor, query } from '../db/query';
+import { executeQuery, type QueryExecutor } from '../db/query';
 import { requireAuth } from '../middleware/auth';
-import { getEnumerableFolderIds } from '../utils/folderEnumeration';
 import { grantOrInviteEntity } from '../utils/invitationAccess';
-import { listPendingInvitations } from '../utils/pendingInvitations';
-import { buildPublicWebUrl } from '../utils/publicWebUrl';
 import { parseJsonRequestBody } from '../utils/requestBody';
 import {
-  ensureCanAdminEntity,
-  ensureFolderAccess,
-  ensurePageAccess,
-  lockEntityAccess,
-  lockEntityAccessMutation,
   parseEntityType,
   parsePermission,
   parsePublicPermission,
   type ShareEntityType,
   type SharePermission,
 } from '../utils/share-access';
-import { notifyShareRecompute, notifyShareRevoke, notifyShareUpdate } from '../utils/share-notify';
-import { getAccessors, getAccessSources, toCollaboratorDisplays } from '../utils/shareAccessors';
-import { resolveShareEntity, type ShareEntity } from '../utils/shareEntity';
-import { getEntityMetaUserIds, mergeMetaUserIds } from '../utils/shareRecipients';
-
-type GrantRow = {
-  id: string;
-  entity_type: ShareEntityType;
-  entity_id: string;
-  permission: SharePermission;
-  recipient_user_id: string;
-  recipient_email: string | null;
-  recipient_name: string | null;
-  recipient_avatar_url: string | null;
-  shared_by_name: string | null;
-  shared_by_email: string | null;
-  created_at: Date | null;
-  updated_at: Date | null;
-};
+import {
+  getShareSummary,
+  revokeShareGrant,
+  updatePublicAccess,
+  updateShareGrantPermission,
+  updateSharingInheritance,
+} from '../utils/shareManagement';
 
 type SharedRootRow = {
   id: string;
@@ -107,15 +77,6 @@ type SharedNavigationItem = SharedNavigationPage | SharedNavigationFolder;
 const sharesRoute = new Hono();
 sharesRoute.use('*', requireAuth);
 
-const buildPagePath = (title: string, pageId: string) =>
-  buildPublicWebUrl(buildSharedPagePath(title, pageId));
-const buildFolderPath = (title: string, folderId: string) =>
-  buildPublicWebUrl(buildSharedFolderPath(title, folderId));
-const buildEntityPath = (entity: ShareEntity, entityType: ShareEntityType) =>
-  entityType === 'page'
-    ? buildPagePath(entity.title, entity.id)
-    : buildFolderPath(entity.title, entity.id);
-
 const timestampValue = (value: unknown): number => {
   if (value instanceof Date) return value.getTime();
   if (typeof value === 'string' || typeof value === 'number') {
@@ -124,106 +85,6 @@ const timestampValue = (value: unknown): number => {
   }
   return 0;
 };
-
-async function ensureEntityAccess(
-  entityType: ShareEntityType,
-  entityId: string,
-  userId: string,
-  executor: QueryExecutor,
-) {
-  return entityType === 'page'
-    ? ensurePageAccess(entityId, userId, 'view', executor)
-    : ensureFolderAccess(entityId, userId, 'view', executor);
-}
-
-function normalizeGrant(row: GrantRow): EntityShare {
-  return {
-    id: row.id,
-    entityType: row.entity_type,
-    entityId: row.entity_id,
-    permission: row.permission,
-    recipientUserId: row.recipient_user_id,
-    recipientEmail: row.recipient_email,
-    recipientName: row.recipient_name,
-    recipientAvatarUrl: row.recipient_avatar_url,
-    sharedByName: row.shared_by_name,
-    sharedByEmail: row.shared_by_email,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  };
-}
-
-async function getDirectGrants(
-  entityType: ShareEntityType,
-  entityId: string,
-  executor: QueryExecutor,
-): Promise<EntityShare[]> {
-  const result = await executeQuery<GrantRow>(
-    executor,
-    sql`select share.id, share.entity_type, share.entity_id, share.permission,
-            share.recipient_user_id, recipient.email as recipient_email,
-            recipient.name as recipient_name,
-            coalesce(recipient.avatar_url, recipient.image) as recipient_avatar_url,
-            sharer.name as shared_by_name, sharer.email as shared_by_email,
-            share.created_at, share.updated_at
-     from shares share
-     join users recipient on recipient.id = share.recipient_user_id
-     left join users sharer on sharer.id = share.shared_by
-     where share.entity_type = ${entityType} and share.entity_id = ${entityId}
-     order by lower(coalesce(recipient.name, recipient.email)), share.created_at`,
-  );
-  return result.rows.map(normalizeGrant);
-}
-
-async function getInheritedPublicAccess(
-  entityType: ShareEntityType,
-  entityId: string,
-  executor: QueryExecutor,
-): Promise<InheritedPublicAccess[]> {
-  const result =
-    entityType === 'page'
-      ? await executeQuery<{
-          entity_id: string;
-          entity_title: string;
-          permission: PublicPermission;
-        }>(
-          executor,
-          sql`select folder.id as entity_id, folder.name as entity_title,
-                  folder.public_permission as permission
-           from pages page
-           join folder_closure path on path.descendant_id = page.parent_id
-           join folders folder on folder.id = path.ancestor_id
-           where page.id = ${entityId} and page.is_deleted = false
-             and folder.is_deleted = false
-             and folder.public_permission is not null
-             and not is_page_folder_inheritance_blocked(folder.id, page.id)
-           order by case folder.public_permission when 'edit' then 2 else 1 end desc,
-                    path.depth asc`,
-        )
-      : await executeQuery<{
-          entity_id: string;
-          entity_title: string;
-          permission: PublicPermission;
-        }>(
-          executor,
-          sql`select folder.id as entity_id, folder.name as entity_title,
-                  folder.public_permission as permission
-           from folder_closure path
-           join folders folder on folder.id = path.ancestor_id
-           where path.descendant_id = ${entityId} and path.depth > 0
-             and folder.is_deleted = false
-             and folder.public_permission is not null
-             and not is_folder_inheritance_blocked(folder.id, ${entityId})
-           order by case folder.public_permission when 'edit' then 2 else 1 end desc,
-                    path.depth asc`,
-        );
-  return result.rows.map((row) => ({
-    entityId: row.entity_id,
-    entityTitle: row.entity_title,
-    permission: row.permission,
-    url: buildFolderPath(row.entity_title, row.entity_id),
-  }));
-}
 
 async function removeNestedSharedRoots(
   rows: SharedRootRow[],
@@ -349,7 +210,18 @@ async function getSharedRoots(userId: string, executor: QueryExecutor): Promise<
 
 function rootToSharedItem(row: SharedRootRow): SharedWithMeItem {
   return {
-    ...normalizeGrant(row),
+    id: row.id,
+    entityType: row.entity_type,
+    entityId: row.entity_id,
+    permission: row.permission,
+    recipientUserId: row.recipient_user_id,
+    recipientEmail: row.recipient_email,
+    recipientName: row.recipient_name,
+    recipientAvatarUrl: row.recipient_avatar_url,
+    sharedByName: row.shared_by_name,
+    sharedByEmail: row.shared_by_email,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
     title: row.entity_title,
     icon: row.entity_icon,
     ownerId: row.owner_id,
@@ -504,102 +376,7 @@ sharesRoute.get('/entity/:entityType/:entityId', async (c) => {
   const entityType = parseEntityType(c.req.param('entityType'));
   const entityId = c.req.param('entityId');
   const user = c.get('user') as { id: string };
-  return db.transaction(async (tx) => {
-    await lockEntityAccess(tx, entityType, entityId);
-    const entity = await resolveShareEntity(entityType, entityId, tx);
-    const access = await ensureEntityAccess(entityType, entityId, user.id, tx);
-    const hasManagementAccess = access.fullAccess || access.permission === 'admin';
-    const publicAccess = {
-      permission: entity.publicPermission ?? ('private' as const),
-      url: buildEntityPath(entity, entityType),
-    };
-
-    if (!hasManagementAccess) {
-      const sources = await getAccessSources(entityType, entityId, tx);
-      const collaborators = toCollaboratorDisplays(getAccessors(sources));
-      return c.json({
-        visibility: 'limited',
-        collaborators,
-        entity: { type: entityType, id: entity.id, title: entity.title, ownerId: null },
-        publicAccess,
-        inheritance: { policy: 'inherit' },
-        grants: [],
-        pendingInvitations: [],
-        accessors: [],
-        accessSources: [],
-        inheritedPublicAccess: [],
-        userPermission: access.permission,
-        capabilities: deriveCapabilities(access.permission, access.fullAccess),
-        permissionDetails: [],
-        inheritedAccessors: [],
-      } satisfies ShareSummary);
-    }
-
-    const [grants, sources, inheritedPublicAccess, pendingInvitations] = await Promise.all([
-      getDirectGrants(entityType, entityId, tx),
-      getAccessSources(entityType, entityId, tx),
-      getInheritedPublicAccess(entityType, entityId, tx),
-      listPendingInvitations(entityType, entityId, tx, {
-        actorId: user.id,
-        fullAccess: access.fullAccess,
-      }),
-    ]);
-    const enumerableFolders = await getEnumerableFolderIds(user.id, tx);
-    const visibleSources = sources.map((source) => {
-      if (!source.folderId || enumerableFolders.has(source.folderId)) return source;
-      const redacted = { ...source, grantId: null };
-      delete redacted.folderId;
-      delete redacted.folderName;
-      return redacted;
-    });
-    const accessors = getAccessors(visibleSources);
-    const userSources = visibleSources.filter((source) => source.userId === user.id);
-
-    return c.json({
-      visibility: 'full',
-      collaborators: toCollaboratorDisplays(accessors),
-      entity: {
-        type: entityType,
-        id: entity.id,
-        title: entity.title,
-        ownerId: entity.ownerId,
-      },
-      publicAccess,
-      inheritance: { policy: entity.inheritancePolicy },
-      grants,
-      pendingInvitations,
-      accessors,
-      accessSources: visibleSources,
-      inheritedPublicAccess: inheritedPublicAccess.filter((item) =>
-        enumerableFolders.has(item.entityId),
-      ),
-      userPermission: access.permission,
-      capabilities: deriveCapabilities(access.permission, access.fullAccess),
-      permissionDetails: userSources.map((source) => ({
-        source:
-          source.kind === 'direct'
-            ? ('grant' as const)
-            : source.kind === 'owner'
-              ? ('owner' as const)
-              : source.kind,
-        permission: source.permission,
-        ...(source.folderId ? { folderId: source.folderId, folderName: source.folderName } : {}),
-      })),
-      inheritedAccessors: visibleSources
-        .filter(
-          (source): source is EntityAccessSource & { kind: 'folder' | 'workspace' } =>
-            source.kind === 'folder' || source.kind === 'workspace',
-        )
-        .map((source) => ({
-          userId: source.userId,
-          name: source.name,
-          email: source.email,
-          permission: source.permission,
-          source: source.kind,
-          ...(source.folderId ? { folderId: source.folderId, folderName: source.folderName } : {}),
-        })),
-    } satisfies ShareSummary);
-  });
+  return c.json(await getShareSummary(entityType, entityId, user.id));
 });
 
 sharesRoute.patch('/entity/:entityType/:entityId/inheritance', async (c) => {
@@ -612,39 +389,7 @@ sharesRoute.patch('/entity/:entityType/:entityId/inheritance', async (c) => {
     throw new HTTPException(400, { message: 'Invalid inheritance policy' });
   }
 
-  const entity = await resolveShareEntity(entityType, entityId);
-  await ensureCanAdminEntity(entityType, entityId, user.id);
-  await db.transaction(async (tx) => {
-    await lockEntityAccessMutation(tx, entityType, entityId);
-    await ensureCanAdminEntity(entityType, entityId, user.id, tx);
-    const affectedBefore = await getEntityMetaUserIds(tx, entityType, entityId);
-    await executeQuery(
-      tx,
-      entityType === 'page'
-        ? sql`update pages set inheritance_policy = ${policy}, updated_at = now() where id = ${entityId}`
-        : sql`update folders set inheritance_policy = ${policy}, updated_at = now() where id = ${entityId}`,
-    );
-    const affectedAfter = await getEntityMetaUserIds(tx, entityType, entityId);
-    await notifyShareRecompute(
-      {
-        entityType,
-        entityId,
-        metaUserIds: mergeMetaUserIds(affectedBefore, affectedAfter),
-        message:
-          policy === 'restricted'
-            ? `${entity.title} stopped inheriting access`
-            : `${entity.title} now inherits access`,
-      },
-      tx,
-    );
-  });
-  return c.json({
-    policy,
-    message:
-      policy === 'restricted'
-        ? `${entity.title} stopped inheriting access`
-        : `${entity.title} now inherits access`,
-  });
+  return c.json(await updateSharingInheritance(entityType, entityId, user.id, policy));
 });
 
 sharesRoute.patch('/entity/:entityType/:entityId/public-access', async (c) => {
@@ -654,76 +399,9 @@ sharesRoute.patch('/entity/:entityType/:entityId/public-access', async (c) => {
   const body = await parseJsonRequestBody(c);
   const requestedPermission =
     body && typeof body === 'object' ? (body as { permission?: unknown }).permission : null;
-  const entity = await resolveShareEntity(entityType, entityId);
-  await ensureCanAdminEntity(entityType, entityId, user.id);
-
-  const nextPermission =
+  const permission =
     requestedPermission === 'private' ? null : parsePublicPermission(requestedPermission);
-  await db.transaction(async (tx) => {
-    await lockEntityAccessMutation(tx, entityType, entityId);
-    await ensureCanAdminEntity(entityType, entityId, user.id, tx);
-    const affectedBefore = await getEntityMetaUserIds(tx, entityType, entityId);
-    await executeQuery(
-      tx,
-      entityType === 'page'
-        ? sql`update pages set public_permission = ${nextPermission}, updated_at = now() where id = ${entityId}`
-        : sql`update folders set public_permission = ${nextPermission}, updated_at = now() where id = ${entityId}`,
-    );
-
-    if (nextPermission === null) {
-      if (entityType === 'page') {
-        await executeQuery(
-          tx,
-          sql`delete from page_public_access_visits visit
-           where visit.page_id = ${entityId} and get_public_page_permission(visit.page_id) is null`,
-        );
-      } else {
-        await executeQuery(
-          tx,
-          sql`delete from folder_public_access_visits visit
-           where visit.folder_id in (
-             select descendant_id from folder_closure where ancestor_id = ${entityId}
-           )`,
-        );
-        await executeQuery(
-          tx,
-          sql`delete from page_public_access_visits visit
-           using pages page, folder_closure path
-           where visit.page_id = page.id
-             and path.ancestor_id = ${entityId} and path.descendant_id = page.parent_id`,
-        );
-      }
-    }
-
-    const affectedAfter = await getEntityMetaUserIds(tx, entityType, entityId);
-    const notification = {
-      entityType,
-      entityId,
-      metaUserIds: mergeMetaUserIds(affectedBefore, affectedAfter),
-      message:
-        nextPermission === null
-          ? `Public access removed for ${entity.title}`
-          : nextPermission === 'view'
-            ? `${entity.title} is now public view only`
-            : `${entity.title} is now publicly editable`,
-    };
-    if (nextPermission === null) {
-      await notifyShareRevoke(notification, tx);
-    } else {
-      await notifyShareUpdate({ ...notification, permission: nextPermission }, tx);
-    }
-  });
-
-  return c.json({
-    permission: nextPermission ?? 'private',
-    url: buildEntityPath(entity, entityType),
-    message:
-      nextPermission === null
-        ? `Public access removed for ${entity.title}`
-        : nextPermission === 'view'
-          ? `${entity.title} is now public view only`
-          : `${entity.title} is now publicly editable`,
-  });
+  return c.json(await updatePublicAccess(entityType, entityId, user.id, permission));
 });
 
 sharesRoute.post('/entity/:entityType/:entityId/grants', async (c) => {
@@ -763,112 +441,18 @@ sharesRoute.patch('/grants/:grantId', async (c) => {
   const grantId = c.req.param('grantId');
   const user = c.get('user') as { id: string };
   const body = await parseJsonRequestBody(c);
-  const nextPermission = parsePermission(
+  const permission = parsePermission(
     body && typeof body === 'object' ? (body as { permission?: unknown }).permission : null,
   );
-  const grantResult = await query<{
-    entity_type: ShareEntityType;
-    entity_id: string;
-  }>(sql`select entity_type, entity_id from shares where id = ${grantId}`);
-  const grant = grantResult.rows[0];
-  if (!grant) throw new HTTPException(404, { message: 'Grant not found' });
-  const entity = await resolveShareEntity(grant.entity_type, grant.entity_id);
-  await ensureCanAdminEntity(grant.entity_type, grant.entity_id, user.id);
-
-  const responseMessage = await db.transaction(async (tx) => {
-    await lockEntityAccessMutation(tx, grant.entity_type, grant.entity_id);
-    const actorAccess = await ensureCanAdminEntity(grant.entity_type, grant.entity_id, user.id, tx);
-    const target = await executeQuery<{
-      permission: SharePermission;
-      recipient_user_id: string;
-      recipient_email: string;
-    }>(
-      tx,
-      sql`select share.permission, share.recipient_user_id, recipient.email as recipient_email
-       from shares share
-       join users recipient on recipient.id = share.recipient_user_id
-       where share.id = ${grantId}
-       for update of share`,
-    );
-    const current = target.rows[0];
-    if (!current) throw new HTTPException(404, { message: 'Grant not found' });
-    if ((current.permission === 'admin' || nextPermission === 'admin') && !actorAccess.fullAccess) {
-      throw new HTTPException(403, {
-        message: 'Only the owner can grant or change admin access',
-      });
-    }
-    await executeQuery(
-      tx,
-      sql`update shares set permission = ${nextPermission}, updated_at = now() where id = ${grantId}`,
-    );
-    await notifyShareUpdate(
-      {
-        entityType: grant.entity_type,
-        entityId: grant.entity_id,
-        permission: nextPermission,
-        targetUserId: current.recipient_user_id,
-      },
-      tx,
-    );
-    return `Updated ${current.recipient_email}’s access to ${nextPermission} on ${entity.title}`;
-  });
-  return c.json({ ok: true, message: responseMessage });
+  const result = await updateShareGrantPermission(grantId, user.id, permission);
+  return c.json({ ok: true, message: result.message });
 });
 
 sharesRoute.delete('/grants/:grantId', async (c) => {
   const grantId = c.req.param('grantId');
   const user = c.get('user') as { id: string };
-  const grantResult = await query<{
-    entity_type: ShareEntityType;
-    entity_id: string;
-    recipient_user_id: string;
-    permission: SharePermission;
-  }>(
-    sql`select entity_type, entity_id, recipient_user_id, permission from shares where id = ${grantId}`,
-  );
-  const grant = grantResult.rows[0];
-  if (!grant) throw new HTTPException(404, { message: 'Grant not found' });
-  const selfRemoval = grant.recipient_user_id === user.id;
-  if (!selfRemoval) await ensureCanAdminEntity(grant.entity_type, grant.entity_id, user.id);
-  const entity = await resolveShareEntity(grant.entity_type, grant.entity_id);
-
-  const responseMessage = await db.transaction(async (tx) => {
-    await lockEntityAccessMutation(tx, grant.entity_type, grant.entity_id);
-    const actorAccess = selfRemoval
-      ? null
-      : await ensureCanAdminEntity(grant.entity_type, grant.entity_id, user.id, tx);
-    const target = await executeQuery<{
-      recipient_user_id: string;
-      permission: SharePermission;
-      recipient_email: string;
-    }>(
-      tx,
-      sql`select share.recipient_user_id, share.permission, recipient.email as recipient_email
-       from shares share
-       join users recipient on recipient.id = share.recipient_user_id
-       where share.id = ${grantId}
-       for update of share`,
-    );
-    const current = target.rows[0];
-    if (!current) throw new HTTPException(404, { message: 'Grant not found' });
-    if (!selfRemoval && current.permission === 'admin' && !actorAccess?.fullAccess) {
-      throw new HTTPException(403, { message: 'Only the owner can remove an admin' });
-    }
-    await executeQuery(tx, sql`delete from shares where id = ${grantId}`);
-    await notifyShareRevoke(
-      {
-        entityType: grant.entity_type,
-        entityId: grant.entity_id,
-        targetUserId: current.recipient_user_id,
-        ...(selfRemoval && entity.ownerId ? { metaUserIds: [entity.ownerId] } : {}),
-      },
-      tx,
-    );
-    return selfRemoval
-      ? `Removed ${entity.title} from your view`
-      : `Removed ${current.recipient_email}’s access to ${entity.title}`;
-  });
-  return c.json({ ok: true, message: responseMessage });
+  const result = await revokeShareGrant(grantId, user.id);
+  return c.json({ ok: true, message: result.message });
 });
 
 export default sharesRoute;

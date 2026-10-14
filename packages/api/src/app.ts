@@ -31,6 +31,7 @@ import { lifecycleRoute } from './routes/v1/lifecycle';
 import meV1Route from './routes/v1/me';
 import openApiV1Route from './routes/v1/openapi';
 import pagesV1Route from './routes/v1/pages';
+import sharingV1Route from './routes/v1/sharing';
 import tokensV1Route from './routes/v1/tokens';
 import versionsRoute from './routes/versions';
 import workspaceRoute from './routes/workspace';
@@ -101,6 +102,7 @@ export async function createApp() {
   v1App.route('/tokens', tokensV1Route);
   v1App.route('/pages', pagesV1Route);
   v1App.route('/folders', foldersV1Route);
+  v1App.route('/shares', sharingV1Route);
   v1App.route('/', lifecycleRoute);
   v1App.all('*', v1NotFound);
   v1App.notFound(v1NotFound);

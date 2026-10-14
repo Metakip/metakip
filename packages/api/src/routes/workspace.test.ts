@@ -133,11 +133,55 @@ describe('workspace API', () => {
     });
 
     expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      ok: true,
+      message: `Changed ${member.name}'s role to commenter`,
+    });
     const membership = await query<{ role: string }>(
       'SELECT role FROM workspace_members WHERE workspace_owner_id = $1 AND member_id = $2',
       [owner.id, member.id],
     );
     expect(membership.rows[0]?.role).toBe('commenter');
+  });
+
+  it('lets an owner remove a workspace member', async () => {
+    const app = await createTestApp();
+    const owner = await createTestUser();
+    const member = await createTestUser();
+    const session = await createTestSession(owner.id);
+    await createTestWorkspaceMember(owner.id, member.id, 'viewer');
+
+    const response = await app.request(`/api/workspace/members/${member.id}`, {
+      method: 'DELETE',
+      headers: { Cookie: session.Cookie },
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      ok: true,
+      message: `Removed ${member.name} from workspace`,
+    });
+    const membership = await query(
+      'SELECT id FROM workspace_members WHERE workspace_owner_id = $1 AND member_id = $2',
+      [owner.id, member.id],
+    );
+    expect(membership.rowCount).toBe(0);
+  });
+
+  it('keeps the legacy response when an owner removes an unknown member', async () => {
+    const app = await createTestApp();
+    const owner = await createTestUser();
+    const session = await createTestSession(owner.id);
+
+    const response = await app.request(`/api/workspace/members/${crypto.randomUUID()}`, {
+      method: 'DELETE',
+      headers: { Cookie: session.Cookie },
+    });
+
+    expect(response.status).toBe(403);
+    expect(await response.json()).toEqual({
+      message: 'Only the workspace owner can remove members',
+    });
   });
 
   it('creates a pending invitation when the email has no account', async () => {

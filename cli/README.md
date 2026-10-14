@@ -160,6 +160,35 @@ metakip folder list
 metakip folder move <folder-id-or-name>... [--parent FOLDER_ID]
 metakip folder update <folder-id-or-name> --name NAME
 
+# Sharing
+metakip share page show <page-id-or-title>
+metakip share page add <page-id-or-title> <email> --permission {view|commenter|edit|admin}
+metakip share page update <page-id-or-title> <email> --permission {view|commenter|edit|admin}
+metakip share page remove <page-id-or-title> <email> [--yes]
+metakip share page leave <page-id-or-title> [--yes]
+metakip share page link <page-id-or-title> --permission {private|view|edit} [--yes]
+metakip share page inherit <page-id-or-title> {on|off}
+metakip share page resend <page-id-or-title> <email>
+metakip share page cancel <page-id-or-title> <email> [--yes]
+
+metakip share folder show <folder-id-or-name>
+metakip share folder add <folder-id-or-name> <email> --permission {view|commenter|edit|admin}
+metakip share folder update <folder-id-or-name> <email> --permission {view|commenter|edit|admin}
+metakip share folder remove <folder-id-or-name> <email> [--yes]
+metakip share folder leave <folder-id-or-name> [--yes]
+metakip share folder link <folder-id-or-name> --permission {private|view|edit} [--yes]
+metakip share folder inherit <folder-id-or-name> {on|off}
+metakip share folder resend <folder-id-or-name> <email>
+metakip share folder cancel <folder-id-or-name> <email> [--yes]
+
+metakip share workspace show
+metakip share workspace add <email> --role {viewer|commenter|editor|admin}
+metakip share workspace update <email> --role {viewer|commenter|editor|admin}
+metakip share workspace remove <email> [--yes]
+metakip share workspace leave <joined-workspace-owner-id> [--yes]
+metakip share workspace resend <email>
+metakip share workspace cancel <email> [--yes]
+
 # Trash
 metakip trash delete {page|folder} <id-or-title>... [--yes]
 metakip trash empty [--yes]
@@ -185,6 +214,28 @@ metakip update [VERSION]
 ```
 
 `upload image` prints the managed Markdown reference to stdout; insert it with a targeted page edit.
+
+`share page show --json` and `share folder show --json` return the sharing summary as JSON. The default text view lists effective
+collaborators and, for owners and administrators, direct shares and pending invitations by email;
+other viewers receive a limited summary with hidden settings omitted. JSON retains share and
+invitation IDs. Page titles and folder names are resolved using the same
+ambiguity checks as other CLI commands. Public-link changes to `view` or `edit` require confirmation
+in interactive use and `--yes` when running without a terminal.
+
+`share page add` and `share folder add` grant access directly when possible, or send an invitation
+when the recipient needs to join first. Use the same target and email with `update` or `remove` for
+a direct share, and with `resend` or `cancel` for a pending invitation. Workspace member and
+invitation commands also identify people by email.
+
+`share workspace show` lists members of your workspace, pending invitations, and other workspaces
+you have joined. It labels your own workspace separately from joined workspaces. Workspace owners
+can add, update, and remove members; members can leave a joined workspace using the owner ID shown
+on its `Joined workspace` line. You cannot leave your own workspace. Workspace roles are `viewer`,
+`commenter`, `editor`, and `admin`.
+With `--json`, use `memberships[].ownerId` for the owner ID of a joined workspace.
+
+Use `share page leave` or `share folder leave` to remove an item from your own view without a grant ID. It removes your
+direct share or saved public access; access inherited from a folder or workspace cannot be left this way.
 
 ## Work safely
 

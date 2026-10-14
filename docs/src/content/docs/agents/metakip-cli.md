@@ -102,6 +102,51 @@ the collaborative page document.
 Private managed image URLs require access to a referenced page. API clients can download them with
 an API token that has `pages:read`; the CLI's upload permission alone does not grant read access.
 
+## Share Pages And Folders
+
+Use a token with write access to manage direct grants, invitations, public-link access, and inherited
+permissions. Resolve a page by title or a folder by name, or use its UUID:
+
+```sh
+metakip share page show "Project notes"
+metakip share folder add "Research" colleague@example.com --permission edit
+metakip share page update "Project notes" colleague@example.com --permission view
+metakip share folder remove "Research" colleague@example.com --yes
+metakip share page leave "Project notes" --yes
+metakip share folder resend "Research" invitee@example.com
+metakip share page cancel "Project notes" invitee@example.com --yes
+metakip share page inherit PAGE_ID off
+metakip share page link PAGE_ID --permission view --yes
+metakip share workspace show
+metakip share workspace add colleague@example.com --role editor
+metakip share workspace update colleague@example.com --role viewer
+metakip share workspace remove colleague@example.com --yes
+metakip share workspace leave JOINED_WORKSPACE_OWNER_ID --yes
+```
+
+`share page add` and `share folder add` grant access directly when possible, or send an invitation
+when the recipient needs to join first. Use the same resource and email with `update` or `remove`
+for a direct share, and with `resend` or `cancel` for a pending invitation. Workspace member and
+invitation commands also identify people by email.
+
+For owners and administrators, `share page show` and `share folder show` list direct shares and
+pending invitations by email. Other viewers receive a limited summary without hidden settings.
+JSON output retains internal share and invitation IDs, but the CLI commands use email to identify
+the person.
+Use `share page leave` or `share folder leave` to remove an item shared with you from your own view;
+it does not remove access inherited from a folder or workspace.
+`share page inherit PAGE on` or `off` controls whether a page inherits access from its parent
+folder or workspace; direct shares remain in place either way. Use `--permission private` on
+`share page link` or `share folder link` to remove public access. Publicly editable pages or folders can be
+changed by anyone with the URL. Only the owner can grant Admin access. As with the other CLI
+commands, pages accept a title or UUID, and folders accept a name or UUID.
+Workspace sharing is managed through membership rather than page-style permissions: owners add,
+update, or remove workspace members with the `viewer`, `commenter`, `editor`, or `admin` role;
+members can leave a workspace using the owner ID on its `Joined workspace` line in
+`share workspace show`. The output labels your own workspace separately; you cannot leave it.
+`share workspace show` also lists your workspace members and pending invitations.
+With `--json`, use `memberships[].ownerId` to select a joined workspace.
+
 ## Agent Skill
 
 Install the Metakip skill for tools that support Agent Skills:

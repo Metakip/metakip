@@ -1,3 +1,18 @@
+import type {
+  InheritancePolicy,
+  PublicPermission,
+  ShareEntityType,
+  SharePermission,
+  V1ResentShareInvitation,
+  V1ShareGrantResponse,
+  V1ShareInheritance,
+  V1ShareMutation,
+  V1SharePublicAccess,
+  V1SharingSummary,
+  V1WorkspaceMemberAdded,
+  V1WorkspaceSharingSummary,
+  WorkspaceRole,
+} from '@metakip/shared';
 import { hasMcpScope } from '@metakip/shared';
 import type {
   CommentAnchor,
@@ -39,6 +54,7 @@ import { V1ImportExportClient } from './v1ClientImportExport';
 import { V1LifecycleClient } from './v1ClientLifecycle';
 import { V1PageClient } from './v1ClientPages';
 import { parseApiResponse } from './v1ClientResponse';
+import { V1SharingClient } from './v1ClientSharing';
 import {
   type V1ClientIO,
   V1ClientTransport,
@@ -63,6 +79,7 @@ export class V1Client extends V1ClientTransport implements McpRequestBackend {
   private readonly trash: V1TrashClient;
   private readonly lifecycle: V1LifecycleClient;
   private readonly importExport: V1ImportExportClient;
+  private readonly sharing: V1SharingClient;
 
   constructor(options: V1ClientOptions) {
     super(options);
@@ -92,6 +109,11 @@ export class V1Client extends V1ClientTransport implements McpRequestBackend {
     );
     this.importExport = new V1ImportExportClient(this.io, (actor, reference, signal) =>
       this.pages.resolvePage(actor, reference, signal),
+    );
+    this.sharing = new V1SharingClient(
+      this.io,
+      (actor, reference, signal) => this.pages.resolvePage(actor, reference, signal),
+      (actor, reference, signal) => this.folders.resolveFolder(actor, reference, signal),
     );
   }
 
@@ -336,5 +358,145 @@ export class V1Client extends V1ClientTransport implements McpRequestBackend {
     options?: McpRequestOptions,
   ): Promise<McpImportFolder> {
     return this.importExport.importFolder(this.actor, input, options);
+  }
+
+  async getSharingSummary(
+    entityType: ShareEntityType,
+    reference: string,
+    options?: McpRequestOptions,
+  ): Promise<V1SharingSummary> {
+    return this.sharing.getSharingSummary(this.actor, entityType, reference, options);
+  }
+
+  async grantEntityAccess(
+    entityType: ShareEntityType,
+    reference: string,
+    input: { email: string; permission: SharePermission },
+    options?: McpRequestOptions,
+  ): Promise<V1ShareGrantResponse> {
+    return this.sharing.grantEntityAccess(this.actor, entityType, reference, input, options);
+  }
+
+  async updateSharePermission(
+    entityType: ShareEntityType,
+    reference: string,
+    email: string,
+    permission: SharePermission,
+    options?: McpRequestOptions,
+  ): Promise<V1ShareMutation> {
+    return this.sharing.updateSharePermission(
+      this.actor,
+      entityType,
+      reference,
+      email,
+      permission,
+      options,
+    );
+  }
+
+  async revokeShare(
+    entityType: ShareEntityType,
+    reference: string,
+    email: string,
+    options?: McpRequestOptions,
+  ): Promise<V1ShareMutation> {
+    return this.sharing.revokeShare(this.actor, entityType, reference, email, options);
+  }
+
+  async leaveSharedEntity(
+    entityType: ShareEntityType,
+    reference: string,
+    options?: McpRequestOptions,
+  ): Promise<V1ShareMutation> {
+    return this.sharing.leaveSharedEntity(this.actor, entityType, reference, options);
+  }
+
+  async updatePublicAccess(
+    entityType: ShareEntityType,
+    reference: string,
+    permission: PublicPermission | 'private',
+    options?: McpRequestOptions,
+  ): Promise<V1SharePublicAccess> {
+    return this.sharing.updatePublicAccess(this.actor, entityType, reference, permission, options);
+  }
+
+  async updateSharingInheritance(
+    entityType: ShareEntityType,
+    reference: string,
+    policy: InheritancePolicy,
+    options?: McpRequestOptions,
+  ): Promise<V1ShareInheritance> {
+    return this.sharing.updateSharingInheritance(
+      this.actor,
+      entityType,
+      reference,
+      policy,
+      options,
+    );
+  }
+
+  async resendSharingInvitation(
+    entityType: ShareEntityType,
+    reference: string,
+    email: string,
+    options?: McpRequestOptions,
+  ): Promise<V1ResentShareInvitation> {
+    return this.sharing.resendSharingInvitation(this.actor, entityType, reference, email, options);
+  }
+
+  async cancelSharingInvitation(
+    entityType: ShareEntityType,
+    reference: string,
+    email: string,
+    options?: McpRequestOptions,
+  ): Promise<V1ShareMutation> {
+    return this.sharing.cancelSharingInvitation(this.actor, entityType, reference, email, options);
+  }
+
+  async getWorkspaceSharingSummary(
+    options?: McpRequestOptions,
+  ): Promise<V1WorkspaceSharingSummary> {
+    return this.sharing.getWorkspaceSharingSummary(this.actor, options);
+  }
+
+  async addWorkspaceMember(
+    email: string,
+    role: WorkspaceRole,
+    options?: McpRequestOptions,
+  ): Promise<V1WorkspaceMemberAdded> {
+    return this.sharing.addWorkspaceMember(this.actor, email, role, options);
+  }
+
+  async updateWorkspaceMember(
+    email: string,
+    role: WorkspaceRole,
+    options?: McpRequestOptions,
+  ): Promise<V1ShareMutation> {
+    return this.sharing.updateWorkspaceMember(this.actor, email, role, options);
+  }
+
+  async removeWorkspaceMember(
+    email: string,
+    options?: McpRequestOptions,
+  ): Promise<V1ShareMutation> {
+    return this.sharing.removeWorkspaceMember(this.actor, email, options);
+  }
+
+  async leaveWorkspace(ownerId: string, options?: McpRequestOptions): Promise<V1ShareMutation> {
+    return this.sharing.leaveWorkspace(this.actor, ownerId, options);
+  }
+
+  async resendWorkspaceInvitation(
+    email: string,
+    options?: McpRequestOptions,
+  ): Promise<V1ResentShareInvitation> {
+    return this.sharing.resendWorkspaceInvitation(this.actor, email, options);
+  }
+
+  async cancelWorkspaceInvitation(
+    email: string,
+    options?: McpRequestOptions,
+  ): Promise<V1ShareMutation> {
+    return this.sharing.cancelWorkspaceInvitation(this.actor, email, options);
   }
 }

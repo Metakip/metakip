@@ -33,7 +33,8 @@ export type ApiTokenAuditOperation =
   | 'import.lifecycle'
   | 'image.upload'
   | 'page.content.edit'
-  | 'page.content.replace';
+  | 'page.content.replace'
+  | 'sharing.mutate';
 export type ApiTokenAuditResult = 'success' | 'conflict';
 export type ContentAuditOperation = Extract<
   ApiTokenAuditOperation,

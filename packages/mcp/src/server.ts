@@ -4,6 +4,7 @@ import { registerFolderTools } from './mcpToolFolders';
 import { registerImportExportTools } from './mcpToolImportExport';
 import { registerPageTools } from './mcpToolPages';
 import { readAnnotations, registerTool } from './mcpToolRegistration';
+import { registerSharingTools } from './mcpToolSharing';
 import { registerTrashLifecycleTools } from './mcpToolTrashLifecycle';
 import {
   MCP_COMMENT_SCOPE,
@@ -36,6 +37,7 @@ export function createMcpServer(backend: McpRequestBackend): McpServer {
   if (backend.canReadPages) {
     registerPageTools(server, backend, backend.canWrite);
     registerFolderTools(server, backend, backend.canWrite);
+    registerSharingTools(server, backend, backend.canWrite);
     registerTrashLifecycleTools(server, backend, backend.canWrite);
     registerImportExportTools(server, backend, backend.canWrite);
   }

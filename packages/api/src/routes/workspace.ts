@@ -8,8 +8,12 @@ import { requireAuth } from '../middleware/auth';
 import { grantOrInviteWorkspaceMember } from '../utils/invitationAccess';
 import { listPendingInvitations } from '../utils/pendingInvitations';
 import { parseJsonRequestBody } from '../utils/requestBody';
-import { lockWorkspaceAccess, lockWorkspaceAccessMutation } from '../utils/share-access';
-import { notifyWorkspaceEvent } from '../utils/share-notify';
+import { lockWorkspaceAccess } from '../utils/share-access';
+import {
+  leaveWorkspace,
+  removeWorkspaceMember,
+  updateWorkspaceMemberRole,
+} from '../utils/workspaceSharing';
 
 const workspaceRoute = new Hono();
 
@@ -131,30 +135,8 @@ workspaceRoute.patch('/members/:memberId/role', async (c) => {
 
   const { role: rawRole } = body as { role?: string };
   const role = parseWorkspaceRole(rawRole);
-
-  const memberResult = await query(sql`SELECT name FROM users WHERE id = ${memberId}`);
-  const memberName =
-    (memberResult.rows[0] as { name: string | null } | undefined)?.name ?? 'Member';
-
-  const roleMessage = `Changed ${memberName}'s role to ${role}`;
-
-  await db.transaction(async (tx) => {
-    await lockWorkspaceAccessMutation(tx, user.id);
-    const updateResult = await executeQuery(
-      tx,
-      sql`UPDATE workspace_members SET role = ${role}
-       WHERE workspace_owner_id = ${user.id} AND member_id = ${memberId}
-       RETURNING id`,
-    );
-
-    if (!updateResult.rowCount || updateResult.rowCount === 0) {
-      throw new HTTPException(404, { message: 'Member not found' });
-    }
-
-    await notifyWorkspaceEvent('role_changed', user.id, memberId, roleMessage, tx);
-  });
-
-  return c.json({ ok: true, message: roleMessage });
+  const result = await updateWorkspaceMemberRole(user.id, memberId, role);
+  return c.json({ ok: true, message: result.message });
 });
 
 /**
@@ -175,6 +157,7 @@ workspaceRoute.delete('/members/:memberId', async (c) => {
   }
 
   if (!isSelfRemoval) {
+    // Keep the legacy 403 response for unknown members; v1 reports 404.
     const ownerCheck = await query(
       sql`SELECT id FROM workspace_members WHERE workspace_owner_id = ${workspaceOwnerId} AND member_id = ${memberId} LIMIT 1`,
     );
@@ -183,29 +166,10 @@ workspaceRoute.delete('/members/:memberId', async (c) => {
     }
   }
 
-  const memberResult = await query(sql`SELECT name FROM users WHERE id = ${memberId}`);
-  const memberName =
-    (memberResult.rows[0] as { name: string | null } | undefined)?.name ?? 'Member';
-
-  const removeMessage = isSelfRemoval
-    ? 'Left the workspace'
-    : `Removed ${memberName} from workspace`;
-
-  await db.transaction(async (tx) => {
-    await lockWorkspaceAccessMutation(tx, workspaceOwnerId);
-    const deleteResult = await executeQuery(
-      tx,
-      sql`DELETE FROM workspace_members WHERE workspace_owner_id = ${workspaceOwnerId} AND member_id = ${memberId} RETURNING id`,
-    );
-
-    if (!deleteResult.rowCount || deleteResult.rowCount === 0) {
-      throw new HTTPException(404, { message: 'Member not found' });
-    }
-
-    await notifyWorkspaceEvent('member_removed', workspaceOwnerId, memberId, removeMessage, tx);
-  });
-
-  return c.json({ ok: true, message: removeMessage });
+  const result = isSelfRemoval
+    ? await leaveWorkspace(user.id, workspaceOwnerId)
+    : await removeWorkspaceMember(user.id, memberId);
+  return c.json({ ok: true, message: result.message });
 });
 
 export default workspaceRoute;
