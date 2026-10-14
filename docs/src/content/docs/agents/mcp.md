@@ -23,7 +23,9 @@ connection.
 
 - **Read access** lets an assistant read pages, folders, and workspace identity.
 - **Write access** lets an assistant create, edit, move, import, and remove
-  pages and folders. Write access includes read access.
+  pages and folders, manage page, folder, and workspace sharing and invitations,
+  change inheritance, and control public-link access. Write access includes read
+  access.
 
 Some assistants may also ask to stay connected. This lets the connection
 refresh its access after a browser session expires. It does not grant access to
@@ -41,6 +43,9 @@ MCP provides workspace operations for:
 
 - Searching and reading pages, and finding folders.
 - Creating and updating pages and folders.
+- Inspecting and managing page, folder, and workspace access by email, including
+  invitations, workspace membership, public-link access, inherited permissions,
+  and removing a shared item from your view.
 - Moving, copying, restoring, and removing pages and folders.
 - Listing and managing Trash.
 - Importing Markdown and Obsidian content.

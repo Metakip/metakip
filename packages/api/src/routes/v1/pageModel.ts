@@ -1,15 +1,12 @@
 import { PageMarkdownError, type ParsedPageMarkdown, parsePageMarkdown } from '@metakip/shared';
 import { HTTPException } from 'hono/http-exception';
 import type { AccessiblePageRow } from '../../utils/pageRepository';
+import { toIsoTimestamp } from '../../utils/toIsoTimestamp';
 import type { PageResponse } from './pageContracts';
 
 export { requireUuid } from '../../utils/uuid';
 
 export type PageRow = AccessiblePageRow;
-
-export function toIso(value: Date | string): string {
-  return new Date(value).toISOString();
-}
 
 export function pageDto(row: PageRow): PageResponse {
   return {
@@ -21,8 +18,8 @@ export function pageDto(row: PageRow): PageResponse {
     properties: row.properties,
     ownerId: row.owner_id,
     permission: row.permission,
-    createdAt: toIso(row.created_at),
-    updatedAt: toIso(row.updated_at),
+    createdAt: toIsoTimestamp(row.created_at),
+    updatedAt: toIsoTimestamp(row.updated_at),
   };
 }
 

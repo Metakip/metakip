@@ -28,6 +28,7 @@ type CLI struct {
 	Whoami WhoamiCmd `cmd:"" help:"Show the authenticated user." group:"Authentication"`
 	Page   PageCmd   `cmd:"" help:"Read and edit pages." group:"Page"`
 	Folder FolderCmd `cmd:"" help:"Read and manage folders." group:"Folder"`
+	Share  ShareCmd  `cmd:"" help:"Manage sharing across Metakip resources." group:"Sharing"`
 	Trash  TrashCmd  `cmd:"" help:"Manage deleted pages and folders." group:"Trash"`
 	Export ExportCmd `cmd:"" help:"Export Metakip content." group:"Import and Export"`
 	Import ImportCmd `cmd:"" help:"Import Metakip content." group:"Import and Export"`
@@ -99,6 +100,144 @@ type FolderCmd struct {
 	List   FolderListCmd   `cmd:"" help:"List accessible folders."`
 	Move   FolderMoveCmd   `cmd:"" help:"Move folders."`
 	Update FolderUpdateCmd `cmd:"" help:"Rename a folder."`
+}
+
+type ShareCmd struct {
+	Page      PageShareCmd      `cmd:"" help:"Manage page sharing."`
+	Folder    FolderShareCmd    `cmd:"" help:"Manage folder sharing."`
+	Workspace WorkspaceShareCmd `cmd:"" help:"Manage workspace members."`
+}
+
+type PageShareCmd struct {
+	Show    PageShareShowCmd    `cmd:"" help:"Inspect sharing settings."`
+	Add     PageShareAddCmd     `cmd:"" help:"Add access or send an invitation."`
+	Update  PageShareUpdateCmd  `cmd:"" help:"Change a direct share's permission."`
+	Remove  PageShareRemoveCmd  `cmd:"" help:"Remove a direct share."`
+	Leave   PageShareLeaveCmd   `cmd:"" help:"Remove a shared page from your view."`
+	Link    PageShareLinkCmd    `cmd:"" help:"Change access by link."`
+	Inherit PageShareInheritCmd `cmd:"" help:"Turn inherited access on or off."`
+	Resend  PageShareResendCmd  `cmd:"" help:"Resend a pending invitation."`
+	Cancel  PageShareCancelCmd  `cmd:"" help:"Cancel a pending invitation."`
+}
+
+type FolderShareCmd struct {
+	Show    FolderShareShowCmd    `cmd:"" help:"Inspect sharing settings."`
+	Add     FolderShareAddCmd     `cmd:"" help:"Add access or send an invitation."`
+	Update  FolderShareUpdateCmd  `cmd:"" help:"Change a direct share's permission."`
+	Remove  FolderShareRemoveCmd  `cmd:"" help:"Remove a direct share."`
+	Leave   FolderShareLeaveCmd   `cmd:"" help:"Remove a shared folder from your view."`
+	Link    FolderShareLinkCmd    `cmd:"" help:"Change access by link."`
+	Inherit FolderShareInheritCmd `cmd:"" help:"Turn inherited access on or off."`
+	Resend  FolderShareResendCmd  `cmd:"" help:"Resend a pending invitation."`
+	Cancel  FolderShareCancelCmd  `cmd:"" help:"Cancel a pending invitation."`
+}
+
+type WorkspaceShareCmd struct {
+	Show   WorkspaceShareShowCmd   `cmd:"" help:"Inspect your workspace members and memberships."`
+	Add    WorkspaceShareAddCmd    `cmd:"" help:"Add a member or send an invitation."`
+	Update WorkspaceShareUpdateCmd `cmd:"" help:"Change a workspace member's role."`
+	Remove WorkspaceShareRemoveCmd `cmd:"" help:"Remove a member from your workspace."`
+	Leave  WorkspaceShareLeaveCmd  `cmd:"" help:"Leave a workspace you joined."`
+	Resend WorkspaceShareResendCmd `cmd:"" help:"Resend a pending invitation."`
+	Cancel WorkspaceShareCancelCmd `cmd:"" help:"Cancel a pending invitation."`
+}
+
+type PageShareShowCmd struct {
+	Reference string `arg:"" name:"reference" help:"Resource title or name, or UUID."`
+}
+
+type FolderShareShowCmd PageShareShowCmd
+
+type PageShareAddCmd struct {
+	Reference  string `arg:"" name:"reference" help:"Resource title or name, or UUID."`
+	Email      string `arg:"" name:"email" help:"Person to give access to or invite."`
+	Permission string `required:"" help:"Permission to grant." enum:"view,commenter,edit,admin"`
+}
+
+type FolderShareAddCmd PageShareAddCmd
+
+type PageShareUpdateCmd struct {
+	Reference  string `arg:"" name:"reference" help:"Resource title or name, or UUID."`
+	Email      string `arg:"" name:"email" help:"Email address with direct access."`
+	Permission string `required:"" help:"New permission." enum:"view,commenter,edit,admin"`
+}
+
+type FolderShareUpdateCmd PageShareUpdateCmd
+
+type PageShareRemoveCmd struct {
+	Reference string `arg:"" name:"reference" help:"Resource title or name, or UUID."`
+	Email     string `arg:"" name:"email" help:"Email address whose direct access to remove."`
+	Yes       bool   `short:"y" help:"Skip the confirmation prompt."`
+}
+
+type FolderShareRemoveCmd PageShareRemoveCmd
+
+type PageShareLeaveCmd struct {
+	Reference string `arg:"" name:"reference" help:"Resource title or name, or UUID."`
+	Yes       bool   `short:"y" help:"Skip the confirmation prompt."`
+}
+
+type FolderShareLeaveCmd PageShareLeaveCmd
+
+type PageShareLinkCmd struct {
+	Reference  string `arg:"" name:"reference" help:"Resource title or name, or UUID."`
+	Permission string `required:"" help:"Use private to remove public access; view or edit exposes the URL accordingly." enum:"private,view,edit"`
+	Yes        bool   `short:"y" help:"Confirm enabling public access."`
+}
+
+type FolderShareLinkCmd PageShareLinkCmd
+
+type PageShareInheritCmd struct {
+	Reference string `arg:"" name:"reference" help:"Resource title or name, or UUID."`
+	State     string `arg:"" name:"state" help:"Whether access from the parent folder or workspace is inherited." enum:"on,off"`
+}
+
+type FolderShareInheritCmd PageShareInheritCmd
+
+type PageShareResendCmd struct {
+	Reference string `arg:"" name:"reference" help:"Resource title or name, or UUID."`
+	Email     string `arg:"" name:"email" help:"Email address on the pending invitation."`
+}
+
+type FolderShareResendCmd PageShareResendCmd
+
+type PageShareCancelCmd struct {
+	Reference string `arg:"" name:"reference" help:"Resource title or name, or UUID."`
+	Email     string `arg:"" name:"email" help:"Email address on the pending invitation."`
+	Yes       bool   `short:"y" help:"Skip the confirmation prompt."`
+}
+
+type FolderShareCancelCmd PageShareCancelCmd
+
+type WorkspaceShareShowCmd struct{}
+
+type WorkspaceShareAddCmd struct {
+	Email string `arg:"" name:"email" help:"Person to add or invite."`
+	Role  string `required:"" help:"Workspace role to grant." enum:"viewer,commenter,editor,admin"`
+}
+
+type WorkspaceShareUpdateCmd struct {
+	Email string `arg:"" name:"email" help:"Email address of the workspace member."`
+	Role  string `required:"" help:"New workspace role." enum:"viewer,commenter,editor,admin"`
+}
+
+type WorkspaceShareRemoveCmd struct {
+	Email string `arg:"" name:"email" help:"Email address of the workspace member to remove."`
+	Yes   bool   `short:"y" help:"Skip the confirmation prompt."`
+}
+
+type WorkspaceShareLeaveCmd struct {
+	OwnerID string `arg:"" name:"joined-workspace-owner-id" help:"Owner ID on a Joined workspace line in share workspace show. Your own workspace cannot be left."`
+	Yes     bool   `short:"y" help:"Skip the confirmation prompt."`
+}
+
+type WorkspaceShareResendCmd struct {
+	Email string `arg:"" name:"email" help:"Email address on the pending workspace invitation."`
+}
+
+type WorkspaceShareCancelCmd struct {
+	Email string `arg:"" name:"email" help:"Email address on the pending workspace invitation."`
+	Yes   bool   `short:"y" help:"Skip the confirmation prompt."`
 }
 
 type TrashCmd struct {

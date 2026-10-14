@@ -32,6 +32,37 @@ async function lockInvitationTarget(
   return lockEntityAccessExclusive(executor, invitation.target_type, invitation.target_id);
 }
 
+export async function withLockedInvitationByEmail<T>(
+  targetType: InvitationTargetType,
+  targetId: string,
+  email: string,
+  actorId: string,
+  operation: LockedInvitationOperation<T>,
+): Promise<T> {
+  const normalizedEmail = normalizeInvitationEmail(email);
+  return db.transaction(async (tx) => {
+    if (targetType === 'workspace') {
+      await lockWorkspaceAccessExclusive(tx, targetId);
+      if (targetId !== actorId) {
+        throw new HTTPException(403, { message: 'Only the Owner can manage this invitation' });
+      }
+    } else {
+      await lockEntityAccessExclusive(tx, targetType, targetId);
+      await ensureCanAdminEntity(targetType, targetId, actorId, tx);
+    }
+    const result = await executeQuery<InvitationRecord>(
+      tx,
+      sql`select * from pending_invitations
+          where target_type = ${targetType} and target_id = ${targetId}
+            and email = ${normalizedEmail}
+          for update`,
+    );
+    const invitation = result.rows[0];
+    if (!invitation) throw new HTTPException(404, { message: 'Invitation not found' });
+    return operation(tx, invitation);
+  });
+}
+
 type LockedInvitation = { invitation: InvitationRecord; workspaceOwnerId: string };
 
 async function lockCurrentInvitation(

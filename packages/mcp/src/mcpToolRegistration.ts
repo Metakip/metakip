@@ -9,10 +9,11 @@ type AnySchema = z.ZodType;
 type SchemaOutput<Schema extends AnySchema> = z.output<Schema>;
 
 type JsonObject = Record<string, unknown>;
-export type McpAnnotations =
-  | typeof readAnnotations
-  | typeof writeAnnotations
-  | typeof destructiveAnnotations;
+export type McpAnnotations = {
+  readonly readOnlyHint: boolean;
+  readonly destructiveHint: boolean;
+  readonly openWorldHint: boolean;
+};
 
 export const readAnnotations = {
   readOnlyHint: true,

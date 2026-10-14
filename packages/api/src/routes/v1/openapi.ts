@@ -6,6 +6,7 @@ import { folderOperations } from './folderContracts';
 import { lifecycleOperations } from './lifecycleContracts';
 import { getMeOperation } from './meContract';
 import { pageOperations, pageResponseSchema } from './pageContracts';
+import { sharingOperations } from './sharingContracts';
 import { tokenOperations } from './tokenContracts';
 
 const pageResponseJsonSchema = z.toJSONSchema(pageResponseSchema);
@@ -50,6 +51,12 @@ export const openApiV1 = {
       name: 'Folders',
       description: 'List, create, and update folders.',
       'x-metakip-docs-slug': 'folders',
+    },
+    {
+      name: 'Sharing',
+      description:
+        'Manage access, invitations, and public links for pages, folders, and workspaces.',
+      'x-metakip-docs-slug': 'sharing',
     },
     {
       name: 'Comments',
@@ -99,6 +106,7 @@ export const openApiV1 = {
     ...Object.values(pageOperations),
     ...Object.values(commentOperations),
     ...Object.values(folderOperations),
+    ...Object.values(sharingOperations),
     ...lifecycleOperations,
     ...Object.values(tokenOperations),
   ]),
