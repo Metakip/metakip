@@ -90,6 +90,7 @@
 }
 .home-page .cli-popover {
   position: absolute;
+  z-index: 10;
   top: calc(100% + 12px);
   left: 50%;
   width: 340px;
