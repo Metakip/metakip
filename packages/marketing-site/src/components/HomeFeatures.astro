@@ -1,19 +1,11 @@
 ---
 // biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
-import { Image } from 'astro:assets';
-// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
-import heroImage from '../assets/metakip-dark.png';
-// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
-import heroLightImage from '../assets/metakip-light.png';
-// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
 import AppLink from './AppLink.astro';
 // biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
 import FeatureSection from './FeatureSection.astro';
 import '../styles/marketingPage.css';
 // biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
 import { FEATURE_GROUPS } from '../data/features';
-// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
-import { PRODUCT_SUMMARY } from '../data/product';
 import { DOCS_ORIGIN, SITE_ORIGIN } from '../data/siteConfig';
 
 // biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
@@ -39,8 +31,8 @@ const INSTALL_COMMANDS = [
   <article>
     <header class="feature-hero">
       <div class="feature-hero-copy">
-        <h1 id="features-title">The collaborative knowledge base for humans and agents.</h1>
-        <p class="lede marketing-lede">{PRODUCT_SUMMARY}</p>
+        <h1 id="features-title">A shared knowledge base for humans and agents.</h1>
+        <p class="lede marketing-lede">The same information exposed through the browser, MCP, CLI, or API.</p>
         <div class="actions" role="group" aria-label="Get started or choose an interface">
           <AppLink class="action-button">Get Started</AppLink>
 
@@ -102,26 +94,6 @@ const INSTALL_COMMANDS = [
           </a>
         </div>
       </div>
-      <figure class="feature-hero-visual">
-        <Image
-          class="hero-image-light"
-          src={heroLightImage}
-          alt="A light-theme Metakip welcome page with page properties and introductory content."
-          width={heroLightImage.width}
-          height={heroLightImage.height}
-          loading="lazy"
-          decoding="async"
-        />
-        <Image
-          class="hero-image-dark"
-          src={heroImage}
-          alt="A dark-theme Metakip welcome page with page properties and introductory content."
-          width={heroImage.width}
-          height={heroImage.height}
-          loading="lazy"
-          decoding="async"
-        />
-      </figure>
     </header>
 
     <div class="feature-content">
@@ -169,39 +141,6 @@ const INSTALL_COMMANDS = [
     margin: 1.25rem auto 0;
   }
 
-  .feature-hero-visual {
-    width: min(100%, 58rem);
-    margin: 0 auto;
-  }
-
-  .feature-hero-visual img {
-    display: block;
-    width: 100%;
-    height: auto;
-    border-radius: 0;
-    box-shadow: none;
-  }
-
-  .feature-hero-visual .hero-image-light {
-    border: 1px solid #181818;
-  }
-
-  .feature-hero-visual .hero-image-dark {
-    border: 1px solid #ffffff;
-  }
-
-  .feature-hero-visual .hero-image-dark {
-    display: none;
-  }
-
-  :global(.dark) .feature-hero-visual .hero-image-light {
-    display: none;
-  }
-
-  :global(.dark) .feature-hero-visual .hero-image-dark {
-    display: block;
-  }
-
   .lede {
     max-width: 48rem;
   }
@@ -236,20 +175,6 @@ const INSTALL_COMMANDS = [
     if (!cliContainer) return;
     const controller = new AbortController();
     const { signal } = controller;
-    const heroImageLight = document.querySelector<HTMLImageElement>('.hero-image-light');
-    const heroImageDark = document.querySelector<HTMLImageElement>('.hero-image-dark');
-    const updateHeroImageLoading = (): void => {
-      const activeImage = document.documentElement.classList.contains('dark')
-        ? heroImageDark
-        : heroImageLight;
-      const shouldLoadEagerly =
-        activeImage !== null && activeImage.getBoundingClientRect().top < window.innerHeight;
-      if (heroImageLight) heroImageLight.loading = shouldLoadEagerly && activeImage === heroImageLight ? 'eager' : 'lazy';
-      if (heroImageDark) heroImageDark.loading = shouldLoadEagerly && activeImage === heroImageDark ? 'eager' : 'lazy';
-    };
-    updateHeroImageLoading();
-    window.addEventListener('resize', updateHeroImageLoading, { signal });
-    window.addEventListener('metakip-theme-change', updateHeroImageLoading, { signal });
     const cliTrigger = document.querySelector<HTMLAnchorElement>('[data-cli-trigger]');
     const cliPopover = document.querySelector<HTMLElement>('[data-cli-popover]');
     let hidePopoverTimeout: number | undefined;

@@ -23,9 +23,9 @@ const pricingLines = formatSectionLines(PRICING_PAGE.sections);
 
 const llms = `# Metakip
 
-> Metakip is the collaborative knowledge base for humans and agents.
+> ${PRODUCT_SUMMARY}
 
-Metakip is currently in public beta. ${PRODUCT_SUMMARY} Metakip is open source under GNU AGPL v3 and can be used as a hosted service or self-hosted.
+Metakip is currently in public beta. Metakip is open source under GNU AGPL v3 and can be used as a hosted service or self-hosted.
 
 ## Features
 
