@@ -1,12 +1,11 @@
 import { FileText, Folder as FolderIcon, RotateCcw, Trash2 } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { EmptyState } from '../components/EmptyState';
+import { WorkspacePageToolbar } from '../components/workspace/WorkspacePageToolbar';
 import { usePermanentDeleteFolder, useRestoreFolder, useTrashFolders } from '../hooks/use-folders';
 import { usePermanentDeletePage, useRestorePage, useTrashPages } from '../hooks/use-pages';
 import { useEmptyAllTrash } from '../hooks/use-trash';
-import { getWorkspacePath } from '../utils/url';
 
 type TrashItem = {
   id: string;
@@ -95,30 +94,27 @@ export default function Trash() {
 
   return (
     <div className="max-w-3xl space-y-8">
-      <div className="flex items-start justify-between">
-        <div>
-          <Link
-            to={getWorkspacePath()}
-            className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
-          >
-            Back to home
-          </Link>
-          <h1 className="mt-2 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Trash</h1>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-            Deleted pages and folders appear here. Restore them or delete permanently.
-          </p>
-        </div>
-        {trashItems.length > 0 && (
-          <button
-            type="button"
-            onClick={() => setShowEmptyAllConfirm(true)}
-            disabled={emptyAllPending}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 dark:hover:border-red-800 transition-colors disabled:opacity-50 cursor-pointer"
-          >
-            <Trash2 size={14} />
-            <span>Empty all</span>
-          </button>
-        )}
+      <WorkspacePageToolbar
+        title="Trash"
+        actions={
+          trashItems.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setShowEmptyAllConfirm(true)}
+              disabled={emptyAllPending}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 dark:hover:border-red-800 transition-colors disabled:opacity-50 cursor-pointer"
+            >
+              <Trash2 size={14} />
+              <span>Empty all</span>
+            </button>
+          )
+        }
+      />
+      <div>
+        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Trash</h1>
+        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+          Deleted pages and folders appear here. Restore them or delete permanently.
+        </p>
       </div>
 
       <section className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-6">

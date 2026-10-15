@@ -23,6 +23,7 @@ export function useAwareness(provider: HocuspocusProvider | null) {
     } else if (session?.user) {
       const userColor = getStableColor(session.user.id);
       provider.awareness.setLocalStateField('user', {
+        userId: session.user.id,
         name: session.user.name || 'Anonymous',
         color: userColor,
         avatar: session.user.image,

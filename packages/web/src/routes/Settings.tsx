@@ -2,13 +2,12 @@ import { METAKIP_DOCS_URL } from '@metakip/shared';
 import { useQueryClient } from '@tanstack/react-query';
 import { BookOpen, Download, FolderOpen } from 'lucide-react';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { ObsidianImportDialog } from '../components/import/ObsidianImportDialog';
 import { ApiTokensPanel } from '../components/settings/ApiTokensPanel';
 import { WorkspaceMembersPanel } from '../components/workspace/WorkspaceMembersPanel';
+import { WorkspacePageToolbar } from '../components/workspace/WorkspacePageToolbar';
 import { useIdentityLifecycle } from '../contexts/IdentityLifecycleContext';
 import { showErrorToast, showSuccessToast } from '../utils/toast';
-import { getWorkspacePath } from '../utils/url';
 
 export default function Settings() {
   const queryClient = useQueryClient();
@@ -45,14 +44,9 @@ export default function Settings() {
 
   return (
     <div className="max-w-3xl space-y-8">
+      <WorkspacePageToolbar title="Settings" />
       <div>
-        <Link
-          to={getWorkspacePath()}
-          className="text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
-        >
-          Back to home
-        </Link>
-        <h1 className="mt-2 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Settings</h1>
+        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Settings</h1>
         <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
           Manage your account and data.
         </p>

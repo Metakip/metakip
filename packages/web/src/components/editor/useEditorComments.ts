@@ -14,7 +14,7 @@ import { layoutCommentCards } from '../../editor/codemirror/commentCardLayout';
 
 type CommentSelectionPosition = { left: number; right: number; top: number; bottom: number };
 type CommentSelection = { anchor: CommentAnchor; position: CommentSelectionPosition };
-type PositionedCommentCard = { thread: PageCommentThread; top: number; right: number };
+type PositionedCommentCard = { thread: PageCommentThread; top: number };
 
 type UseEditorCommentsOptions = {
   wrapperRef: RefObject<HTMLDivElement | null>;
@@ -93,12 +93,7 @@ export function useEditorComments({
         return;
       }
       const markdown = view.state.doc.toString();
-      const scrollViewport = wrapper.closest<HTMLElement>('.overflow-x-hidden');
-      const viewportRight = Math.min(
-        document.documentElement.clientWidth,
-        scrollViewport?.getBoundingClientRect().right ?? document.documentElement.clientWidth,
-      );
-      const right = wrapper.getBoundingClientRect().right - (viewportRight - 50);
+      const wrapperTop = wrapper.getBoundingClientRect().top;
       const positioned = commentThreads.flatMap((thread) => {
         const range = findCommentAnchorRange(markdown, thread.anchor);
         if (!range) return [];
@@ -106,8 +101,7 @@ export function useEditorComments({
         return [
           {
             thread,
-            anchorTop: documentY - wrapper.getBoundingClientRect().top,
-            right,
+            anchorTop: documentY - wrapperTop,
             anchorOffset: range.from,
           },
         ];
@@ -119,7 +113,7 @@ export function useEditorComments({
           anchorTop: item.anchorTop,
           height: inlineCommentHeightsRef.current.get(item.thread.id) ?? 84,
         })),
-      ).map(({ value, top }) => ({ thread: value.thread, right: value.right, top }));
+      ).map(({ value, top }) => ({ thread: value.thread, top }));
       setInlineCommentPositions(spaced);
     },
     [commentThreads, wrapperRef],

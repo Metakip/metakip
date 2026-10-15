@@ -1,8 +1,13 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ReactNode } from 'react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildFolderPath } from '../utils/url';
+
+vi.mock('../components/AppShellToolbar', () => ({
+  AppShellToolbar: ({ children }: { children: ReactNode }) => <>{children}</>,
+}));
 
 const FOLDER_ID = '11111111-1111-4111-8111-111111111111';
 const mocks = vi.hoisted(() => ({

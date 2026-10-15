@@ -25,23 +25,23 @@ export function ThemeToggle() {
         type="button"
         aria-label="Toggle theme"
         onClick={toggleTheme}
-        className="relative p-2 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors text-zinc-600 dark:text-zinc-300 overflow-hidden w-9 h-9 flex items-center justify-center cursor-pointer"
+        className="relative flex h-8 w-8 cursor-pointer items-center justify-center overflow-hidden rounded-md p-2 text-zinc-600 transition-colors hover:bg-zinc-200 dark:text-zinc-300 dark:hover:bg-zinc-800"
       >
         <div className="relative w-full h-full flex items-center justify-center">
           <div
             className={`absolute transition-all duration-300 ${theme === 'light' ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 -rotate-90'}`}
           >
-            <Sun size={18} />
+            <Sun size={16} />
           </div>
           <div
             className={`absolute transition-all duration-300 ${theme === 'dark' ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 rotate-90'}`}
           >
-            <Moon size={18} />
+            <Moon size={16} />
           </div>
           <div
             className={`absolute transition-all duration-300 ${theme === 'system' ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 rotate-90'}`}
           >
-            <Monitor size={18} />
+            <Monitor size={16} />
           </div>
         </div>
       </button>

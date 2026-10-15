@@ -1,6 +1,6 @@
 import clsx from 'clsx';
-import { Menu } from 'lucide-react';
-import { type ReactElement, useEffect, useState } from 'react';
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { type CSSProperties, type ReactElement, useCallback, useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { EntityCommandProvider, useEntityCommands } from '../contexts/EntityCommandContext';
 import { useShortcut } from '../contexts/KeyboardShortcutContext';
@@ -8,10 +8,11 @@ import { useShareContext } from '../contexts/ShareContext';
 import { usePageMeta } from '../hooks/usePageMeta';
 import { useSidebarCollapsed } from '../hooks/useSidebarCollapsed';
 import { useTheme } from '../hooks/useTheme';
-import { SHORTCUT_PATTERNS } from '../utils/keyboardShortcuts';
+import { formatShortcut, SHORTCUT_PATTERNS } from '../utils/keyboardShortcuts';
 import { CommandPalette } from './CommandPalette';
 import { ProfilePill } from './ProfilePill';
 import { Sidebar } from './Sidebar';
+import { Tooltip } from './Tooltip';
 
 export type AppShellContentState =
   | { status: 'ready' }
@@ -31,17 +32,46 @@ export function AppShell({
 
 function AppShellContent({ contentState }: { contentState: AppShellContentState }) {
   const { collapsed, toggleCollapsed } = useSidebarCollapsed();
-  const [isHovered, setIsHovered] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [toolbarContainer] = useState<HTMLDivElement | null>(() => {
+    if (typeof document === 'undefined') return null;
+    const container = document.createElement('div');
+    container.className = 'app-shell-toolbar-portal';
+    return container;
+  });
+  const [contentContainer, setContentContainer] = useState<HTMLDivElement | null>(null);
+  const [isDesktopLayout, setIsDesktopLayout] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(min-width: 48rem)').matches,
+  );
   const { setTheme, isDark } = useTheme();
   const location = useLocation();
   const { isAnonymous } = useShareContext();
   const entityCommands = useEntityCommands();
   const isLoading = contentState.status === 'loading';
+  const mobileMenuVisible = isMobileMenuOpen && !isDesktopLayout;
+  const sidebarTakesSpace = !isAnonymous && !collapsed;
+  const sidebarOpen = isDesktopLayout ? !collapsed : mobileMenuVisible;
+  const sidebarShortcut = formatShortcut(SHORTCUT_PATTERNS.toggleSidebar);
+  const toggleSidebar = useCallback(() => {
+    if (isDesktopLayout) {
+      toggleCollapsed();
+      return;
+    }
+    setIsMobileMenuOpen((open) => !open);
+  }, [isDesktopLayout, toggleCollapsed]);
+
+  const attachToolbarContainer = useCallback(
+    (slot: HTMLDivElement | null) => {
+      if (slot && toolbarContainer && toolbarContainer.parentElement !== slot) {
+        slot.appendChild(toolbarContainer);
+      }
+    },
+    [toolbarContainer],
+  );
 
   useShortcut({
     key: SHORTCUT_PATTERNS.toggleSidebar,
-    handler: toggleCollapsed,
+    handler: toggleSidebar,
     whenInputFocused: 'allow',
     description: 'Toggle sidebar',
   });
@@ -66,32 +96,67 @@ function AppShellContent({ contentState }: { contentState: AppShellContentState 
 
   usePageMeta();
 
+  useEffect(() => {
+    const desktopLayout = window.matchMedia('(min-width: 48rem)');
+    const updateDesktopLayout = () => {
+      setIsDesktopLayout(desktopLayout.matches);
+      if (desktopLayout.matches) setIsMobileMenuOpen(false);
+    };
+    updateDesktopLayout();
+    desktopLayout.addEventListener('change', updateDesktopLayout);
+    return () => desktopLayout.removeEventListener('change', updateDesktopLayout);
+  }, []);
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: location.pathname triggers mobile menu close on navigation
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
 
   return (
-    <div className="flex h-screen w-full bg-zinc-50 dark:bg-zinc-950 overflow-hidden text-zinc-900 dark:text-zinc-50 font-sans">
-      {!isAnonymous && collapsed && !isHovered && (
-        <button
-          type="button"
-          className="hidden md:block fixed left-0 top-0 bottom-0 w-16 z-50 bg-transparent border-none p-0 cursor-pointer"
-          onMouseEnter={() => setIsHovered(true)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              setIsHovered(true);
-            }
-          }}
-          aria-label="Show sidebar"
-        />
-      )}
+    <div
+      className="app-shell-layout grid h-screen w-full grid-cols-1 overflow-hidden bg-zinc-50 font-sans text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50"
+      style={
+        {
+          '--sidebar-column-width': sidebarTakesSpace ? 'var(--sidebar-width)' : '0px',
+        } as CSSProperties
+      }
+    >
+      <div
+        className="app-shell-toolbar-slot"
+        data-sidebar-toggle={!isAnonymous ? 'true' : 'false'}
+        data-sidebar-open={mobileMenuVisible ? 'true' : 'false'}
+      >
+        {!isAnonymous && (
+          <div className="app-shell-mobile-sidebar-toggle">
+            <Tooltip
+              label={`${sidebarOpen ? 'Close' : 'Open'} Sidebar (${sidebarShortcut})`}
+              position="bottom-left"
+            >
+              <button
+                type="button"
+                onClick={toggleSidebar}
+                className={clsx(
+                  'flex h-8 w-8 cursor-pointer items-center justify-center rounded-md p-2 transition-colors',
+                  sidebarOpen
+                    ? 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200'
+                    : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200',
+                )}
+                aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+                aria-expanded={sidebarOpen}
+                aria-controls="app-sidebar"
+              >
+                {sidebarOpen ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
+              </button>
+            </Tooltip>
+          </div>
+        )}
+        <div className="app-shell-toolbar-content-slot" ref={attachToolbarContainer} />
+      </div>
 
-      {!isAnonymous && isMobileMenuOpen && (
+      {!isAnonymous && mobileMenuVisible && (
         <button
           type="button"
-          className="md:hidden fixed inset-0 z-50 bg-zinc-900/50 backdrop-blur-sm animate-fade-in border-none p-0 cursor-pointer"
+          className="fixed inset-x-0 bottom-0 top-[var(--app-toolbar-height)] z-50 cursor-pointer animate-fade-in border-none bg-zinc-900/50 p-0 backdrop-blur-sm md:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
           onKeyDown={(e) => {
             if (e.key === 'Escape') setIsMobileMenuOpen(false);
@@ -102,68 +167,48 @@ function AppShellContent({ contentState }: { contentState: AppShellContentState 
 
       {!isAnonymous && (
         <section
+          id="app-sidebar"
           aria-label="Sidebar"
+          aria-hidden={!sidebarOpen}
+          inert={!sidebarOpen}
           className={clsx(
-            'fixed left-0 top-0 bottom-0 z-[51] w-[min(80vw,252px)] flex-col flex-shrink-0 items-center p-3 gap-3',
-            'md:z-40 md:flex md:w-[252px] md:pl-3 md:py-3 md:pr-0 md:transition-all md:duration-500 md:ease-[cubic-bezier(0.16,1,0.3,1)]',
-            isMobileMenuOpen ? 'flex animate-slide-right' : 'hidden',
-            collapsed
-              ? isHovered
-                ? 'md:opacity-100 md:translate-x-0 md:bg-zinc-50/80 md:dark:bg-zinc-950/80 md:backdrop-blur-xl md:pointer-events-auto'
-                : 'md:opacity-0 md:-translate-x-full md:pointer-events-none'
-              : 'md:opacity-100 md:translate-x-0 md:pointer-events-auto',
+            'fixed bottom-0 left-0 top-[var(--app-toolbar-height)] z-[51] flex w-[80vw] max-w-[var(--sidebar-width)] flex-shrink-0 flex-col items-center gap-3 p-3 transition-[transform,opacity] duration-200 ease-in-out',
+            'md:col-start-1 md:row-start-2 md:static md:z-40 md:h-full md:w-[var(--sidebar-width)] md:max-w-none md:overflow-hidden md:pl-4 md:py-3 md:pr-0',
+            sidebarOpen
+              ? 'pointer-events-auto translate-x-0 animate-slide-right opacity-100'
+              : 'pointer-events-none -translate-x-full opacity-0',
+            'md:transition-[transform,opacity] md:duration-200 md:ease-in-out',
           )}
-          onMouseLeave={() => collapsed && setIsHovered(false)}
         >
-          <Sidebar
-            className="flex-1 w-full"
-            collapsed={!isMobileMenuOpen && collapsed && !isHovered}
-            onToggleCollapsed={
-              isMobileMenuOpen ? () => setIsMobileMenuOpen(false) : toggleCollapsed
-            }
-          />
-          <ProfilePill
-            collapsed={!isMobileMenuOpen && collapsed && !isHovered}
-            isActuallyCollapsed={!isMobileMenuOpen && collapsed}
-            onToggleCollapsed={
-              isMobileMenuOpen ? () => setIsMobileMenuOpen(false) : toggleCollapsed
-            }
-            className="flex-shrink-0"
-          />
+          <Sidebar className="flex-1" />
+          <ProfilePill className="flex-shrink-0" />
         </section>
       )}
 
-      <main className="flex min-w-0 flex-1 flex-col h-full overflow-hidden relative">
-        {!isAnonymous && (
-          <div className="md:hidden flex items-center h-14 px-4 border-b border-zinc-200/50 dark:border-zinc-800/50 bg-white/70 dark:bg-zinc-950/70 backdrop-blur-xl flex-shrink-0 z-10 sticky top-0">
-            <button
-              type="button"
-              onClick={() => setIsMobileMenuOpen(true)}
-              className="p-2 -ml-2 text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 rounded-xl hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
-              aria-label="Open menu"
-            >
-              <Menu size={20} />
-            </button>
-          </div>
-        )}
-
+      <main className="relative col-start-1 row-start-2 flex h-full min-w-0 flex-col overflow-hidden md:col-start-2 md:row-start-2">
         <div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto scroll-smooth pb-8">
           <div
             className={clsx(
-              'mx-auto w-full min-w-0 max-w-4xl',
+              'app-shell-content mx-auto w-full min-w-0 max-w-4xl',
               isLoading
                 ? isAnonymous
                   ? 'flex min-h-[100dvh] flex-col p-6 md:p-12'
                   : 'flex min-h-[calc(100dvh-3.5rem)] flex-col p-6 md:min-h-[100dvh] md:p-12'
                 : 'min-h-full p-6 md:p-12',
             )}
+            ref={setContentContainer}
           >
             {contentState.status === 'loading' ? (
               <div className="flex min-h-0 flex-1 items-center justify-center">
                 {contentState.content}
               </div>
             ) : (
-              <Outlet />
+              <Outlet
+                context={{
+                  toolbarContainer,
+                  contentContainer,
+                }}
+              />
             )}
           </div>
         </div>

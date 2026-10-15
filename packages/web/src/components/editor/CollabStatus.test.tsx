@@ -6,8 +6,8 @@ import { CollabStatus } from './CollabStatus';
 const mockAwareness = {
   getStates: vi.fn().mockReturnValue(
     new Map([
-      ['u1', { user: { name: 'User 1', color: '#ff0000' } }],
-      ['u2', { user: { name: 'User 2', color: '#00ff00' } }],
+      ['u1', { user: { userId: 'user-1', name: 'User 1', color: '#ff0000' } }],
+      ['u2', { user: { userId: 'user-2', name: 'User 2', color: '#00ff00' } }],
     ]),
   ),
   on: vi.fn(),
@@ -49,6 +49,29 @@ describe('CollabStatus', () => {
     expect(screen.getByText('Live')).toBeInTheDocument();
     const dot = document.querySelector('.bg-emerald-500');
     expect(dot).toBeInTheDocument();
+  });
+
+  it('includes the collaborator role in page avatar tooltips', () => {
+    const provider = createMockProvider(WebSocketStatus.Connected);
+    mockAwareness.getStates.mockReturnValueOnce(
+      new Map([
+        ['u1', { user: { userId: 'user-1', name: 'User 1', color: '#ff0000' } }],
+        ['u2', { user: { userId: 'user-2', name: 'User 1', color: '#00ff00' } }],
+      ]),
+    );
+    render(
+      <CollabStatus
+        provider={provider}
+        status={WebSocketStatus.Connected}
+        collaborators={[
+          { userId: 'user-2', name: 'User 1', avatarUrl: null, permission: 'view', isOwner: false },
+          { userId: 'user-1', name: 'User 1', avatarUrl: null, permission: 'edit', isOwner: true },
+        ]}
+      />,
+    );
+
+    expect(screen.getByText('User 1 (Owner)')).toBeInTheDocument();
+    expect(screen.getByText('User 1 (Viewer)')).toBeInTheDocument();
   });
 
   it('shows disconnected status label and rose dot', () => {

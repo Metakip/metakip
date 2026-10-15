@@ -65,10 +65,10 @@ export function Breadcrumbs({ pages, folders, currentPageId }: BreadcrumbsProps)
   }, [currentPageId, pages, folders]);
 
   return (
-    <div className="flex items-center gap-1 text-sm font-medium text-zinc-500 dark:text-zinc-400 overflow-x-auto whitespace-nowrap scrollbar-none">
+    <div className="flex items-center gap-3 overflow-x-auto whitespace-nowrap text-sm font-medium text-zinc-500 [scrollbar-width:none] dark:text-zinc-400 [&::-webkit-scrollbar]:hidden">
       <Link
         to={getWorkspacePath()}
-        className="flex items-center hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors p-1 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800/50 shrink-0"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100"
       >
         <Home size={16} aria-label="Home" />
       </Link>
@@ -77,22 +77,22 @@ export function Breadcrumbs({ pages, folders, currentPageId }: BreadcrumbsProps)
           const isLast = index === breadcrumbPath.length - 1;
           return (
             <React.Fragment key={item.id}>
-              <ChevronRight size={14} className="text-zinc-300 dark:text-zinc-600 shrink-0" />
+              <ChevronRight size={16} className="text-zinc-300 dark:text-zinc-600 shrink-0" />
               {isLast ? (
-                <span className="text-zinc-900 dark:text-zinc-100 px-1.5 py-0.5">
+                <span className="flex h-8 shrink-0 items-center px-1.5 text-zinc-900 dark:text-zinc-100">
                   {item.title || 'Untitled'}
                 </span>
               ) : item.isFolder ? (
                 <Link
                   to={buildFolderPath(item.title, item.id)}
-                  className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors px-1.5 py-0.5 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800/50"
+                  className="flex h-8 shrink-0 items-center rounded-md px-1.5 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100"
                 >
                   {item.title}
                 </Link>
               ) : (
                 <Link
                   to={buildPagePath(item.title, item.id)}
-                  className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors px-1.5 py-0.5 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800/50"
+                  className="flex h-8 shrink-0 items-center rounded-md px-1.5 transition-colors hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100"
                 >
                   {item.title || 'Untitled'}
                 </Link>

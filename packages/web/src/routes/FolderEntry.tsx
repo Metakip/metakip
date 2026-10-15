@@ -1,17 +1,11 @@
 import type { CollaboratorDisplay, FolderTreeNode } from '@metakip/shared';
-import {
-  ChevronRight,
-  FilePlus2,
-  FileText,
-  FolderPlus,
-  Home as HomeIcon,
-  LayoutGrid,
-  List,
-} from 'lucide-react';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { FileText } from 'lucide-react';
+import type React from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useParams } from 'react-router-dom';
 import { ExplorerItem, type ExplorerItemData } from '../components/workspace/ExplorerItem';
 import { ExplorerLoadingState } from '../components/workspace/ExplorerLoadingState';
+import { ExplorerToolbar } from '../components/workspace/ExplorerToolbar';
 import { MoveDialog } from '../components/workspace/MoveDialog';
 import { SelectionToolbar } from '../components/workspace/SelectionToolbar';
 import { useClipboard } from '../contexts/ClipboardContext';
@@ -35,6 +29,7 @@ import { usePageTree, useUpdatePage } from '../hooks/use-pages';
 import { useWorkspaceMemberships } from '../hooks/use-workspace';
 import { useAuth } from '../hooks/useAuth';
 import { useEntityCreationActions } from '../hooks/useEntityCreationActions';
+import { useExplorerViewMode } from '../hooks/useExplorerViewMode';
 import { useStableValueWhile } from '../hooks/useStableValue';
 import { canRenameEntity, preservesEffectiveOwnerAtRoot } from '../utils/entity-actions';
 import { getInitialQueriesState } from '../utils/queryState';
@@ -97,10 +92,7 @@ export default function FolderEntry() {
     [currentUserId],
   );
 
-  const [viewMode, setViewMode] = useState<'card' | 'list'>(() => {
-    const saved = localStorage.getItem('metakip:viewMode');
-    return saved === 'list' ? 'list' : 'card';
-  });
+  const [viewMode, setViewMode] = useExplorerViewMode();
   const [moveDialogOpen, setMoveDialogOpen] = useState(false);
   const [editingTarget, setEditingTarget] = useState<{
     kind: 'page' | 'folder';
@@ -112,23 +104,11 @@ export default function FolderEntry() {
     message: string;
     canRetry: boolean;
   } | null>(null);
-  const [showNewMenu, setShowNewMenu] = useState(false);
-  const newMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     selection.clear();
     setLastSelectedIndex(null);
   }, [selection.clear]);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (newMenuRef.current && !newMenuRef.current.contains(event.target as Node)) {
-        setShowNewMenu(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const { currentFolder, currentFolders, currentPages, publicFolder, usesPublicPayload } = useMemo(
     () => getFolderContentsModel({ folderId, folders, pages, publicEntity, isAnonymous }),
@@ -500,218 +480,60 @@ export default function FolderEntry() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-1 text-sm text-zinc-500 dark:text-zinc-400 min-w-0">
-          <Link
-            to={getWorkspacePath()}
-            className="flex items-center gap-1 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
-          >
-            <HomeIcon size={14} />
-            <span className="font-medium">Home</span>
-          </Link>
-          {breadcrumbPath.map((folder) => (
-            <React.Fragment key={folder.id}>
-              <ChevronRight size={14} className="mx-1 shrink-0" />
-              <Link
-                to={buildFolderPath(folder.name, folder.id)}
-                className="hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors truncate"
-              >
-                {folder.name}
-              </Link>
-            </React.Fragment>
-          ))}
-        </div>
+    <div className="app-shell-full-width explorer-page flex w-full min-w-0 flex-col">
+      <ExplorerToolbar
+        breadcrumbs={breadcrumbPath}
+        homeHref={getWorkspacePath()}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        canCreate={canCreateChildren}
+        onCreatePage={handleCreatePage}
+        onCreateFolder={handleCreateFolder}
+      />
 
-        <div className="flex items-center gap-2 shrink-0">
-          <div className="flex items-center bg-zinc-100 dark:bg-zinc-800 rounded-lg p-0.5">
+      <div className="explorer-content mx-auto mt-4 w-full max-w-4xl space-y-4 px-6 md:px-12">
+        {initialQueriesState.status === 'error' || initialQueriesState.status === 'paused' ? (
+          <div className="p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-md flex items-center justify-between">
+            <span>
+              {initialQueriesState.status === 'paused'
+                ? 'Loading is paused. Check your connection.'
+                : 'Failed to load items.'}
+            </span>
             <button
               type="button"
-              onClick={() => {
-                setViewMode('card');
-                localStorage.setItem('metakip:viewMode', 'card');
-              }}
-              className={`p-1.5 rounded-md transition-colors cursor-pointer ${viewMode === 'card' ? 'bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-100' : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'}`}
-              title="Card view"
+              onClick={() => void Promise.all([refetchPages(), refetchFolders()])}
+              className="px-3 py-1 bg-red-100 dark:bg-red-900/40 hover:bg-red-200 dark:hover:bg-red-900/60 rounded text-sm transition-colors"
             >
-              <LayoutGrid size={16} />
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setViewMode('list');
-                localStorage.setItem('metakip:viewMode', 'list');
-              }}
-              className={`p-1.5 rounded-md transition-colors cursor-pointer ${viewMode === 'list' ? 'bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-100' : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'}`}
-              title="List view"
-            >
-              <List size={16} />
+              Retry
             </button>
           </div>
-          {canCreateChildren && (
-            <div className="relative flex items-stretch" ref={newMenuRef}>
-              <button
-                type="button"
-                onClick={handleCreatePage}
-                className="flex items-center gap-1.5 pl-3 pr-2 h-7 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-l-lg text-sm hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors cursor-pointer border border-zinc-200 dark:border-zinc-700 border-r-0"
-              >
-                <FilePlus2 size={14} />
-                <span className="hidden sm:inline">New Page</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowNewMenu((prev) => !prev)}
-                className="flex items-center px-1.5 h-7 bg-white dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-r-lg text-sm hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors cursor-pointer border border-zinc-200 dark:border-zinc-700"
-              >
-                <ChevronRight size={14} className="rotate-90" />
-              </button>
-              {showNewMenu && (
-                <div className="absolute right-0 top-full mt-1 w-44 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-xl z-50 p-1.5 flex flex-col animate-scale-in origin-top-right">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowNewMenu(false);
-                      void handleCreatePage();
-                    }}
-                    className="flex items-center gap-2.5 px-2.5 py-2 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-black/5 dark:hover:bg-white/10 w-full text-left cursor-pointer rounded-xl transition-colors"
-                  >
-                    <FilePlus2 size={14} /> New Page
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowNewMenu(false);
-                      void handleCreateFolder();
-                    }}
-                    className="flex items-center gap-2.5 px-2.5 py-2 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-black/5 dark:hover:bg-white/10 w-full text-left cursor-pointer rounded-xl transition-colors"
-                  >
-                    <FolderPlus size={14} /> New Folder
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {initialQueriesState.status === 'error' || initialQueriesState.status === 'paused' ? (
-        <div className="p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-md flex items-center justify-between">
-          <span>
-            {initialQueriesState.status === 'paused'
-              ? 'Loading is paused. Check your connection.'
-              : 'Failed to load items.'}
-          </span>
-          <button
-            type="button"
-            onClick={() => void Promise.all([refetchPages(), refetchFolders()])}
-            className="px-3 py-1 bg-red-100 dark:bg-red-900/40 hover:bg-red-200 dark:hover:bg-red-900/60 rounded text-sm transition-colors"
-          >
-            Retry
-          </button>
-        </div>
-      ) : initialQueriesState.status === 'loading' ? (
-        <ExplorerLoadingState />
-      ) : allItems.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-center">
-          <FileText size={48} className="text-zinc-300 dark:text-zinc-600 mb-4" />
-          <h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-50 mb-2">No items yet</h3>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm">
-            {canCreateChildren
-              ? 'Create a new page or folder to get started.'
-              : 'No items in this folder.'}
-          </p>
-        </div>
-      ) : viewMode === 'card' ? (
-        <div className="space-y-8 animate-fade-in">
-          {favoriteItems.length > 0 && (
-            <div>
-              <h2 className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3 px-1">
-                Favorites
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {favoriteItems.map((item) => (
-                  <ExplorerItem
-                    key={`${item.type}-${item.id}`}
-                    item={item}
-                    viewMode="card"
-                    isSelected={selection.isSelected(item.id)}
-                    isFavorite={isFavoriteItem(item)}
-                    onSelect={(e) => {
-                      e.stopPropagation();
-                      selection.toggle({ id: item.id, type: item.type });
-                    }}
-                    onNavigate={(e) => handleItemClick(item, allItemIndexMap.get(item.id) ?? 0, e)}
-                    {...(canRenameEntity(item, currentUserId)
-                      ? { onRename: () => handleRenameItem(item) }
-                      : {})}
-                    collaborators={filterOutSelf(item.collaborators ?? [])}
-                    canSelect={!isAnonymous && !bulkRemoveMutation.isPending}
-                    showContextMenu={!isAnonymous}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-          <div>
-            <h2 className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3 px-1">
-              All Pages
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {allItems.map((item, index) => (
-                <ExplorerItem
-                  key={`${item.type}-${item.id}`}
-                  item={item}
-                  viewMode="card"
-                  isSelected={selection.isSelected(item.id)}
-                  isFavorite={isFavoriteItem(item)}
-                  onSelect={(e) => {
-                    e.stopPropagation();
-                    selection.toggle({ id: item.id, type: item.type });
-                  }}
-                  onNavigate={(e) => handleItemClick(item, index, e)}
-                  {...(canRenameEntity(item, currentUserId)
-                    ? { onRename: () => handleRenameItem(item) }
-                    : {})}
-                  isEditing={
-                    canRenameEditingTarget &&
-                    editingTarget?.kind === item.type &&
-                    editingTarget.id === item.id
-                  }
-                  editValue={editingTarget?.value ?? ''}
-                  onEditChange={(value) =>
-                    setEditingTarget((prev) => (prev ? { ...prev, value } : null))
-                  }
-                  onEditSave={handleSaveRename}
-                  onEditKeyDown={handleEditKeyDown}
-                  collaborators={filterOutSelf(item.collaborators ?? [])}
-                  canSelect={!isAnonymous && !bulkRemoveMutation.isPending}
-                  showContextMenu={!isAnonymous}
-                />
-              ))}
-            </div>
+        ) : initialQueriesState.status === 'loading' ? (
+          <ExplorerLoadingState />
+        ) : allItems.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <FileText size={48} className="text-zinc-300 dark:text-zinc-600 mb-4" />
+            <h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-50 mb-2">
+              No items yet
+            </h3>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm">
+              {canCreateChildren
+                ? 'Create a new page or folder to get started.'
+                : 'No items in this folder.'}
+            </p>
           </div>
-        </div>
-      ) : (
-        <div className="space-y-8">
-          {favoriteItems.length > 0 && (
-            <div>
-              <h2 className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3 px-1">
-                Favorites
-              </h2>
-              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-clip">
-                <div className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-3 px-4 py-2 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-800">
-                  <span className="w-8" />
-                  <span className="-ml-10">Name</span>
-                  <span className="hidden md:block w-28">Shared with</span>
-                  <span className="hidden md:block w-36">Last edited</span>
-                  <span className="w-8" />
-                </div>
-                <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+        ) : viewMode === 'card' ? (
+          <div className="space-y-8 animate-fade-in">
+            {favoriteItems.length > 0 && (
+              <div>
+                <h2 className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3 px-1">
+                  Favorites
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {favoriteItems.map((item) => (
                     <ExplorerItem
                       key={`${item.type}-${item.id}`}
                       item={item}
-                      viewMode="list"
+                      viewMode="card"
                       isSelected={selection.isSelected(item.id)}
                       isFavorite={isFavoriteItem(item)}
                       onSelect={(e) => {
@@ -727,31 +549,21 @@ export default function FolderEntry() {
                       collaborators={filterOutSelf(item.collaborators ?? [])}
                       canSelect={!isAnonymous && !bulkRemoveMutation.isPending}
                       showContextMenu={!isAnonymous}
-                      showCheckboxes={hasSelection}
                     />
                   ))}
                 </div>
               </div>
-            </div>
-          )}
-          <div>
-            <h2 className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3 px-1">
-              All Pages
-            </h2>
-            <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-clip">
-              <div className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-3 px-4 py-2 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-800">
-                <span className="w-8" />
-                <span className="-ml-10">Name</span>
-                <span className="hidden md:block w-28">Shared with</span>
-                <span className="hidden md:block w-36">Last edited</span>
-                <span className="w-8" />
-              </div>
-              <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+            )}
+            <div>
+              <h2 className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3 px-1">
+                All Pages
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {allItems.map((item, index) => (
                   <ExplorerItem
                     key={`${item.type}-${item.id}`}
                     item={item}
-                    viewMode="list"
+                    viewMode="card"
                     isSelected={selection.isSelected(item.id)}
                     isFavorite={isFavoriteItem(item)}
                     onSelect={(e) => {
@@ -776,58 +588,151 @@ export default function FolderEntry() {
                     collaborators={filterOutSelf(item.collaborators ?? [])}
                     canSelect={!isAnonymous && !bulkRemoveMutation.isPending}
                     showContextMenu={!isAnonymous}
-                    showCheckboxes={hasSelection}
                   />
                 ))}
               </div>
             </div>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="space-y-8">
+            {favoriteItems.length > 0 && (
+              <div>
+                <h2 className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3 px-1">
+                  Favorites
+                </h2>
+                <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-clip">
+                  <div className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-3 px-4 py-2 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-800">
+                    <span className="w-8" />
+                    <span className="-ml-10">Name</span>
+                    <span className="hidden md:block w-28">Shared with</span>
+                    <span className="hidden md:block w-36">Last edited</span>
+                    <span className="w-8" />
+                  </div>
+                  <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                    {favoriteItems.map((item) => (
+                      <ExplorerItem
+                        key={`${item.type}-${item.id}`}
+                        item={item}
+                        viewMode="list"
+                        isSelected={selection.isSelected(item.id)}
+                        isFavorite={isFavoriteItem(item)}
+                        onSelect={(e) => {
+                          e.stopPropagation();
+                          selection.toggle({ id: item.id, type: item.type });
+                        }}
+                        onNavigate={(e) =>
+                          handleItemClick(item, allItemIndexMap.get(item.id) ?? 0, e)
+                        }
+                        {...(canRenameEntity(item, currentUserId)
+                          ? { onRename: () => handleRenameItem(item) }
+                          : {})}
+                        collaborators={filterOutSelf(item.collaborators ?? [])}
+                        canSelect={!isAnonymous && !bulkRemoveMutation.isPending}
+                        showContextMenu={!isAnonymous}
+                        showCheckboxes={hasSelection}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+            <div>
+              <h2 className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3 px-1">
+                All Pages
+              </h2>
+              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-clip">
+                <div className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-3 px-4 py-2 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-800">
+                  <span className="w-8" />
+                  <span className="-ml-10">Name</span>
+                  <span className="hidden md:block w-28">Shared with</span>
+                  <span className="hidden md:block w-36">Last edited</span>
+                  <span className="w-8" />
+                </div>
+                <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                  {allItems.map((item, index) => (
+                    <ExplorerItem
+                      key={`${item.type}-${item.id}`}
+                      item={item}
+                      viewMode="list"
+                      isSelected={selection.isSelected(item.id)}
+                      isFavorite={isFavoriteItem(item)}
+                      onSelect={(e) => {
+                        e.stopPropagation();
+                        selection.toggle({ id: item.id, type: item.type });
+                      }}
+                      onNavigate={(e) => handleItemClick(item, index, e)}
+                      {...(canRenameEntity(item, currentUserId)
+                        ? { onRename: () => handleRenameItem(item) }
+                        : {})}
+                      isEditing={
+                        canRenameEditingTarget &&
+                        editingTarget?.kind === item.type &&
+                        editingTarget.id === item.id
+                      }
+                      editValue={editingTarget?.value ?? ''}
+                      onEditChange={(value) =>
+                        setEditingTarget((prev) => (prev ? { ...prev, value } : null))
+                      }
+                      onEditSave={handleSaveRename}
+                      onEditKeyDown={handleEditKeyDown}
+                      collaborators={filterOutSelf(item.collaborators ?? [])}
+                      canSelect={!isAnonymous && !bulkRemoveMutation.isPending}
+                      showContextMenu={!isAnonymous}
+                      showCheckboxes={hasSelection}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
-      {!isAnonymous && (
-        <SelectionToolbar
-          selectedCount={selection.selectedCount}
-          totalCount={allItems.length}
-          clipboardCount={clipboard.state.items.length}
-          onDelete={handleBulkDelete}
-          onCopy={handleBulkCopy}
-          onCut={handleBulkCut}
-          onMove={handleBulkMove}
-          canDelete={canRemoveSelection}
-          trashCount={selectedRemovalCounts.trashCount}
-          removeFromViewCount={selectedRemovalCounts.removeFromViewCount}
-          unremovableCount={unremovableSelectionCount}
-          removalFailureMessage={removalFailure?.message ?? null}
-          canRetryRemoval={removalFailure?.canRetry ?? false}
-          onDismissRemovalFailure={() => setRemovalFailure(null)}
-          canMove={canMoveSelection}
-          canPaste={
-            clipboard.state.action === 'copy'
-              ? canCreateChildren
-              : clipboard.state.action === 'cut' && canManageFolder
-          }
-          isRemoving={bulkRemoveMutation.isPending}
-          onPaste={() => void handlePaste()}
-          onSelectAll={() => selection.selectAll(allItems.map((i) => ({ id: i.id, type: i.type })))}
-          onClear={() => {
-            selection.clear();
-            clipboard.clear();
-          }}
+        {!isAnonymous && (
+          <SelectionToolbar
+            selectedCount={selection.selectedCount}
+            totalCount={allItems.length}
+            clipboardCount={clipboard.state.items.length}
+            onDelete={handleBulkDelete}
+            onCopy={handleBulkCopy}
+            onCut={handleBulkCut}
+            onMove={handleBulkMove}
+            canDelete={canRemoveSelection}
+            trashCount={selectedRemovalCounts.trashCount}
+            removeFromViewCount={selectedRemovalCounts.removeFromViewCount}
+            unremovableCount={unremovableSelectionCount}
+            removalFailureMessage={removalFailure?.message ?? null}
+            canRetryRemoval={removalFailure?.canRetry ?? false}
+            onDismissRemovalFailure={() => setRemovalFailure(null)}
+            canMove={canMoveSelection}
+            canPaste={
+              clipboard.state.action === 'copy'
+                ? canCreateChildren
+                : clipboard.state.action === 'cut' && canManageFolder
+            }
+            isRemoving={bulkRemoveMutation.isPending}
+            onPaste={() => void handlePaste()}
+            onSelectAll={() =>
+              selection.selectAll(allItems.map((i) => ({ id: i.id, type: i.type })))
+            }
+            onClear={() => {
+              selection.clear();
+              clipboard.clear();
+            }}
+          />
+        )}
+
+        <MoveDialog
+          isOpen={moveDialogOpen}
+          folders={folders ?? []}
+          movingFolderIds={selection.selectedItems
+            .filter((item) => item.type === 'folder')
+            .map((item) => item.id)}
+          {...(selectedOwnerId !== undefined ? { movingOwnerId: selectedOwnerId } : {})}
+          allowRoot={canMoveSelectionToRoot}
+          onClose={() => setMoveDialogOpen(false)}
+          onConfirm={handleConfirmMove}
         />
-      )}
-
-      <MoveDialog
-        isOpen={moveDialogOpen}
-        folders={folders ?? []}
-        movingFolderIds={selection.selectedItems
-          .filter((item) => item.type === 'folder')
-          .map((item) => item.id)}
-        {...(selectedOwnerId !== undefined ? { movingOwnerId: selectedOwnerId } : {})}
-        allowRoot={canMoveSelectionToRoot}
-        onClose={() => setMoveDialogOpen(false)}
-        onConfirm={handleConfirmMove}
-      />
+      </div>
     </div>
   );
 }

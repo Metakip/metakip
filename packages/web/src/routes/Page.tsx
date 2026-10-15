@@ -13,16 +13,17 @@ import {
 } from '@metakip/shared';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FileQuestion, LogIn, RefreshCw, ShieldOff } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
+import { AppShellToolbar, useAppShellOutletContext } from '../components/AppShellToolbar';
 import { BacklinksPanel } from '../components/editor/BacklinksPanel';
 import { Breadcrumbs } from '../components/editor/Breadcrumbs';
 import { CodeMirrorEditor } from '../components/editor/CodeMirrorEditor';
+import { CollabStatus } from '../components/editor/CollabStatus';
 import { CommentsPanel } from '../components/editor/CommentsPanel';
 import { PageActions } from '../components/editor/PageActions';
 import { PageIcon } from '../components/editor/PageIcon';
 import { PageLoadingState } from '../components/editor/PageLoadingState';
-import { PageStatus } from '../components/editor/PageStatus';
 import { PageTitle } from '../components/editor/PageTitle';
 import { PropertiesPanel } from '../components/editor/PropertiesPanel';
 import { ThemeToggle } from '../components/ThemeToggle';
@@ -35,6 +36,7 @@ import {
 } from '../contexts/ShareContext';
 import type { WikiLinkNavigationTarget } from '../editor/wikiLinkPresentations';
 import { useFolderTree } from '../hooks/use-folders';
+import { usePageCollaborators } from '../hooks/use-page-collaborators';
 import { type RecentPage, usePageTree } from '../hooks/use-pages';
 import { getLogger } from '../logger-init';
 import { ApiError, apiFetch } from '../utils/api';
@@ -48,6 +50,23 @@ import {
 import { buildPagePath, extractUuidFromSlug, getWorkspacePathPrefix } from '../utils/url';
 
 const API_BASE = '/api';
+const COMMENTS_OPEN_STORAGE_KEY = 'metakip-comments-open';
+// Minimum content width for a 640px editor beside the comments panel and gutters.
+const COMMENTS_DOCK_MIN_WIDTH = 1022;
+
+function getSavedCommentsOpen(): boolean {
+  try {
+    return localStorage.getItem(COMMENTS_OPEN_STORAGE_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+function saveCommentsOpen(open: boolean): void {
+  try {
+    localStorage.setItem(COMMENTS_OPEN_STORAGE_KEY, String(open));
+  } catch {}
+}
 
 async function fetchPage(pageId: string): Promise<PageDetailPayload> {
   const res = await fetch(`${API_BASE}/pages/${pageId}`);
@@ -66,6 +85,7 @@ async function fetchPage(pageId: string): Promise<PageDetailPayload> {
 export default function Page() {
   const { slugAndId } = useParams<{ slugAndId: string }>();
   const location = useLocation();
+  const { contentContainer } = useAppShellOutletContext();
   const pageId = slugAndId ? extractUuidFromSlug(slugAndId) : undefined;
   const navigate = useIdentityNavigate();
   const [provider, setProvider] = useState<HocuspocusProvider | null>(null);
@@ -75,10 +95,14 @@ export default function Page() {
   );
   const [editorGeneration, setEditorGeneration] = useState(0);
   const [commentsOpen, setCommentsOpen] = useState(false);
+  const [isCommentsDocked, setIsCommentsDocked] = useState(false);
+  const [pendingCommentSelection, setPendingCommentSelection] = useState(false);
   const [selectedCommentAnchor, setSelectedCommentAnchor] = useState<CommentAnchor | null>(null);
   const [activeCommentAnchor, setActiveCommentAnchor] = useState<CommentAnchor | null>(null);
   const accessRecordedRef = useRef<string | null>(null);
   const prevPageIdRef = useRef<string | undefined>(pageId);
+  const isCommentsDockedRef = useRef(false);
+  const hasMeasuredCommentsDockRef = useRef(false);
   const queryClient = useQueryClient();
   const { isAnonymous, accessPermission } = useShareContext();
   const setAccessPermission = useSetAccessPermission();
@@ -95,10 +119,32 @@ export default function Page() {
     // fire first), so setProvider(null) would overwrite the new provider.
     setCollabStatus(WebSocketStatus.Connecting);
     setCollabPermission(undefined);
-    setCommentsOpen(false);
+    setPendingCommentSelection(false);
+    if (!isCommentsDockedRef.current) setCommentsOpen(false);
     setSelectedCommentAnchor(null);
     setActiveCommentAnchor(null);
   }, [pageId]);
+
+  useLayoutEffect(() => {
+    if (!contentContainer) return;
+
+    const updateDocking = () => {
+      const isDocked = contentContainer.clientWidth >= COMMENTS_DOCK_MIN_WIDTH;
+      if (isDocked !== isCommentsDockedRef.current) {
+        isCommentsDockedRef.current = isDocked;
+        setIsCommentsDocked(isDocked);
+      }
+      if (!hasMeasuredCommentsDockRef.current) {
+        hasMeasuredCommentsDockRef.current = true;
+        if (isDocked) setCommentsOpen(getSavedCommentsOpen());
+      }
+    };
+
+    updateDocking();
+    const observer = new ResizeObserver(updateDocking);
+    observer.observe(contentContainer);
+    return () => observer.disconnect();
+  }, [contentContainer]);
 
   const {
     data: page,
@@ -113,6 +159,10 @@ export default function Page() {
     enabled: !!pageId,
     retry: false,
   });
+  const { data: collaboratorsByPage } = usePageCollaborators(
+    !isAnonymous && pageId ? [pageId] : [],
+  );
+  const pageCollaborators = pageId ? (collaboratorsByPage?.[pageId] ?? []) : [];
 
   const handleDocumentReloadRequired = useCallback(() => {
     setProvider(null);
@@ -136,12 +186,13 @@ export default function Page() {
   const readOnly = collabPermission === undefined || !effectiveCapabilities.canEdit;
   const canLoadComments =
     !!pageId && !isAnonymous && effectiveCapabilities.canComment && collabPermission !== undefined;
+  const commentsPanelVisible = commentsOpen && canLoadComments;
+  const commentsPanelDocked = commentsPanelVisible && isCommentsDocked;
   useEffect(() => {
-    if (effectiveCapabilities.canComment) return;
-    setCommentsOpen(false);
+    if (collabPermission === undefined || effectiveCapabilities.canComment) return;
     setSelectedCommentAnchor(null);
     setActiveCommentAnchor(null);
-  }, [effectiveCapabilities.canComment]);
+  }, [collabPermission, effectiveCapabilities.canComment]);
   const commentsQuery = useInfiniteQuery({
     queryKey: pageCommentHighlightsQueryKey(pageId),
     initialPageParam: null as string | null,
@@ -190,14 +241,15 @@ export default function Page() {
     () => (canLoadComments ? (commentsQuery.data?.pages.flatMap((page) => page.data) ?? []) : []),
     [canLoadComments, commentsQuery.data?.pages],
   );
-  const hasCommentThreads = commentThreads.length > 0;
+  const showInlineCommentRail =
+    !commentsPanelVisible && commentThreads.some((thread) => thread.comments.length > 0);
   const commentAnchors = useMemo(
     () => [
       ...commentThreads.map((thread) => thread.anchor),
-      ...(commentsOpen && selectedCommentAnchor ? [selectedCommentAnchor] : []),
+      ...(commentsPanelVisible && selectedCommentAnchor ? [selectedCommentAnchor] : []),
       ...(activeCommentAnchor ? [activeCommentAnchor] : []),
     ],
-    [activeCommentAnchor, commentThreads, commentsOpen, selectedCommentAnchor],
+    [activeCommentAnchor, commentThreads, commentsPanelVisible, selectedCommentAnchor],
   );
   useEffect(() => {
     if (!page) return;
@@ -383,9 +435,31 @@ export default function Page() {
     [navigate],
   );
 
+  const setCommentsPanelOpen = (open: boolean) => {
+    setCommentsOpen(open);
+    if (isCommentsDocked) saveCommentsOpen(open);
+  };
   const openComments = (anchor: CommentAnchor | null = selectedCommentAnchor) => {
     setSelectedCommentAnchor(anchor);
-    setCommentsOpen(true);
+    setPendingCommentSelection(false);
+    setCommentsPanelOpen(true);
+  };
+  const closeComments = () => {
+    setActiveCommentAnchor(null);
+    setPendingCommentSelection(false);
+    setCommentsPanelOpen(false);
+  };
+  const startCommentSelection = () => {
+    setPendingCommentSelection(true);
+    setActiveCommentAnchor(null);
+    setCommentsOpen(false);
+  };
+  const handleCommentSelection = (anchor: CommentAnchor | null) => {
+    setSelectedCommentAnchor(anchor);
+    if (anchor && pendingCommentSelection) {
+      setPendingCommentSelection(false);
+      setCommentsPanelOpen(true);
+    }
   };
 
   const createInlineComment = useCallback(
@@ -467,77 +541,85 @@ export default function Page() {
 
   return (
     <EditorReadOnlyProvider readOnly={readOnly}>
-      <div className="flex w-full min-w-0 items-start justify-center gap-4">
-        <main
-          className={`w-full min-w-0 max-w-4xl px-6 animate-fade-in ${commentsOpen ? 'flex-1' : 'mx-auto'} ${commentsOpen || hasCommentThreads ? 'xl:-translate-x-[51.5px]' : ''}`}
-        >
-          <div className="sticky top-0 z-10 -mx-6 px-6 py-2 bg-zinc-50 dark:bg-zinc-950 md:-mt-12">
-            <div className="flex items-center justify-between text-sm font-medium text-zinc-500 dark:text-zinc-400 md:pt-5">
-              {isAnonymous ? (
-                <button
-                  type="button"
-                  onClick={() => navigate('/login')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors cursor-pointer"
-                >
-                  <LogIn size={14} />
-                  Sign in
-                </button>
-              ) : (
-                <div>
-                  <Breadcrumbs pages={flatPages} folders={flatFolders} currentPageId={pageId} />
-                </div>
+      <div className="app-shell-full-width page-layout flex w-full min-w-0 flex-col">
+        <AppShellToolbar className="bg-zinc-50 py-2 dark:bg-zinc-950 md:py-3">
+          <div className="flex min-h-9 w-full min-w-0 items-center justify-between text-sm font-medium text-zinc-500 dark:text-zinc-400">
+            {isAnonymous ? (
+              <button
+                type="button"
+                onClick={() => navigate('/login')}
+                className="flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800 cursor-pointer"
+              >
+                <LogIn size={16} />
+                Sign in
+              </button>
+            ) : (
+              <div className="min-w-0 flex-1">
+                <Breadcrumbs pages={flatPages} folders={flatFolders} currentPageId={pageId} />
+              </div>
+            )}
+            <div className="flex shrink-0 items-center gap-3">
+              {collabPermission === 'view' && !effectiveCapabilities.canEdit && (
+                <span className="hidden items-center gap-1.5 rounded-full bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400 sm:flex">
+                  View Access
+                </span>
               )}
-              <div className="flex items-center gap-2">
-                {collabPermission === 'view' && !effectiveCapabilities.canEdit && (
-                  <span className="flex items-center gap-1.5 px-2 py-1 text-xs font-medium text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800 rounded-full">
-                    View Access
-                  </span>
-                )}
-                {collabPermission === 'commenter' && (
-                  <span className="flex items-center gap-1.5 rounded-full bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
-                    Comment Access
-                  </span>
-                )}
-                {!isAnonymous && (
-                  <PageActions
-                    pageId={pageId}
-                    page={page}
-                    canComment={effectiveCapabilities.canComment}
-                    commentsOpen={commentsOpen}
-                    commentsCount={commentThreads.length}
-                    onToggleComments={() => {
-                      if (commentsOpen) setCommentsOpen(false);
-                      else openComments();
-                    }}
-                  />
-                )}
-                {isAnonymous && <ThemeToggle />}
-                <PageStatus provider={provider} collabStatus={collabStatus} />
-              </div>
-            </div>
-          </div>
-
-          <div className="mb-6">
-            <div className="relative flex-1 flex items-center mt-16">
-              <div className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center justify-center w-[42px] h-[42px]">
-                <EditorReadOnlyProvider readOnly={readOnly}>
-                  <PageIcon pageId={pageId} initialIcon={page?.icon ?? null} />
-                </EditorReadOnlyProvider>
-              </div>
-              <div className="pl-[54px] w-full">
-                <PageTitle
+              {collabPermission === 'commenter' && (
+                <span className="hidden items-center gap-1.5 rounded-full bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 sm:flex">
+                  Comment Access
+                </span>
+              )}
+              {!isAnonymous && (
+                <PageActions
                   pageId={pageId}
-                  initialTitle={page?.title ?? 'Untitled'}
-                  ydoc={provider?.document ?? null}
-                  usePublicEndpoint={isAnonymous}
+                  page={page}
+                  canComment={effectiveCapabilities.canComment}
+                  commentsOpen={commentsPanelVisible}
+                  commentsCount={commentThreads.length}
+                  onToggleComments={() => {
+                    if (commentsOpen) closeComments();
+                    else openComments();
+                  }}
                 />
-              </div>
+              )}
+              {isAnonymous && <ThemeToggle />}
+              <CollabStatus
+                provider={provider}
+                status={collabStatus}
+                collaborators={pageCollaborators}
+              />
             </div>
           </div>
-          <EditorReadOnlyProvider readOnly={readOnly}>
-            <PropertiesPanel pageId={pageId} properties={page?.properties ?? null} />
-          </EditorReadOnlyProvider>
-          {page && pageId ? (
+        </AppShellToolbar>
+
+        <div
+          className={`page-editor-container flex w-full min-w-0 items-start justify-center gap-4 ${commentsPanelDocked ? 'page-comments-open' : ''}`}
+        >
+          <main
+            className={`page-editor-content w-full min-w-0 max-w-[var(--page-content-width)] px-6 animate-fade-in ${
+              showInlineCommentRail ? 'page-editor-content--with-inline-comment-rail' : ''
+            } ${commentsPanelDocked ? 'flex-1 page-editor-with-comments' : 'mx-auto'}`}
+          >
+            <div className="mb-6">
+              <div className="relative flex-1 flex items-center mt-16">
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center justify-center w-[42px] h-[42px]">
+                  <EditorReadOnlyProvider readOnly={readOnly}>
+                    <PageIcon pageId={pageId} initialIcon={page?.icon ?? null} />
+                  </EditorReadOnlyProvider>
+                </div>
+                <div className="pl-[54px] w-full">
+                  <PageTitle
+                    pageId={pageId}
+                    initialTitle={page?.title ?? 'Untitled'}
+                    ydoc={provider?.document ?? null}
+                    usePublicEndpoint={isAnonymous}
+                  />
+                </div>
+              </div>
+            </div>
+            <EditorReadOnlyProvider readOnly={readOnly}>
+              <PropertiesPanel pageId={pageId} properties={page?.properties ?? null} />
+            </EditorReadOnlyProvider>
             <CodeMirrorEditor
               key={`${pageId}:${editorGeneration}`}
               pageId={pageId}
@@ -548,32 +630,31 @@ export default function Page() {
               onPermissionSnapshot={setCollabPermission}
               commentAnchors={commentAnchors}
               commentThreads={commentThreads}
-              hideInlineCommentCards={commentsOpen && effectiveCapabilities.canComment}
+              hideInlineCommentCards={!showInlineCommentRail}
               activeCommentAnchor={activeCommentAnchor}
               onCommentAnchorHoverChange={setActiveCommentAnchor}
               canComment={effectiveCapabilities.canComment && !isAnonymous}
               canModerateComments={page.capabilities.canDelete}
-              onCommentSelection={setSelectedCommentAnchor}
+              onCommentSelection={handleCommentSelection}
               onCreateComment={createInlineComment}
               {...(requestedHeadingId ? { requestedHeadingId } : {})}
             />
-          ) : null}
-          {!isAnonymous && <BacklinksPanel pageId={pageId} />}
-        </main>
-        {commentsOpen && effectiveCapabilities.canComment && (
-          <CommentsPanel
-            pageId={pageId}
-            selectedAnchor={selectedCommentAnchor}
-            canModerate={page.capabilities.canDelete}
-            activeCommentAnchor={activeCommentAnchor}
-            onCommentAnchorHoverChange={setActiveCommentAnchor}
-            onClose={() => {
-              setActiveCommentAnchor(null);
-              setCommentsOpen(false);
-            }}
-            onClearSelection={() => setSelectedCommentAnchor(null)}
-          />
-        )}
+            {!isAnonymous && <BacklinksPanel pageId={pageId} />}
+          </main>
+          {commentsPanelVisible && (
+            <CommentsPanel
+              pageId={pageId}
+              isDrawer={!commentsPanelDocked}
+              selectedAnchor={selectedCommentAnchor}
+              canModerate={page.capabilities.canDelete}
+              onStartSelection={startCommentSelection}
+              activeCommentAnchor={activeCommentAnchor}
+              onCommentAnchorHoverChange={setActiveCommentAnchor}
+              onClose={closeComments}
+              onClearSelection={() => setSelectedCommentAnchor(null)}
+            />
+          )}
+        </div>
       </div>
     </EditorReadOnlyProvider>
   );

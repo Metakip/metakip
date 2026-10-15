@@ -204,7 +204,15 @@ export function validateAwarenessIdentity(
     throw new CollabProtocolDeniedError('Foreign awareness identity is not allowed');
   }
   if (isUnknownRecord(entry.state) && entry.state.user != null) {
-    if (!hasExactPrimitiveFields(entry.state.user, getCanonicalAwarenessUser(context))) {
+    const canonicalUser = getCanonicalAwarenessUser(context);
+    const matchesLegacyUser = hasExactPrimitiveFields(entry.state.user, canonicalUser);
+    const matchesIdentifiedUser =
+      !isAnonymousSession(context) &&
+      hasExactPrimitiveFields(entry.state.user, {
+        ...canonicalUser,
+        userId: getSessionUser(context).id,
+      });
+    if (!matchesLegacyUser && !matchesIdentifiedUser) {
       throw new CollabProtocolDeniedError('Forged awareness user is not allowed');
     }
   }

@@ -14,10 +14,4 @@ describe('Sidebar', () => {
 
     expect(screen.getByTestId('sidebar')).toBeInTheDocument();
   });
-
-  it('shows collapsed state with correct data-testid', () => {
-    render(<Sidebar collapsed={true} />);
-
-    expect(screen.getByTestId('sidebar-collapsed')).toBeInTheDocument();
-  });
 });

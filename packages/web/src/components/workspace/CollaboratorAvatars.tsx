@@ -2,20 +2,7 @@ import type { CollaboratorDisplay } from '@metakip/shared';
 import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { getInitial } from '../../utils/avatar';
-
-const ROLE_LABELS: Record<string, string> = {
-  owner: 'Owner',
-  admin: 'Admin',
-  edit: 'Editor',
-  commenter: 'Commenter',
-  view: 'Viewer',
-};
-
-function formatCollabLabel(collab: CollaboratorDisplay): string {
-  const name = collab.name ?? 'User';
-  const role = collab.isOwner ? 'Owner' : (ROLE_LABELS[collab.permission] ?? collab.permission);
-  return `${name} (${role})`;
-}
+import { formatCollaboratorLabel } from '../../utils/formatCollaboratorLabel';
 
 interface CollaboratorAvatarsProps {
   collaborators: CollaboratorDisplay[];
@@ -131,7 +118,7 @@ export function CollaboratorAvatars({ collaborators, max = 3 }: CollaboratorAvat
   return (
     <div className="flex items-center -space-x-1.5">
       {visible.map((collab) => (
-        <Avatar key={collab.userId} collab={collab} label={formatCollabLabel(collab)} />
+        <Avatar key={collab.userId} collab={collab} label={formatCollaboratorLabel(collab)} />
       ))}
       {overflow > 0 && <OverflowBadge count={overflow} />}
     </div>

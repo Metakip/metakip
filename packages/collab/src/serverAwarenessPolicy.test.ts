@@ -64,12 +64,13 @@ describe('collab server awareness policy', () => {
       await waitFor(() => source.synced && observer.synced, 5_000, 'image providers to sync');
       source.setAwarenessField('user', {
         ...canonicalTestAwarenessUser(user.id),
+        userId: user.id,
         avatar: image,
       });
       await waitFor(
         () =>
           Array.from(observer.awareness?.getStates().values() ?? []).some(
-            (state) => state.user?.avatar === image,
+            (state) => state.user?.avatar === image && state.user?.userId === user.id,
           ),
         5_000,
         'canonical image awareness to propagate',
@@ -853,6 +854,15 @@ describe('collab server awareness policy', () => {
             state: {
               user: { name: 'Forged Owner', color: '#000000', avatar: 'forged.png' },
             },
+          },
+        ]),
+      );
+      await sendAdversarialAwareness((attackerDocument) =>
+        encodeAwarenessMessage(page.id, [
+          {
+            clientId: attackerDocument.clientID,
+            clock: 100,
+            state: { user: { ...canonicalTestAwarenessUser(attacker.id), userId: owner.id } },
           },
         ]),
       );
