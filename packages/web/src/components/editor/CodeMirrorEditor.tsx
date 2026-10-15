@@ -423,11 +423,19 @@ export function CodeMirrorEditor({
   }, [editor, updateActiveStates]);
 
   const commentSelection = editorComments.commentSelection;
+  const inlineCommentPositions = hideInlineCommentCards
+    ? []
+    : editorComments.inlineCommentPositions.filter(({ thread }) => thread.comments.length > 0);
+  const hasInlineCommentRail = inlineCommentPositions.length > 0;
 
   return (
     <div
       ref={wrapperRef}
-      className={`editor-wrapper relative min-h-[500px] ${isReadOnly ? '' : 'editor-scroll-past-end'} ${isEditorReady ? '' : 'flex items-center justify-center'}`}
+      className={`editor-wrapper relative min-h-[500px] ${
+        isReadOnly ? '' : 'editor-scroll-past-end'
+      } ${isEditorReady ? '' : 'flex items-center justify-center'} ${
+        hasInlineCommentRail ? 'editor-wrapper--with-inline-comment-rail' : ''
+      }`}
     >
       {editorLoadState.status === 'error' ? (
         <div className="flex max-w-md flex-col items-center gap-3 p-8 text-center" role="alert">
@@ -506,30 +514,32 @@ export function CodeMirrorEditor({
         />
       )}
       <div ref={setContainer} className={`codemirror-editor ${isEditorReady ? '' : 'invisible'}`} />
-      {!hideInlineCommentCards &&
-        !isTableOfContentsHovered &&
-        editorComments.inlineCommentPositions.map(({ thread, top, right }) => {
-          const anchor = thread.anchor;
-          if (thread.comments.length === 0) return null;
-          const anchorKey = commentAnchorKey(anchor);
-          return (
-            <InlineCommentCard
-              key={thread.id}
-              pageId={pageId}
-              thread={thread}
-              anchorKey={anchorKey}
-              currentUserId={currentUserId}
-              canComment={canComment}
-              canModerate={canModerateComments}
-              active={editorComments.activeCommentAnchorKey === anchorKey}
-              onHoverChange={(hovered) =>
-                onCommentAnchorHoverChange?.(hovered ? thread.anchor : null)
-              }
-              onHeightChange={editorComments.handleInlineCommentCardHeightChange}
-              style={{ top, right }}
-            />
-          );
-        })}
+      {hasInlineCommentRail && (
+        <div className="inline-comment-card-rail">
+          {!isTableOfContentsHovered &&
+            inlineCommentPositions.map(({ thread, top }) => {
+              const anchor = thread.anchor;
+              const anchorKey = commentAnchorKey(anchor);
+              return (
+                <InlineCommentCard
+                  key={thread.id}
+                  pageId={pageId}
+                  thread={thread}
+                  anchorKey={anchorKey}
+                  currentUserId={currentUserId}
+                  canComment={canComment}
+                  canModerate={canModerateComments}
+                  active={editorComments.activeCommentAnchorKey === anchorKey}
+                  onHoverChange={(hovered) =>
+                    onCommentAnchorHoverChange?.(hovered ? thread.anchor : null)
+                  }
+                  onHeightChange={editorComments.handleInlineCommentCardHeightChange}
+                  style={{ top, right: 0 }}
+                />
+              );
+            })}
+        </div>
+      )}
       {editorComments.isCommentComposerOpen &&
         commentSelection &&
         onCreateComment &&

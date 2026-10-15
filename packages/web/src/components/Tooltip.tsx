@@ -4,7 +4,7 @@ import type React from 'react';
 interface TooltipProps {
   label: string;
   children: React.ReactNode;
-  position?: 'top' | 'bottom' | 'left' | 'right';
+  position?: 'top' | 'bottom' | 'bottom-left' | 'left' | 'right';
   className?: string;
   delay?: number;
 }
@@ -19,6 +19,7 @@ export function Tooltip({
   const positionClasses = {
     top: 'bottom-full left-1/2 -translate-x-1/2 mb-2',
     bottom: 'top-full left-1/2 -translate-x-1/2 mt-2',
+    'bottom-left': 'top-full left-0 mt-2',
     left: 'right-full top-1/2 -translate-y-1/2 mr-2',
     right: 'left-full top-1/2 -translate-y-1/2 ml-2',
   };

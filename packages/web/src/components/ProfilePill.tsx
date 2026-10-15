@@ -1,15 +1,6 @@
 import { METAKIP_DOCS_URL } from '@metakip/shared';
 import clsx from 'clsx';
-import {
-  BookOpen,
-  LogOut,
-  PanelLeftClose,
-  PanelLeftOpen,
-  Search,
-  Settings,
-  Trash2,
-  User,
-} from 'lucide-react';
+import { BookOpen, LogOut, Search, Settings, Trash2, User } from 'lucide-react';
 import { useIdentityNavigate } from '../contexts/IdentityLifecycleContext';
 import { useTrashFolders } from '../hooks/use-folders';
 import { useTrashPages } from '../hooks/use-pages';
@@ -22,17 +13,9 @@ import { Tooltip } from './Tooltip';
 
 interface ProfilePillProps {
   className?: string;
-  collapsed?: boolean;
-  isActuallyCollapsed?: boolean;
-  onToggleCollapsed?: () => void;
 }
 
-export function ProfilePill({
-  className,
-  collapsed = false,
-  isActuallyCollapsed,
-  onToggleCollapsed,
-}: ProfilePillProps) {
+export function ProfilePill({ className }: ProfilePillProps) {
   const navigate = useIdentityNavigate();
 
   const { data: session } = useAuth();
@@ -40,7 +23,6 @@ export function ProfilePill({
   const { data: trashPages } = useTrashPages();
   const { data: trashFolders } = useTrashFolders();
   const hasTrashItems = (trashPages?.length ?? 0) + (trashFolders?.length ?? 0) > 0;
-  const sidebarShortcut = formatShortcut(SHORTCUT_PATTERNS.toggleSidebar);
   const searchShortcut = formatShortcut(SHORTCUT_PATTERNS.commandPalette);
 
   const handleSignOut = async () => {
@@ -56,66 +38,11 @@ export function ProfilePill({
   return (
     <div
       className={clsx(
-        'rounded-[2rem] border border-white/60 dark:border-zinc-700/50 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] flex-shrink-0 z-50 relative overflow-visible flex flex-col justify-center',
-        collapsed ? 'w-[68px] min-h-[160px] py-4' : 'w-[240px] p-3',
+        'relative z-50 flex w-full max-w-[240px] flex-shrink-0 flex-col justify-center overflow-visible rounded-[2rem] border border-white/60 bg-white/70 p-3 shadow-[0_8px_30px_rgb(0,0,0,0.08)] backdrop-blur-2xl dark:border-zinc-700/50 dark:bg-zinc-900/70 dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)]',
         className,
       )}
     >
-      {/* Collapsed State */}
-      <div
-        className={clsx(
-          'absolute inset-0 flex flex-col items-center justify-between py-5 transition-all duration-400 ease-[cubic-bezier(0.16,1,0.3,1)]',
-          collapsed
-            ? 'opacity-100 translate-x-0 pointer-events-auto delay-100'
-            : 'opacity-0 -translate-x-8 pointer-events-none',
-        )}
-      >
-        <div className="flex flex-col items-center gap-4 w-full">
-          <ThemeToggle />
-          <Tooltip label={`Open Sidebar (${sidebarShortcut})`} position="right">
-            <button
-              type="button"
-              onClick={onToggleCollapsed}
-              className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-xl hover:bg-zinc-900/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
-            >
-              <PanelLeftOpen size={20} />
-            </button>
-          </Tooltip>
-          <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden shadow-sm ring-1 ring-black/5 dark:ring-white/10">
-            {session?.user?.image ? (
-              <img
-                src={session.user.image}
-                alt={session.user.name || 'User'}
-                className="w-full h-full object-cover"
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-zinc-500 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-800">
-                <User size={18} />
-              </div>
-            )}
-          </div>
-
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="p-2 text-zinc-400 dark:text-zinc-500 hover:text-red-600 dark:hover:text-red-400 rounded-xl hover:bg-red-500/10 transition-colors cursor-pointer"
-            title="Sign Out"
-          >
-            <LogOut size={20} />
-          </button>
-        </div>
-      </div>
-
-      {/* Expanded State */}
-      <div
-        className={clsx(
-          'flex flex-col transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] w-full',
-          collapsed
-            ? 'opacity-0 translate-x-8 pointer-events-none absolute'
-            : 'opacity-100 translate-x-0 pointer-events-auto delay-100 relative',
-        )}
-      >
+      <div className="flex w-full flex-col">
         <div className="flex items-center justify-between mb-2">
           <ThemeToggle />
           <Tooltip label="Documentation" position="top">
@@ -157,22 +84,6 @@ export function ProfilePill({
               className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
             >
               <Search size={18} />
-            </button>
-          </Tooltip>
-          <Tooltip
-            label={`${(isActuallyCollapsed ?? collapsed) ? 'Open' : 'Close'} Sidebar (${sidebarShortcut})`}
-            position="top"
-          >
-            <button
-              type="button"
-              onClick={onToggleCollapsed}
-              className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
-            >
-              {(isActuallyCollapsed ?? collapsed) ? (
-                <PanelLeftOpen size={18} />
-              ) : (
-                <PanelLeftClose size={18} />
-              )}
             </button>
           </Tooltip>
         </div>

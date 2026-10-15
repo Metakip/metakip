@@ -287,7 +287,7 @@ export function InlineCommentCard({
       data-comment-anchor-key={anchorKey}
       onMouseEnter={() => onHoverChange(true)}
       onMouseLeave={() => onHoverChange(false)}
-      className={`group absolute top-0 z-20 hidden w-[296px] cursor-pointer rounded-lg border border-zinc-200 p-3 transition-colors lg:block dark:border-zinc-800 ${active ? 'bg-zinc-100 shadow-md dark:bg-zinc-800' : 'bg-white shadow-sm dark:bg-zinc-900'} ${expanded ? 'max-h-[min(70vh,32rem)] overflow-y-auto' : ''}`}
+      className={`group absolute top-0 z-20 block w-[296px] cursor-pointer rounded-lg border border-zinc-200 p-3 transition-colors dark:border-zinc-800 ${active ? 'bg-zinc-100 shadow-md dark:bg-zinc-800' : 'bg-white shadow-sm dark:bg-zinc-900'} ${expanded ? 'max-h-[min(70vh,32rem)] overflow-y-auto' : ''}`}
       style={style}
     >
       {expanded && comments.length > 1 && (

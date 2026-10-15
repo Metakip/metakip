@@ -3,6 +3,7 @@ import type { CapabilitySet } from '@metakip/shared';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ReactNode } from 'react';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { useIsReadOnly } from '../contexts/EditorReadOnlyContext';
@@ -23,7 +24,13 @@ const VIEW_CAPABILITIES: CapabilitySet = {
   canComment: false,
 };
 
+vi.mock('../components/AppShellToolbar', () => ({
+  AppShellToolbar: ({ children }: { children: ReactNode }) => <>{children}</>,
+  useAppShellOutletContext: () => ({ contentContainer: mocks.contentContainer }),
+}));
+
 const mocks = vi.hoisted(() => ({
+  contentContainer: null as HTMLDivElement | null,
   share: {
     isAnonymous: false,
     capabilities: {
@@ -58,6 +65,9 @@ vi.mock('../hooks/use-pages', () => ({
 vi.mock('../hooks/use-folders', () => ({
   useFolderTree: () => ({ data: [] }),
 }));
+vi.mock('../hooks/use-page-collaborators', () => ({
+  usePageCollaborators: () => ({ data: undefined }),
+}));
 vi.mock('../logger-init', () => ({
   getLogger: () => ({ error: mocks.loggerError }),
 }));
@@ -72,8 +82,18 @@ vi.mock('../components/editor/PageActions', () => ({
   },
 }));
 vi.mock('../components/editor/CommentsPanel', () => ({
-  CommentsPanel: ({ selectedAnchor }: { selectedAnchor: { quote: string } | null }) => (
-    <div data-testid="comments-panel" data-selected-quote={selectedAnchor?.quote ?? ''} />
+  CommentsPanel: ({
+    selectedAnchor,
+    isDrawer,
+  }: {
+    selectedAnchor: { quote: string } | null;
+    isDrawer: boolean;
+  }) => (
+    <div
+      data-testid="comments-panel"
+      data-selected-quote={selectedAnchor?.quote ?? ''}
+      data-is-drawer={String(isDrawer)}
+    />
   ),
 }));
 vi.mock('../components/editor/PageIcon', () => ({
@@ -131,7 +151,7 @@ vi.mock('../components/editor/CodeMirrorEditor', async () => {
     },
   };
 });
-vi.mock('../components/editor/PageStatus', () => ({ PageStatus: () => null }));
+vi.mock('../components/editor/CollabStatus', () => ({ CollabStatus: () => null }));
 vi.mock('../components/editor/TableOfContents', () => ({ TableOfContents: () => null }));
 vi.mock('../components/ThemeToggle', () => ({ ThemeToggle: () => null }));
 
@@ -230,6 +250,7 @@ function mockPageFetchSequence(statuses: number[]) {
 
 describe('Page permission presentation', () => {
   beforeEach(() => {
+    mocks.contentContainer = null;
     mocks.setAccessPermission.mockReset();
     mocks.setCapabilities.mockReset();
     mocks.share = {
@@ -372,9 +393,40 @@ describe('Page permission presentation', () => {
       expect(screen.queryByTestId('comments-panel')).not.toBeInTheDocument();
       expect(screen.getByTestId('page-body')).toHaveAttribute(
         'data-hide-inline-comment-cards',
-        'false',
+        'true',
       );
     });
+  });
+
+  it('keeps comments open when the available content width changes', async () => {
+    let width = 1100;
+    const contentContainer = document.createElement('div');
+    Object.defineProperty(contentContainer, 'clientWidth', { get: () => width });
+    mocks.contentContainer = contentContainer;
+    let notifyResize: (() => void) | undefined;
+    class TrackingResizeObserver implements ResizeObserver {
+      constructor(callback: ResizeObserverCallback) {
+        notifyResize = () => callback([], this);
+      }
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    }
+    vi.stubGlobal('ResizeObserver', TrackingResizeObserver);
+    vi.stubGlobal('fetch', mockPageFetch('edit'));
+    await renderPage();
+    await screen.findByTestId('page-body');
+
+    act(() => mocks.toggleComments?.());
+    expect(screen.getByTestId('comments-panel')).toHaveAttribute('data-is-drawer', 'false');
+
+    width = 900;
+    act(() => notifyResize?.());
+    expect(screen.getByTestId('comments-panel')).toHaveAttribute('data-is-drawer', 'true');
+
+    width = 1100;
+    act(() => notifyResize?.());
+    expect(screen.getByTestId('comments-panel')).toHaveAttribute('data-is-drawer', 'false');
   });
 
   it('fails closed without labeling unresolved permission as confirmed View Access', async () => {

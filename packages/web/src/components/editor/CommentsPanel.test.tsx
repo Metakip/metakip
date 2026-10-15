@@ -1,4 +1,6 @@
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from '../../test-utils/render';
 import { apiFetch } from '../../utils/api';
@@ -14,13 +16,69 @@ vi.mock('../../hooks/useAuth', () => ({
 
 const pageId = '00000000-0000-4000-8000-000000000002';
 
+function CommentsPanelHarness({ isDrawer }: { isDrawer: boolean }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <button type="button" onClick={() => setOpen(true)}>
+        Open comments panel
+      </button>
+      {open && (
+        <CommentsPanel
+          pageId={pageId}
+          isDrawer={isDrawer}
+          selectedAnchor={null}
+          canModerate={false}
+          onClose={() => setOpen(false)}
+          onClearSelection={() => {}}
+        />
+      )}
+    </>
+  );
+}
+
 describe('CommentsPanel', () => {
+  it('traps focus in the narrow drawer and restores it when closed', async () => {
+    vi.mocked(apiFetch).mockResolvedValue({ data: [], nextCursor: null });
+    const user = userEvent.setup();
+
+    render(<CommentsPanelHarness isDrawer />);
+
+    const trigger = screen.getByRole('button', { name: 'Open comments panel' });
+    await user.click(trigger);
+
+    const dialog = await screen.findByRole('dialog', { name: 'Comments' });
+    expect(dialog).toHaveAttribute('aria-modal', 'true');
+    const closeButton = within(dialog).getByRole('button', { name: 'Close comments' });
+    await waitFor(() => expect(closeButton).toHaveFocus());
+
+    await user.tab({ shift: true });
+    expect(dialog.contains(document.activeElement)).toBe(true);
+
+    await user.click(closeButton);
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Comments' })).toBeNull());
+    await waitFor(() => expect(trigger).toHaveFocus());
+  });
+
+  it('keeps the docked panel non-modal', async () => {
+    vi.mocked(apiFetch).mockResolvedValue({ data: [], nextCursor: null });
+    const user = userEvent.setup();
+
+    render(<CommentsPanelHarness isDrawer={false} />);
+    await user.click(screen.getByRole('button', { name: 'Open comments panel' }));
+
+    const panel = await screen.findByRole('complementary', { name: 'Comments' });
+    expect(panel).not.toHaveAttribute('aria-modal', 'true');
+  });
+
   it('requires a text selection before showing the new comment composer', async () => {
     vi.mocked(apiFetch).mockResolvedValue({ data: [], nextCursor: null });
 
     render(
       <CommentsPanel
         pageId={pageId}
+        isDrawer
         selectedAnchor={null}
         canModerate={false}
         onClose={() => {}}
@@ -68,9 +126,10 @@ describe('CommentsPanel', () => {
     });
     const onCommentAnchorHoverChange = vi.fn();
 
-    const { container } = render(
+    render(
       <CommentsPanel
         pageId={pageId}
+        isDrawer
         selectedAnchor={null}
         canModerate={false}
         onClose={() => {}}
@@ -79,8 +138,9 @@ describe('CommentsPanel', () => {
       />,
     );
 
-    await screen.findByText('“important phrase”');
-    const threadCard = container.querySelector('[data-comment-anchor-key]');
+    const threadCard = (await screen.findByText('“important phrase”')).closest(
+      '[data-comment-anchor-key]',
+    );
     if (!threadCard) throw new Error('Expected a comment thread card');
     fireEvent.mouseEnter(threadCard);
     expect(onCommentAnchorHoverChange).toHaveBeenLastCalledWith(anchor);
@@ -126,6 +186,7 @@ describe('CommentsPanel', () => {
     render(
       <CommentsPanel
         pageId={pageId}
+        isDrawer
         selectedAnchor={{ quote: 'important phrase', prefix: 'before ', suffix: ' after' }}
         canModerate={false}
         onClose={() => {}}

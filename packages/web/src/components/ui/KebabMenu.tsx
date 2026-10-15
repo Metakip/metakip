@@ -15,6 +15,7 @@ export type KebabMenuItem = {
 
 type KebabMenuProps = {
   items: KebabMenuItem[];
+  triggerContent?: ReactNode;
   triggerClassName?: string;
   menuClassName?: string;
   ariaLabel?: string;
@@ -29,6 +30,7 @@ const defaultMenuClass =
 
 export function KebabMenu({
   items,
+  triggerContent,
   triggerClassName,
   menuClassName,
   ariaLabel = 'Open menu',
@@ -63,7 +65,7 @@ export function KebabMenu({
         className={`${triggerClassName ?? ''} ${kebab.isOpen ? 'opacity-100 bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100' : ''}`}
         {...kebab.getReferenceProps({ onClick: (e) => e.stopPropagation() })}
       >
-        <MoreHorizontal size={16} />
+        {triggerContent ?? <MoreHorizontal size={16} />}
       </button>
 
       {kebab.isMounted && (

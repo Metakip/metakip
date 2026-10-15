@@ -1,3 +1,4 @@
+import { Dialog } from '@base-ui/react/dialog';
 import {
   COMMENT_BODY_MAX_LENGTH,
   type CommentAnchor,
@@ -33,10 +34,12 @@ import {
 
 type CommentsPanelProps = {
   pageId: string;
+  isDrawer: boolean;
   selectedAnchor: CommentAnchor | null;
   canModerate: boolean;
   onClose: () => void;
   onClearSelection: () => void;
+  onStartSelection?: () => void;
   activeCommentAnchor?: CommentAnchor | null;
   onCommentAnchorHoverChange?: (anchor: CommentAnchor | null) => void;
 };
@@ -329,10 +332,12 @@ function ThreadCard({
 
 export function CommentsPanel({
   pageId,
+  isDrawer,
   selectedAnchor,
   canModerate,
   onClose,
   onClearSelection,
+  onStartSelection,
   activeCommentAnchor = null,
   onCommentAnchorHoverChange,
 }: CommentsPanelProps) {
@@ -401,23 +406,36 @@ export function CommentsPanel({
         ? error.message
         : 'Request failed';
 
-  return (
-    <aside
-      aria-label="Comments"
-      className="fixed left-[15px] right-[15px] bottom-[15px] z-40 flex h-[min(65vh,38rem)] flex-col rounded-t-[2rem] border-y border-r border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950 lg:left-auto lg:top-3 lg:right-[15px] lg:bottom-3 lg:h-auto lg:w-[340px] lg:rounded-[2rem] lg:border-l"
-    >
+  const panelContent = (
+    <>
       <header className="flex items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
-        <div className="flex items-center gap-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-          <MessageSquare size={16} /> Comments
-        </div>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close comments"
-          className="cursor-pointer rounded-md p-1.5 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-        >
-          <X size={16} />
-        </button>
+        {isDrawer ? (
+          <Dialog.Title className="flex items-center gap-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            <MessageSquare size={16} /> Comments
+          </Dialog.Title>
+        ) : (
+          <h2 className="flex items-center gap-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+            <MessageSquare size={16} /> Comments
+          </h2>
+        )}
+        {isDrawer ? (
+          <Dialog.Close
+            type="button"
+            aria-label="Close comments"
+            className="cursor-pointer rounded-md p-1.5 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+          >
+            <X size={16} />
+          </Dialog.Close>
+        ) : (
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close comments"
+            className="cursor-pointer rounded-md p-1.5 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+          >
+            <X size={16} />
+          </button>
+        )}
       </header>
       <div className="border-b border-zinc-200 p-4 dark:border-zinc-800">
         {selectedAnchor && (
@@ -483,9 +501,20 @@ export function CommentsPanel({
             )}
           </form>
         ) : (
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
-            Select text in the page to start a comment thread.
-          </p>
+          <div className="space-y-3">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              Select text in the page to start a comment thread.
+            </p>
+            {isDrawer && onStartSelection && (
+              <button
+                type="button"
+                onClick={onStartSelection}
+                className="cursor-pointer rounded-md border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-900"
+              >
+                Select text on page
+              </button>
+            )}
+          </div>
         )}
       </div>
       <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-2 dark:border-zinc-800">
@@ -541,6 +570,39 @@ export function CommentsPanel({
           </button>
         )}
       </div>
-    </aside>
+    </>
+  );
+
+  if (!isDrawer) {
+    return (
+      <aside
+        aria-label="Comments"
+        className="sticky top-3 z-40 flex h-[calc(100dvh-var(--app-toolbar-height)-1.5rem)] w-[var(--comments-panel-width)] flex-col rounded-[2rem] border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950"
+      >
+        {panelContent}
+      </aside>
+    );
+  }
+
+  return (
+    <Dialog.Root
+      open
+      modal
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
+      <Dialog.Portal>
+        <Dialog.Backdrop className="fixed inset-0 z-[var(--z-index-overlay)] bg-zinc-950/30 backdrop-blur-[1px]" />
+        <Dialog.Popup
+          initialFocus
+          finalFocus
+          aria-modal="true"
+          className="fixed right-[var(--comments-panel-inset)] top-3 bottom-3 z-[var(--z-index-modal)] flex w-[85vw] max-w-[var(--comments-panel-width)] flex-col rounded-[2rem] border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950 md:top-[calc(var(--app-toolbar-height)+0.75rem)]"
+        >
+          {panelContent}
+        </Dialog.Popup>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }

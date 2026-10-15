@@ -1,7 +1,12 @@
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import type { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+vi.mock('../components/AppShellToolbar', () => ({
+  AppShellToolbar: ({ children }: { children: ReactNode }) => <>{children}</>,
+}));
 
 const mocks = vi.hoisted(() => ({
   refetchPages: vi.fn(),
