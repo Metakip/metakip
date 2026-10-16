@@ -2,8 +2,10 @@
 
 ## Brand assets
 
-The transparent PNGs are generated from `src/assets/metakip-mark.png`, with the dark version
-recolored white. Regenerate those PNGs and the all-assets archive with:
+The brand-asset generator centers the mark with a safe inset on a transparent 512×512 source
+canvas. The SVGs stay transparent; the light PNG has a white background and the dark PNG has a
+charcoal background, with the dark mark recolored white. It also rebuilds the all-assets archive.
+Run it with:
 
 ```sh
 pnpm --filter @metakip/marketing-site generate:brand-assets
