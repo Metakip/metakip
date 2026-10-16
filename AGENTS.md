@@ -22,6 +22,7 @@
    - For a fresh dev setup or new server: `setup.sh` runs `db:migrate`. No `db:push` or legacy stub tables are needed.
 9. The default branch in this repo is `master`.
 10. Never run lsp diagnostics. Instead run pnpm typecheck and pnpm format. Iterate until fixed.
+11. **Brand assets**: When changing the Metakip logo, update `packages/marketing-site/public/metakip.svg` and `metakip-dark.svg` separately before running `pnpm --filter @metakip/marketing-site generate:brand-assets`; the command regenerates the PNGs and ZIP but not the SVGs.
 
 ## Code Style
 
