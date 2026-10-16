@@ -6,6 +6,7 @@
     "dev": "astro dev",
     "build": "astro build && node scripts/copy-installers.mjs",
     "preview": "astro preview",
+    "generate:brand-assets": "node scripts/generate-brand-assets.mjs",
     "typecheck": "astro check"
   },
   "dependencies": {

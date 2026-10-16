@@ -1,0 +1,35 @@
+main.brand-page > header.brand-intro {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+main.brand-page > header.brand-intro > a.brand-download-all {
+  display: inline-flex;
+  min-height: 2.5rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 0 0.9rem;
+  border: 1px solid var(--text);
+  border-radius: 0.25rem;
+  background: var(--text);
+  color: var(--background);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 150ms ease;
+}
+
+main.brand-page > header.brand-intro > a.brand-download-all:hover {
+  opacity: 0.84;
+}
+
+@media (max-width: 480px) {
+  main.brand-page > header.brand-intro {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

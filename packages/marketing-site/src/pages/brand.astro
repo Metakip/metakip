@@ -1,0 +1,230 @@
+---
+// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
+import SiteLayout from '../components/SiteLayout.astro';
+import { SITE_ORIGIN } from '../data/siteConfig';
+import '../styles/brandPage.css';
+
+// biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
+const PAGE_TITLE = 'Brand Assets | Metakip';
+// biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
+const PAGE_DESCRIPTION = 'The Metakip mark in light and dark PNGs, with direct download links.';
+// biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
+const PAGE_URL = `${SITE_ORIGIN}/brand`;
+// biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
+const logoAssets = [
+  {
+    title: 'Light Mode',
+    filename: 'metakip.png',
+    svgFilename: 'metakip.svg',
+    href: '/metakip.png',
+    svgHref: '/metakip.svg',
+    previewClass: 'light',
+  },
+  {
+    title: 'Dark Mode',
+    filename: 'metakip-dark.png',
+    svgFilename: 'metakip-dark.svg',
+    href: '/metakip-dark.png',
+    svgHref: '/metakip-dark.svg',
+    previewClass: 'dark',
+  },
+];
+---
+
+<SiteLayout title={PAGE_TITLE} description={PAGE_DESCRIPTION} url={PAGE_URL}>
+  <main class="brand-page marketing-page">
+    <header class="brand-intro">
+      <h1>Brand assets</h1>
+      <a class="brand-download-all" href="/metakip-brand-assets.zip" download>
+        Download all assets
+        <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v12" />
+          <path d="m7 10 5 5 5-5" />
+          <path d="M5 21h14" />
+        </svg>
+      </a>
+    </header>
+
+    <section class="brand-assets" aria-label="Metakip logo files">
+      {logoAssets.map((asset) => (
+        <article class="brand-asset">
+          <div class:list={['brand-preview', asset.previewClass]}>
+            <img
+              src={asset.href}
+              alt={`Metakip mark for ${asset.title.toLowerCase()}`}
+              width="512"
+              height="470"
+            />
+          </div>
+          <div class="brand-asset-info">
+            <div class="brand-details">
+              <h2>{asset.title}</h2>
+              <a class="brand-direct-link" href={asset.href} target="_blank" rel="noreferrer" aria-label={`Open ${asset.filename}`}>
+                metakip.com{asset.href}<span aria-hidden="true">↗</span>
+              </a>
+            </div>
+            <div class="brand-downloads" aria-label={`${asset.title} downloads`}>
+              <a
+                class="brand-download"
+                href={asset.href}
+                download={asset.filename}
+                aria-label={`Download ${asset.title} PNG`}
+              >
+                PNG
+              </a>
+              <a
+                class="brand-download brand-download-secondary"
+                href={asset.svgHref}
+                download={asset.svgFilename}
+                aria-label={`Download ${asset.title} SVG`}
+              >
+                SVG
+              </a>
+            </div>
+          </div>
+        </article>
+      ))}
+    </section>
+
+  </main>
+</SiteLayout>
+
+<style>
+  .brand-page {
+    width: min(72rem, calc(100% - 2.5rem));
+    margin: 0 auto;
+    padding: 5rem 0 6rem;
+  }
+
+  .brand-intro { margin-bottom: 1.5rem; }
+
+  .brand-intro h1 {
+    margin: 0;
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 600;
+    letter-spacing: -0.05em;
+    line-height: 1.05;
+  }
+
+  .brand-assets {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(1rem, 2vw, 1.5rem);
+  }
+
+  .brand-asset {
+    min-width: 0;
+  }
+
+  .brand-preview {
+    display: grid;
+    aspect-ratio: 1.78;
+    place-items: center;
+    overflow: hidden;
+    border: 1px solid;
+    border-radius: 0.2rem;
+  }
+
+  .brand-preview.light {
+    border-color: #d4d4d4;
+    background-color: #fff;
+    background-image: conic-gradient(#ececec 25%, #fff 0 50%, #ececec 0 75%, #fff 0);
+    background-size: 20px 20px;
+  }
+
+  .brand-preview.dark {
+    border-color: #292929;
+    background-color: #111;
+    background-image: conic-gradient(#1c1c1c 25%, #111 0 50%, #1c1c1c 0 75%, #111 0);
+    background-size: 20px 20px;
+  }
+
+  .brand-preview img {
+    display: block;
+    width: clamp(7rem, 28%, 10rem);
+    height: auto;
+    object-fit: contain;
+  }
+
+  .brand-asset-info {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem 0 0;
+    border: 0;
+  }
+
+  .brand-details {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.45rem;
+  }
+
+  .brand-details h2 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+  }
+
+  .brand-direct-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    color: var(--muted);
+    font-family: 'Geist Mono', ui-monospace, monospace;
+    font-size: 0.625rem;
+    text-decoration: none;
+    text-underline-offset: 0.25em;
+    transition: color 150ms ease;
+  }
+
+  .brand-direct-link:hover { color: var(--text); }
+
+  .brand-download {
+    display: inline-flex;
+    min-height: 2.25rem;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.85rem;
+    border: 1px solid var(--text);
+    border-radius: 999px;
+    background: var(--text);
+    color: var(--background);
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 150ms ease, opacity 150ms ease;
+  }
+
+  .brand-download:hover { transform: translateY(-1px); opacity: 0.86; }
+
+  .brand-downloads {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .brand-download-secondary {
+    background: transparent;
+    color: var(--text);
+  }
+
+  @media (max-width: 680px) {
+    .brand-assets { grid-template-columns: 1fr; }
+    .brand-preview { aspect-ratio: 1.78; }
+    .brand-asset-info { padding-inline: 0; }
+  }
+
+  @media (max-width: 480px) {
+    .brand-page { padding-top: 4rem; }
+    .brand-preview img { width: clamp(7rem, 32%, 10rem); }
+  }
+</style>
