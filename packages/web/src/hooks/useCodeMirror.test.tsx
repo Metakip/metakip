@@ -67,19 +67,19 @@ describe('CodeMirror outline parsing', () => {
     act(() => worker?.respond(0));
     expect(onOutlineChange).not.toHaveBeenCalledWith(
       [{ id: 'initial-title', text: 'Initial title', level: 1, from: 0 }],
-      expect.any(String),
+      expect.any(Number),
     );
     act(() => worker?.respond(1));
     expect(onOutlineChange).toHaveBeenLastCalledWith(
       [{ id: 'initial-title', text: 'Initial title', level: 1, from: 7 }],
-      'initial-title',
+      7,
     );
 
     title = 'Renamed';
     act(() => hook.result.current.refreshHeadingResolver());
     expect(onOutlineChange).toHaveBeenLastCalledWith(
       [{ id: 'renamed', text: 'Renamed', level: 1, from: 7 }],
-      'renamed',
+      7,
     );
     expect(worker?.requests).toHaveLength(2);
 
