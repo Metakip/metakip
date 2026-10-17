@@ -1,7 +1,11 @@
 import type { EditorView } from '@codemirror/view';
 import { describe, expect, it, vi } from 'vitest';
 import { parseEditorHeadingSyntax } from './headingSyntax';
-import { extractEditorHeadings, getActiveHeadingIdInView, resolveEditorHeadings } from './headings';
+import {
+  extractEditorHeadings,
+  getActiveHeadingFromInView,
+  resolveEditorHeadings,
+} from './headings';
 
 describe('editor headings', () => {
   it('uses rendered link text for the outline and heading ID', () => {
@@ -61,7 +65,21 @@ describe('editor headings', () => {
       documentTop: -69920,
       lineBlockAt,
     } as unknown as EditorView;
-    expect(getActiveHeadingIdInView(headings, view)).toBe('heading-3503');
+    expect(getActiveHeadingFromInView(headings, view)).toBe(350300);
     expect(lineBlockAt.mock.calls.length).toBeLessThan(15);
+  });
+
+  it('identifies repeated heading titles by document position', () => {
+    const headings = [
+      { id: 'question-1', text: 'Question 1', level: 3, from: 0 },
+      { id: 'question-1', text: 'Question 1', level: 3, from: 20 },
+    ];
+    const view = {
+      viewport: { from: 0 },
+      documentTop: 0,
+      lineBlockAt: (position: number) => ({ top: position }),
+    } as unknown as EditorView;
+
+    expect(getActiveHeadingFromInView(headings, view)).toBe(20);
   });
 });

@@ -161,11 +161,11 @@ export function getActiveHeadingId(
  * CodeMirror may be embedded in a page that scrolls instead of its own
  * scroll container, so the document viewport is not sufficient here.
  */
-export function getActiveHeadingIdInView(
+export function getActiveHeadingFromInView(
   headings: readonly EditorHeading[],
   view: EditorView,
-): string {
-  if (!headings.length) return '';
+): number | null {
+  if (!headings.length) return null;
   // The rendered viewport begins above the visible top edge. Start near that
   // position instead of measuring every preceding heading on every scroll.
   let low = 0;
@@ -186,7 +186,7 @@ export function getActiveHeadingIdInView(
     if (top > topBoundary) break;
     active = heading;
   }
-  return active?.id ?? '';
+  return active?.from ?? null;
 }
 
 export function scrollToEditorHeading(view: EditorView, heading: EditorHeading): void {

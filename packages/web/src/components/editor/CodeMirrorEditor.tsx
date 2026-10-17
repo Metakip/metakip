@@ -99,7 +99,7 @@ export function CodeMirrorEditor({
   const [initialSyncError, setInitialSyncError] = useState(false);
   const [initialSyncAttempt, setInitialSyncAttempt] = useState(0);
   const [headings, setHeadings] = useState<readonly EditorHeading[]>([]);
-  const [activeHeadingId, setActiveHeadingId] = useState('');
+  const [activeHeadingFrom, setActiveHeadingFrom] = useState<number | null>(null);
   const [isTableOfContentsHovered, setIsTableOfContentsHovered] = useState(false);
   const initialContentReadyRef = useRef(false);
   const { isAnonymous } = useShareContext();
@@ -226,9 +226,9 @@ export function CodeMirrorEditor({
       handleSlashMenuSuggestRef.current(isOpen, query, position, range);
     }, []),
     onOutlineChange: useCallback(
-      (nextHeadings: readonly EditorHeading[], nextActiveHeadingId: string) => {
+      (nextHeadings: readonly EditorHeading[], nextActiveHeadingFrom: number | null) => {
         setHeadings(nextHeadings);
-        setActiveHeadingId(nextActiveHeadingId);
+        setActiveHeadingFrom(nextActiveHeadingFrom);
       },
       [],
     ),
@@ -556,7 +556,7 @@ export function CodeMirrorEditor({
         )}
       <TableOfContents
         headings={headings}
-        activeHeadingId={activeHeadingId}
+        activeHeadingFrom={activeHeadingFrom}
         onHoverChange={setIsTableOfContentsHovered}
         onHeadingSelect={(heading) => {
           if (editor) scrollToEditorHeading(editor, heading);

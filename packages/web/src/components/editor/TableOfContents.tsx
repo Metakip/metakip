@@ -8,14 +8,14 @@ interface HeadingNode extends EditorHeading {
 
 interface TableOfContentsProps {
   headings: readonly EditorHeading[];
-  activeHeadingId: string;
+  activeHeadingFrom: number | null;
   onHeadingSelect: (heading: EditorHeading) => void;
   onHoverChange?: (isHovered: boolean) => void;
 }
 
 export function TableOfContents({
   headings,
-  activeHeadingId,
+  activeHeadingFrom,
   onHeadingSelect,
   onHoverChange,
 }: TableOfContentsProps) {
@@ -35,7 +35,7 @@ export function TableOfContents({
   }, [headings]);
 
   const renderHeading = (heading: HeadingNode, depth = 0) => {
-    const isActive = activeHeadingId === heading.id;
+    const isActive = activeHeadingFrom === heading.from;
     const hasChildren = heading.children && heading.children.length > 0;
 
     return (
@@ -79,7 +79,7 @@ export function TableOfContents({
   const renderTickMarks = () => {
     const allHeadings = getAllHeadingsFlat(headingTree);
     return allHeadings.map((heading) => {
-      const isActive = activeHeadingId === heading.id;
+      const isActive = activeHeadingFrom === heading.from;
       const width = Math.max(12, 24 - heading.level * 3);
 
       return (
@@ -88,7 +88,7 @@ export function TableOfContents({
           key={`${heading.id}:${heading.from}`}
           onClick={() => onHeadingSelect(heading)}
           className={clsx(
-            'w-full h-[2px] rounded-full transition-all duration-300 mb-1.5',
+            'w-full h-[2px] shrink-0 rounded-full transition-all duration-300 mb-1.5',
             isActive
               ? 'bg-zinc-900 dark:bg-zinc-100'
               : 'bg-zinc-400 dark:bg-zinc-600 hover:bg-zinc-600 dark:hover:bg-zinc-400',

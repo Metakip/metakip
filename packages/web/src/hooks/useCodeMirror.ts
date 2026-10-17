@@ -28,7 +28,7 @@ import { anchorFromSelection, commentAnchorHighlight } from '../editor/codemirro
 import { type HeadingSyntax, parseEditorHeadingSyntax } from '../editor/codemirror/headingSyntax';
 import {
   type EditorHeading,
-  getActiveHeadingIdInView,
+  getActiveHeadingFromInView,
   type HeadingWikiLinkResolver,
   resolveEditorHeadings,
 } from '../editor/codemirror/headings';
@@ -77,7 +77,7 @@ interface UseCodeMirrorProps {
   ) => void;
   readOnly?: boolean;
   onImageUpload?: ImageUploader;
-  onOutlineChange?: (headings: readonly EditorHeading[], activeHeadingId: string) => void;
+  onOutlineChange?: (headings: readonly EditorHeading[], activeHeadingFrom: number | null) => void;
   resolveHeadingWikiLink?: HeadingWikiLinkResolver;
   commentAnchors: readonly CommentAnchor[];
   onDocumentChange?: (view: EditorView) => void;
@@ -269,7 +269,7 @@ export function useCodeMirror({
     const publishCurrentHeadings = (currentView: EditorView) => {
       onOutlineChangeRef.current?.(
         currentHeadings,
-        getActiveHeadingIdInView(currentHeadings, currentView),
+        getActiveHeadingFromInView(currentHeadings, currentView),
       );
     };
     const applySyntax = (generation: number, syntax: readonly HeadingSyntax[]) => {
@@ -513,7 +513,7 @@ export function useCodeMirror({
       window.removeEventListener('scroll', refreshActiveHeading, true);
       window.removeEventListener('resize', refreshActiveHeading);
       view?.scrollDOM.removeEventListener('scroll', refreshActiveHeading);
-      onOutlineChangeRef.current?.([], '');
+      onOutlineChangeRef.current?.([], null);
       view?.destroy();
       undoManager?.destroy();
     };
