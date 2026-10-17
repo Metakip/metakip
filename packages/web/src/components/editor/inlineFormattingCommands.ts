@@ -176,12 +176,12 @@ function blockPrefixLength(text: string): number {
 }
 
 function formattingExclusions(
-  state: EditorState,
   selection: TextRange,
   kind: InlineKind,
+  tree: ReturnType<typeof syntaxTree>,
 ): TextRange[] {
   const exclusions: TextRange[] = [];
-  syntaxTree(state).iterate({
+  tree.iterate({
     from: selection.from,
     to: selection.to,
     enter(node) {
@@ -201,9 +201,13 @@ function formattingExclusions(
   return exclusions.sort((left, right) => left.from - right.from);
 }
 
-function protectedLines(state: EditorState, selection: TextRange): Set<number> {
+function protectedLines(
+  state: EditorState,
+  selection: TextRange,
+  tree: ReturnType<typeof syntaxTree>,
+): Set<number> {
   const lines = new Set<number>();
-  syntaxTree(state).iterate({
+  tree.iterate({
     from: selection.from,
     to: selection.to,
     enter(node) {
@@ -228,9 +232,10 @@ function addInlineFormatting(
   selection: TextRange,
   kind: InlineKind,
   delimiter: string,
+  tree: ReturnType<typeof syntaxTree>,
 ): ChangeSpec[] {
-  const exclusions = formattingExclusions(state, selection, kind);
-  const excludedLines = protectedLines(state, selection);
+  const exclusions = formattingExclusions(selection, kind, tree);
+  const excludedLines = protectedLines(state, selection, tree);
   const changes: ChangeSpec[] = [];
   const addRange = (from: number, to: number) => {
     const text = state.sliceDoc(from, to);
@@ -284,10 +289,12 @@ export function toggleInlineFormatting(view: EditorView, kind: InlineKind): void
   // A selection can extend well beyond CodeMirror's parsed viewport. In that
   // case the syntax exclusions below would miss code blocks and tables and
   // insert Markdown delimiters into them. Never format from a partial tree.
-  if (!selection.empty && !ensureSyntaxTree(state, selection.to, 50)) {
+  const ensuredTree = !selection.empty ? ensureSyntaxTree(state, selection.to, 50) : null;
+  if (!selection.empty && !ensuredTree) {
     showInfoToast('Markdown is still parsing. Try again, or select a smaller range.');
     return;
   }
+  const tree = ensuredTree ?? syntaxTree(state);
   const line = state.doc.lineAt(selection.head);
   // In particular, an empty strike pair (~~~~) parses as a code fence until typed into.
   if (
@@ -302,7 +309,7 @@ export function toggleInlineFormatting(view: EditorView, kind: InlineKind): void
     });
     return;
   }
-  let context = syntaxTree(state).resolveInner(selection.from, 1);
+  let context = tree.resolveInner(selection.from, 1);
   for (;;) {
     // Formatting markup inside literal code would only insert visible punctuation.
     if (
@@ -417,7 +424,7 @@ export function toggleInlineFormatting(view: EditorView, kind: InlineKind): void
     return;
   }
 
-  const changes = addInlineFormatting(state, selection, kind, delimiter);
+  const changes = addInlineFormatting(state, selection, kind, delimiter, tree);
   if (!changes.length) return;
   const changeSet = state.changes(changes);
   const from = changeSet.mapPos(selection.from, 1);
