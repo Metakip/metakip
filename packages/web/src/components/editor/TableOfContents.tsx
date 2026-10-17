@@ -88,7 +88,7 @@ export function TableOfContents({
           key={`${heading.id}:${heading.from}`}
           onClick={() => onHeadingSelect(heading)}
           className={clsx(
-            'w-full h-[2px] rounded-full transition-all duration-300 mb-1.5',
+            'w-full h-[2px] shrink-0 rounded-full transition-all duration-300 mb-1.5',
             isActive
               ? 'bg-zinc-900 dark:bg-zinc-100'
               : 'bg-zinc-400 dark:bg-zinc-600 hover:bg-zinc-600 dark:hover:bg-zinc-400',
