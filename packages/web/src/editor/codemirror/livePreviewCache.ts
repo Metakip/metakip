@@ -11,7 +11,7 @@ export function trimLivePreviewCache(
   decorations: DecorationSet,
   documentLength: number,
   visible: SourceRange,
-  mathBlockAt: (position: number) => SourceRange | null,
+  previewBlockAt: (position: number) => SourceRange | null,
 ): DecorationSet {
   if (decorations.size <= MAX_CACHED_DECORATIONS) return decorations;
   let result = decorations;
@@ -19,11 +19,11 @@ export function trimLivePreviewCache(
   do {
     let keepFrom = Math.max(0, visible.from - radius);
     let keepTo = Math.min(documentLength, visible.to + radius);
-    // Don't keep the hidden body of display math without its widget (or vice versa).
-    const firstMath = mathBlockAt(keepFrom);
-    const lastMath = mathBlockAt(keepTo);
-    if (firstMath) keepFrom = Math.min(keepFrom, firstMath.from);
-    if (lastMath) keepTo = Math.max(keepTo, lastMath.to);
+    // Don't keep only part of a rendered block and strand its hidden source.
+    const firstBlock = previewBlockAt(keepFrom);
+    const lastBlock = previewBlockAt(keepTo);
+    if (firstBlock) keepFrom = Math.min(keepFrom, firstBlock.from);
+    if (lastBlock) keepTo = Math.max(keepTo, lastBlock.to);
     result = result.update({ filter: (start, end) => end >= keepFrom && start <= keepTo });
     radius = Math.floor(radius / 2);
   } while (result.size > MAX_CACHED_DECORATIONS / 2 && radius > 0);

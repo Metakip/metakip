@@ -1,59 +1,11 @@
 import { getIndentUnit, syntaxTree } from '@codemirror/language';
 import { countColumn, type EditorState } from '@codemirror/state';
 import type { EditorView } from '@codemirror/view';
-
-export function codeBlockRange(state: EditorState, from: number, to: number) {
-  const first = state.doc.lineAt(from);
-  let node = syntaxTree(state).resolveInner(from, 1);
-  while (node.parent && node.name !== 'FencedCode') node = node.parent;
-  const marks = node.getChildren('CodeMark');
-  const opening = marks[0];
-  const closing = marks[1];
-  const fence = opening ? state.sliceDoc(opening.from, opening.to) : '```';
-  // List markers belong on the opening line only; subsequent lines use indentation.
-  const prefix = state
-    .sliceDoc(first.from, from)
-    .replace(/(?:[-+*]|\d+[.)])([ \t]+)/g, (marker) => ' '.repeat(marker.length));
-  const closed = closing !== undefined;
-  const contentFrom = Math.min(first.to + 1, to);
-  return {
-    from,
-    to,
-    fence,
-    closed,
-    opening: opening ? { from: opening.from, to: opening.to } : undefined,
-    closing: closing ? { from: closing.from, to: closing.to } : undefined,
-    prefix,
-    contentFrom,
-    contentTo: Math.max(contentFrom, closing ? state.doc.lineAt(closing.from).from - 1 : to),
-  };
-}
-
-type CodeBlockRange = ReturnType<typeof codeBlockRange>;
-
-function codePrefixLength(text: string, prefix: string): number {
-  let offset = 0;
-  const quotes = prefix.match(/>/g)?.length ?? 0;
-  for (let depth = 0; depth < quotes; depth += 1) {
-    const marker = text.slice(offset).match(/^[ \t]{0,3}>[ \t]?/);
-    if (!marker) return offset;
-    offset += marker[0].length;
-  }
-  const indentation = quotes
-    ? prefix.slice(prefix.lastIndexOf('>') + 1).replace(/^[ \t]/, '')
-    : prefix;
-  for (let index = 0; index < indentation.length && /[ \t]/.test(text[offset] ?? ''); index += 1)
-    offset += 1;
-  return offset;
-}
-
-export function codeBlockText(state: EditorState, block: CodeBlockRange): string {
-  return state
-    .sliceDoc(block.contentFrom, block.contentTo)
-    .split('\n')
-    .map((line) => line.slice(codePrefixLength(line, block.prefix)))
-    .join('\n');
-}
+import {
+  type CodeBlockRange,
+  codeBlockRange,
+  codePrefixLength,
+} from '../../editor/codemirror/codeBlocks';
 
 export function selectedCodeBlock(state: EditorState): ReturnType<typeof codeBlockRange> | null {
   const selection = state.selection.main;
@@ -61,7 +13,7 @@ export function selectedCodeBlock(state: EditorState): ReturnType<typeof codeBlo
     let node = syntaxTree(state).resolveInner(selection.from, side);
     for (;;) {
       if (node.name === 'FencedCode' && node.to >= selection.to) {
-        return codeBlockRange(state, node.from, node.to);
+        return codeBlockRange(state, node);
       }
       if (!node.parent) break;
       node = node.parent;

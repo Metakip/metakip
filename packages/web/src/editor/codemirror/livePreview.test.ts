@@ -1,36 +1,15 @@
-import { markdown } from '@codemirror/lang-markdown';
-import { forceParsing, syntaxHighlighting, syntaxTreeAvailable } from '@codemirror/language';
+import { forceParsing, syntaxTreeAvailable } from '@codemirror/language';
 import { EditorState } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
-import { GFM } from '@lezer/markdown';
 import { describe, expect, it, vi } from 'vitest';
 import { yCollab } from 'y-codemirror.next';
 import * as Y from 'yjs';
-import '../../components/editor/editor.css';
-import { editorHighlightStyle } from './highlightStyle';
-import { livePreview } from './livePreview';
 import {
   buildLivePreviewDecorations,
-  expandPreviewRangeForBlockMath,
+  expandPreviewRangeForLivePreview,
 } from './livePreviewDecorations';
 import { buildTableWrappers } from './livePreviewTables';
-import { mathMarkdownExtension, wikiLinkMarkdownExtension } from './markdownSyntax';
-
-function createView(doc: string): EditorView {
-  const parent = document.body.appendChild(document.createElement('div'));
-  parent.className = 'codemirror-editor';
-  return new EditorView({
-    parent,
-    state: EditorState.create({
-      doc,
-      extensions: [
-        syntaxHighlighting(editorHighlightStyle, { fallback: true }),
-        markdown({ extensions: [GFM, wikiLinkMarkdownExtension, mathMarkdownExtension] }),
-        livePreview(),
-      ],
-    }),
-  });
-}
+import { createView } from './livePreviewTestView';
 
 describe('CodeMirror Live Preview', () => {
   it('reveals both code fences anywhere inside the block and compacts them after leaving', () => {
@@ -127,7 +106,7 @@ describe('CodeMirror Live Preview', () => {
     const view = createView(source);
     const first = view.state.doc.line(1);
     const fullDocumentCopy = vi.spyOn(view.state.doc, 'toString');
-    const decorations = buildLivePreviewDecorations(view, {}, first.from, first.to);
+    const decorations = buildLivePreviewDecorations(view, {}, { from: first.from, to: first.to });
     let count = 0;
     decorations.between(0, source.length, () => {
       count += 1;
@@ -144,7 +123,14 @@ describe('CodeMirror Live Preview', () => {
     expect(forceParsing(view, source.length, 1000)).toBe(true);
     expect(syntaxTreeAvailable(view.state, source.length)).toBe(true);
     const lastLine = view.state.doc.lineAt(source.length);
-    const decorations = buildLivePreviewDecorations(view, {}, lastLine.from, lastLine.to);
+    const decorations = buildLivePreviewDecorations(
+      view,
+      {},
+      {
+        from: lastLine.from,
+        to: lastLine.to,
+      },
+    );
     const classes: string[] = [];
     decorations.between(lastLine.from, lastLine.to, (_from, _to, value) => {
       if (typeof value.spec.class === 'string') classes.push(value.spec.class);
@@ -164,6 +150,33 @@ describe('CodeMirror Live Preview', () => {
     view.destroy();
   });
 
+  it('renders Mermaid fences as SVG and reveals the unchanged source when activated', async () => {
+    const source = 'Diagram\n\n```mermaid\nflowchart LR\n  A[Start] --> B[Finish]\n```\n\nAfter';
+    const view = createView(source);
+    await vi.waitFor(() => {
+      expect(view.dom.querySelector('.cm-md-mermaid-widget > svg')).not.toBeNull();
+    });
+    const widget = view.dom.querySelector<HTMLElement>('.cm-md-mermaid-widget');
+    const svg = view.dom.querySelector<SVGSVGElement>('.cm-md-mermaid-widget > svg');
+    widget?.style.setProperty('--pele-fg', 'rgb(1, 2, 3)');
+    expect(svg ? getComputedStyle(svg).getPropertyValue('--pele-fg').trim() : '').toBe(
+      'rgb(1, 2, 3)',
+    );
+    expect(view.dom.querySelector('.cm-md-mermaid-error')).toBeNull();
+    expect(view.dom.querySelector('.cm-md-mermaid-widget')?.textContent).not.toContain('A[Start]');
+    const closingFence = view.dom.querySelector<HTMLElement>('.cm-md-mermaid-widget + .cm-line');
+    expect(closingFence).not.toBeNull();
+    expect(closingFence ? getComputedStyle(closingFence).paddingBottom : '').toBe('0px');
+    expect(view.state.doc.toString()).toBe(source);
+
+    view.dom.querySelector<HTMLElement>('.cm-md-mermaid-widget')?.click();
+
+    expect(view.dom.querySelector('.cm-md-mermaid-widget')).toBeNull();
+    expect(view.dom.textContent).toContain('A[Start] --> B[Finish]');
+    expect(view.state.doc.toString()).toBe(source);
+    view.destroy();
+  });
+
   it('renders block math without interpreting math fences inside code blocks', () => {
     const view = createView('$$\nx^2\n$$\n\n```\n$$\nnot math\n$$\n```');
     view.dispatch({ selection: { anchor: 11 } });
@@ -178,13 +191,13 @@ describe('CodeMirror Live Preview', () => {
     const view = createView(source);
     const body = source.indexOf('x^2');
     const closingFence = source.lastIndexOf('$$');
-    const region = expandPreviewRangeForBlockMath(view, { from: body, to: body + 1 });
+    const region = expandPreviewRangeForLivePreview(view, { from: body, to: body + 1 });
     expect(region).toEqual({
       from: source.indexOf('$$'),
       to: closingFence + 2,
     });
 
-    const decorations = buildLivePreviewDecorations(view, {}, body, body + 1);
+    const decorations = buildLivePreviewDecorations(view, {}, region);
     const hiddenLines: number[] = [];
     decorations.between(region.from, region.to, (from, _to, value) => {
       if (value.spec.class === 'cm-md-math-hidden-line') hiddenLines.push(from);

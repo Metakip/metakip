@@ -3,8 +3,8 @@ import { markdown } from '@codemirror/lang-markdown';
 import { EditorState } from '@codemirror/state';
 import { EditorView } from '@codemirror/view';
 import { afterEach, describe, expect, it } from 'vitest';
+import { codeBlockText } from '../../editor/codemirror/codeBlocks';
 import {
-  codeBlockText,
   deleteEmptyCodeFence,
   exitCodeBlockOnEmptyFinalLine,
   handleCodeFenceInput,

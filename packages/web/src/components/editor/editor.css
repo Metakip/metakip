@@ -681,6 +681,65 @@
   line-height: 0;
 }
 
+.codemirror-editor .cm-md-mermaid-widget + .cm-line {
+  padding-bottom: 0;
+}
+
+.codemirror-editor .cm-md-mermaid-widget {
+  display: block;
+  width: auto;
+  min-width: 0;
+  padding: 0.75rem 1rem;
+  overflow: auto;
+  color: inherit;
+  font-family: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  text-align: left;
+  cursor: pointer;
+  background: #f4f4f5;
+  --pele-bg: transparent;
+  --pele-fg: currentColor;
+  --pele-muted: color-mix(in srgb, currentColor 62%, transparent);
+  --pele-line: color-mix(in srgb, currentColor 30%, transparent);
+  --pele-surface: color-mix(in srgb, currentColor 5%, transparent);
+  --pele-surface-alt: color-mix(in srgb, currentColor 9%, transparent);
+  --pele-border: color-mix(in srgb, currentColor 20%, transparent);
+}
+
+.dark .codemirror-editor .cm-md-mermaid-widget {
+  background: #18181b;
+}
+
+.codemirror-editor .cm-md-mermaid-widget > svg {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+  overflow: visible;
+}
+
+.codemirror-editor .cm-md-mermaid-status,
+.codemirror-editor .cm-md-mermaid-error-label,
+.codemirror-editor .cm-md-mermaid-error-details {
+  display: block;
+  color: #71717a;
+  font-size: 0.875rem;
+}
+
+.codemirror-editor .cm-md-mermaid-error-details {
+  margin-top: 0.25rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  overflow-wrap: anywhere;
+}
+
+.dark .codemirror-editor .cm-md-mermaid-status,
+.dark .codemirror-editor .cm-md-mermaid-error-label,
+.dark .codemirror-editor .cm-md-mermaid-error-details {
+  color: #a1a1aa;
+}
+
 .codemirror-editor .cm-md-image {
   display: block;
   max-width: min(100%, 48rem);
@@ -692,6 +751,17 @@
 
 .codemirror-editor .cm-md-code-block {
   padding: 0 3rem 0 1rem;
+}
+
+.codemirror-editor .cm-md-mermaid-language,
+.codemirror-editor .cm-md-mermaid-language * {
+  color: #71717a;
+  font-weight: 500;
+}
+
+.dark .codemirror-editor .cm-md-mermaid-language,
+.dark .codemirror-editor .cm-md-mermaid-language * {
+  color: #a1a1aa;
 }
 
 .codemirror-editor .cm-md-code-block-first {

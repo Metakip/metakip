@@ -40,6 +40,7 @@
     "linkifyjs": "^4.3.3",
     "lucide-react": "^0.575.0",
     "papaparse": "^5.5.3",
+    "pele": "^1.5.2",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.13.0",
