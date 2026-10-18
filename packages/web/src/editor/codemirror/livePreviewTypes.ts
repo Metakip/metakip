@@ -1,3 +1,4 @@
+import type { syntaxTree } from '@codemirror/language';
 import type { EditorState } from '@codemirror/state';
 import type { WikiLinkNavigationTarget, WikiLinkReference } from '../wikiLinkPresentations';
 import type { HeadingWikiLinkResolver } from './headings';
@@ -8,15 +9,7 @@ export type LivePreviewOptions = {
   resolveHeadingWikiLink?: HeadingWikiLinkResolver;
 };
 
-export type PreviewTreeNode = {
-  name: string;
-  from: number;
-  to: number;
-  parent: PreviewTreeNode | null;
-  firstChild: PreviewTreeNode | null;
-  nextSibling: PreviewTreeNode | null;
-  prevSibling: PreviewTreeNode | null;
-};
+export type PreviewTreeNode = ReturnType<ReturnType<typeof syntaxTree>['resolveInner']>;
 
 export type PreviewNodeRef = {
   name: string;

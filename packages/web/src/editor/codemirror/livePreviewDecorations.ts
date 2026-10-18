@@ -1,19 +1,13 @@
 import { syntaxTree, syntaxTreeAvailable } from '@codemirror/language';
 import type { Range } from '@codemirror/state';
 import { Decoration, type DecorationSet, type EditorView } from '@codemirror/view';
-import { codeBlockRange, codeBlockText } from '../../components/editor/codeBlockCommands';
 import { getHeadingId } from '../../utils/headingNavigation';
+import { addCodeBlockPreview } from './codeBlockPreview';
 import { getHeadingText } from './headings';
 import { addLinkPreviewDecoration } from './livePreviewLinks';
 import { addTablePreviewDecoration } from './livePreviewTables';
 import { type LivePreviewOptions, type PreviewNodeRef, selectionTouches } from './livePreviewTypes';
-import {
-  CopyCodeWidget,
-  DividerWidget,
-  ListMarkerWidget,
-  MathWidget,
-  TaskWidget,
-} from './livePreviewWidgets';
+import { DividerWidget, ListMarkerWidget, MathWidget, TaskWidget } from './livePreviewWidgets';
 
 function parentRange(node: { node: { parent: { from: number; to: number } | null } }): {
   from: number;
@@ -72,9 +66,9 @@ export interface PreviewRange {
   to: number;
 }
 
-/** Expand a preview refresh to contain every intersected display-math block.
- * Its widget and hidden source lines must be added or removed as one unit. */
-export function expandPreviewRangeForBlockMath(
+/** Display-math widgets and their hidden lines must be rebuilt together.
+ * Mermaid's block replacement is atomic on its own. */
+export function expandPreviewRangeForLivePreview(
   view: EditorView,
   range: PreviewRange,
 ): PreviewRange {
@@ -236,35 +230,7 @@ function addSyntaxDecorations(
           ranges.push(Decoration.line({ class: 'cm-md-blockquote' }).range(line.from));
         }
       } else if (node.name === 'FencedCode') {
-        const firstLine = state.doc.lineAt(node.from).number;
-        const lastLine = state.doc.lineAt(node.to).number;
-        const first = state.doc.line(firstLine);
-        const block = codeBlockRange(state, node.from, node.to);
-        const active = selectionTouches(state, first.from, state.doc.line(lastLine).to + 1);
-        if (first.from >= from) {
-          ranges.push(
-            Decoration.widget({
-              widget: new CopyCodeWidget(codeBlockText(state, block)),
-              side: 1,
-            }).range(first.to),
-          );
-        }
-        for (
-          let lineNumber = Math.max(firstLine, state.doc.lineAt(from).number);
-          lineNumber <= Math.min(lastLine, state.doc.lineAt(to).number);
-          lineNumber += 1
-        ) {
-          const line = state.doc.line(lineNumber);
-          const fenceOnly =
-            (lineNumber === firstLine && node.node.firstChild?.nextSibling?.name !== 'CodeInfo') ||
-            (lineNumber === lastLine && block.closed);
-          const compactFence = fenceOnly && !active;
-          ranges.push(
-            Decoration.line({
-              class: `cm-md-code-block ${lineNumber === firstLine ? 'cm-md-code-block-first' : ''} ${lineNumber === lastLine ? 'cm-md-code-block-last' : ''} ${compactFence ? 'cm-md-code-fence-compact' : ''}`,
-            }).range(line.from),
-          );
-        }
+        addCodeBlockPreview(state, node, ranges, from, to);
       } else if (node.name === 'HorizontalRule' && !selectionTouches(state, node.from, node.to)) {
         ranges.push(Decoration.replace({ widget: new DividerWidget() }).range(node.from, node.to));
       } else if (node.name === 'TaskMarker') {
@@ -335,16 +301,14 @@ function addSyntaxDecorations(
   });
 }
 
+/** Build decorations for a refresh region already expanded to whole preview blocks. */
 export function buildLivePreviewDecorations(
   view: EditorView,
   options: LivePreviewOptions,
-  from = 0,
-  to = view.state.doc.length,
+  region: PreviewRange,
 ): DecorationSet {
   const ranges: Range<Decoration>[] = [];
-  const expanded = expandPreviewRangeForBlockMath(view, { from, to });
-  const start = expanded.from;
-  const end = expanded.to;
+  const { from: start, to: end } = region;
   addTagDecorations(view, ranges, start, end);
   addSyntaxDecorations(view, options, ranges, start, end);
   // An ancestor can extend outside the requested window. Keep only decorations

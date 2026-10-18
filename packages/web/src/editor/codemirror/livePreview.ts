@@ -11,10 +11,11 @@ import { externalLinkInteractions } from './linkInteractions';
 import { trimLivePreviewCache } from './livePreviewCache';
 import {
   buildLivePreviewDecorations,
-  expandPreviewRangeForBlockMath,
+  expandPreviewRangeForLivePreview,
 } from './livePreviewDecorations';
 import { buildTableWrappers, tableWrapperPlugin } from './livePreviewTables';
 import type { LivePreviewOptions } from './livePreviewTypes';
+import { mermaidPreviewField, mermaidRenderCachePlugin } from './mermaidPreview';
 import { scrollEdgeContinuity } from './scrollEdgeContinuity';
 import { tableCaretScroll } from './tableCaretScroll';
 import { tableCellInput } from './tableCellInput';
@@ -22,7 +23,7 @@ import { visualEditors } from './visualEditors';
 
 const refreshAfterScroll = StateEffect.define<void>();
 
-function keepWholeMathBlock(
+function keepWholePreviewBlock(
   tree: ReturnType<typeof syntaxTree>,
   position: number,
 ): { from: number; to: number } | null {
@@ -43,11 +44,11 @@ export function livePreview(options: LivePreviewOptions = {}): Extension {
 
       constructor(readonly view: EditorView) {
         this.tree = syntaxTree(view.state);
-        const region = expandPreviewRangeForBlockMath(view, {
+        const region = expandPreviewRangeForLivePreview(view, {
           from: view.viewport.from,
           to: view.viewport.to,
         });
-        this.decorations = buildLivePreviewDecorations(view, options, region.from, region.to);
+        this.decorations = buildLivePreviewDecorations(view, options, region);
       }
 
       update(update: ViewUpdate): void {
@@ -95,11 +96,11 @@ export function livePreview(options: LivePreviewOptions = {}): Extension {
         // Rebuild only the visible lines. Preserve decorations already rendered
         // elsewhere so a selection change or scroll doesn't collapse offscreen
         // blocks and shift the browser's scroll anchor.
-        const region = expandPreviewRangeForBlockMath(update.view, {
+        const region = expandPreviewRangeForLivePreview(update.view, {
           from: update.view.viewport.from,
           to: update.view.viewport.to,
         });
-        const visible = buildLivePreviewDecorations(update.view, options, region.from, region.to);
+        const visible = buildLivePreviewDecorations(update.view, options, region);
         const add: Range<Decoration>[] = [];
         visible.between(region.from, region.to, (start, end, value) => {
           add.push(value.range(start, end));
@@ -113,7 +114,7 @@ export function livePreview(options: LivePreviewOptions = {}): Extension {
           sort: true,
         });
         this.decorations = trimLivePreviewCache(this.decorations, doc.length, region, (position) =>
-          keepWholeMathBlock(tree, position),
+          keepWholePreviewBlock(tree, position),
         );
       }
 
@@ -124,6 +125,8 @@ export function livePreview(options: LivePreviewOptions = {}): Extension {
     { decorations: (value) => value.decorations },
   );
   return [
+    mermaidPreviewField,
+    mermaidRenderCachePlugin,
     visualEditors,
     externalLinkInteractions,
     tableCellInput,

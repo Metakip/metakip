@@ -19,7 +19,7 @@ import {
 } from './types';
 
 const markdownAuthoringGuidance =
-  ' For authored Markdown, escape literal currency symbols as `\\$` because `$...$` renders as inline math; use `$...$` only intentionally. Keep citation markers such as `[1]` as plain text; use `[[Page]]` for Metakip page links and `[label](url)` for ordinary links.';
+  ' Supported Mermaid fenced blocks render as diagrams. For authored Markdown, escape literal currency symbols as `\\$` because `$...$` renders as inline math; use `$...$` only intentionally. Keep citation markers such as `[1]` as plain text; use `[[Page]]` for Metakip page links and `[label](url)` for ordinary links.';
 
 export type UpdatePageInput = {
   title?: string | undefined;
