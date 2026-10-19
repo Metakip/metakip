@@ -175,7 +175,7 @@ function AppShellContent({ contentState }: { contentState: AppShellContentState 
             'fixed bottom-0 left-0 top-[var(--app-toolbar-height)] z-[51] flex w-[80vw] max-w-[var(--sidebar-width)] flex-shrink-0 flex-col items-center gap-3 p-3 transition-[transform,opacity] duration-200 ease-in-out',
             'md:col-start-1 md:row-start-2 md:static md:z-40 md:h-full md:w-[var(--sidebar-width)] md:max-w-none md:overflow-hidden md:pl-4 md:py-3 md:pr-0',
             sidebarOpen
-              ? 'pointer-events-auto translate-x-0 animate-slide-right opacity-100'
+              ? 'pointer-events-auto translate-x-0 opacity-100'
               : 'pointer-events-none -translate-x-full opacity-0',
             'md:transition-[transform,opacity] md:duration-200 md:ease-in-out',
           )}
