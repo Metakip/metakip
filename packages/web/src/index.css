@@ -296,15 +296,6 @@
   }
 }
 
-@keyframes slide-right {
-  from {
-    transform: translateX(-100%);
-  }
-  to {
-    transform: translateX(0);
-  }
-}
-
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
@@ -333,9 +324,6 @@
 }
 .animate-slide-down {
   animation: slide-down 200ms ease-out;
-}
-.animate-slide-right {
-  animation: slide-right 200ms ease-out;
 }
 .animate-shimmer {
   animation: shimmer 1.5s linear infinite;
