@@ -186,7 +186,7 @@ export async function restorePageForUser(pageId: string, userId: string) {
       sql`update pages
           set is_deleted = false, deleted_at = null, deletion_batch_id = null,
               parent_id = ${parentId}, created_by = ${parentId ? page.created_by : userId},
-              position = ${position}, title_search = to_tsvector('english', title), updated_at = now()
+              position = ${position}, updated_at = now()
           where id = ${pageId} and is_deleted = true returning *`,
     );
     const row = restored.rows[0];

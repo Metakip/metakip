@@ -65,36 +65,36 @@ func TestPageListFetchesPagesAndFoldersConcurrently(t *testing.T) {
 	}
 }
 
-func TestPageSearchSendsTrimmedQueryAndRendersResults(t *testing.T) {
+func TestSearchSendsTrimmedQueryAndRendersPagesAndFolders(t *testing.T) {
 	runtime, output := testRuntime(t, http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
-		if request.Method != http.MethodGet || request.URL.Path != "/api/v1/pages/search" {
+		if request.Method != http.MethodGet || request.URL.Path != "/api/v1/search" {
 			t.Fatalf("unexpected request %s %s", request.Method, request.URL.Path)
 		}
 		if request.URL.Query().Get("q") != "project notes" {
 			t.Fatalf("unexpected search query %q", request.URL.Query().Get("q"))
 		}
-		fmt.Fprint(response, `{"data":[{"id":"page-id","title":"Project Notes","folderPath":"/Research"}]}`)
+		fmt.Fprint(response, `{"data":[{"type":"page","id":"page-id","title":"Project Notes","folderPath":"/Research"},{"type":"folder","id":"folder-id","name":"Research","folderPath":"/Research"}]}`)
 	}), true)
 
-	if err := (&PageSearchCmd{Query: "  project notes  "}).Run(runtime); err != nil {
+	if err := (&SearchCmd{Query: "  project notes  "}).Run(runtime); err != nil {
 		t.Fatal(err)
 	}
-	var results []pageListItem
+	var results []searchResult
 	if err := json.Unmarshal(output.Bytes(), &results); err != nil {
 		t.Fatal(err)
 	}
-	if len(results) != 1 || results[0].ID != "page-id" || results[0].FolderPath != "/Research" {
+	if len(results) != 2 || results[0].ID != "page-id" || results[0].FolderPath != "/Research" || results[1].ID != "folder-id" || results[1].displayName() != "Research" {
 		t.Fatalf("unexpected search results %#v", results)
 	}
 }
 
-func TestPageSearchRejectsBlankQueryBeforeMakingARequest(t *testing.T) {
+func TestSearchRejectsBlankQueryBeforeMakingARequest(t *testing.T) {
 	requests := 0
 	runtime, _ := testRuntime(t, http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
 		requests++
 	}), true)
 
-	err := (&PageSearchCmd{Query: "  "}).Run(runtime)
+	err := (&SearchCmd{Query: "  "}).Run(runtime)
 	if exitCode(err) != exitUsage {
 		t.Fatalf("expected usage error, got %v", err)
 	}
@@ -103,18 +103,18 @@ func TestPageSearchRejectsBlankQueryBeforeMakingARequest(t *testing.T) {
 	}
 }
 
-func TestPageSearchReportsNoMatches(t *testing.T) {
+func TestSearchReportsNoMatches(t *testing.T) {
 	runtime, output := testRuntime(t, http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
-		if request.URL.Path != "/api/v1/pages/search" {
+		if request.URL.Path != "/api/v1/search" {
 			t.Fatalf("unexpected request %s", request.URL.Path)
 		}
 		fmt.Fprint(response, `{"data":[]}`)
 	}), false)
 
-	if err := (&PageSearchCmd{Query: "missing"}).Run(runtime); err != nil {
+	if err := (&SearchCmd{Query: "missing"}).Run(runtime); err != nil {
 		t.Fatal(err)
 	}
-	if output.String() != "No matching pages found.\n" {
+	if output.String() != "No matching pages or folders found.\n" {
 		t.Fatalf("unexpected output %q", output.String())
 	}
 }

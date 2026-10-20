@@ -271,8 +271,8 @@ export async function importObsidianVault(
         const nextPosition = await getNextPosition('pages', parentId, userId, tx);
         const insertResult = await executeQuery(
           tx,
-          sql`insert into pages (parent_id, title, title_search, position, created_by, ydoc, properties)
-           values (${parentId}, ${title}, to_tsvector('english', ${title}), ${nextPosition}, ${userId}, ${ydocBuffer}, ${JSON.stringify(frontmatter)}) returning *`,
+          sql`insert into pages (parent_id, title, position, created_by, ydoc, properties)
+           values (${parentId}, ${title}, ${nextPosition}, ${userId}, ${ydocBuffer}, ${JSON.stringify(frontmatter)}) returning *`,
         );
         const insertedPageId = insertResult.rows[0]?.id;
         if (typeof insertedPageId !== 'string') {

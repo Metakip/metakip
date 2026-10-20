@@ -36,6 +36,20 @@ func TestLegacyPageEditReservedTitlesParseAsInteractiveReferences(t *testing.T) 
 	}
 }
 
+func TestSearchIsTopLevelCommand(t *testing.T) {
+	cli := CLI{}
+	parser, err := kong.New(&cli)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := parser.Parse([]string{"search", "project notes"}); err != nil {
+		t.Fatal(err)
+	}
+	if cli.Search.Query != "project notes" {
+		t.Fatalf("search query = %q, want %q", cli.Search.Query, "project notes")
+	}
+}
+
 func TestSharingCommandsUseTopLevelShareGroup(t *testing.T) {
 	tests := []struct {
 		name      string

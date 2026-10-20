@@ -183,7 +183,7 @@ export async function persistDocument(
           `update pages
            set ydoc = $1,
                title_revision = title_revision + case when title is distinct from $2 then 1 else 0 end,
-               title = $2, title_search = to_tsvector('english', $2), updated_at = now()
+               title = $2, updated_at = now()
            where id = $3`,
           [state, persistedTitle.value, documentName],
         );

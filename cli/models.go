@@ -27,6 +27,22 @@ type pageResolution struct {
 	Data []pageResolutionItem `json:"data"`
 }
 
+type searchResult struct {
+	Type       string  `json:"type"`
+	ID         string  `json:"id"`
+	Title      string  `json:"title,omitempty"`
+	Name       string  `json:"name,omitempty"`
+	Icon       *string `json:"icon"`
+	FolderPath string  `json:"folderPath"`
+}
+
+func (result searchResult) displayName() string {
+	if result.Title != "" {
+		return result.Title
+	}
+	return result.Name
+}
+
 type folder struct {
 	ID         string  `json:"id"`
 	ParentID   *string `json:"parentId"`

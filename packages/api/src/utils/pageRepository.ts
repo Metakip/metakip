@@ -23,8 +23,8 @@ export type AccessiblePageRow = Pick<
 > & { enumerable_parent_id: string | null; permission: SharePermission | null };
 
 export type AccessiblePagePathRow = AccessiblePageRow & {
-  title_search: string | null;
   folder_path: string;
+  folder_path_segments: string[];
 };
 
 export const pageMetadataSelection = sql`p.id,
@@ -41,11 +41,11 @@ export function accessiblePagePathsCte(userId: string): SQL {
   return sql`${enumerableFolderPathsCte(userId)},
     accessible_page_paths as (
       select ${pageMetadataSelection},
-        p.title_search,
         coalesce(get_root_folder_owner(p.parent_id), p.created_by) as owner_id,
         case when paths.id is null then null else p.parent_id end as enumerable_parent_id,
         access.permission,
-        case when paths.path is null then '/' else '/' || paths.path end as folder_path
+        case when paths.path is null then '/' else '/' || paths.path end as folder_path,
+        coalesce(paths.path_segments, '{}'::text[]) as folder_path_segments
       from pages p
       join lateral get_effective_page_permission(p.id, ${userId}) access on true
       left join folder_paths paths on paths.id = p.parent_id

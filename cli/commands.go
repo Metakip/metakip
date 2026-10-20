@@ -26,6 +26,7 @@ type CLI struct {
 	Login  LoginCmd  `cmd:"" help:"Authenticate with a named API token." group:"Authentication"`
 	Logout LogoutCmd `cmd:"" help:"Remove the locally stored API token." group:"Authentication"`
 	Whoami WhoamiCmd `cmd:"" help:"Show the authenticated user." group:"Authentication"`
+	Search SearchCmd `cmd:"" help:"Search accessible pages and folders." group:"Search"`
 	Page   PageCmd   `cmd:"" help:"Read and edit pages." group:"Page"`
 	Folder FolderCmd `cmd:"" help:"Read and manage folders." group:"Folder"`
 	Share  ShareCmd  `cmd:"" help:"Manage sharing across Metakip resources." group:"Sharing"`
@@ -88,7 +89,6 @@ type PageCmd struct {
 	Edit     PageEditCmd     `cmd:"" help:"Edit a page's Markdown."`
 	List     PageListCmd     `cmd:"" help:"List accessible pages."`
 	Move     PageMoveCmd     `cmd:"" help:"Move pages."`
-	Search   PageSearchCmd   `cmd:"" help:"Search page titles."`
 	Update   PageUpdateCmd   `cmd:"" help:"Update a page's title or icon."`
 	View     PageViewCmd     `cmd:"" help:"View a page's Markdown."`
 }

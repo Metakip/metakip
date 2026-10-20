@@ -98,11 +98,11 @@ export async function importMarkdownPage(
     const result = hasProperties
       ? await executeQuery<PageDatabaseRow>(
           tx,
-          sql`insert into pages (parent_id, title, title_search, position, created_by, ydoc, properties) values (${parentId}, ${title}, to_tsvector('english', ${title}), ${nextPosition}, ${userId}, ${ydocBuffer}, ${JSON.stringify(properties)}) returning *`,
+          sql`insert into pages (parent_id, title, position, created_by, ydoc, properties) values (${parentId}, ${title}, ${nextPosition}, ${userId}, ${ydocBuffer}, ${JSON.stringify(properties)}) returning *`,
         )
       : await executeQuery<PageDatabaseRow>(
           tx,
-          sql`insert into pages (parent_id, title, title_search, position, created_by, ydoc) values (${parentId}, ${title}, to_tsvector('english', ${title}), ${nextPosition}, ${userId}, ${ydocBuffer}) returning *`,
+          sql`insert into pages (parent_id, title, position, created_by, ydoc) values (${parentId}, ${title}, ${nextPosition}, ${userId}, ${ydocBuffer}) returning *`,
         );
     const createdPageId = result.rows[0]?.id;
     if (createdPageId) {

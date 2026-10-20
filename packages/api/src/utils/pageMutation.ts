@@ -41,7 +41,7 @@ export async function replacePageRecordFields(
     executor,
     sql`update pages set
         title_revision = title_revision + case when title is distinct from ${input.title} then 1 else 0 end,
-        title = ${input.title}, title_search = to_tsvector('english', ${input.title}),
+        title = ${input.title},
         icon = ${input.icon}, parent_id = ${input.parentId}, position = ${input.position},
         cover_type = ${input.coverType}, cover_value = ${input.coverValue},
         ${propertiesAssignment}
@@ -66,7 +66,7 @@ export async function updatePageMetadata(
     input.title === undefined
       ? sql``
       : sql`title_revision = title_revision + case when title is distinct from ${input.title} then 1 else 0 end,
-            title = ${input.title}, title_search = to_tsvector('english', ${input.title}),`;
+            title = ${input.title},`;
   const iconAssignment = input.icon === undefined ? sql`` : sql`icon = ${input.icon},`;
   const result = await executeQuery<PageMetadataMutationRow>(
     executor,

@@ -123,10 +123,14 @@ test.describe('Keyboard shortcuts', () => {
       await createNewPage(page);
 
       await page.keyboard.press('Control+k');
-      await expect(page.getByPlaceholder('Search pages...')).toBeVisible({ timeout: 5000 });
+      await expect(page.getByRole('combobox', { name: 'Search pages and folders' })).toBeVisible({
+        timeout: 5000,
+      });
 
       await page.keyboard.press('Escape');
-      await expect(page.getByPlaceholder('Search pages...')).not.toBeVisible({ timeout: 5000 });
+      await expect(
+        page.getByRole('combobox', { name: 'Search pages and folders' }),
+      ).not.toBeVisible({ timeout: 5000 });
     });
 
     test('Ctrl+K while typing in editor opens command palette (no text selected)', async ({
@@ -139,7 +143,9 @@ test.describe('Keyboard shortcuts', () => {
 
       // No text selected, so Ctrl+K should open the command palette
       await page.keyboard.press('Control+k');
-      await expect(page.getByPlaceholder('Search pages...')).toBeVisible({ timeout: 5000 });
+      await expect(page.getByRole('combobox', { name: 'Search pages and folders' })).toBeVisible({
+        timeout: 5000,
+      });
     });
 
     test('Ctrl+K with text selected triggers link insertion prompt', async ({ page }) => {
@@ -166,7 +172,9 @@ test.describe('Keyboard shortcuts', () => {
       await createNewPage(page);
 
       await page.keyboard.press('Control+k');
-      await expect(page.getByPlaceholder('Search pages...')).toBeVisible({ timeout: 5000 });
+      await expect(page.getByRole('combobox', { name: 'Search pages and folders' })).toBeVisible({
+        timeout: 5000,
+      });
 
       const sidebarBefore = page.locator('[data-testid="sidebar"]');
       const isExpanded = await sidebarBefore.isVisible();
@@ -188,10 +196,14 @@ test.describe('Keyboard shortcuts', () => {
       await expect(page.locator('[data-testid="sidebar"]')).toBeVisible({ timeout: 5000 });
 
       await page.keyboard.press('Control+k');
-      await expect(page.getByPlaceholder('Search pages...')).toBeVisible({ timeout: 5000 });
+      await expect(page.getByRole('combobox', { name: 'Search pages and folders' })).toBeVisible({
+        timeout: 5000,
+      });
 
       await page.keyboard.press('Escape');
-      await expect(page.getByPlaceholder('Search pages...')).not.toBeVisible({ timeout: 5000 });
+      await expect(
+        page.getByRole('combobox', { name: 'Search pages and folders' }),
+      ).not.toBeVisible({ timeout: 5000 });
 
       // Yield to the event loop so React can process the state update and
       // run the popScope effect before the next keystroke fires.
@@ -209,7 +221,9 @@ test.describe('Keyboard shortcuts', () => {
       const urlBefore = page.url();
 
       await page.keyboard.press('Control+k');
-      await expect(page.getByPlaceholder('Search pages...')).toBeVisible({ timeout: 5000 });
+      await expect(page.getByRole('combobox', { name: 'Search pages and folders' })).toBeVisible({
+        timeout: 5000,
+      });
 
       await page.keyboard.press('Alt+n');
 

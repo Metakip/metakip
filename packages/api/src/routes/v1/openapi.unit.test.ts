@@ -13,7 +13,8 @@ describe('v1 OpenAPI lifecycle contract', () => {
     expect(paths['/imports/obsidian']?.post).toBeDefined();
     expect(paths['/pages/{pageId}/export/markdown']?.get).toBeDefined();
     expect(paths['/exports/workspace']?.get).toBeDefined();
-    expect(paths['/pages/search']?.get).toBeDefined();
+    expect(paths['/search']?.get).toBeDefined();
+    expect(paths['/pages/search']).toBeUndefined();
 
     const pageExport = paths['/pages/{pageId}/export/markdown']?.get as {
       responses: { 200: { content: Record<string, unknown> } };
@@ -107,14 +108,12 @@ describe('v1 OpenAPI lifecycle contract', () => {
     };
     expect(pageMetadata['x-metakip-docs-slug']).toBe('pages-page-id-get');
 
-    const pageSearch = paths['/pages/search']?.get as {
+    const search = paths['/search']?.get as {
       'x-required-scopes': string[];
       parameters: Array<{ name: string; in: string }>;
     };
-    expect(pageSearch['x-required-scopes']).toEqual(['pages:read']);
-    expect(pageSearch.parameters).toContainEqual(
-      expect.objectContaining({ name: 'q', in: 'query' }),
-    );
+    expect(search['x-required-scopes']).toEqual(['pages:read']);
+    expect(search.parameters).toContainEqual(expect.objectContaining({ name: 'q', in: 'query' }));
 
     const listTokens = paths['/tokens']?.get as {
       'x-required-scopes': string[];

@@ -58,12 +58,12 @@ export async function persistPageCopies(
     const inserted = await executeQuery<PageDatabaseRow>(
       executor,
       sql`insert into pages (
-         id, parent_id, title, title_search, icon, cover_type, cover_value,
+         id, parent_id, title, icon, cover_type, cover_value,
          position, ydoc, properties, created_by
        ) values ${sql.join(
          prepared.map(
            (page) =>
-             sql`(${page.id}, ${page.options.parentId}, ${page.title}, to_tsvector('english', ${page.title}),
+             sql`(${page.id}, ${page.options.parentId}, ${page.title},
                ${page.source.icon}, ${page.source.coverType}, ${page.source.coverValue},
                ${page.options.position}, ${page.ydoc}, ${page.source.properties},
                ${actor.kind === 'user' ? actor.id : null})`,

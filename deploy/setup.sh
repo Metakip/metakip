@@ -60,6 +60,8 @@ cd "$REPO_DIR"
 . "$REPO_DIR/deploy/upload-storage.sh"
 # shellcheck source=invitation-token-encryption-key.sh
 . "$REPO_DIR/deploy/invitation-token-encryption-key.sh"
+# shellcheck source=meilisearch-secret.sh
+. "$REPO_DIR/deploy/meilisearch-secret.sh"
 # shellcheck source=resend-email.sh
 . "$REPO_DIR/deploy/resend-email.sh"
 
@@ -84,6 +86,8 @@ fi
 ensureCollaborationSecret .env
 ensureMcpApiInternalSecret .env
 ensureInvitationTokenEncryptionKey .env
+ensureMeilisearchUrl .env
+ensureMeilisearchMasterKey .env
 if [ "$created_env" = "true" ]; then
     echo -e "${YELLOW}.env created from .env.production. Edit it now:${NC}"
     nano .env
@@ -103,12 +107,15 @@ mkdir -p ~/.config/containers/systemd
 
 echo -e "${YELLOW}[PULL] Pre-pulling PostgreSQL image to avoid timeout on first start...${NC}"
 podman pull docker.io/library/postgres:17-alpine
+podman pull docker.io/getmeili/meilisearch:v1.12.8
 
 podman volume create postgres-data 2>/dev/null || true
 podman volume create metakip-data 2>/dev/null || true
+podman volume create meilisearch-data 2>/dev/null || true
 
 cp "$REPO_DIR/deploy/quadlet/metakip.pod" ~/.config/containers/systemd/
 cp "$REPO_DIR/deploy/quadlet/metakip-postgres.container" ~/.config/containers/systemd/
+cp "$REPO_DIR/deploy/quadlet/metakip-meilisearch.container" ~/.config/containers/systemd/
 cp "$REPO_DIR/deploy/quadlet/metakip-api.container" ~/.config/containers/systemd/
 cp "$REPO_DIR/deploy/quadlet/metakip-mcp.container" ~/.config/containers/systemd/
 cp "$REPO_DIR/deploy/quadlet/metakip-collab.container" ~/.config/containers/systemd/
@@ -133,6 +140,7 @@ sudo systemctl reload caddy
 systemctl --user daemon-reload
 systemctl --user start metakip-pod.service
 systemctl --user start metakip-postgres.service
+systemctl --user start metakip-meilisearch.service
 
 echo -e "${YELLOW}[WAIT] Waiting for PostgreSQL to be ready...${NC}"
 for i in {1..30}; do
@@ -169,7 +177,7 @@ done
 
 echo -e "${GREEN}[DONE] Setup complete!${NC}"
 echo ""
-echo "Check status: systemctl --user status metakip-postgres.service metakip-api.service metakip-mcp.service metakip-collab.service"
+echo "Check status: systemctl --user status metakip-postgres.service metakip-meilisearch.service metakip-api.service metakip-mcp.service metakip-collab.service"
 echo "View logs:    journalctl --user -u metakip-api.service -f"
 echo "MCP logs:     journalctl --user -u metakip-mcp.service -f"
 echo "API health:   curl https://app.metakip.com/api/health"

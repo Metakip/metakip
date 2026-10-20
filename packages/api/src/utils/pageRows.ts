@@ -8,8 +8,6 @@ export type PageDatabaseRow = {
   parent_id: string | null;
   title: string;
   title_revision: bigint;
-  title_search: PageRow['titleSearch'];
-  content_search: string | null;
   icon: string | null;
   cover_type: string | null;
   cover_value: string | null;
@@ -34,8 +32,6 @@ export function normalizePageRow(row: PageDatabaseRow, ownerId: string | null): 
     parentId: row.parent_id,
     title: row.title,
     titleRevision: row.title_revision,
-    titleSearch: row.title_search,
-    contentSearch: row.content_search,
     icon: row.icon,
     coverType: row.cover_type,
     coverValue: row.cover_value,
@@ -60,8 +56,6 @@ export function toPageResponse(page: NormalizedPageRow): Omit<NormalizedPageRow,
     parentId: page.parentId,
     title: page.title,
     titleRevision: page.titleRevision,
-    titleSearch: page.titleSearch,
-    contentSearch: page.contentSearch,
     icon: page.icon,
     coverType: page.coverType,
     coverValue: page.coverValue,

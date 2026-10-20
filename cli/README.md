@@ -134,6 +134,7 @@ Environment variables override saved configuration. Do not pass tokens as comman
 metakip login [--url URL]
 metakip logout
 metakip whoami
+metakip search <query>
 
 # Page
 metakip page copy <page-id-or-title>... [--parent FOLDER_ID]
@@ -148,7 +149,6 @@ metakip page edit prepend <page-id-or-title> {--content-text CONTENT | --content
 metakip page edit replace <page-id-or-title> {--content-text CONTENT | --content-file CONTENT}
 metakip page list [--parent FOLDER_ID] [--limit N]
 metakip page move <page-id-or-title>... [--parent FOLDER_ID]
-metakip page search <query>
 metakip page update <page-id-or-title> [--title TITLE] [--icon ICON | --clear-icon]
 metakip page view <page-id-or-title> [--raw]
 

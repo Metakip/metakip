@@ -4,16 +4,11 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strings"
 )
 
 type PageListCmd struct {
 	Parent string `help:"Only list pages directly inside this folder ID." placeholder:"FOLDER_ID"`
 	Limit  int    `help:"Maximum number of pages to return; 0 returns all pages." default:"0"`
-}
-
-type PageSearchCmd struct {
-	Query string `arg:"" name:"query" help:"Text to search for in page titles."`
 }
 
 type PageViewCmd struct {
@@ -165,26 +160,6 @@ func (cmd *PageListCmd) Run(r *runtimeState) error {
 		items = append(items, pageListItem{page: item, FolderPath: folderPath})
 	}
 	return renderPageList(r, items)
-}
-
-func (cmd *PageSearchCmd) Run(r *runtimeState) error {
-	query := strings.TrimSpace(cmd.Query)
-	if query == "" {
-		return usageError("A search query is required.")
-	}
-	c, err := r.client()
-	if err != nil {
-		return err
-	}
-	results, err := c.searchPages(query)
-	if err != nil {
-		return err
-	}
-	items := make([]pageListItem, 0, len(results))
-	for _, result := range results {
-		items = append(items, pageListItem{page: result.page, FolderPath: result.FolderPath})
-	}
-	return renderPageListWithEmptyMessage(r, items, "No matching pages found.")
 }
 
 func (cmd *PageViewCmd) Run(r *runtimeState) error {

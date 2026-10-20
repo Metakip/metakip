@@ -13,7 +13,6 @@ import {
   mcpExactEditSchema,
   mcpPageListSchema,
   mcpPageSchema,
-  mcpPageSearchSchema,
   mcpReadPageSchema,
   mcpReplacePageSchema,
 } from './types';
@@ -52,15 +51,6 @@ export function registerPageTools(
     readAnnotations,
     mcpPageListSchema,
     (input, options) => backend.listPages(input, options),
-  );
-  registerTool(
-    server,
-    'search_pages',
-    'Use this when you need to find accessible Metakip pages by title. Searches titles only, returns up to 20 results in relevance order, and includes each page folder path. Use a returned page ID with read_page to inspect its Markdown.',
-    { query: z.string().trim().min(1) },
-    readAnnotations,
-    mcpPageSearchSchema,
-    (input, options) => backend.searchPages(input.query, options),
   );
   registerTool(
     server,

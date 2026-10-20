@@ -123,7 +123,6 @@ versionsRoute.post(':pageId/versions/:versionId/restore', async (c) => {
       sql`update pages
        set title_revision = title_revision + case when title is distinct from ${versionTitle} then 1 else 0 end,
            title = ${versionTitle},
-           title_search = to_tsvector('english', ${versionTitle}),
            updated_at = now()
        where id = ${pageId}
        returning id, title`,

@@ -34,24 +34,6 @@ function page(updatedAt: string): McpPage {
 }
 
 describe('V1PageClient', () => {
-  it('searches page titles through the v1 search endpoint', async () => {
-    const searchPage = { ...page('2026-01-01T00:00:00.000Z'), folderPath: '/Research' };
-    const io = {
-      send: vi.fn().mockResolvedValue(new Response(null)),
-      readJson: vi.fn().mockResolvedValue({ data: [searchPage] }),
-      readMutationJson: vi.fn(),
-      readBytes: vi.fn(),
-      readBinaryOrMarkdown: vi.fn(),
-      discardResponse: vi.fn(),
-    } as unknown as V1ClientIO;
-    const client = new V1PageClient(io);
-
-    await expect(client.searchPages(actor, 'project notes')).resolves.toEqual({
-      data: [searchPage],
-    });
-    expect(io.send).toHaveBeenCalledWith(actor, '/pages/search?q=project+notes', {}, undefined);
-  });
-
   it('returns fresh metadata after replacing page content', async () => {
     const initialPage = page('2026-01-01T00:00:00.000Z');
     const updatedPage = page('2026-01-01T00:01:00.000Z');

@@ -72,23 +72,6 @@ func (c *client) resolvePagesByTitle(title string) ([]pageResolutionItem, error)
 	return resolved.Data, nil
 }
 
-func (c *client) searchPages(query string) ([]pageResolutionItem, error) {
-	response, err := c.request(
-		http.MethodGet,
-		"/pages/search?q="+url.QueryEscape(query),
-		nil,
-		nil,
-	)
-	if err != nil {
-		return nil, err
-	}
-	var searchResults pageResolution
-	if err := decodeJSON(response, &searchResults); err != nil {
-		return nil, err
-	}
-	return searchResults.Data, nil
-}
-
 type createPageRequest struct {
 	Title    *string `json:"title,omitempty"`
 	ParentID *string `json:"parentId,omitempty"`

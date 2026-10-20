@@ -28,9 +28,9 @@ import type {
   McpMarkdownImport,
   McpPage,
   McpPageList,
-  McpPageSearch,
   McpReadPage,
   McpReplacePage,
+  McpSearch,
   McpTrashList,
   PageCommentThread,
   PageCommentThreadsResponse,
@@ -54,6 +54,7 @@ import { V1ImportExportClient } from './v1ClientImportExport';
 import { V1LifecycleClient } from './v1ClientLifecycle';
 import { V1PageClient } from './v1ClientPages';
 import { parseApiResponse } from './v1ClientResponse';
+import { V1SearchClient } from './v1ClientSearch';
 import { V1SharingClient } from './v1ClientSharing';
 import {
   type V1ClientIO,
@@ -74,6 +75,7 @@ export class V1Client extends V1ClientTransport implements McpRequestBackend {
   private readonly actor: McpActor;
   private readonly io: V1ClientIO;
   private readonly pages: V1PageClient;
+  private readonly searchClient: V1SearchClient;
   private readonly comments: V1CommentClient;
   private readonly folders: V1FolderClient;
   private readonly trash: V1TrashClient;
@@ -98,6 +100,7 @@ export class V1Client extends V1ClientTransport implements McpRequestBackend {
       discardResponse: (response) => this.discardResponse(response),
     };
     this.pages = new V1PageClient(this.io);
+    this.searchClient = new V1SearchClient(this.io);
     this.comments = new V1CommentClient(this.io);
     this.folders = new V1FolderClient(this.io);
     this.trash = new V1TrashClient(this.io);
@@ -139,8 +142,8 @@ export class V1Client extends V1ClientTransport implements McpRequestBackend {
     return this.pages.listPages(this.actor, input, options);
   }
 
-  async searchPages(query: string, options?: McpRequestOptions): Promise<McpPageSearch> {
-    return this.pages.searchPages(this.actor, query, options);
+  async search(query: string, options?: McpRequestOptions): Promise<McpSearch> {
+    return this.searchClient.search(this.actor, query, options);
   }
 
   async readPage(reference: string, options?: McpRequestOptions): Promise<McpReadPage> {

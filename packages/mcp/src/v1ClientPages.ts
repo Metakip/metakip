@@ -5,7 +5,6 @@ import {
   type McpExactEdit,
   type McpPage,
   type McpPageList,
-  type McpPageSearch,
   type McpReadPage,
   type McpReplacePage,
   type McpRequestOptions,
@@ -13,7 +12,6 @@ import {
   mcpExactEditSchema,
   mcpPageListSchema,
   mcpPageResolutionSchema,
-  mcpPageSearchSchema,
   mcpReadPageSchema,
   mcpReplacePageSchema,
 } from './types';
@@ -45,20 +43,6 @@ export class V1PageClient {
       mcpPageListSchema,
       await this.io.readJson(
         await this.io.send(actor, `/pages?${query.toString()}`, {}, options?.signal),
-      ),
-    );
-  }
-
-  async searchPages(
-    actor: McpActor,
-    query: string,
-    options?: McpRequestOptions,
-  ): Promise<McpPageSearch> {
-    const params = new URLSearchParams({ q: query });
-    return parseApiResponse(
-      mcpPageSearchSchema,
-      await this.io.readJson(
-        await this.io.send(actor, `/pages/search?${params.toString()}`, {}, options?.signal),
       ),
     );
   }

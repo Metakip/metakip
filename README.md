@@ -54,8 +54,13 @@ Open source under GNU AGPL v3. Run it on your own infrastructure.
 
 ```bash
 cp .env.dev .env
+pnpm db:start
+pnpm --filter @metakip/api db:migrate
 pnpm dev
 ```
+
+`pnpm db:start` starts local PostgreSQL and Meilisearch containers. `pnpm db:stop`
+stops them while preserving their data; `pnpm db:reset` removes both local data volumes.
 
 Use `http://localhost:5173` for the application. This keeps local OAuth
 callbacks compatible with providers such as Google. In a second terminal, run:
