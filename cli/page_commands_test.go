@@ -73,7 +73,7 @@ func TestSearchSendsTrimmedQueryAndRendersPagesAndFolders(t *testing.T) {
 		if request.URL.Query().Get("q") != "project notes" {
 			t.Fatalf("unexpected search query %q", request.URL.Query().Get("q"))
 		}
-		fmt.Fprint(response, `{"data":[{"type":"page","id":"page-id","title":"Project Notes","folderPath":"/Research"},{"type":"folder","id":"folder-id","name":"Research","folderPath":"/Research"}]}`)
+		fmt.Fprint(response, `{"data":[{"type":"page","id":"page-id","parentId":null,"title":"Project Notes","icon":"📝","cover":null,"properties":{"priority":"high"},"ownerId":"owner-id","permission":"view","createdAt":"2026-01-01T00:00:00Z","updatedAt":"2026-01-02T00:00:00Z","folderPath":"/Research","titleMatches":[{"start":0,"end":7}],"snippet":{"text":"Project notes in the body","matches":[{"start":0,"end":7}]}},{"type":"folder","id":"folder-id","parentId":null,"name":"Research","icon":null,"ownerId":"owner-id","permission":"view","createdAt":null,"updatedAt":null,"folderPath":"/Research","titleMatches":[{"start":0,"end":8}]}]}`)
 	}), true)
 
 	if err := (&SearchCmd{Query: "  project notes  "}).Run(runtime); err != nil {
@@ -85,6 +85,37 @@ func TestSearchSendsTrimmedQueryAndRendersPagesAndFolders(t *testing.T) {
 	}
 	if len(results) != 2 || results[0].ID != "page-id" || results[0].FolderPath != "/Research" || results[1].ID != "folder-id" || results[1].displayName() != "Research" {
 		t.Fatalf("unexpected search results %#v", results)
+	}
+	if results[0].Snippet == nil || results[0].Snippet.Text != "Project notes in the body" || len(results[0].TitleMatches) != 1 {
+		t.Fatalf("search highlights were not decoded: %#v", results[0])
+	}
+	var encoded []map[string]json.RawMessage
+	if err := json.Unmarshal(output.Bytes(), &encoded); err != nil {
+		t.Fatal(err)
+	}
+	for _, key := range []string{"cover", "properties", "ownerId", "permission", "createdAt", "updatedAt", "snippet", "titleMatches"} {
+		if _, ok := encoded[0][key]; !ok {
+			t.Errorf("JSON output omitted API field %q", key)
+		}
+	}
+	if _, ok := encoded[1]["name"]; !ok {
+		t.Error("JSON output omitted folder name")
+	}
+	if _, ok := encoded[1]["ownerId"]; !ok {
+		t.Error("JSON output omitted folder metadata")
+	}
+}
+
+func TestSearchPlainOutputIncludesSnippetAndIcon(t *testing.T) {
+	runtime, output := testRuntime(t, http.HandlerFunc(func(response http.ResponseWriter, request *http.Request) {
+		fmt.Fprint(response, `{"data":[{"type":"page","id":"page-id","title":"Project Notes","icon":"📝","folderPath":"/Research","titleMatches":[{"start":0,"end":7}],"snippet":{"text":"Project notes in the body","matches":[{"start":0,"end":7}]}}]}`)
+	}), false)
+
+	if err := (&SearchCmd{Query: "project"}).Run(runtime); err != nil {
+		t.Fatal(err)
+	}
+	if got, want := output.String(), "page\tProject Notes\t/Research\tpage-id\t📝\tProject notes in the body\n"; got != want {
+		t.Fatalf("search output = %q, want %q", got, want)
 	}
 }
 
@@ -116,6 +147,24 @@ func TestSearchReportsNoMatches(t *testing.T) {
 	}
 	if output.String() != "No matching pages or folders found.\n" {
 		t.Fatalf("unexpected output %q", output.String())
+	}
+}
+
+func TestSearchMatchOffsetsUseUTF16CodeUnits(t *testing.T) {
+	for _, test := range []struct {
+		name   string
+		offset int
+		want   int
+	}{
+		{name: "before supplementary character", offset: 1, want: 1},
+		{name: "after supplementary character", offset: 3, want: 5},
+		{name: "after final character", offset: 4, want: 6},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			if got := utf16ByteOffset("A😀B", test.offset); got != test.want {
+				t.Fatalf("utf16ByteOffset(%q, %d) = %d, want %d", "A😀B", test.offset, got, test.want)
+			}
+		})
 	}
 }
 

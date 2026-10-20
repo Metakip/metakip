@@ -215,6 +215,12 @@ metakip update [VERSION]
 
 `upload image` prints the managed Markdown reference to stdout; insert it with a targeted page edit.
 
+`metakip search` returns up to 20 pages and folders. Human output includes each result's type,
+name, path, ID, icon, and matching body snippet when available. `--json` preserves the full search
+result fields, including page metadata, title match ranges, and snippet match ranges. Use a page ID
+with `page view` or a folder ID with a folder command. Piped and `--plain` output is tab-separated
+in the same field order.
+
 `share page show --json` and `share folder show --json` return the sharing summary as JSON. The default text view lists effective
 collaborators and, for owners and administrators, direct shares and pending invitations by email;
 other viewers receive a limited summary with hidden settings omitted. JSON retains share and
