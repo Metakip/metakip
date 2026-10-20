@@ -41,8 +41,8 @@ async function insertPage(
   const result = await executeQuery<PageDatabaseRow>(
     executor,
     sql`insert into pages
-        (parent_id, title, title_search, icon, position, created_by, ydoc, properties)
-      values (${input.parentId}, ${input.title}, to_tsvector('english', ${input.title}),
+        (parent_id, title, icon, position, created_by, ydoc, properties)
+      values (${input.parentId}, ${input.title},
         ${input.icon}, ${input.position}, ${input.createdBy}, ${input.content.ydoc},
         ${input.content.properties ? JSON.stringify(input.content.properties) : null})
       returning *`,

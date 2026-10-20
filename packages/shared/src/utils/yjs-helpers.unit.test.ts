@@ -4,6 +4,7 @@ import {
   extractConnectionsFromYDoc,
   extractWikiLinkTargetIds,
   yDocToMarkdown,
+  yDocToSearchText,
 } from './yjs-helpers';
 
 describe('extractConnectionsFromYDoc', () => {
@@ -69,5 +70,12 @@ describe('wiki-link target IDs', () => {
     const targetId = '11111111-1111-1111-1111-111111111111';
     const connections = extractConnectionsFromYDoc(markdownToYjsState(`![[id:${targetId}]]`));
     expect(connections.filter((connection) => connection.targetType === 'page')).toEqual([]);
+  });
+});
+
+describe('yDocToSearchText', () => {
+  it('returns normalized authored Markdown without requester-scoped wiki-link redaction', () => {
+    const text = '## Project notes\n\nSee [[id:11111111-1111-1111-1111-111111111111|Roadmap]]';
+    expect(yDocToSearchText(markdownToYjsState(text))).toBe(text);
   });
 });

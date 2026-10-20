@@ -103,6 +103,8 @@ git pull origin master
 . "$REPO_DIR/deploy/upload-storage.sh"
 # shellcheck source=invitation-token-encryption-key.sh
 . "$REPO_DIR/deploy/invitation-token-encryption-key.sh"
+# shellcheck source=meilisearch-secret.sh
+. "$REPO_DIR/deploy/meilisearch-secret.sh"
 # shellcheck source=resend-email.sh
 . "$REPO_DIR/deploy/resend-email.sh"
 
@@ -114,6 +116,8 @@ ensureMcpApiInternalSecret .env
 migrateUploadStorage .env
 ensureUploadStorage .env
 ensureInvitationTokenEncryptionKey .env
+ensureMeilisearchUrl .env
+ensureMeilisearchMasterKey .env
 ensureResendEmailConfiguration .env
 
 echo -e "${YELLOW}[STEP 2/9] Installing dependencies...${NC}"
@@ -129,8 +133,11 @@ pnpm --filter @metakip/web exec vite build --outDir dist.next
 echo -e "${YELLOW}[STEP 4/9] Updating Podman Quadlet units...${NC}"
 podman volume create postgres-data 2>/dev/null || true
 podman volume create metakip-data 2>/dev/null || true
+podman volume create meilisearch-data 2>/dev/null || true
+podman pull docker.io/getmeili/meilisearch:v1.12.8
 cp "$REPO_DIR/deploy/quadlet/metakip.pod" ~/.config/containers/systemd/
 cp "$REPO_DIR/deploy/quadlet/metakip-postgres.container" ~/.config/containers/systemd/
+cp "$REPO_DIR/deploy/quadlet/metakip-meilisearch.container" ~/.config/containers/systemd/
 cp "$REPO_DIR/deploy/quadlet/metakip-api.container" ~/.config/containers/systemd/
 cp "$REPO_DIR/deploy/quadlet/metakip-mcp.container" ~/.config/containers/systemd/
 cp "$REPO_DIR/deploy/quadlet/metakip-collab.container" ~/.config/containers/systemd/
@@ -149,14 +156,14 @@ EXISTING_POD_ID=""
 if podman container exists "$POSTGRES_CONTAINER"; then
     EXISTING_POD_ID=$(podman inspect --format '{{.Pod}}' "$POSTGRES_CONTAINER")
 fi
-systemctl --user stop metakip-api.service metakip-mcp.service metakip-collab.service metakip-postgres.service 2>/dev/null || true
+systemctl --user stop metakip-api.service metakip-mcp.service metakip-collab.service metakip-meilisearch.service metakip-postgres.service 2>/dev/null || true
 systemctl --user stop metakip-pod.service 2>/dev/null || true
 if [ -n "$EXISTING_POD_ID" ] && podman pod exists "$EXISTING_POD_ID"; then
     podman pod rm --force "$EXISTING_POD_ID"
 fi
 
 echo -e "${YELLOW}[STEP 7/9] Starting PostgreSQL in the recreated pod...${NC}"
-systemctl --user start metakip-pod.service metakip-postgres.service
+systemctl --user start metakip-pod.service metakip-postgres.service metakip-meilisearch.service
 POSTGRES_READY=false
 for _ in {1..30}; do
     if postgresReady >/dev/null 2>&1; then
@@ -235,7 +242,7 @@ echo "$(date -u '+%Y-%m-%dT%H:%M:%SZ') deploy: $DEPLOYED_COMMIT" >> "$REPO_DIR/.
 echo -e "${GREEN}[DONE] Deployment complete!${NC}"
 echo ""
 echo "Deployed commit: $DEPLOYED_COMMIT"
-echo "Check status: systemctl --user status metakip-postgres.service metakip-api.service metakip-mcp.service metakip-collab.service"
+echo "Check status: systemctl --user status metakip-postgres.service metakip-meilisearch.service metakip-api.service metakip-mcp.service metakip-collab.service"
 echo "View logs:    journalctl --user -u metakip-api.service -f"
 echo "MCP logs:     journalctl --user -u metakip-mcp.service -f"
 echo "API health:   curl https://app.metakip.com/api/health"

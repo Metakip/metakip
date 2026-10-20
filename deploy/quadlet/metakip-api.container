@@ -1,6 +1,6 @@
 [Unit]
 Description=Metakip API Server (Hono)
-After=network-online.target metakip-postgres.service
+After=network-online.target metakip-postgres.service metakip-meilisearch.service
 Requires=metakip-postgres.service
 
 [Container]

@@ -6,7 +6,7 @@ test.describe('Search', () => {
     await createNewPage(page);
 
     await page.keyboard.press('Control+K');
-    const searchInput = page.getByPlaceholder('Search pages...');
+    const searchInput = page.getByRole('combobox', { name: 'Search pages and folders' });
     await expect(searchInput).toBeVisible({ timeout: 5000 });
   });
 
@@ -14,7 +14,7 @@ test.describe('Search', () => {
     await createNewPage(page);
 
     await page.keyboard.press('Control+K');
-    const searchInput = page.getByPlaceholder('Search pages...');
+    const searchInput = page.getByRole('combobox', { name: 'Search pages and folders' });
     await expect(searchInput).toBeVisible({ timeout: 5000 });
 
     await searchInput.fill('zzzznonexistent');

@@ -16,9 +16,9 @@ import {
   type McpMarkdownImport,
   type McpPage,
   type McpPageList,
-  type McpPageSearch,
   type McpReadPage,
   type McpReplacePage,
+  type McpSearch,
   type McpTrashList,
   type McpWhoami,
   type PageCommentThread,
@@ -77,7 +77,6 @@ export type McpPageBackend = {
     },
     options?: McpRequestOptions,
   ): Promise<McpPageList>;
-  searchPages(query: string, options?: McpRequestOptions): Promise<McpPageSearch>;
   readPage(reference: string, options?: McpRequestOptions): Promise<McpReadPage>;
   createPage(
     input: {
@@ -130,6 +129,10 @@ export type McpPageBackend = {
     },
     options?: McpRequestOptions,
   ): Promise<McpContentOperation>;
+};
+
+export type McpSearchBackend = {
+  search(query: string, options?: McpRequestOptions): Promise<McpSearch>;
 };
 
 export type McpCommentsBackend = {
@@ -317,6 +320,7 @@ export type McpImportExportBackend = {
 
 export type McpRequestBackend = McpIdentityBackend &
   McpPageBackend &
+  McpSearchBackend &
   McpCommentsBackend &
   McpFolderBackend &
   McpSharingBackend &

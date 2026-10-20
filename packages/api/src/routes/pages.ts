@@ -403,7 +403,7 @@ pagesPublicRoute.patch(
         tx,
         sql`update pages
          set title_revision = title_revision + case when title is distinct from ${nextTitle} then 1 else 0 end,
-             title = ${nextTitle}, title_search = to_tsvector('english', ${nextTitle}), icon = ${nextIcon},
+             title = ${nextTitle}, icon = ${nextIcon},
              cover_type = ${nextCoverType}, cover_value = ${nextCoverValue}, properties = ${nextProperties}, updated_at = now()
          where id = ${pageId}
          returning *`,
@@ -467,7 +467,6 @@ pagesPublicRoute.patch(
           sql`update pages
            set title_revision = title_revision + 1,
                title = ${nextTitle},
-               title_search = to_tsvector('english', ${nextTitle}),
                updated_at = now()
            where id = ${pageId}`,
         );
@@ -1018,7 +1017,6 @@ pagesRoute.post(':id/import/markdown', async (c) => {
        set ydoc = ${ydocBuffer},
            title_revision = title_revision + case when title is distinct from ${currentPage.title || 'Untitled'} then 1 else 0 end,
            title = ${currentPage.title || 'Untitled'},
-           title_search = to_tsvector('english', ${currentPage.title || 'Untitled'}),
            updated_at = now()
        where id = ${pageId}`,
     );

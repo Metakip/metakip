@@ -57,17 +57,18 @@ metakip doctor
 ## Read Pages
 
 ```sh
-metakip page search "project notes"
+metakip search "project notes"
 metakip page list
 metakip page view "Page Title"
-metakip --json page search "project notes"
+metakip --json search "project notes"
 metakip --json page list
 metakip --json page view PAGE_ID
 ```
 
-`page search` searches page titles only and returns at most 20 matching pages, including their
-folder paths. Use a returned page ID with `page view` or another page command. Use page IDs in
-scripts; titles are convenient for interactive use but can be ambiguous.
+`search` searches page titles and Markdown bodies plus folder names. It returns at most 20 mixed
+results in relevance order, including each result's type and path. Use a returned page ID with
+`page view`; use folder IDs with folder commands. Use IDs in scripts; titles and names are
+convenient for interactive use but can be ambiguous.
 
 ## Create And Edit Pages
 

@@ -49,15 +49,17 @@ command-specific syntax.
 Use JSON for reliable automation:
 
 ```bash
-metakip --json page search "project notes"
+metakip --json search "project notes"
 metakip --json page list
 metakip --json folder list
 metakip --json page view "Page title"
 ```
 
-`page search` searches page titles only and returns at most 20 results with folder paths. Use a
-returned page ID with `page view` or another page command. Page IDs are canonical. A title is only
-a convenience for interactive lookup. If a title is ambiguous, choose from the returned candidates and retry with the page ID; never guess.
+`search` searches page titles and Markdown bodies plus folder names. It returns at most 20 mixed
+results in relevance order with each result's type and path. Use returned page IDs with `page view`
+and folder IDs with folder commands. IDs are canonical; titles and names are only conveniences for
+interactive lookup. If a name is ambiguous, choose from returned candidates and use the ID; never
+guess.
 
 ## Markdown authoring conventions
 

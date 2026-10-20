@@ -31,12 +31,6 @@ const bytea = customType<{ data: Buffer; notNull: false; default: false }>({
   },
 });
 
-const tsvector = customType<{ data: string; notNull: false; default: false }>({
-  dataType() {
-    return 'tsvector';
-  },
-});
-
 // ======================
 // Better Auth Tables
 // ======================
@@ -569,8 +563,6 @@ export const pages = pgTable(
     parentId: uuid('parent_id').references(() => folders.id, { onDelete: 'cascade' }),
     title: text('title').notNull().default('Untitled'),
     titleRevision: bigint('title_revision', { mode: 'bigint' }).notNull().default(0n),
-    titleSearch: tsvector('title_search'),
-    contentSearch: text('content_search'),
     icon: text('icon'),
     coverType: text('cover_type'),
     coverValue: text('cover_value'),
@@ -603,7 +595,6 @@ export const pages = pgTable(
   },
   (table) => ({
     titleExactIdx: index('pages_title_exact_idx').on(sql`lower(${table.title})`),
-    titleSearchIdx: index('pages_title_search_idx').using('gin', table.titleSearch),
     titleLength: check('pages_title_length_check', sql`char_length(${table.title}) <= 250`),
     positionNumeric: check(
       'pages_position_numeric_check',
@@ -615,6 +606,37 @@ export const pages = pgTable(
     ),
   }),
 );
+
+export const searchIndexQueue = pgTable(
+  'search_index_queue',
+  {
+    pageId: uuid('page_id').primaryKey(),
+    requestedAt: timestamp('requested_at', { withTimezone: true, precision: 3 })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    requestedAtIdx: index('search_index_queue_requested_at_idx').on(table.requestedAt),
+  }),
+);
+
+export const folderSearchIndexQueue = pgTable(
+  'folder_search_index_queue',
+  {
+    folderId: uuid('folder_id').primaryKey(),
+    requestedAt: timestamp('requested_at', { withTimezone: true, precision: 3 })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => ({
+    requestedAtIdx: index('folder_search_index_queue_requested_at_idx').on(table.requestedAt),
+  }),
+);
+
+export const searchIndexState = pgTable('search_index_state', {
+  indexUid: text('index_uid').primaryKey(),
+  generation: text('generation').notNull(),
+});
 
 export const apiTokenAuditEvents = pgTable(
   'api_token_audit_events',

@@ -118,6 +118,27 @@ export const v1FolderResolutionResponseSchema = z
   .object({ data: z.array(v1FolderResolutionItemSchema) })
   .strict();
 
+export const v1SearchTextMatchSchema = z
+  .object({ start: z.number().int().nonnegative(), end: z.number().int().positive() })
+  .strict();
+export const v1SearchSnippetSchema = z
+  .object({ text: z.string(), matches: z.array(v1SearchTextMatchSchema).min(1) })
+  .strict();
+export const v1SearchResultSchema = z.discriminatedUnion('type', [
+  v1PageResolutionItemSchema.extend({
+    type: z.literal('page'),
+    titleMatches: z.array(v1SearchTextMatchSchema).min(1).optional(),
+    snippet: v1SearchSnippetSchema.optional(),
+  }),
+  v1FolderResolutionItemSchema.extend({
+    type: z.literal('folder'),
+    titleMatches: z.array(v1SearchTextMatchSchema).min(1).optional(),
+  }),
+]);
+export const v1SearchResponseSchema = z.object({ data: z.array(v1SearchResultSchema) }).strict();
+export type V1SearchTextMatch = z.infer<typeof v1SearchTextMatchSchema>;
+export type V1SearchSnippet = z.infer<typeof v1SearchSnippetSchema>;
+
 export const v1ParentRequestSchema = z
   .object({ parentId: v1UuidSchema.nullable() })
   .strict()

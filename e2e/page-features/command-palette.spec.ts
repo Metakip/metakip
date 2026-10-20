@@ -6,7 +6,9 @@ test.describe('Command palette', () => {
     await createNewPage(page);
 
     await page.keyboard.press('Control+K');
-    await expect(page.getByPlaceholder('Search pages...')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('combobox', { name: 'Search pages and folders' })).toBeVisible({
+      timeout: 5000,
+    });
 
     const newPageAction = page.getByText('New Page').first();
     await expect(newPageAction).toBeVisible({ timeout: 5000 });
@@ -20,7 +22,9 @@ test.describe('Command palette', () => {
     await createNewPage(page);
 
     await page.keyboard.press('Control+K');
-    await expect(page.getByPlaceholder('Search pages...')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('combobox', { name: 'Search pages and folders' })).toBeVisible({
+      timeout: 5000,
+    });
 
     const goToTrash = page.getByText('Go to Trash');
     await expect(goToTrash).toBeVisible({ timeout: 5000 });

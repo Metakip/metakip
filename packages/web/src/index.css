@@ -265,6 +265,12 @@
   }
 }
 
+/* Keep the palette's search field borderless while retaining global focus rings elsewhere. */
+.command-palette-search-input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
 @keyframes fade-in {
   from {
     opacity: 0;

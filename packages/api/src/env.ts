@@ -37,6 +37,27 @@ export function requireMcpApiInternalSecret(): string {
   );
 }
 
+export function requireMeilisearchConfiguration(): { url: string; apiKey: string } {
+  const url = process.env.MEILISEARCH_URL?.trim();
+  const apiKey = process.env.MEILI_MASTER_KEY?.trim();
+  if (!url || !apiKey) {
+    throw new Error('MEILISEARCH_URL and MEILI_MASTER_KEY are required');
+  }
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(url);
+  } catch {
+    throw new Error('MEILISEARCH_URL must be a valid HTTP(S) URL');
+  }
+  if (parsedUrl.protocol !== 'http:' && parsedUrl.protocol !== 'https:') {
+    throw new Error('MEILISEARCH_URL must use HTTP or HTTPS');
+  }
+  if (apiKey.length < 32) {
+    throw new Error('MEILI_MASTER_KEY must be at least 32 characters');
+  }
+  return { url, apiKey };
+}
+
 export function requireInvitationTokenEncryptionKey(): string {
   const key = process.env.INVITATION_TOKEN_ENCRYPTION_KEY;
   if (!key || key.length < 32) {

@@ -1,0 +1,20 @@
+[Unit]
+Description=Metakip Meilisearch
+After=network-online.target metakip-pod.service
+Requires=metakip-pod.service
+
+[Container]
+Image=docker.io/getmeili/meilisearch:v1.12.8
+ContainerName=metakip-meilisearch
+Pod=metakip.pod
+Environment=MEILI_ENV=production
+EnvironmentFile=/var/www/metakip/.env
+Volume=meilisearch-data:/meili_data:Z
+
+[Service]
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=300
+
+[Install]
+WantedBy=default.target

@@ -34,7 +34,6 @@ export { contentBoundaryOperationSchema };
 export const pageResponseSchema = v1PageResponseSchema;
 export const pageListResponseSchema = v1PageListResponseSchema;
 export const pageResolutionResponseSchema = v1PageResolutionResponseSchema;
-export const pageSearchResponseSchema = pageResolutionResponseSchema;
 
 export type CreatePageRequest = z.infer<typeof createPageRequestSchema>;
 export type UpdatePageRequest = z.infer<typeof updatePageRequestSchema>;
@@ -93,31 +92,6 @@ export const pageOperations = {
       '200': {
         description: 'A page of accessible pages and the cursor for the next page.',
         content: jsonContent(pageListResponseSchema),
-      },
-    },
-  },
-  search: {
-    method: 'get',
-    routePath: '/search',
-    openApiPath: '/pages/search',
-    summary: 'Search Pages By Title',
-    description:
-      'Returns accessible, non-deleted pages whose titles match the query. Search uses English full-text matching with a partial-title fallback and returns at most 20 results ordered by relevance.',
-    tags: pagesTag,
-    requiredScopes: ['pages:read'],
-    parameters: [
-      {
-        name: 'q',
-        in: 'query',
-        description:
-          'Text to search for in page titles. Blank or omitted queries return no results.',
-        schema: { type: 'string' },
-      },
-    ],
-    responses: {
-      '200': {
-        description: 'Accessible pages with matching titles and computed folder paths.',
-        content: jsonContent(pageSearchResponseSchema),
       },
     },
   },

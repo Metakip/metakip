@@ -8,7 +8,9 @@ import {
   requireCollaborationInternalSecret,
   requireInvitationEmailConfiguration,
   requireMcpApiInternalSecret,
+  requireMeilisearchConfiguration,
 } from './env';
+import { startSearchIndexWorker } from './search/searchIndexer';
 import {
   drainOperationalRetention,
   OPERATIONAL_RETENTION_INTERVAL_MS,
@@ -129,6 +131,8 @@ async function main() {
 
   const port = Number(process.env.PORT ?? 3001);
 
+  startSearchIndexWorker();
+
   serve({
     fetch: app.fetch,
     port,
@@ -159,6 +163,7 @@ requireCollaborationInternalSecret();
 invitationTokenEncryptionKeys();
 if (process.env.NODE_ENV === 'production') requireInvitationEmailConfiguration();
 requireMcpApiInternalSecret();
+if (process.env.NODE_ENV === 'production') requireMeilisearchConfiguration();
 getUploadStorage();
 main();
 

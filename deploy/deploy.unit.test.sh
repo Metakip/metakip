@@ -26,4 +26,5 @@ grep -Fqx 'HealthCmd=CMD-SHELL pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB
     "$SCRIPT_DIR/quadlet/metakip-postgres.container"
 
 bash "$SCRIPT_DIR/migrate-editor-content.unit.test.sh"
+bash "$SCRIPT_DIR/meilisearch-secret.test.sh"
 bash "$SCRIPT_DIR/migrations/markdawn-to-metakip.unit.test.sh"

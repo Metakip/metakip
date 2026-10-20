@@ -60,6 +60,16 @@ export function yDocToMarkdown(update: Uint8Array, options: MarkdownRenderOption
   }
 }
 
+export function yDocToSearchText(update: Uint8Array): string {
+  const doc = new Y.Doc();
+  try {
+    Y.applyUpdate(doc, update);
+    return normalizeCollaborativeMarkdown(doc.getText(COLLABORATIVE_CONTENT_FIELD).toString());
+  } finally {
+    doc.destroy();
+  }
+}
+
 export function extractConnectionsFromYDoc(update: Uint8Array): ConnectionDraft[] {
   const doc = new Y.Doc();
   try {

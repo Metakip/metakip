@@ -1,5 +1,7 @@
 package main
 
+import "encoding/json"
+
 type page struct {
 	ID         string         `json:"id"`
 	ParentID   *string        `json:"parentId"`
@@ -25,6 +27,54 @@ type pageResolutionItem struct {
 
 type pageResolution struct {
 	Data []pageResolutionItem `json:"data"`
+}
+
+type searchResult struct {
+	Type         string            `json:"type"`
+	ID           string            `json:"id"`
+	Title        string            `json:"title,omitempty"`
+	Name         string            `json:"name,omitempty"`
+	Icon         *string           `json:"icon"`
+	FolderPath   string            `json:"folderPath"`
+	TitleMatches []searchTextMatch `json:"titleMatches,omitempty"`
+	Snippet      *searchSnippet    `json:"snippet,omitempty"`
+	raw          json.RawMessage
+}
+
+type searchTextMatch struct {
+	Start int `json:"start"`
+	End   int `json:"end"`
+}
+
+type searchSnippet struct {
+	Text    string            `json:"text"`
+	Matches []searchTextMatch `json:"matches"`
+}
+
+func (result *searchResult) UnmarshalJSON(data []byte) error {
+	type searchResultAlias searchResult
+	var decoded searchResultAlias
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	*result = searchResult(decoded)
+	result.raw = append(json.RawMessage(nil), data...)
+	return nil
+}
+
+func (result searchResult) MarshalJSON() ([]byte, error) {
+	if len(result.raw) > 0 {
+		return result.raw, nil
+	}
+	type searchResultAlias searchResult
+	return json.Marshal(searchResultAlias(result))
+}
+
+func (result searchResult) displayName() string {
+	if result.Title != "" {
+		return result.Title
+	}
+	return result.Name
 }
 
 type folder struct {

@@ -6,6 +6,7 @@ import { folderOperations } from './folderContracts';
 import { lifecycleOperations } from './lifecycleContracts';
 import { getMeOperation } from './meContract';
 import { pageOperations, pageResponseSchema } from './pageContracts';
+import { searchOperation } from './searchContracts';
 import { sharingOperations } from './sharingContracts';
 import { tokenOperations } from './tokenContracts';
 
@@ -51,6 +52,11 @@ export const openApiV1 = {
       name: 'Folders',
       description: 'List, create, and update folders.',
       'x-metakip-docs-slug': 'folders',
+    },
+    {
+      name: 'Search',
+      description: 'Search accessible page content and folder names.',
+      'x-metakip-docs-slug': 'search',
     },
     {
       name: 'Sharing',
@@ -104,6 +110,7 @@ export const openApiV1 = {
   paths: buildOpenApiPaths([
     getMeOperation,
     ...Object.values(pageOperations),
+    searchOperation,
     ...Object.values(commentOperations),
     ...Object.values(folderOperations),
     ...Object.values(sharingOperations),

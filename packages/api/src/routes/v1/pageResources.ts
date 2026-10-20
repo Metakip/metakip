@@ -80,34 +80,6 @@ pageResourcesRoute.get(
   },
 );
 
-pageResourcesRoute.get(
-  pageOperations.search.routePath,
-  requireV1OperationScope(pageOperations.search),
-  async (c) => {
-    const principal = c.get('v1Principal');
-    const textQuery = c.req.query('q')?.trim() ?? '';
-    if (!textQuery) return c.json({ data: [] });
-
-    const searchPattern = `%${textQuery}%`;
-    const result = await query<AccessiblePagePathRow & { rank: number | null }>(
-      sql`${accessiblePagePathsCte(principal.userId)}
-      select p.*,
-        ts_rank(p.title_search, plainto_tsquery('english', ${textQuery})) as rank
-      from accessible_page_paths p
-      where (
-        p.title_search @@ plainto_tsquery('english', ${textQuery})
-        or p.title ilike ${searchPattern}
-      )
-      order by rank desc nulls last, p.updated_at desc, p.id
-      limit 20`,
-    );
-
-    return c.json({
-      data: result.rows.map((row) => ({ ...pageDto(row), folderPath: row.folder_path })),
-    });
-  },
-);
-
 pageResourcesRoute.post(
   pageOperations.create.routePath,
   requireV1OperationScope(pageOperations.create),
