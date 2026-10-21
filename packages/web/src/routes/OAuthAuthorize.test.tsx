@@ -68,7 +68,7 @@ describe('OAuthAuthorize', () => {
     );
 
     const writeScope = await screen.findByRole('checkbox', {
-      name: 'Modify pages and folders (includes comment access)',
+      name: 'Write Access',
     });
     expect(writeScope).toBeChecked();
 
@@ -79,7 +79,7 @@ describe('OAuthAuthorize', () => {
     await waitFor(() =>
       expect(
         screen.getByRole('checkbox', {
-          name: 'Modify pages and folders (includes comment access)',
+          name: 'Write Access',
         }),
       ).toBeChecked(),
     );
@@ -102,9 +102,7 @@ describe('OAuthAuthorize', () => {
     );
 
     expect(await screen.findByRole('heading', { name: 'Test application' })).toBeInTheDocument();
-    expect(
-      screen.queryByText('Modify pages and folders (includes comment access)'),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('checkbox', { name: 'Write Access' })).not.toBeInTheDocument();
     expect(fetch).toHaveBeenCalledWith('/api/auth/oauth2/public-client?client_id=client-1');
 
     await user.click(screen.getByRole('button', { name: 'Connect' }));
@@ -166,9 +164,7 @@ describe('OAuthAuthorize', () => {
         'This application is requesting access to your Metakip pages, folders, and comments.',
       ),
     ).toBeInTheDocument();
-    expect(
-      screen.getByRole('checkbox', { name: 'Read and comment on pages and folders' }),
-    ).toBeChecked();
+    expect(screen.getByRole('checkbox', { name: 'Comment Access' })).toBeChecked();
     expect(screen.getByRole('button', { name: 'Connect' })).toBeEnabled();
 
     await user.click(screen.getByRole('button', { name: 'Connect' }));
@@ -179,5 +175,58 @@ describe('OAuthAuthorize', () => {
         scope: 'pages:comment openid',
       }),
     );
+  });
+
+  it('selects prerequisite access levels and clears dependent levels when unchecked', async () => {
+    mocks.consent.mockResolvedValue({ error: { message: 'Stop before redirect' } });
+
+    render(
+      <MemoryRouter
+        initialEntries={[
+          '/oauth/authorize?client_id=client-1&scope=pages%3Aread+pages%3Acomment+pages%3Awrite',
+        ]}
+      >
+        <Routes>
+          <Route path="/oauth/authorize" element={<OAuthAuthorize />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    const readAccess = await screen.findByRole('checkbox', { name: 'Read Access' });
+    const commentAccess = screen.getByRole('checkbox', { name: 'Comment Access' });
+    const writeAccess = screen.getByRole('checkbox', { name: 'Write Access' });
+
+    expect(readAccess).toBeChecked();
+    expect(commentAccess).toBeChecked();
+    expect(writeAccess).toBeChecked();
+
+    fireEvent.click(writeAccess);
+    expect(readAccess).toBeChecked();
+    expect(commentAccess).toBeChecked();
+    expect(writeAccess).not.toBeChecked();
+
+    fireEvent.click(commentAccess);
+    expect(readAccess).toBeChecked();
+    expect(commentAccess).not.toBeChecked();
+    expect(writeAccess).not.toBeChecked();
+
+    fireEvent.click(commentAccess);
+    expect(readAccess).toBeChecked();
+    expect(commentAccess).toBeChecked();
+    expect(writeAccess).not.toBeChecked();
+
+    fireEvent.click(writeAccess);
+    expect(readAccess).toBeChecked();
+    expect(commentAccess).toBeChecked();
+    expect(writeAccess).toBeChecked();
+
+    fireEvent.click(commentAccess);
+    expect(readAccess).toBeChecked();
+    expect(commentAccess).not.toBeChecked();
+    expect(writeAccess).not.toBeChecked();
+
+    fireEvent.click(readAccess);
+    expect(readAccess).not.toBeChecked();
+    expect(screen.getByRole('button', { name: 'Connect' })).toBeDisabled();
   });
 });

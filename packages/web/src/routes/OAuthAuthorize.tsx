@@ -19,9 +19,9 @@ type PublicClient = {
 };
 
 function scopeLabel(scope: string): string {
-  if (scope === READ_SCOPE) return 'Read pages and folders';
-  if (scope === COMMENT_SCOPE) return 'Read and comment on pages and folders';
-  if (scope === WRITE_SCOPE) return 'Modify pages and folders (includes comment access)';
+  if (scope === READ_SCOPE) return 'Read Access';
+  if (scope === COMMENT_SCOPE) return 'Comment Access';
+  if (scope === WRITE_SCOPE) return 'Write Access';
   return scope;
 }
 
@@ -240,20 +240,27 @@ export default function OAuthAuthorize() {
                   <input
                     type="checkbox"
                     checked={selectedScopes.includes(scope)}
-                    disabled={
-                      isSubmitting ||
-                      (scope === READ_SCOPE &&
-                        (selectedScopes.includes(COMMENT_SCOPE) ||
-                          selectedScopes.includes(WRITE_SCOPE))) ||
-                      (scope === COMMENT_SCOPE && selectedScopes.includes(WRITE_SCOPE))
-                    }
-                    onChange={(event) =>
+                    disabled={isSubmitting}
+                    onChange={(event) => {
+                      const isChecked = event.currentTarget.checked;
                       setSelectedScopes((current) =>
-                        event.target.checked
-                          ? [...current, scope]
-                          : current.filter((item) => item !== scope),
-                      )
-                    }
+                        isChecked
+                          ? [
+                              ...new Set([
+                                ...current,
+                                ...PAGE_SCOPES_ORDER.slice(
+                                  0,
+                                  PAGE_SCOPES_ORDER.indexOf(scope) + 1,
+                                ).filter((item) => requestedPermissionScopes.includes(item)),
+                              ]),
+                            ]
+                          : current.filter(
+                              (item) =>
+                                !PAGE_SCOPES.has(item) ||
+                                PAGE_SCOPES_ORDER.indexOf(item) < PAGE_SCOPES_ORDER.indexOf(scope),
+                            ),
+                      );
+                    }}
                     className="mt-0.5 h-4 w-4 cursor-pointer"
                   />
                   <span>
