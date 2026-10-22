@@ -70,7 +70,7 @@ export const USE_CASES = [
       {
         kind: 'external',
         label: 'Read About The CLI →',
-        url: `${DOCS_ORIGIN}/agents/metakip-cli/`,
+        url: `${DOCS_ORIGIN}/agents/cli/`,
       } satisfies MarketingLink,
     ],
   },
@@ -85,8 +85,8 @@ export const USE_CASES = [
     links: [
       {
         kind: 'external',
-        label: 'Read About Agent Access →',
-        url: `${DOCS_ORIGIN}/agents/use-metakip-with-ai-assistants/`,
+        label: 'Connect Agents To Metakip →',
+        url: `${DOCS_ORIGIN}/agents/`,
       } satisfies MarketingLink,
     ],
   },

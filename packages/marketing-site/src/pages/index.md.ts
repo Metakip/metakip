@@ -16,7 +16,7 @@ const markdown = renderMarkdownPage({
   footerTitle: 'Next step',
   footerLinks: [
     { kind: 'app', label: 'Open Metakip' },
-    { kind: 'external', label: 'Read The CLI Guide', url: `${DOCS_ORIGIN}/agents/metakip-cli/` },
+    { kind: 'external', label: 'Read The CLI Guide', url: `${DOCS_ORIGIN}/agents/cli/` },
     { kind: 'internal', label: 'See Who Metakip Is For', path: '/use-cases' },
   ],
 });

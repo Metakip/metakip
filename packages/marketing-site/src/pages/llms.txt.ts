@@ -60,9 +60,9 @@ ${pricingLines}
 
 - [Documentation Home](${DOCS_ORIGIN}/): Guides, API reference, comparisons, and self-hosting documentation.
 - [MCP](${DOCS_ORIGIN}/agents/mcp/): Connect to Metakip through OAuth and MCP.
-- [Metakip CLI](${DOCS_ORIGIN}/agents/metakip-cli/): Install the CLI and manage pages from a terminal.
+- [Metakip CLI](${DOCS_ORIGIN}/agents/cli/): Install the CLI and manage pages from a terminal.
 - [API Reference](${DOCS_ORIGIN}/api-reference/endpoints/): Direct HTTP interface for Metakip resources.
-- [AI Assistant Access](${DOCS_ORIGIN}/agents/use-metakip-with-ai-assistants/): Connect terminal-based assistants with scoped tokens and safe edits.
+- [Connect Agents To Metakip](${DOCS_ORIGIN}/agents/): Connect agents through MCP, the CLI, or the API.
 - [markdown support](${DOCS_ORIGIN}/getting-started/markdown-support/): Supported syntax, page links, frontmatter, and known limitations.
 - [Self-hosting](${DOCS_ORIGIN}/self-hosting/): Deployment, maintenance, and migration guidance.
 

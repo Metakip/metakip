@@ -7,7 +7,7 @@ Metakip gives you pages for information you want to keep, connect, and share. Th
 
 You can write pages in the browser, group them in folders, connect related pages, and share them with other people. If you already have notes, import them instead of starting over.
 
-If you use an AI assistant, Metakip also gives it a way to work with the same pages through the CLI. You can leave that setup until you need it.
+If you use an AI agent, Metakip also gives it a way to work with the same pages through MCP or the CLI. You can leave that setup until you need it.
 
 ## Before You Begin
 
@@ -34,6 +34,6 @@ Start with one useful page. You can change the structure later.
 ## When You Are Ready For Automation
 
 Use [MCP](/agents/mcp/) when an AI assistant can connect to a remote MCP
-service. Use the [Metakip CLI](/agents/metakip-cli/) for terminal workflows,
+service. Use the [Metakip CLI](/agents/cli/) for terminal workflows,
 or the [API Reference](/api-reference/endpoints/) when you are building an
 integration or script.

@@ -99,4 +99,4 @@ For portable content, prefer headings, paragraphs, lists, links, images, tables,
 
 - [Create A Page In Metakip](/getting-started/create-your-first-page/) shows page titles and page links in a first page.
 - [Bring Your Notes to Metakip](/getting-started/bring-your-notes/) explains what to check after an import.
-- [Metakip CLI](/agents/metakip-cli/) shows how to import and export markdown from a terminal.
+- [Metakip CLI](/agents/cli/) shows how to import and export markdown from a terminal.

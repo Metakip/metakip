@@ -22,10 +22,12 @@ connection.
 ## Permissions
 
 - **Read access** lets an assistant read pages, folders, and workspace identity.
+- **Comment access** lets an assistant read and participate in page comment
+  threads without permission to edit page content. It includes read access.
 - **Write access** lets an assistant create, edit, move, import, and remove
   pages and folders, manage page, folder, and workspace sharing and invitations,
   change inheritance, and control public-link access. Write access includes read
-  access.
+  and comment access.
 
 Some assistants may also ask to stay connected. This lets the connection
 refresh its access after a browser session expires. It does not grant access to
@@ -48,7 +50,9 @@ MCP provides workspace operations for:
   and removing a shared item from your view.
 - Moving, copying, restoring, and removing pages and folders.
 - Listing and managing Trash.
-- Importing Markdown and Obsidian content.
+- Reading and managing page comment threads with Comment access.
+- Importing Markdown and Obsidian content, including supported images in a
+  folder import.
 - Exporting a page or the workspace.
 
 Mutations preserve Metakip's idempotency and conflict rules. If an operation

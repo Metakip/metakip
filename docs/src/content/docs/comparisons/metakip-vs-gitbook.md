@@ -187,9 +187,8 @@ Both can support AI retrieval. GitBook provides Markdown documentation, publishe
 - [Markdown Support](/getting-started/markdown-support/) for supported syntax and page links.
 - [Organize Metakip Pages And Folders](/getting-started/organize-pages-and-folders/) for shared knowledge structure.
 - [Share A Metakip Page](/getting-started/share-a-page/) for View, Edit, and Admin access.
-- [Metakip CLI](/agents/metakip-cli/) for terminal workflows.
 - [API Reference](/api-reference/endpoints/) for automation and integrations.
-- [Use Metakip With AI Assistants](/agents/use-metakip-with-ai-assistants/) for controlled AI assistant access.
+- [Connect Agents To Metakip](/agents/) for MCP, CLI, and API options.
 - [Self-Host Metakip](/self-hosting/) for deployment ownership.
 
 ## Sources And Further Reading

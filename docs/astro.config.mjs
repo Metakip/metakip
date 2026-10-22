@@ -18,8 +18,10 @@ export default defineConfig({
   site: 'https://docs.metakip.com',
   redirects: {
     '/api-reference/': '/api-reference/endpoints/',
-    '/agents/markdawn-cli/': '/agents/metakip-cli/',
-    '/agents/use-markdawn-with-ai-assistants/': '/agents/use-metakip-with-ai-assistants/',
+    '/agents/markdawn-cli/': '/agents/cli/',
+    '/agents/metakip-cli/': '/agents/cli/',
+    '/agents/use-markdawn-with-ai-assistants/': '/agents/',
+    '/agents/use-metakip-with-ai-assistants/': '/agents/',
     '/self-hosting/deploy-markdawn-on-a-vps/': '/self-hosting/deploy-metakip-on-a-vps/',
     '/self-hosting/maintain-a-self-hosted-markdawn/':
       '/self-hosting/maintain-a-self-hosted-metakip/',
@@ -95,11 +97,7 @@ export default defineConfig({
           items: [
             { label: 'Agents', link: '/agents/' },
             { label: 'MCP', link: '/agents/mcp/' },
-            { label: 'Metakip CLI', link: '/agents/metakip-cli/' },
-            {
-              label: 'Use Metakip With AI Assistants',
-              link: '/agents/use-metakip-with-ai-assistants/',
-            },
+            { label: 'CLI', link: '/agents/cli/' },
           ],
         },
         {

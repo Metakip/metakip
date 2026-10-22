@@ -39,4 +39,4 @@ If you later change the page to **Restricted**, people who only had public-link 
 
 A folder can affect access to the pages inside it. Check the access shown in the sharing dialog when you share a folder or a page inside a shared folder.
 
-For a page that should be available to a terminal-based AI tool, start with a read-only API token instead of making the page public. See [Use Metakip With AI Assistants](/agents/use-metakip-with-ai-assistants/).
+For a page that should be available to a terminal-based AI agent, start with a read-only API token instead of making the page public. See [Metakip CLI: Install And Manage Pages](/agents/cli/).
