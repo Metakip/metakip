@@ -96,6 +96,30 @@ body {
   background: var(--color-surface);
 }
 
+.mode-paired-image {
+  margin: 1rem 0;
+}
+
+.mode-paired-image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+  border-radius: 0.75rem;
+}
+
+.mode-paired-image .mode-paired-image__dark {
+  display: none;
+}
+
+:root[data-theme='dark'] .mode-paired-image .mode-paired-image__light {
+  display: none;
+}
+
+:root[data-theme='dark'] .mode-paired-image .mode-paired-image__dark {
+  display: block;
+}
+
 .mobile-section-switcher {
   display: none;
 }

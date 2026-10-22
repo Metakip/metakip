@@ -39,7 +39,7 @@ export const FEATURE_GROUPS = [
       {
         kind: 'external',
         label: 'Read About The CLI →',
-        url: `${DOCS_ORIGIN}/agents/metakip-cli/`,
+        url: `${DOCS_ORIGIN}/agents/cli/`,
       },
       {
         kind: 'external',
@@ -123,8 +123,8 @@ export const FEATURE_GROUPS = [
     links: [
       {
         kind: 'external',
-        label: 'Read About Agent Access →',
-        url: `${DOCS_ORIGIN}/agents/use-metakip-with-ai-assistants/`,
+        label: 'Connect Agents To Metakip →',
+        url: `${DOCS_ORIGIN}/agents/`,
       },
     ],
   },

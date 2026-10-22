@@ -145,9 +145,8 @@ Metakip does not currently describe Apple Notes as a first-class native import. 
 - [Markdown Support](/getting-started/markdown-support/) for supported syntax.
 - [Organize Metakip Pages And Folders](/getting-started/organize-pages-and-folders/) for shared project structure.
 - [Share A Metakip Page](/getting-started/share-a-page/) for view, edit, and admin access.
-- [Metakip CLI](/agents/metakip-cli/) for terminal workflows.
 - [API Reference](/api-reference/endpoints/) for automation and integrations.
-- [Use Metakip With AI Assistants](/agents/use-metakip-with-ai-assistants/) for controlled AI assistant access.
+- [Connect Agents To Metakip](/agents/) for MCP, CLI, and API options.
 
 ## Sources And Further Reading
 

@@ -49,4 +49,4 @@ Start with one small cleanup pass:
 
 Do not reorganize everything at once. Keep using Metakip and improve the structure when you notice a real problem.
 
-For the syntax available after importing, see [Markdown Support](/getting-started/markdown-support/). For a repeatable terminal workflow, see [Metakip CLI](/agents/metakip-cli/).
+For the syntax available after importing, see [Markdown Support](/getting-started/markdown-support/). For a repeatable terminal workflow, see [Metakip CLI](/agents/cli/).

@@ -100,7 +100,7 @@ export const CHANGELOG_ENTRIES: readonly ChangelogEntry[] = [
       {
         kind: 'external',
         label: 'Read The CLI Guide →',
-        url: `${DOCS_ORIGIN}/agents/metakip-cli/`,
+        url: `${DOCS_ORIGIN}/agents/cli/`,
       },
       pullRequestLink(161),
     ],
@@ -151,7 +151,7 @@ export const CHANGELOG_ENTRIES: readonly ChangelogEntry[] = [
       {
         kind: 'external',
         label: 'Read The CLI Guide →',
-        url: `${DOCS_ORIGIN}/agents/metakip-cli/`,
+        url: `${DOCS_ORIGIN}/agents/cli/`,
       },
       {
         kind: 'external',
@@ -219,8 +219,8 @@ export const CHANGELOG_ENTRIES: readonly ChangelogEntry[] = [
       },
       {
         kind: 'external',
-        label: 'Use Metakip With AI Assistants →',
-        url: `${DOCS_ORIGIN}/agents/use-metakip-with-ai-assistants/`,
+        label: 'Connect Agents To Metakip →',
+        url: `${DOCS_ORIGIN}/agents/`,
       },
       pullRequestLink(141),
     ],
@@ -254,7 +254,7 @@ export const CHANGELOG_ENTRIES: readonly ChangelogEntry[] = [
       {
         kind: 'external',
         label: 'Read The Metakip CLI Guide →',
-        url: `${DOCS_ORIGIN}/agents/metakip-cli/`,
+        url: `${DOCS_ORIGIN}/agents/cli/`,
       },
       pullRequestLink(135),
     ],
@@ -272,7 +272,7 @@ export const CHANGELOG_ENTRIES: readonly ChangelogEntry[] = [
       {
         kind: 'external',
         label: 'Read The Metakip CLI Guide →',
-        url: `${DOCS_ORIGIN}/agents/metakip-cli/`,
+        url: `${DOCS_ORIGIN}/agents/cli/`,
       },
       {
         kind: 'external',
@@ -294,13 +294,13 @@ export const CHANGELOG_ENTRIES: readonly ChangelogEntry[] = [
     links: [
       {
         kind: 'external',
-        label: 'Learn About AI Assistant Access →',
-        url: `${DOCS_ORIGIN}/agents/use-metakip-with-ai-assistants/`,
+        label: 'Connect Agents To Metakip →',
+        url: `${DOCS_ORIGIN}/agents/`,
       },
       {
         kind: 'external',
         label: 'Read The CLI Guide →',
-        url: `${DOCS_ORIGIN}/agents/metakip-cli/`,
+        url: `${DOCS_ORIGIN}/agents/cli/`,
       },
       pullRequestLink(123),
     ],
@@ -317,7 +317,7 @@ export const CHANGELOG_ENTRIES: readonly ChangelogEntry[] = [
       {
         kind: 'external',
         label: 'Install And Use The CLI →',
-        url: `${DOCS_ORIGIN}/agents/metakip-cli/`,
+        url: `${DOCS_ORIGIN}/agents/cli/`,
       },
       pullRequestLink(122),
     ],

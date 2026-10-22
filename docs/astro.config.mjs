@@ -18,8 +18,11 @@ export default defineConfig({
   site: 'https://docs.metakip.com',
   redirects: {
     '/api-reference/': '/api-reference/endpoints/',
-    '/agents/markdawn-cli/': '/agents/metakip-cli/',
-    '/agents/use-markdawn-with-ai-assistants/': '/agents/use-metakip-with-ai-assistants/',
+    '/agents/markdawn-cli/': '/agents/cli/',
+    '/agents/metakip-cli/': '/agents/cli/',
+    '/agents/use-markdawn-with-ai-assistants/': '/agents/',
+    '/agents/use-metakip-with-ai-assistants/': '/agents/',
+    '/agents/chatgpt/': '/agents/chatgpt-web/',
     '/self-hosting/deploy-markdawn-on-a-vps/': '/self-hosting/deploy-metakip-on-a-vps/',
     '/self-hosting/maintain-a-self-hosted-markdawn/':
       '/self-hosting/maintain-a-self-hosted-metakip/',
@@ -95,11 +98,18 @@ export default defineConfig({
           items: [
             { label: 'Agents', link: '/agents/' },
             { label: 'MCP', link: '/agents/mcp/' },
-            { label: 'Metakip CLI', link: '/agents/metakip-cli/' },
-            {
-              label: 'Use Metakip With AI Assistants',
-              link: '/agents/use-metakip-with-ai-assistants/',
-            },
+            { label: 'CLI', link: '/agents/cli/' },
+            { label: 'MCP vs CLI', link: '/agents/mcp-vs-cli/' },
+            { label: 'ChatGPT Web', link: '/agents/chatgpt-web/' },
+            { label: 'ChatGPT Desktop App', link: '/agents/chatgpt-app/' },
+            { label: 'Claude Web and Desktop', link: '/agents/claude/' },
+            { label: 'Claude Code', link: '/agents/claude-code/' },
+            { label: 'Grok', link: '/agents/grok/' },
+            { label: 'Grok Build', link: '/agents/grok-build/' },
+            { label: 'Hermes Agent', link: '/agents/hermes/' },
+            { label: 'OpenCode', link: '/agents/opencode/' },
+            { label: 'OpenClaw', link: '/agents/openclaw/' },
+            { label: 'Pi', link: '/agents/pi/' },
           ],
         },
         {

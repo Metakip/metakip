@@ -14,9 +14,19 @@ Use this documentation to answer questions about Metakip's browser workflows, ma
 ## Agent Connections
 
 - [MCP](https://docs.metakip.com/agents/mcp/): Connect to Metakip through OAuth and review its available MCP operations.
-- [Metakip CLI](https://docs.metakip.com/agents/metakip-cli/): Install the CLI, sign in, read and edit pages, and import or export content.
+- [Metakip CLI](https://docs.metakip.com/agents/cli/): Install the CLI, sign in, read and edit pages, and import or export content.
+- [MCP vs CLI](https://docs.metakip.com/agents/mcp-vs-cli/): Compare MCP and the CLI, including standalone image upload.
 - [API Reference](https://docs.metakip.com/api-reference/endpoints/): Read and change pages, folders, markdown content, imports, exports, and API tokens.
-- [Use Metakip With AI Assistants](https://docs.metakip.com/agents/use-metakip-with-ai-assistants/): Connect a terminal-based AI tool using the CLI and scoped API tokens.
+- [How To Use Metakip With ChatGPT Web](https://docs.metakip.com/agents/chatgpt-web/): Connect ChatGPT on the web with a custom MCP server.
+- [How To Use Metakip With ChatGPT Desktop App](https://docs.metakip.com/agents/chatgpt-app/): Use the plugin in regular chats; choose the plugin or CLI in terminal-enabled Work or Codex.
+- [How To Use Metakip With Claude Web and Desktop](https://docs.metakip.com/agents/claude/): Connect Claude on the web and desktop to Metakip using a remote MCP connector.
+- [How To Use Metakip With Claude Code](https://docs.metakip.com/agents/claude-code/): Connect Claude Code with MCP or its terminal CLI.
+- [How To Use Metakip With Grok](https://docs.metakip.com/agents/grok/): Connect Grok to Metakip with a custom MCP connector.
+- [How To Use Metakip With Grok Build](https://docs.metakip.com/agents/grok-build/): Connect Grok Build through MCP or its terminal CLI.
+- [How To Use Metakip With Hermes Agent](https://docs.metakip.com/agents/hermes/): Connect Hermes Agent through remote MCP or the Metakip CLI.
+- [How To Use Metakip With OpenCode](https://docs.metakip.com/agents/opencode/): Connect OpenCode through remote MCP or the Metakip CLI.
+- [How To Use Metakip With OpenClaw](https://docs.metakip.com/agents/openclaw/): Connect OpenClaw through Gateway-managed remote MCP or the Metakip CLI.
+- [How To Use Metakip With Pi](https://docs.metakip.com/agents/pi/): Connect Pi through its built-in MCP client or the Metakip CLI.
 - [API Markdown](https://docs.metakip.com/api-reference/endpoints.md): Plain Markdown representation of the API overview.
 
 ## Self-Hosting
@@ -32,4 +42,4 @@ Use this documentation to answer questions about Metakip's browser workflows, ma
 
 ## Machine-Readable Pages
 
-Every documentation page also has a plain Markdown representation at the same path with `.md` instead of the trailing slash. For example, `/agents/metakip-cli/` is also available at `/agents/metakip-cli.md`.
+Every documentation page also has a plain Markdown representation at the same path with `.md` instead of the trailing slash. For example, `/agents/cli/` is also available at `/agents/cli.md`.

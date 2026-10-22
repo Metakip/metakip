@@ -1,10 +1,10 @@
 ---
-title: Connect Tools To Metakip
-description: Choose MCP, the CLI, or the API to let AI assistants and scripts work with your Metakip pages.
+title: Connect Agents To Metakip
+description: Choose MCP, the CLI, or the API to connect AI agents and scripts to your Metakip pages.
 ---
 
-Metakip keeps people and tools on the same pages. Write in the browser, then
-let an assistant, terminal, or script find and update that content without
+Metakip keeps people and AI agents on the same pages. Write in the browser,
+then let an assistant, terminal, or script find and update that content without
 creating a second copy.
 
 Choose the connection that fits the way you work.
@@ -30,7 +30,9 @@ Use the Metakip CLI when you work from a terminal or when an assistant can
 run command-line tools. The CLI can read and update pages, manage folders,
 import and export content, and make targeted edits.
 
-[Install and use the CLI](/agents/metakip-cli/).
+[Install and use the CLI](/agents/cli/).
+
+For a comparison of MCP and the CLI, see [MCP vs CLI](/agents/mcp-vs-cli/).
 
 ## API Reference
 

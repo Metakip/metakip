@@ -472,7 +472,7 @@ function renderOverview(): string {
     '  -H "Authorization: Bearer $METAKIP_TOKEN"',
     '```',
     '',
-    'Use the [Metakip CLI](/agents/metakip-cli/) when you want a terminal workflow instead of making HTTP requests directly.',
+    'Use the [Metakip CLI](/agents/cli/) when you want a terminal workflow instead of making HTTP requests directly.',
     '',
     '## Endpoint Groups',
     '',
