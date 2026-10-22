@@ -164,5 +164,6 @@ Do not paste a token into a chat, commit it to a repository, or put it directly 
 ## Related Guides
 
 - [Connect Agents To Metakip](/agents/) compares MCP, the CLI, and the API.
+- [MCP vs CLI](/agents/mcp-vs-cli/) compares their capabilities and setup.
 - [Markdown Support In Metakip](/getting-started/markdown-support/) lists supported content syntax.
 - [API Reference](/api-reference/endpoints/) documents the direct HTTP interface.

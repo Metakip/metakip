@@ -32,6 +32,8 @@ import and export content, and make targeted edits.
 
 [Install and use the CLI](/agents/cli/).
 
+For a comparison of MCP and the CLI, see [MCP vs CLI](/agents/mcp-vs-cli/).
+
 ## API Reference
 
 Use the API when you are building an integration, script, or custom tool. The

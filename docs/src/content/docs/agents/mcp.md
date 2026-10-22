@@ -60,6 +60,8 @@ reports `outcome_uncertain`, inspect the affected page or folder before trying
 it again. Lifecycle batches report each item separately, so check every result
 instead of assuming that the whole batch succeeded.
 
+For the differences between MCP and the CLI, see [MCP vs CLI](/agents/mcp-vs-cli/).
+
 ## Protocol Compatibility
 
 Send MCP requests to `/mcp`. Older MCP clients can use the same endpoint
