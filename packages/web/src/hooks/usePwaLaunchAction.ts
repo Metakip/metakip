@@ -7,9 +7,8 @@ export function usePwaLaunchAction(): boolean {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { createPageAndNavigate } = useEntityCreationActions();
-  const handledAction = useRef<string | null>(null);
-  const isWorkspaceRoot = location.pathname === getWorkspaceRootPath();
-  const action = isWorkspaceRoot ? searchParams.get('action') : null;
+  const handledAction = useRef<'search' | 'new-page' | null>(null);
+  const action = location.pathname === getWorkspaceRootPath() ? searchParams.get('action') : null;
 
   useEffect(() => {
     if (action !== 'search' && action !== 'new-page') {
