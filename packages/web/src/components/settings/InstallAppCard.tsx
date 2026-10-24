@@ -19,13 +19,11 @@ export function InstallAppCard() {
           use your workspace.
         </p>
 
-        {isStandalone ? (
+        {isStandalone || isInstalled ? (
           <p className="mt-3 text-xs font-medium text-emerald-700 dark:text-emerald-400">
-            This device is using the installed app.
-          </p>
-        ) : isInstalled ? (
-          <p className="mt-3 text-xs font-medium text-emerald-700 dark:text-emerald-400">
-            Metakip may take a moment to appear in your apps.
+            {isStandalone
+              ? 'This device is using the installed app.'
+              : 'Metakip may take a moment to appear in your apps.'}
           </p>
         ) : (
           <>

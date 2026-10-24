@@ -1,4 +1,4 @@
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, type ReactNode, useContext, useEffect, useState } from 'react';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -31,8 +31,7 @@ export function PwaInstallProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const displayModeQuery = window.matchMedia('(display-mode: standalone)');
     const updateStandaloneState = () => {
-      const navigatorWithStandalone = window.navigator as Navigator & { standalone?: boolean };
-      setIsStandalone(displayModeQuery.matches || navigatorWithStandalone.standalone === true);
+      setIsStandalone(isRunningAsInstalledApp());
     };
     updateStandaloneState();
 
@@ -64,7 +63,7 @@ export function PwaInstallProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const install = useCallback(async (): Promise<void> => {
+  const install = async (): Promise<void> => {
     if (!deferredPrompt) return;
 
     setDeferredPrompt(null);
@@ -76,7 +75,7 @@ export function PwaInstallProvider({ children }: { children: ReactNode }) {
       // The consumed offer falls back to the browser installation instructions.
       return;
     }
-  }, [deferredPrompt]);
+  };
 
   return (
     <PwaInstallContext.Provider
