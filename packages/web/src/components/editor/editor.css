@@ -753,15 +753,15 @@
   padding: 0 3rem 0 1rem;
 }
 
-.codemirror-editor .cm-md-mermaid-language,
-.codemirror-editor .cm-md-mermaid-language * {
-  color: #71717a;
+.codemirror-editor .cm-md-code-language,
+.codemirror-editor .cm-md-code-language * {
+  color: #6e6e77;
   font-weight: 500;
 }
 
-.dark .codemirror-editor .cm-md-mermaid-language,
-.dark .codemirror-editor .cm-md-mermaid-language * {
-  color: #a1a1aa;
+.dark .codemirror-editor .cm-md-code-language,
+.dark .codemirror-editor .cm-md-code-language * {
+  color: #8b8b94;
 }
 
 .codemirror-editor .cm-md-code-block-first {

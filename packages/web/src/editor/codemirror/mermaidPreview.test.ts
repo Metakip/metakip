@@ -5,6 +5,32 @@ import { expandPreviewRangeForLivePreview } from './livePreviewDecorations';
 import { createView } from './livePreviewTestView';
 import { mermaidPreviewField, mermaidRenderCachePlugin } from './mermaidPreview';
 
+function relativeLuminance(color: string): number {
+  const channels = color.match(/\d+/g)?.map(Number);
+  if (!channels || channels.length !== 3) {
+    throw new Error(`Expected an RGB color, received "${color}"`);
+  }
+
+  const [red, green, blue] = channels.map((channel) => {
+    const srgb = channel / 255;
+    return srgb <= 0.04045 ? srgb / 12.92 : ((srgb + 0.055) / 1.055) ** 2.4;
+  });
+  if (red === undefined || green === undefined || blue === undefined) {
+    throw new Error(`Expected an RGB color, received "${color}"`);
+  }
+
+  return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+}
+
+function contrastRatio(foreground: string, background: string): number {
+  const foregroundLuminance = relativeLuminance(foreground);
+  const backgroundLuminance = relativeLuminance(background);
+  return (
+    (Math.max(foregroundLuminance, backgroundLuminance) + 0.05) /
+    (Math.min(foregroundLuminance, backgroundLuminance) + 0.05)
+  );
+}
+
 describe('Mermaid preview', () => {
   it('previews the first block in a read-only editor until its source is revealed', async () => {
     const source = '```mermaid\nflowchart LR\nA --> B\n```\n\nAfter';
@@ -308,14 +334,64 @@ describe('Mermaid preview', () => {
     view.destroy();
   });
 
-  it('uses subdued neutral color for Mermaid fence metadata in both themes', () => {
-    const view = createView('Before\n```mermaid\nflowchart LR\nA --> B\n```');
-    const language = view.dom.querySelector<HTMLElement>('.cm-md-mermaid-language');
-    expect(language).not.toBeNull();
-    expect(language ? getComputedStyle(language).color : '').toBe('rgb(113, 113, 122)');
+  it('uses subdued neutral color for all fenced-code metadata in both themes', () => {
+    const source = [
+      'Before',
+      '```mermaid',
+      'flowchart LR',
+      'A --> B',
+      '```',
+      '```ts',
+      'const value = 1;',
+      '```',
+      '```python',
+      'print("hello")',
+      '```',
+    ].join('\n');
+    const view = createView(source);
+    const languages = view.dom.querySelectorAll<HTMLElement>('.cm-md-code-language');
+    expect(Array.from(languages, (language) => language.textContent)).toEqual([
+      'mermaid',
+      'ts',
+      'python',
+    ]);
+    expect(languages).toHaveLength(3);
+    expect(Array.from(languages, (language) => getComputedStyle(language).color)).toEqual([
+      'rgb(110, 110, 119)',
+      'rgb(110, 110, 119)',
+      'rgb(110, 110, 119)',
+    ]);
+    for (const language of languages) {
+      const codeBlockLine = language.closest('.cm-md-code-block');
+      expect(codeBlockLine).not.toBeNull();
+      if (codeBlockLine) {
+        expect(
+          contrastRatio(
+            getComputedStyle(language).color,
+            getComputedStyle(codeBlockLine).backgroundColor,
+          ),
+        ).toBeGreaterThanOrEqual(4.5);
+      }
+    }
 
     document.documentElement.classList.add('dark');
-    expect(language ? getComputedStyle(language).color : '').toBe('rgb(161, 161, 170)');
+    expect(Array.from(languages, (language) => getComputedStyle(language).color)).toEqual([
+      'rgb(139, 139, 148)',
+      'rgb(139, 139, 148)',
+      'rgb(139, 139, 148)',
+    ]);
+    for (const language of languages) {
+      const codeBlockLine = language.closest('.cm-md-code-block');
+      expect(codeBlockLine).not.toBeNull();
+      if (codeBlockLine) {
+        expect(
+          contrastRatio(
+            getComputedStyle(language).color,
+            getComputedStyle(codeBlockLine).backgroundColor,
+          ),
+        ).toBeGreaterThanOrEqual(4.5);
+      }
+    }
     document.documentElement.classList.remove('dark');
     view.destroy();
   });
