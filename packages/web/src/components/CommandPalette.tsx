@@ -1,6 +1,7 @@
 import { METAKIP_DOCS_URL } from '@metakip/shared';
 import { Search, X } from 'lucide-react';
 import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useIdentityNavigate } from '../contexts/IdentityLifecycleContext';
 import { useShortcut, useShortcutScope } from '../contexts/KeyboardShortcutContext';
 import { useAuth } from '../hooks/useAuth';
@@ -26,6 +27,8 @@ function AuthenticatedCommandPalette({ userId }: { userId: string }) {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const handledLaunchAction = useRef<string | null>(null);
   const { recentSearches, rememberSearch, clearRecentSearches } = useRecentSearches(userId);
   const dialogRef = useRef<HTMLDivElement>(null);
 
@@ -51,6 +54,27 @@ function AuthenticatedCommandPalette({ userId }: { userId: string }) {
     window.addEventListener('open-search', handleOpenSearch);
     return () => window.removeEventListener('open-search', handleOpenSearch);
   }, []);
+
+  useEffect(() => {
+    const action = searchParams.get('action');
+    if (action !== 'search' && action !== 'new-page') {
+      handledLaunchAction.current = null;
+      return;
+    }
+    if (handledLaunchAction.current === action) return;
+
+    handledLaunchAction.current = action;
+    const nextSearchParams = new URLSearchParams(searchParams);
+    nextSearchParams.delete('action');
+    setSearchParams(nextSearchParams, { replace: true });
+    if (action === 'search') {
+      setIsOpen(true);
+    } else {
+      void entityCreation.createPageAndNavigate().catch(() => {
+        // Error toast handled globally by MutationCache.onError
+      });
+    }
+  }, [entityCreation, searchParams, setSearchParams]);
 
   // Toggle the command palette with the canonical Mod+K shortcut.
   useShortcut({
