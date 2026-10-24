@@ -1,5 +1,3 @@
-import { METAKIP_DOCS_URL } from '@metakip/shared';
-import { useEffect } from 'react';
 import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { AppShell } from './components/AppShell';
 import { AuthIdentityBoundary } from './components/auth/AuthIdentityBoundary';
@@ -28,14 +26,6 @@ function OnboardingIndexRedirect() {
   return <Navigate to="/onboarding/1" replace state={location.state} />;
 }
 
-function DocumentationRedirect() {
-  useEffect(() => {
-    window.location.replace(METAKIP_DOCS_URL);
-  }, []);
-
-  return <p className="p-6 text-sm text-zinc-500">Opening Metakip documentation…</p>;
-}
-
 function LegacyWorkspaceRedirect() {
   const location = useLocation();
   return (
@@ -51,7 +41,6 @@ function ApplicationRoutes() {
 
   return (
     <Routes>
-      <Route path="/documentation" element={<DocumentationRedirect />} />
       <Route path="/app" element={<LegacyWorkspaceRedirect />} />
       <Route path="/app/*" element={<LegacyWorkspaceRedirect />} />
       <Route path="/login" element={<Login />} />

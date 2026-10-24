@@ -48,19 +48,6 @@
           "type": "image/svg+xml"
         }
       ]
-    },
-    {
-      "name": "Documentation",
-      "short_name": "Documentation",
-      "description": "Read the Metakip documentation.",
-      "url": "/documentation",
-      "icons": [
-        {
-          "src": "/shortcut-icons/documentation.svg",
-          "sizes": "any",
-          "type": "image/svg+xml"
-        }
-      ]
     }
   ]
 }
