@@ -4,6 +4,7 @@ import { axe } from 'jest-axe';
 import { StrictMode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { usePwaLaunchAction } from '../hooks/usePwaLaunchAction';
 import { render } from '../test-utils/render';
 import { CommandPalette } from './CommandPalette';
 
@@ -33,8 +34,15 @@ vi.mock('../hooks/use-pages', () => ({
   }),
 }));
 
-function LocationSearch() {
-  return <output data-testid="location-search">{useLocation().search}</output>;
+function WorkspacePalette() {
+  const openSearch = usePwaLaunchAction();
+  const location = useLocation();
+  return (
+    <>
+      <CommandPalette openSearch={openSearch} />
+      <output data-testid="location-search">{location.search}</output>
+    </>
+  );
 }
 
 describe('CommandPalette', () => {
@@ -54,14 +62,15 @@ describe('CommandPalette', () => {
     expect(screen.queryByPlaceholderText('Search pages and folders...')).not.toBeInTheDocument();
   });
 
-  it('opens from the PWA search shortcut', async () => {
-    render(
-      <>
-        <CommandPalette />
-        <LocationSearch />
-      </>,
-      { route: '/?action=search&filter=owned-by-me' },
-    );
+  it('opens when the app shell requests search', async () => {
+    const view = render(<CommandPalette openSearch />);
+    view.rerender(<CommandPalette openSearch={false} />);
+
+    expect(await screen.findByPlaceholderText('Search pages and folders...')).toBeInTheDocument();
+  });
+
+  it('opens search from a PWA shortcut after consuming its URL', async () => {
+    render(<WorkspacePalette />, { route: '/?action=search&filter=owned-by-me' });
 
     await waitFor(() => {
       expect(screen.getByPlaceholderText('Search pages and folders...')).toBeInTheDocument();
@@ -73,8 +82,7 @@ describe('CommandPalette', () => {
     mockCreatePage.mockResolvedValue({ id: 'page-id', title: 'Untitled' });
     render(
       <StrictMode>
-        <CommandPalette />
-        <LocationSearch />
+        <WorkspacePalette />
       </StrictMode>,
       { route: '/?action=new-page' },
     );
