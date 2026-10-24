@@ -443,18 +443,6 @@
   border-color: #2563eb;
 }
 
-.math-editor-popup button {
-  transition: all 0.15s ease;
-}
-
-.math-editor-popup button:hover {
-  transform: translateY(-1px);
-}
-
-.math-editor-popup button:active {
-  transform: translateY(0);
-}
-
 /* MathEditor Component */
 .math-editor-popup {
   position: absolute;
@@ -515,9 +503,6 @@
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
-  transition:
-    background-color 0.15s,
-    transform 0.1s;
 }
 
 .math-editor-btn-cancel {
@@ -539,10 +524,6 @@
 
 .math-editor-btn-done:hover {
   background: #1d4ed8;
-}
-
-.math-editor-btn-done:active {
-  transform: scale(0.98);
 }
 
 .dark .math-editor-popup {
