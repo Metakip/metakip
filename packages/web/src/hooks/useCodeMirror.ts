@@ -23,6 +23,7 @@ import {
 } from '../components/editor/codeBlockCommands';
 import { moveToAdjacentTableCell } from '../components/editor/editorTableCommands';
 import { inlineFormattingState } from '../components/editor/inlineFormattingCommands';
+import { resolveCodeFenceLanguage } from '../editor/codemirror/codeLanguages';
 import { collaborationCursors } from '../editor/codemirror/collaborationCursors';
 import { anchorFromSelection, commentAnchorHighlight } from '../editor/codemirror/commentAnchors';
 import { type HeadingSyntax, parseEditorHeadingSyntax } from '../editor/codemirror/headingSyntax';
@@ -363,6 +364,7 @@ export function useCodeMirror({
         syntaxHighlighting(editorHighlightStyle, { fallback: true }),
         markdown({
           extensions: [GFM, wikiLinkMarkdownExtension, mathMarkdownExtension],
+          codeLanguages: resolveCodeFenceLanguage,
           completeHTMLTags: false,
           pasteURLAsLink: false,
         }),

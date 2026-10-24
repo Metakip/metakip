@@ -753,6 +753,40 @@
   padding: 0 3rem 0 1rem;
 }
 
+.codemirror-editor {
+  --cm-syntax-meta: #404740;
+  --cm-syntax-keyword: #708;
+  --cm-syntax-atom: #219;
+  --cm-syntax-literal: #164;
+  --cm-syntax-string: #a11;
+  --cm-syntax-regexp: #e40;
+  --cm-syntax-definition: #00f;
+  --cm-syntax-local: #30a;
+  --cm-syntax-type: #085;
+  --cm-syntax-class: #167;
+  --cm-syntax-special: #256;
+  --cm-syntax-property: #00c;
+  --cm-syntax-comment: #940;
+  --cm-syntax-invalid: #f00;
+}
+
+.dark .codemirror-editor {
+  --cm-syntax-meta: #8b949e;
+  --cm-syntax-keyword: #ff7b72;
+  --cm-syntax-atom: #79c0ff;
+  --cm-syntax-literal: #79c0ff;
+  --cm-syntax-string: #a5d6ff;
+  --cm-syntax-regexp: #7ee787;
+  --cm-syntax-definition: #d2a8ff;
+  --cm-syntax-local: #c9d1d9;
+  --cm-syntax-type: #ffa657;
+  --cm-syntax-class: #f0883e;
+  --cm-syntax-special: #d2a8ff;
+  --cm-syntax-property: #79c0ff;
+  --cm-syntax-comment: #8b949e;
+  --cm-syntax-invalid: #ffa198;
+}
+
 .codemirror-editor .cm-md-code-language,
 .codemirror-editor .cm-md-code-language * {
   color: #6e6e77;
