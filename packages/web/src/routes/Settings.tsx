@@ -4,6 +4,7 @@ import { BookOpen, Download, FolderOpen } from 'lucide-react';
 import { useState } from 'react';
 import { ObsidianImportDialog } from '../components/import/ObsidianImportDialog';
 import { ApiTokensPanel } from '../components/settings/ApiTokensPanel';
+import { InstallAppCard } from '../components/settings/InstallAppCard';
 import { WorkspaceMembersPanel } from '../components/workspace/WorkspaceMembersPanel';
 import { WorkspacePageToolbar } from '../components/workspace/WorkspacePageToolbar';
 import { useIdentityLifecycle } from '../contexts/IdentityLifecycleContext';
@@ -78,6 +79,8 @@ export default function Settings() {
       <section className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-6">
         <ApiTokensPanel />
       </section>
+
+      <InstallAppCard />
 
       <section className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-6 space-y-4">
         <div>
