@@ -18,9 +18,7 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks: (id) => {
             if (id.includes('node_modules')) {
-              if (id.includes('@codemirror') || id.includes('@lezer') || id.includes('katex')) {
-                return 'editor';
-              }
+              if (id.includes('katex')) return 'editor';
               if (id.includes('yjs') || id.includes('@hocuspocus')) {
                 return 'collab';
               }

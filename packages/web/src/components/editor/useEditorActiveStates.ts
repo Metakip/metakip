@@ -44,7 +44,8 @@ const INACTIVE_STATES: EditorActiveStates = {
 type TreeNode = { name: string; to: number; parent: TreeNode | null };
 
 function namesAtPosition(state: EditorState, position: number, side: -1 | 1 = -1): Set<string> {
-  let node: TreeNode | null = syntaxTree(state).resolveInner(position, side) as TreeNode;
+  // Formatting reflects the document's Markdown, not a language parsed inside a code fence.
+  let node: TreeNode | null = syntaxTree(state).resolve(position, side) as TreeNode;
   const names = new Set<string>();
   while (node) {
     const inline = ['StrongEmphasis', 'Emphasis', 'Strikethrough', 'InlineCode'].includes(

@@ -1,5 +1,8 @@
+import { syntaxTree } from '@codemirror/language';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import '../components/editor/editor.css';
+import { deriveActiveStates } from '../components/editor/useEditorActiveStates';
 import { type HeadingSyntax, parseEditorHeadingSyntax } from '../editor/codemirror/headingSyntax';
 import { useCodeMirror } from './useCodeMirror';
 
@@ -34,11 +37,86 @@ class TestOutlineWorker {
 }
 
 afterEach(() => {
+  document.documentElement.classList.remove('dark');
   vi.unstubAllGlobals();
   TestOutlineWorker.instances = [];
 });
 
+describe('CodeMirror code-block formatting state', () => {
+  it('treats highlighted Markdown inside a code fence as code, not document formatting', async () => {
+    const source = '# Real heading\n\n```markdown\n# Example heading\n- Example list\n```';
+    const parent = document.body.appendChild(document.createElement('div'));
+    const hook = renderHook(() =>
+      useCodeMirror({ initialValue: source, commentAnchors: [], readOnly: true }),
+    );
+
+    act(() => hook.result.current.setContainer(parent));
+    await waitFor(() => {
+      const view = hook.result.current.editor;
+      expect(view).not.toBeNull();
+      if (!view) return;
+      expect(syntaxTree(view.state).resolveInner(source.indexOf('Example heading'), 1).name).toBe(
+        'ATXHeading1',
+      );
+    });
+
+    const view = hook.result.current.editor;
+    if (!view) throw new Error('Editor did not initialize');
+    act(() => view.dispatch({ selection: { anchor: source.indexOf('Real heading') } }));
+    expect(deriveActiveStates(view.state).isH1Active).toBe(true);
+
+    act(() => view.dispatch({ selection: { anchor: source.indexOf('Example heading') } }));
+    expect(deriveActiveStates(view.state).isCodeActive).toBe(true);
+    expect(deriveActiveStates(view.state).isH1Active).toBe(false);
+
+    act(() => view.dispatch({ selection: { anchor: source.indexOf('Example list') } }));
+    expect(deriveActiveStates(view.state).isCodeActive).toBe(true);
+    expect(deriveActiveStates(view.state).isBulletListActive).toBe(false);
+
+    hook.unmount();
+    parent.remove();
+  });
+});
+
 describe('CodeMirror outline parsing', () => {
+  it('syntax-highlights language-aware fenced code blocks', async () => {
+    const parent = document.body.appendChild(document.createElement('div'));
+    parent.className = 'codemirror-editor';
+    const hook = renderHook(() =>
+      useCodeMirror({
+        initialValue: '```ts\nconst answer = 42;\n```',
+        commentAnchors: [],
+        readOnly: true,
+      }),
+    );
+
+    act(() => hook.result.current.setContainer(parent));
+    await waitFor(() => {
+      const tokens = Array.from(parent.querySelectorAll<HTMLElement>('.cm-line span'));
+      const keyword = tokens.find((token) => token.textContent === 'const');
+      const variable = tokens.find((token) => token.textContent === 'answer');
+
+      expect(keyword).toBeDefined();
+      expect(variable).toBeDefined();
+      if (!keyword || !variable) return;
+
+      expect(keyword.className).not.toBe(variable.className);
+      expect(getComputedStyle(keyword).color).toBe('var(--cm-syntax-keyword)');
+      expect(getComputedStyle(variable).color).toBe('var(--cm-syntax-definition)');
+    });
+
+    expect(getComputedStyle(parent).getPropertyValue('--cm-syntax-keyword').trim()).toBe('#708');
+    expect(getComputedStyle(parent).getPropertyValue('--cm-syntax-definition').trim()).toBe('#00f');
+    document.documentElement.classList.add('dark');
+    expect(getComputedStyle(parent).getPropertyValue('--cm-syntax-keyword').trim()).toBe('#ff7b72');
+    expect(getComputedStyle(parent).getPropertyValue('--cm-syntax-definition').trim()).toBe(
+      '#d2a8ff',
+    );
+
+    hook.unmount();
+    parent.remove();
+  });
+
   it('ignores stale worker results and re-resolves wiki titles without reparsing', async () => {
     vi.stubGlobal('Worker', TestOutlineWorker);
     const parent = document.body.appendChild(document.createElement('div'));

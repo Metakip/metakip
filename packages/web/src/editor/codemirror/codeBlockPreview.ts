@@ -20,9 +20,9 @@ export function addCodeBlockPreview(
   const block = codeBlockRange(state, node.node);
   const active = selectionTouches(state, first.from, state.doc.line(lastLine).to + 1);
   const codeInfo = codeBlockInfo(state, node.node);
-  if (codeInfo?.language === 'mermaid') {
+  if (codeInfo) {
     ranges.push(
-      Decoration.mark({ class: 'cm-md-mermaid-language' }).range(codeInfo.from, codeInfo.to),
+      Decoration.mark({ class: 'cm-md-code-language' }).range(codeInfo.from, codeInfo.to),
     );
   }
   if (first.from >= from) {
