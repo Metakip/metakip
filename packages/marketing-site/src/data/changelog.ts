@@ -37,6 +37,88 @@ const commitLink = (hash: string): MarketingLink => ({
 
 export const CHANGELOG_ENTRIES: readonly ChangelogEntry[] = [
   {
+    id: 'mobile-app-install-and-shortcuts',
+    date: '2026-10-25',
+    title: 'Make Metakip feel at home on your phone',
+    details: [
+      'Settings now explains how to install Metakip from your mobile browser and use it as an app from your home screen.',
+      'Home-screen shortcuts open directly to common actions like creating a page and searching your workspace.',
+    ],
+    links: [pullRequestLink(187)],
+  },
+  {
+    id: 'syntax-highlighted-code-fences',
+    date: '2026-10-24',
+    title: 'Read code blocks more easily',
+    details: [
+      'Fenced code blocks now use syntax highlighting based on their language, with colors tuned for light and dark themes.',
+      'Language labels are styled more quietly so code stays in focus.',
+    ],
+    links: [pullRequestLink(186)],
+  },
+  {
+    id: 'full-text-workspace-search',
+    date: '2026-10-20',
+    title: 'Search the contents of your workspace',
+    details: [
+      'Search now finds matching text in pages as well as folder names, with results scoped to what you can access.',
+      'The command palette, API, CLI, and MCP return useful context such as snippets and highlighted matches.',
+    ],
+    links: [
+      {
+        kind: 'external',
+        label: 'Read The CLI Guide →',
+        url: `${DOCS_ORIGIN}/agents/cli/`,
+      },
+      {
+        kind: 'external',
+        label: 'Read About Metakip MCP →',
+        url: `${DOCS_ORIGIN}/agents/mcp/`,
+      },
+      pullRequestLink(181),
+    ],
+  },
+  {
+    id: 'mermaid-diagram-previews',
+    date: '2026-10-18',
+    title: 'Preview Mermaid diagrams as you write',
+    details: [
+      'Closed Mermaid code fences now render as diagrams directly in the Markdown editor.',
+      'Reveal the source when you want to edit it, with accessible feedback when a diagram cannot be rendered.',
+    ],
+    links: [
+      {
+        kind: 'external',
+        label: 'Read About Markdown Support →',
+        url: `${DOCS_ORIGIN}/getting-started/markdown-support/`,
+      },
+      pullRequestLink(179),
+    ],
+  },
+  {
+    id: 'sharing-controls-across-tools',
+    date: '2026-10-14',
+    title: 'Manage sharing from your tools',
+    details: [
+      'Manage page, folder, and workspace access—including invitations—from the API, CLI, and MCP.',
+      'A commenter role lets collaborators join page discussions without edit access.',
+    ],
+    links: [
+      {
+        kind: 'external',
+        label: 'Read The CLI Guide →',
+        url: `${DOCS_ORIGIN}/agents/cli/`,
+      },
+      {
+        kind: 'external',
+        label: 'Read About Metakip MCP →',
+        url: `${DOCS_ORIGIN}/agents/mcp/`,
+      },
+      pullRequestLink(172),
+      pullRequestLink(173),
+    ],
+  },
+  {
     id: 'invite-new-collaborators',
     date: '2026-10-10',
     title: 'Invite people who are new to Metakip',
