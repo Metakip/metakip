@@ -21,5 +21,33 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "shortcuts": [
+    {
+      "name": "New Page",
+      "short_name": "New Page",
+      "description": "Create a page in your workspace.",
+      "url": "/?action=new-page",
+      "icons": [
+        {
+          "src": "/shortcut-icons/new-page.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Search",
+      "short_name": "Search",
+      "description": "Search your workspace.",
+      "url": "/?action=search",
+      "icons": [
+        {
+          "src": "/shortcut-icons/search.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
   ]
 }

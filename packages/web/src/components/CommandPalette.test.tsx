@@ -1,12 +1,16 @@
 import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { axe } from 'jest-axe';
+import { StrictMode } from 'react';
+import { useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { usePwaLaunchAction } from '../hooks/usePwaLaunchAction';
 import { render } from '../test-utils/render';
 import { CommandPalette } from './CommandPalette';
 
 const mockNavigate = vi.fn();
 const mockMutate = vi.fn();
+const mockCreatePage = vi.fn();
 const { mockUserId } = vi.hoisted(() => ({ mockUserId: { current: 'first-user' } }));
 
 vi.mock('../hooks/useAuth', () => ({
@@ -25,9 +29,21 @@ vi.mock('react-router-dom', async () => {
 vi.mock('../hooks/use-pages', () => ({
   useCreatePage: () => ({
     mutate: mockMutate,
+    mutateAsync: mockCreatePage,
     isPending: false,
   }),
 }));
+
+function WorkspacePalette() {
+  const openSearch = usePwaLaunchAction();
+  const location = useLocation();
+  return (
+    <>
+      <CommandPalette openSearch={openSearch} />
+      <output data-testid="location-search">{location.search}</output>
+    </>
+  );
+}
 
 describe('CommandPalette', () => {
   beforeEach(() => {
@@ -44,6 +60,38 @@ describe('CommandPalette', () => {
     render(<CommandPalette />);
 
     expect(screen.queryByPlaceholderText('Search pages and folders...')).not.toBeInTheDocument();
+  });
+
+  it('opens when the app shell requests search', async () => {
+    const view = render(<CommandPalette openSearch />);
+    view.rerender(<CommandPalette openSearch={false} />);
+
+    expect(await screen.findByPlaceholderText('Search pages and folders...')).toBeInTheDocument();
+  });
+
+  it('opens search from a PWA shortcut after consuming its URL', async () => {
+    render(<WorkspacePalette />, { route: '/?action=search&filter=owned-by-me' });
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText('Search pages and folders...')).toBeInTheDocument();
+      expect(screen.getByTestId('location-search')).toHaveTextContent('?filter=owned-by-me');
+    });
+  });
+
+  it('creates one page from the PWA new-page shortcut', async () => {
+    mockCreatePage.mockResolvedValue({ id: 'page-id', title: 'Untitled' });
+    render(
+      <StrictMode>
+        <WorkspacePalette />
+      </StrictMode>,
+      { route: '/?action=new-page' },
+    );
+
+    await waitFor(() => {
+      expect(mockCreatePage).toHaveBeenCalledTimes(1);
+      expect(mockNavigate).toHaveBeenCalledWith('/untitled-page-id');
+      expect(screen.getByTestId('location-search')).toBeEmptyDOMElement();
+    });
   });
 
   it('opens when Ctrl+K is pressed', async () => {

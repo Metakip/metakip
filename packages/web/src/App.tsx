@@ -7,6 +7,7 @@ import { ShareablePageRoute } from './components/auth/ShareablePageRoute';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { PageLoadingState } from './components/editor/PageLoadingState';
 import { ExplorerLoadingState } from './components/workspace/ExplorerLoadingState';
+import { PwaInstallProvider } from './contexts/PwaInstallContext';
 import { AuthSessionProvider } from './hooks/useAuth';
 import Dashboard from './routes/Dashboard';
 import FolderEntry from './routes/FolderEntry';
@@ -110,11 +111,13 @@ function App() {
     <ErrorBoundary>
       <div className="bg-white dark:bg-zinc-950 min-h-screen text-zinc-900 dark:text-zinc-50">
         <BrowserRouter>
-          <AuthSessionProvider>
-            <AuthIdentityBoundary>
-              <ApplicationRoutes />
-            </AuthIdentityBoundary>
-          </AuthSessionProvider>
+          <PwaInstallProvider>
+            <AuthSessionProvider>
+              <AuthIdentityBoundary>
+                <ApplicationRoutes />
+              </AuthIdentityBoundary>
+            </AuthSessionProvider>
+          </PwaInstallProvider>
         </BrowserRouter>
       </div>
     </ErrorBoundary>

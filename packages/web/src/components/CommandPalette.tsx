@@ -12,13 +12,21 @@ import { CommandPaletteOptions, QUICK_ACTIONS, type SearchResult } from './Comma
 
 const API_BASE = '/api';
 
-export function CommandPalette() {
+export function CommandPalette({ openSearch = false }: { openSearch?: boolean }) {
   const { data } = useAuth();
   const userId = data?.user.id;
-  return userId ? <AuthenticatedCommandPalette key={userId} userId={userId} /> : null;
+  return userId ? (
+    <AuthenticatedCommandPalette key={userId} userId={userId} openSearch={openSearch} />
+  ) : null;
 }
 
-function AuthenticatedCommandPalette({ userId }: { userId: string }) {
+function AuthenticatedCommandPalette({
+  userId,
+  openSearch,
+}: {
+  userId: string;
+  openSearch: boolean;
+}) {
   const navigate = useIdentityNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -51,6 +59,10 @@ function AuthenticatedCommandPalette({ userId }: { userId: string }) {
     window.addEventListener('open-search', handleOpenSearch);
     return () => window.removeEventListener('open-search', handleOpenSearch);
   }, []);
+
+  useEffect(() => {
+    if (openSearch) setIsOpen(true);
+  }, [openSearch]);
 
   // Toggle the command palette with the canonical Mod+K shortcut.
   useShortcut({

@@ -1,5 +1,5 @@
 import type { V1SearchSnippet, V1SearchTextMatch } from '@metakip/shared';
-import { BookOpen, FileText, Folder, History, Plus, Trash2 } from 'lucide-react';
+import { BookOpen, FilePlus2, FileText, Folder, History, Trash2 } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 export type SearchResult = {
@@ -13,7 +13,7 @@ export type SearchResult = {
 };
 
 export const QUICK_ACTIONS = [
-  { id: 'new-page', title: 'New Page', description: 'Create a blank page', icon: Plus },
+  { id: 'new-page', title: 'New Page', description: 'Create a blank page', icon: FilePlus2 },
   { id: 'trash', title: 'Go to Trash', description: 'Restore or remove pages', icon: Trash2 },
   {
     id: 'docs',

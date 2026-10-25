@@ -6,6 +6,7 @@ import { EntityCommandProvider, useEntityCommands } from '../contexts/EntityComm
 import { useShortcut } from '../contexts/KeyboardShortcutContext';
 import { useShareContext } from '../contexts/ShareContext';
 import { usePageMeta } from '../hooks/usePageMeta';
+import { usePwaLaunchAction } from '../hooks/usePwaLaunchAction';
 import { useSidebarCollapsed } from '../hooks/useSidebarCollapsed';
 import { useTheme } from '../hooks/useTheme';
 import { formatShortcut, SHORTCUT_PATTERNS } from '../utils/keyboardShortcuts';
@@ -47,6 +48,7 @@ function AppShellContent({ contentState }: { contentState: AppShellContentState 
   const location = useLocation();
   const { isAnonymous } = useShareContext();
   const entityCommands = useEntityCommands();
+  const openSearch = usePwaLaunchAction();
   const isLoading = contentState.status === 'loading';
   const mobileMenuVisible = isMobileMenuOpen && !isDesktopLayout;
   const sidebarTakesSpace = !isAnonymous && !collapsed;
@@ -212,7 +214,7 @@ function AppShellContent({ contentState }: { contentState: AppShellContentState 
             )}
           </div>
         </div>
-        {!isAnonymous && <CommandPalette />}
+        {!isAnonymous && <CommandPalette openSearch={openSearch} />}
       </main>
     </div>
   );
