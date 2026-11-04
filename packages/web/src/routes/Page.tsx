@@ -12,7 +12,7 @@ import {
   type SharePermission,
 } from '@metakip/shared';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FileQuestion, LogIn, RefreshCw, ShieldOff } from 'lucide-react';
+import { FileQuestion, LogIn, Maximize2, Minimize2, RefreshCw, ShieldOff } from 'lucide-react';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { AppShellToolbar, useAppShellOutletContext } from '../components/AppShellToolbar';
@@ -27,6 +27,7 @@ import { PageLoadingState } from '../components/editor/PageLoadingState';
 import { PageTitle } from '../components/editor/PageTitle';
 import { PropertiesPanel } from '../components/editor/PropertiesPanel';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { Tooltip } from '../components/Tooltip';
 import { EditorReadOnlyProvider } from '../contexts/EditorReadOnlyContext';
 import { useIdentityNavigate } from '../contexts/IdentityLifecycleContext';
 import {
@@ -38,6 +39,7 @@ import type { WikiLinkNavigationTarget } from '../editor/wikiLinkPresentations';
 import { useFolderTree } from '../hooks/use-folders';
 import { usePageCollaborators } from '../hooks/use-page-collaborators';
 import { type RecentPage, usePageTree } from '../hooks/use-pages';
+import { usePageFullWidth } from '../hooks/usePageFullWidth';
 import { getLogger } from '../logger-init';
 import { ApiError, apiFetch } from '../utils/api';
 import { getApplicationFaviconHref, resetDocumentMetadata } from '../utils/documentMeta';
@@ -105,6 +107,8 @@ export default function Page() {
   const hasMeasuredCommentsDockRef = useRef(false);
   const queryClient = useQueryClient();
   const { isAnonymous, accessPermission } = useShareContext();
+  const { fullWidth, toggleFullWidth } = usePageFullWidth(pageId);
+  const wideModeActive = fullWidth && !isAnonymous;
   const setAccessPermission = useSetAccessPermission();
   const setCapabilities = useSetCapabilities();
 
@@ -541,7 +545,9 @@ export default function Page() {
 
   return (
     <EditorReadOnlyProvider readOnly={readOnly}>
-      <div className="app-shell-full-width page-layout flex w-full min-w-0 flex-col">
+      <div
+        className={`app-shell-full-width page-layout flex w-full min-w-0 flex-col ${wideModeActive ? 'page-layout--wide' : ''}`}
+      >
         <AppShellToolbar className="bg-zinc-50 py-2 dark:bg-zinc-950 md:py-3">
           <div className="flex min-h-9 w-full min-w-0 items-center justify-between text-sm font-medium text-zinc-500 dark:text-zinc-400">
             {isAnonymous ? (
@@ -583,6 +589,25 @@ export default function Page() {
                 />
               )}
               {isAnonymous && <ThemeToggle />}
+              {!isAnonymous && (
+                <div className="hidden md:block">
+                  <Tooltip label={fullWidth ? 'Default width' : 'Full width'} position="bottom">
+                    <button
+                      type="button"
+                      onClick={toggleFullWidth}
+                      aria-label="Full width"
+                      aria-pressed={fullWidth}
+                      className={`flex h-8 w-8 cursor-pointer items-center justify-center rounded-md transition-colors ${
+                        fullWidth
+                          ? 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200'
+                          : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800'
+                      }`}
+                    >
+                      {fullWidth ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+                    </button>
+                  </Tooltip>
+                </div>
+              )}
               <CollabStatus
                 provider={provider}
                 status={collabStatus}

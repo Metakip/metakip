@@ -268,6 +268,42 @@ describe('Page permission presentation', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals();
+    localStorage.removeItem(`metakip-page-full-width:${PAGE_ID}`);
+  });
+
+  it('does not apply a saved wide preference to anonymous visitors', async () => {
+    localStorage.setItem(`metakip-page-full-width:${PAGE_ID}`, 'true');
+    mocks.share = {
+      isAnonymous: true,
+      capabilities: VIEW_CAPABILITIES,
+      accessPermission: 'view',
+    };
+    mocks.snapshotPermission = 'view';
+    vi.stubGlobal('fetch', mockPageFetch('view'));
+    await renderPage();
+
+    await screen.findByTestId('page-body');
+
+    expect(document.querySelector('.page-layout')).not.toHaveClass('page-layout--wide');
+    expect(screen.queryByRole('button', { name: 'Full width' })).not.toBeInTheDocument();
+  });
+
+  it('toggles full width directly beside the page status control', async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal('fetch', mockPageFetch('edit'));
+    await renderPage();
+    await screen.findByTestId('page-body');
+
+    const toggle = screen.getByRole('button', { name: 'Full width' });
+    expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute('aria-pressed', 'true');
+    expect(document.querySelector('.page-layout')).toHaveClass('page-layout--wide');
+    expect(localStorage.getItem(`metakip-page-full-width:${PAGE_ID}`)).toBe('true');
+
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    expect(document.querySelector('.page-layout')).not.toHaveClass('page-layout--wide');
   });
 
   it('keeps editor surfaces editable but hides account-only controls for anonymous public editors', async () => {
