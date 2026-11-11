@@ -6,6 +6,7 @@ import type {
 } from '@metakip/shared';
 import type { ExplorerItemData } from '../components/workspace/ExplorerItem';
 import type { Favorite } from '../hooks/use-favorites';
+import { canMoveEntity } from '../utils/entity-actions';
 
 export type DashboardFilter = 'all' | 'owned-by-me' | 'shared-with-me';
 
@@ -101,9 +102,8 @@ export function buildFavoriteDashboardItems({
             canMove:
               page?.ownerId === currentUserId ||
               (page?.workspaceAccess === true &&
-                page.userPermission === 'admin' &&
                 !!page.ownerId &&
-                workspaceAdminOwnerIds.has(page.ownerId)),
+                canMoveEntity(page.userPermission, workspaceAdminOwnerIds.has(page.ownerId))),
           },
         ];
       }
@@ -127,9 +127,8 @@ export function buildFavoriteDashboardItems({
           canMove:
             folder?.ownerId === currentUserId ||
             (folder?.workspaceAccess === true &&
-              folder.userPermission === 'admin' &&
               !!folder.ownerId &&
-              workspaceAdminOwnerIds.has(folder.ownerId)),
+              canMoveEntity(folder.userPermission, workspaceAdminOwnerIds.has(folder.ownerId))),
         },
       ];
     })

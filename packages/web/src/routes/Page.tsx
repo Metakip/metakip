@@ -12,7 +12,7 @@ import {
   type SharePermission,
 } from '@metakip/shared';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FileQuestion, LogIn, Maximize2, Minimize2, RefreshCw, ShieldOff } from 'lucide-react';
+import { FileQuestion, LogIn, RefreshCw, ShieldOff } from 'lucide-react';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { AppShellToolbar, useAppShellOutletContext } from '../components/AppShellToolbar';
@@ -27,7 +27,6 @@ import { PageLoadingState } from '../components/editor/PageLoadingState';
 import { PageTitle } from '../components/editor/PageTitle';
 import { PropertiesPanel } from '../components/editor/PropertiesPanel';
 import { ThemeToggle } from '../components/ThemeToggle';
-import { Tooltip } from '../components/Tooltip';
 import { EditorReadOnlyProvider } from '../contexts/EditorReadOnlyContext';
 import { useIdentityNavigate } from '../contexts/IdentityLifecycleContext';
 import {
@@ -49,7 +48,13 @@ import {
   invalidatePageCommentQueries,
   pageCommentHighlightsQueryKey,
 } from '../utils/pageCommentMutations';
-import { buildPagePath, extractUuidFromSlug, getWorkspacePathPrefix } from '../utils/url';
+import {
+  buildFolderPath,
+  buildPagePath,
+  extractUuidFromSlug,
+  getWorkspacePath,
+  getWorkspacePathPrefix,
+} from '../utils/url';
 
 const API_BASE = '/api';
 const COMMENTS_OPEN_STORAGE_KEY = 'metakip-comments-open';
@@ -163,6 +168,12 @@ export default function Page() {
     enabled: !!pageId,
     retry: false,
   });
+  const handlePageDeleted = useCallback(() => {
+    const parentId = page?.accessScope === 'account' ? page.parentId : null;
+    navigate(parentId ? buildFolderPath('folder', parentId) : getWorkspacePath(), {
+      replace: true,
+    });
+  }, [navigate, page]);
   const { data: collaboratorsByPage } = usePageCollaborators(
     !isAnonymous && pageId ? [pageId] : [],
   );
@@ -577,8 +588,12 @@ export default function Page() {
               )}
               {!isAnonymous && (
                 <PageActions
-                  pageId={pageId}
+                  key={pageId}
                   page={page}
+                  permission={pagePermission}
+                  onDeleted={handlePageDeleted}
+                  fullWidth={fullWidth}
+                  onToggleFullWidth={toggleFullWidth}
                   canComment={effectiveCapabilities.canComment}
                   commentsOpen={commentsPanelVisible}
                   commentsCount={commentThreads.length}
@@ -589,25 +604,6 @@ export default function Page() {
                 />
               )}
               {isAnonymous && <ThemeToggle />}
-              {!isAnonymous && (
-                <div className="hidden md:block">
-                  <Tooltip label={fullWidth ? 'Default width' : 'Full width'} position="bottom">
-                    <button
-                      type="button"
-                      onClick={toggleFullWidth}
-                      aria-label="Full width"
-                      aria-pressed={fullWidth}
-                      className={`flex h-8 w-8 cursor-pointer items-center justify-center rounded-md transition-colors ${
-                        fullWidth
-                          ? 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200'
-                          : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800'
-                      }`}
-                    >
-                      {fullWidth ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
-                    </button>
-                  </Tooltip>
-                </div>
-              )}
               <CollabStatus
                 provider={provider}
                 status={collabStatus}

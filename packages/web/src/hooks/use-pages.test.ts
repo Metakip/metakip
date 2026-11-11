@@ -19,7 +19,6 @@ import {
   useCreatePage,
   useEmptyTrash,
   useImportMarkdown,
-  useMovePage,
   usePages,
   usePageTree,
   usePermanentDeletePage,
@@ -502,67 +501,6 @@ describe('useEmptyTrash', () => {
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/pages/trash/empty-all',
       expect.objectContaining({ method: 'DELETE' }),
-    );
-  });
-});
-
-describe('useMovePage', () => {
-  let queryClient: ReturnType<typeof createTestQueryClient>;
-  let fetchMock: ReturnType<typeof vi.fn>;
-
-  beforeEach(() => {
-    queryClient = createTestQueryClient();
-    fetchMock = vi.fn();
-    vi.stubGlobal('fetch', fetchMock);
-  });
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
-    queryClient.clear();
-  });
-
-  it('invalidates shared navigation after moving a page', async () => {
-    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
-    fetchMock.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve({ id: 'p1', parentId: 'f2' }),
-    });
-
-    const { result } = renderHook(() => useMovePage(), {
-      wrapper: createWrapper(queryClient),
-    });
-
-    result.current.mutate({ pageId: 'p1', parentId: 'f2', position: 'a0' });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['shared-with-me'] });
-  });
-
-  it('moves page to new parent', async () => {
-    fetchMock.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve({ id: 'p1', parentId: 'p2' }),
-    });
-
-    const { result } = renderHook(() => useMovePage(), {
-      wrapper: createWrapper(queryClient),
-    });
-
-    result.current.mutate({ pageId: 'p1', parentId: 'p2', position: 'a0' });
-
-    await waitFor(() => {
-      expect(result.current.isSuccess).toBe(true);
-    });
-
-    expect(fetchMock).toHaveBeenCalledWith(
-      '/api/pages/p1/move',
-      expect.objectContaining({
-        method: 'PATCH',
-        body: JSON.stringify({ parentId: 'p2', position: 'a0' }),
-      }),
     );
   });
 });

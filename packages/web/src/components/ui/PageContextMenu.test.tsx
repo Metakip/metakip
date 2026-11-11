@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ClipboardProvider } from '../../contexts/ClipboardContext';
 import { render } from '../../test-utils/render';
+import type { KebabMenuItem } from './KebabMenu';
 
 const mocks = vi.hoisted(() => ({
   useAuth: vi.fn(),
@@ -11,6 +12,11 @@ const mocks = vi.hoisted(() => ({
   removeFromView: vi.fn(),
   memberships: [] as Array<{ ownerId: string; role: 'viewer' | 'editor' | 'admin' }>,
   moveDialogProps: vi.fn(),
+  movePages: vi.fn(),
+  moveFolders: vi.fn(),
+  folderQuery: vi.fn(),
+  membershipQuery: vi.fn(),
+  foldersLoading: false,
 }));
 
 vi.mock('../../hooks/useAuth', () => ({ useAuth: mocks.useAuth }));
@@ -18,17 +24,23 @@ vi.mock('../../contexts/ShareContext', () => ({
   useShareContext: mocks.useShareContext,
 }));
 vi.mock('../../hooks/use-bulk-actions', () => ({
-  useBulkMoveFolders: () => ({ mutate: vi.fn() }),
-  useBulkMovePages: () => ({ mutate: vi.fn() }),
+  useBulkMoveFolders: () => ({ mutate: mocks.moveFolders }),
+  useBulkMovePages: () => ({ mutate: mocks.movePages }),
 }));
 vi.mock('../../hooks/use-favorites', () => ({
   useToggleFavorite: () => ({ mutate: vi.fn() }),
 }));
 vi.mock('../../hooks/use-folders', () => ({
-  useFolderTree: () => ({ data: [] }),
+  useFolderTree: (options: unknown) => {
+    mocks.folderQuery(options);
+    return { data: [], isLoading: mocks.foldersLoading };
+  },
 }));
 vi.mock('../../hooks/use-workspace', () => ({
-  useWorkspaceMemberships: () => ({ data: mocks.memberships }),
+  useWorkspaceMemberships: (options: unknown) => {
+    mocks.membershipQuery(options);
+    return { data: mocks.memberships };
+  },
 }));
 vi.mock('../../utils/entity-actions', async (importOriginal) => {
   const original = await importOriginal<typeof import('../../utils/entity-actions')>();
@@ -56,11 +68,7 @@ vi.mock('../workspace/MoveDialog', () => ({
   },
 }));
 vi.mock('./KebabMenu', () => ({
-  KebabMenu: ({
-    items,
-  }: {
-    items: Array<{ label: string; onClick: () => void; dividerBefore?: boolean }>;
-  }) => (
+  KebabMenu: ({ items }: { items: KebabMenuItem[] }) => (
     <div>
       {items.map((item) => (
         <div key={item.label}>
@@ -140,6 +148,9 @@ describe('PageContextMenu permissions', () => {
     mocks.removeFromView.mockResolvedValue(undefined);
     mocks.memberships = [];
     mocks.moveDialogProps.mockReset();
+    mocks.movePages.mockReset();
+    mocks.moveFolders.mockReset();
+    mocks.foldersLoading = false;
   });
 
   it('hides signed-in-only actions from anonymous viewers and editors', () => {
@@ -229,7 +240,7 @@ describe('PageContextMenu permissions', () => {
 
     expect(screen.getByRole('button', { name: 'Move to Trash' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Remove for me' })).toBeInTheDocument();
-    expect(screen.getByRole('separator')).toBeInTheDocument();
+    expect(screen.queryByRole('separator')).not.toBeInTheDocument();
   });
 
   it('never offers personal removal to the owner', () => {
@@ -286,13 +297,53 @@ describe('PageContextMenu permissions', () => {
   it.each([
     { createdBy: 'workspace-owner', allowRoot: true },
     { createdBy: 'current-user', allowRoot: false },
-  ])('sets root move availability to $allowRoot when the creator is $createdBy', ({
+  ])('sets root move availability to $allowRoot when the creator is $createdBy', async ({
     createdBy,
     allowRoot,
   }) => {
     mocks.memberships = [{ ownerId: 'workspace-owner', role: 'admin' }];
     renderMenu({ permission: 'admin', ownerId: 'workspace-owner', createdBy });
+    await userEvent.click(screen.getByRole('button', { name: 'Move' }));
 
     expect(mocks.moveDialogProps).toHaveBeenLastCalledWith(expect.objectContaining({ allowRoot }));
+  });
+
+  it('only loads move destinations and mounts the move dialog when requested', async () => {
+    renderMenu({ permission: 'admin' });
+
+    expect(mocks.folderQuery).toHaveBeenLastCalledWith({ enabled: false });
+    expect(mocks.membershipQuery).toHaveBeenLastCalledWith({ enabled: false });
+    expect(mocks.moveDialogProps).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Move' }));
+
+    expect(mocks.folderQuery).toHaveBeenLastCalledWith({ enabled: true });
+    expect(mocks.membershipQuery).toHaveBeenLastCalledWith({ enabled: true });
+    expect(mocks.moveDialogProps).toHaveBeenCalledOnce();
+  });
+
+  it('marks the move dialog as loading while destinations are pending', async () => {
+    mocks.foldersLoading = true;
+    renderMenu({ permission: 'admin', ownerId: 'current-user', createdBy: 'current-user' });
+    await userEvent.click(screen.getByRole('button', { name: 'Move' }));
+
+    expect(mocks.moveDialogProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isLoading: true, allowRoot: true }),
+    );
+  });
+
+  it.each(['page', 'folder'] as const)('uses the shared %s move mutation', async (entityType) => {
+    renderMenu({ permission: 'admin', entityType });
+    await userEvent.click(screen.getByRole('button', { name: 'Move' }));
+    const props = mocks.moveDialogProps.mock.lastCall?.[0] as {
+      onConfirm: (folderId: string | null) => void;
+    };
+
+    props.onConfirm('destination');
+
+    expect(entityType === 'page' ? mocks.movePages : mocks.moveFolders).toHaveBeenCalledWith(
+      { [entityType === 'page' ? 'pageIds' : 'folderIds']: ['page-1'], parentId: 'destination' },
+      { onSuccess: expect.any(Function) },
+    );
   });
 });

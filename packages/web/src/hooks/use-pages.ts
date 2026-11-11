@@ -8,7 +8,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { useShareContext } from '../contexts/ShareContext';
 import { isBulkRemovalInProgress } from '../utils/bulkRemovalState';
-import { useLeaveEntity } from '../utils/entity-actions';
 import {
   addCreatedPageToNavigationCache,
   updatePageNavigationCache,
@@ -107,22 +106,6 @@ async function emptyTrash(): Promise<void> {
   if (!res.ok) {
     throw new Error('Failed to empty trash');
   }
-}
-
-export function useLeavePage() {
-  return useLeaveEntity('page');
-}
-
-async function movePage(pageId: string, parentId: string | null, position: string): Promise<Page> {
-  const res = await fetch(`${API_BASE}/pages/${pageId}/move`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ parentId, position }),
-  });
-  if (!res.ok) {
-    throw new Error('Failed to move page');
-  }
-  return res.json();
 }
 
 async function importMarkdown(file: File): Promise<MarkdownImportResult> {
@@ -262,27 +245,6 @@ export function useEmptyTrash({ silent = false }: { silent?: boolean } = {}) {
       }
     },
     meta: { errorMessage: 'Failed to empty trash' },
-  });
-}
-
-export function useMovePage() {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({
-      pageId,
-      parentId,
-      position,
-    }: {
-      pageId: string;
-      parentId: string | null;
-      position: string;
-    }) => movePage(pageId, parentId, position),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['pageTree'] });
-      queryClient.invalidateQueries({ queryKey: ['shared-with-me'] });
-      showSuccessToast('Page moved');
-    },
-    meta: { errorMessage: 'Failed to move page' },
   });
 }
 

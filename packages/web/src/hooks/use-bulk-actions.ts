@@ -9,7 +9,7 @@ import { MAX_BULK_REMOVAL_OPERATIONS_PER_REQUEST } from '@metakip/shared';
 import { useIsMutating, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useIdentityLifecycle } from '../contexts/IdentityLifecycleContext';
 import { beginBulkRemoval } from '../utils/bulkRemovalState';
-import { isOwnedByUser } from '../utils/entity-actions';
+import { canRemoveEntityFromView, isOwnedByUser } from '../utils/entity-actions';
 import { showSuccessToast } from '../utils/toast';
 
 const API_BASE = '/api';
@@ -33,6 +33,13 @@ async function moveFolder(folderId: string, parentId: string | null): Promise<vo
   if (!res.ok) throw new Error('Failed to move folder');
 }
 
+async function completeMoves(moves: Promise<void>[]): Promise<void> {
+  // A late success must not land after the batch's final cache refresh.
+  const results = await Promise.allSettled(moves);
+  const failure = results.find((result) => result.status === 'rejected');
+  if (failure) throw failure.reason;
+}
+
 export type BulkRemovalInput = BulkRemovalRequest;
 
 export interface BulkRemovalCandidate {
@@ -51,8 +58,7 @@ export function buildBulkRemovalInput(
   const operations: BulkRemovalOperation[] = [];
   for (const item of items) {
     const isOwned = !!currentUserId && isOwnedByUser(item, currentUserId);
-    const canRemoveFromView =
-      !isOwned && (item.shareSource === 'direct' || item.shareSource === 'public');
+    const canRemoveFromView = canRemoveEntityFromView(item, currentUserId);
     if (!isOwned && !canRemoveFromView) continue;
     operations.push({
       entityType: item.type,
@@ -285,38 +291,40 @@ export function useBulkRemoveEntities() {
 export function useBulkMovePages() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ pageIds, parentId }: { pageIds: string[]; parentId: string | null }) => {
-      await Promise.all(pageIds.map((id) => movePage(id, parentId)));
-    },
+    mutationFn: ({ pageIds, parentId }: { pageIds: string[]; parentId: string | null }) =>
+      completeMoves(pageIds.map((id) => movePage(id, parentId))),
     onSuccess: () => {
       showSuccessToast('Pages moved');
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['pageTree'] });
-      queryClient.invalidateQueries({ queryKey: ['shared-with-me'] });
-    },
+    onSettled: (_result, _error, { pageIds }) =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['pageTree'] }),
+        queryClient.invalidateQueries({ queryKey: ['shared-with-me'] }),
+        ...pageIds.map((pageId) =>
+          queryClient.invalidateQueries({ queryKey: ['pages', 'detail', pageId], exact: true }),
+        ),
+        // Both the source and destination folder contents may have changed.
+        queryClient.invalidateQueries({ queryKey: ['folders', 'detail'] }),
+      ]),
   });
 }
 
 export function useBulkMoveFolders() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({
-      folderIds,
-      parentId,
-    }: {
-      folderIds: string[];
-      parentId: string | null;
-    }) => {
-      await Promise.all(folderIds.map((id) => moveFolder(id, parentId)));
-    },
+    mutationFn: ({ folderIds, parentId }: { folderIds: string[]; parentId: string | null }) =>
+      completeMoves(folderIds.map((id) => moveFolder(id, parentId))),
     onSuccess: () => {
       showSuccessToast('Folders moved');
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['folderTree'] });
-      queryClient.invalidateQueries({ queryKey: ['pageTree'] });
-      queryClient.invalidateQueries({ queryKey: ['shared-with-me'] });
-    },
+    onSettled: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['folderTree'] }),
+        queryClient.invalidateQueries({ queryKey: ['pageTree'] }),
+        queryClient.invalidateQueries({ queryKey: ['shared-with-me'] }),
+        // Moving a folder can change inherited access throughout its subtree.
+        queryClient.invalidateQueries({ queryKey: ['folders', 'detail'] }),
+        queryClient.invalidateQueries({ queryKey: ['pages', 'detail'] }),
+      ]),
   });
 }

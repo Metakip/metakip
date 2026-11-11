@@ -1,4 +1,4 @@
-import { focusManager, QueryClientProvider } from '@tanstack/react-query';
+import { focusManager, QueryClientProvider, QueryObserver } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React, { type ReactNode } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -562,6 +562,95 @@ describe('useBulkMovePages', () => {
     );
   });
 
+  it('refreshes moved page and folder details before completing without refreshing unrelated pages', async () => {
+    let finishRefresh: ((detail: { parentId: string }) => void) | undefined;
+    const refresh = new Promise<{ parentId: string }>((resolve) => {
+      finishRefresh = resolve;
+    });
+    const detailQuery = vi
+      .fn<() => Promise<{ parentId: string }>>()
+      .mockResolvedValueOnce({ parentId: 'source' })
+      .mockReturnValueOnce(refresh);
+    const detailObserver = new QueryObserver(queryClient, {
+      queryKey: ['pages', 'detail', 'p1'],
+      queryFn: detailQuery,
+    });
+    queryClient.setQueryData(['pages', 'detail', 'unrelated'], { parentId: 'other' });
+    queryClient.setQueryData(['folders', 'detail', 'source'], { pages: [] });
+    queryClient.setQueryData(['folders', 'detail', 'destination'], { pages: [] });
+    const unsubscribe = detailObserver.subscribe(() => undefined);
+    try {
+      await waitFor(() => expect(detailQuery).toHaveBeenCalledOnce());
+      fetchMock.mockResolvedValue({ ok: true });
+      const onSuccess = vi.fn();
+      const { result } = renderHook(() => useBulkMovePages(), {
+        wrapper: createWrapper(queryClient),
+      });
+
+      act(() => {
+        result.current.mutate({ pageIds: ['p1'], parentId: 'destination' }, { onSuccess });
+      });
+      await waitFor(() => expect(detailQuery).toHaveBeenCalledTimes(2));
+      expect(result.current.isPending).toBe(true);
+      expect(onSuccess).not.toHaveBeenCalled();
+
+      await act(async () => {
+        finishRefresh?.({ parentId: 'destination' });
+        await refresh;
+      });
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      expect(onSuccess).toHaveBeenCalledOnce();
+      expect(queryClient.getQueryData(['pages', 'detail', 'p1'])).toEqual({
+        parentId: 'destination',
+      });
+      expect(queryClient.getQueryState(['pages', 'detail', 'unrelated'])?.isInvalidated).toBe(
+        false,
+      );
+      for (const folderId of ['source', 'destination']) {
+        expect(queryClient.getQueryState(['folders', 'detail', folderId])?.isInvalidated).toBe(
+          true,
+        );
+      }
+    } finally {
+      unsubscribe();
+    }
+  });
+
+  it('waits for late successful moves before refreshing a partially failed batch', async () => {
+    let finishSecondMove: ((response: { ok: boolean }) => void) | undefined;
+    const secondMove = new Promise<{ ok: boolean }>((resolve) => {
+      finishSecondMove = resolve;
+    });
+    fetchMock.mockResolvedValueOnce({ ok: false }).mockReturnValueOnce(secondMove);
+    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
+    const { result } = renderHook(() => useBulkMovePages(), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    act(() => {
+      result.current.mutate({ pageIds: ['p1', 'p2'], parentId: 'destination' });
+    });
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    expect(result.current.isPending).toBe(true);
+    expect(invalidateSpy).not.toHaveBeenCalled();
+
+    await act(async () => {
+      finishSecondMove?.({ ok: true });
+      await secondMove;
+    });
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    expect(toastMocks.showSuccessToast).not.toHaveBeenCalled();
+    for (const pageId of ['p1', 'p2']) {
+      expect(invalidateSpy).toHaveBeenCalledWith({
+        queryKey: ['pages', 'detail', pageId],
+        exact: true,
+      });
+    }
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['folders', 'detail'] });
+  });
+
   it('reports a partial move failure without a false success message', async () => {
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
     fetchMock.mockResolvedValueOnce({ ok: true });
@@ -637,5 +726,26 @@ describe('useBulkMoveFolders', () => {
         body: JSON.stringify({ parentId: 'f-parent' }),
       }),
     );
+  });
+
+  it('refreshes folder contents and descendant page details when a folder moves', async () => {
+    fetchMock.mockResolvedValue({ ok: true });
+    queryClient.setQueryData(['folders', 'detail', 'source'], { folders: [] });
+    queryClient.setQueryData(['folders', 'detail', 'destination'], { folders: [] });
+    queryClient.setQueryData(['folders', 'detail', 'nested-folder'], { parentId: 'f1' });
+    queryClient.setQueryData(['pages', 'detail', 'nested-page'], { parentId: 'nested-folder' });
+    const { result } = renderHook(() => useBulkMoveFolders(), {
+      wrapper: createWrapper(queryClient),
+    });
+
+    act(() => {
+      result.current.mutate({ folderIds: ['f1'], parentId: 'destination' });
+    });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    for (const folderId of ['source', 'destination', 'nested-folder']) {
+      expect(queryClient.getQueryState(['folders', 'detail', folderId])?.isInvalidated).toBe(true);
+    }
+    expect(queryClient.getQueryState(['pages', 'detail', 'nested-page'])?.isInvalidated).toBe(true);
   });
 });
