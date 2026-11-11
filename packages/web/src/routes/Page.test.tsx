@@ -4,13 +4,20 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactNode } from 'react';
-import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { createMemoryRouter, Outlet, RouterProvider, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { AppShellContentState } from '../components/AppShell';
+import { ClipboardProvider } from '../contexts/ClipboardContext';
 import { useIsReadOnly } from '../contexts/EditorReadOnlyContext';
+import {
+  createIdentityLifecycle,
+  IdentityLifecycleProvider,
+} from '../contexts/IdentityLifecycleContext';
 import { createTestQueryClient } from '../test-utils/render';
 
 const PAGE_ID = '11111111-1111-4111-8111-111111111111';
 const WIKI_TARGET_ID = '22222222-2222-4222-8222-222222222222';
+const PARENT_FOLDER_ID = '33333333-3333-4333-8333-333333333333';
 const EDIT_CAPABILITIES: CapabilitySet = {
   canEdit: true,
   canDelete: false,
@@ -28,6 +35,10 @@ vi.mock('../components/AppShellToolbar', () => ({
   AppShellToolbar: ({ children }: { children: ReactNode }) => <>{children}</>,
   useAppShellOutletContext: () => ({ contentContainer: mocks.contentContainer }),
 }));
+vi.mock('../components/AppShell', () => ({
+  AppShell: ({ contentState }: { contentState: AppShellContentState }) =>
+    contentState.status === 'loading' ? contentState.content : <Outlet />,
+}));
 
 const mocks = vi.hoisted(() => ({
   contentContainer: null as HTMLDivElement | null,
@@ -41,6 +52,7 @@ const mocks = vi.hoisted(() => ({
     },
     accessPermission: 'edit' as 'view' | 'commenter' | 'edit' | 'admin' | null,
   },
+  currentUserId: 'current-user',
   setAccessPermission: vi.fn(),
   setCapabilities: vi.fn(),
   loggerError: vi.fn(),
@@ -50,20 +62,33 @@ const mocks = vi.hoisted(() => ({
     | ((permission: 'view' | 'commenter' | 'edit' | 'admin' | null, revision: string) => void)
     | null,
   commentSelection: null as ((anchor: { quote: string } | null) => void) | null,
-  toggleComments: null as (() => void) | null,
   wikiLinkClick: null as ((target: { id: string; title: string; heading?: string }) => void) | null,
 }));
 
-vi.mock('../contexts/ShareContext', () => ({
+vi.mock('../contexts/ShareContext', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../contexts/ShareContext')>()),
   useShareContext: () => mocks.share,
   useSetAccessPermission: () => mocks.setAccessPermission,
   useSetCapabilities: () => mocks.setCapabilities,
 }));
 vi.mock('../hooks/use-pages', () => ({
-  usePageTree: () => ({ data: [] }),
+  usePageTree: () => ({ data: [], isSuccess: true }),
 }));
 vi.mock('../hooks/use-folders', () => ({
-  useFolderTree: () => ({ data: [] }),
+  useFolderTree: () => ({ data: [], isSuccess: true }),
+}));
+vi.mock('../hooks/use-favorites', () => ({
+  useFavorites: () => ({ data: [] }),
+  useToggleFavorite: () => ({ mutate: vi.fn() }),
+}));
+vi.mock('../hooks/use-shared-with-me', () => ({
+  useSharedWithMeTree: () => ({ data: [], isSuccess: true }),
+}));
+vi.mock('../hooks/use-workspace', () => ({
+  useWorkspaceMemberships: () => ({ data: [], isSuccess: true }),
+}));
+vi.mock('../hooks/useAuth', () => ({
+  useAuth: () => ({ data: { user: { id: mocks.currentUserId } }, isPending: false }),
 }));
 vi.mock('../hooks/use-page-collaborators', () => ({
   usePageCollaborators: () => ({ data: undefined }),
@@ -75,11 +100,10 @@ vi.mock('../components/editor/BacklinksPanel', () => ({
   BacklinksPanel: () => <div data-testid="backlinks" />,
 }));
 vi.mock('../components/editor/Breadcrumbs', () => ({ Breadcrumbs: () => null }));
-vi.mock('../components/editor/PageActions', () => ({
-  PageActions: ({ onToggleComments }: { onToggleComments?: () => void }) => {
-    mocks.toggleComments = onToggleComments ?? null;
-    return <div data-testid="page-actions" />;
-  },
+vi.mock('../components/editor/ShareDialog', () => ({
+  ShareDialog: ({ title }: { title: string }) => (
+    <div role="dialog" aria-label={`Share ${title}`} />
+  ),
 }));
 vi.mock('../components/editor/CommentsPanel', () => ({
   CommentsPanel: ({
@@ -155,6 +179,7 @@ vi.mock('../components/editor/CollabStatus', () => ({ CollabStatus: () => null }
 vi.mock('../components/editor/TableOfContents', () => ({ TableOfContents: () => null }));
 vi.mock('../components/ThemeToggle', () => ({ ThemeToggle: () => null }));
 
+import { ShareablePageRoute } from '../components/auth/ShareablePageRoute';
 import Page from './Page';
 
 function LocationProbe() {
@@ -162,7 +187,7 @@ function LocationProbe() {
   return <output data-testid="location">{`${location.pathname}${location.hash}`}</output>;
 }
 
-function pageResponse(permission: 'view' | 'edit') {
+function pageResponse(permission: 'view' | 'edit', ownerId = 'owner-1') {
   return {
     accessScope: 'account',
     id: PAGE_ID,
@@ -173,8 +198,8 @@ function pageResponse(permission: 'view' | 'edit') {
     coverValue: null,
     position: 'a0',
     properties: null,
-    createdBy: 'owner-1',
-    ownerId: 'owner-1',
+    createdBy: ownerId,
+    ownerId,
     createdAt: '2026-01-01T00:00:00.000Z',
     updatedAt: '2026-01-01T00:00:00.000Z',
     publicPermission: null,
@@ -184,19 +209,52 @@ function pageResponse(permission: 'view' | 'edit') {
   };
 }
 
-function renderPage() {
+function renderPage({
+  withShareableRoute = false,
+  initialEntries = [`/test-page-${PAGE_ID}`],
+}: {
+  withShareableRoute?: boolean;
+  initialEntries?: string[];
+} = {}) {
   const queryClient = createTestQueryClient();
+  const lifecycle = createIdentityLifecycle();
+  const router = createMemoryRouter(
+    [
+      {
+        element: (
+          <>
+            <LocationProbe />
+            <Outlet />
+          </>
+        ),
+        children: [
+          { path: '/', element: <output>Workspace home</output> },
+          { path: '/settings', element: <output>Settings</output> },
+          { path: '/folder/:slugAndId', element: <output>Folder</output> },
+          {
+            path: '/:slugAndId',
+            element: withShareableRoute ? (
+              <ShareablePageRoute entityType="page" loadingState={<output>Loading page</output>} />
+            ) : (
+              <Outlet />
+            ),
+            children: [{ index: true, element: <Page /> }],
+          },
+        ],
+      },
+    ],
+    { initialEntries },
+  );
   const result = render(
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={[`/test-page-${PAGE_ID}`]}>
-        <LocationProbe />
-        <Routes>
-          <Route path="/:slugAndId" element={<Page />} />
-        </Routes>
-      </MemoryRouter>
+      <IdentityLifecycleProvider lifecycle={lifecycle}>
+        <ClipboardProvider>
+          <RouterProvider router={router} />
+        </ClipboardProvider>
+      </IdentityLifecycleProvider>
     </QueryClientProvider>,
   );
-  return { queryClient, ...result };
+  return { queryClient, router, lifecycle, ...result };
 }
 
 function mockPageFetch(permission: 'view' | 'edit', accessResponses: Array<boolean> = [true]) {
@@ -250,6 +308,7 @@ function mockPageFetchSequence(statuses: number[]) {
 
 describe('Page permission presentation', () => {
   beforeEach(() => {
+    mocks.currentUserId = 'current-user';
     mocks.contentContainer = null;
     mocks.setAccessPermission.mockReset();
     mocks.setCapabilities.mockReset();
@@ -263,7 +322,6 @@ describe('Page permission presentation', () => {
     mocks.permissionSnapshot = null;
     mocks.wikiLinkClick = null;
     mocks.commentSelection = null;
-    mocks.toggleComments = null;
   });
 
   afterEach(() => {
@@ -288,22 +346,24 @@ describe('Page permission presentation', () => {
     expect(screen.queryByRole('button', { name: 'Full width' })).not.toBeInTheDocument();
   });
 
-  it('toggles full width directly beside the page status control', async () => {
+  it('toggles and persists page width through the toolbar action menu', async () => {
     const user = userEvent.setup();
     vi.stubGlobal('fetch', mockPageFetch('edit'));
     await renderPage();
     await screen.findByTestId('page-body');
 
-    const toggle = screen.getByRole('button', { name: 'Full width' });
-    expect(toggle).toHaveAttribute('aria-pressed', 'false');
-    await user.click(toggle);
-    expect(toggle).toHaveAttribute('aria-pressed', 'true');
+    const menu = screen.getByRole('button', { name: 'Page actions' });
+    expect(screen.queryByRole('button', { name: 'Full width' })).not.toBeInTheDocument();
+    await user.click(menu);
+    await user.click(await screen.findByRole('menuitem', { name: 'Full width' }));
     expect(document.querySelector('.page-layout')).toHaveClass('page-layout--wide');
     expect(localStorage.getItem(`metakip-page-full-width:${PAGE_ID}`)).toBe('true');
 
-    await user.click(toggle);
-    expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
+    await user.click(menu);
+    await user.click(await screen.findByRole('menuitem', { name: 'Default width' }));
     expect(document.querySelector('.page-layout')).not.toHaveClass('page-layout--wide');
+    expect(localStorage.getItem(`metakip-page-full-width:${PAGE_ID}`)).toBe('false');
   });
 
   it('keeps editor surfaces editable but hides account-only controls for anonymous public editors', async () => {
@@ -321,7 +381,8 @@ describe('Page permission presentation', () => {
     });
     expect(screen.getByTestId('page-icon')).toHaveAttribute('data-read-only', 'false');
     expect(screen.getByTestId('properties')).toHaveAttribute('data-read-only', 'false');
-    expect(screen.queryByTestId('page-actions')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Share page' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Page actions' })).not.toBeInTheDocument();
     expect(screen.queryByTestId('backlinks')).not.toBeInTheDocument();
   });
 
@@ -351,7 +412,8 @@ describe('Page permission presentation', () => {
     });
     expect(screen.getByTestId('page-icon')).toHaveAttribute('data-read-only', 'false');
     expect(screen.getByTestId('properties')).toHaveAttribute('data-read-only', 'false');
-    expect(screen.getByTestId('page-actions')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Share page' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Page actions' })).toBeInTheDocument();
   });
 
   it('navigates only with the target already resolved by the server presentation', async () => {
@@ -388,7 +450,7 @@ describe('Page permission presentation', () => {
     await screen.findByTestId('page-body');
 
     act(() => mocks.commentSelection?.({ quote: 'Text from the previous page' }));
-    act(() => mocks.toggleComments?.());
+    await userEvent.click(screen.getByRole('button', { name: 'Open comments' }));
     expect(screen.getByTestId('comments-panel')).toHaveAttribute(
       'data-selected-quote',
       'Text from the previous page',
@@ -416,7 +478,7 @@ describe('Page permission presentation', () => {
     await renderPage();
     await screen.findByTestId('page-body');
 
-    act(() => mocks.toggleComments?.());
+    await userEvent.click(screen.getByRole('button', { name: 'Open comments' }));
     expect(screen.getByTestId('comments-panel')).toBeInTheDocument();
     expect(screen.getByTestId('page-body')).toHaveAttribute(
       'data-hide-inline-comment-cards',
@@ -453,7 +515,7 @@ describe('Page permission presentation', () => {
     await renderPage();
     await screen.findByTestId('page-body');
 
-    act(() => mocks.toggleComments?.());
+    await userEvent.click(screen.getByRole('button', { name: 'Open comments' }));
     expect(screen.getByTestId('comments-panel')).toHaveAttribute('data-is-drawer', 'false');
 
     width = 900;
@@ -501,10 +563,296 @@ describe('Page permission presentation', () => {
       expect(screen.getByTestId('properties')).toHaveAttribute('data-read-only', 'false');
     });
   });
+
+  it('does not reopen sharing after navigation unmounts the page controls', async () => {
+    let resolveNextPage: (response: Response) => void;
+    const nextPage = new Promise<Response>((resolve) => {
+      resolveNextPage = resolve;
+    });
+    const pageFetch = mockPageFetch('edit');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((input: RequestInfo | URL) => {
+        if (String(input) === `/api/pages/${WIKI_TARGET_ID}`) return nextPage;
+        if (String(input) === `/api/pages/${WIKI_TARGET_ID}/access`) {
+          return Promise.resolve(new Response('{}'));
+        }
+        return pageFetch(input);
+      }),
+    );
+    await renderPage();
+    await screen.findByTestId('page-body');
+    await userEvent.click(screen.getByRole('button', { name: 'Share page' }));
+    expect(screen.getByRole('dialog', { name: 'Share Test Page' })).toBeInTheDocument();
+
+    await act(async () => {
+      mocks.wikiLinkClick?.({ id: WIKI_TARGET_ID, title: 'Next page' });
+    });
+    await waitFor(() => expect(screen.queryByTestId('page-body')).not.toBeInTheDocument());
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+    await act(async () => {
+      resolveNextPage(
+        new Response(
+          JSON.stringify({ ...pageResponse('edit'), id: WIKI_TARGET_ID, title: 'Next page' }),
+        ),
+      );
+    });
+    await screen.findByTestId('page-body');
+    expect(screen.getByRole('button', { name: 'Share page' })).toBeInTheDocument();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it.each([
+    {
+      scenario: 'another page with a new route instance',
+      withShareableRoute: true,
+      leave: 'page',
+      returnToPage: false,
+    },
+    {
+      scenario: 'another page in the existing route instance',
+      withShareableRoute: false,
+      leave: 'page',
+      returnToPage: false,
+    },
+    {
+      scenario: 'a non-page route',
+      withShareableRoute: true,
+      leave: 'settings',
+      returnToPage: false,
+    },
+    { scenario: 'browser Back', withShareableRoute: true, leave: 'back', returnToPage: false },
+    {
+      scenario: 'leaving and reopening the same page',
+      withShareableRoute: true,
+      leave: 'page',
+      returnToPage: true,
+    },
+    {
+      scenario: 'leaving and reopening the same page without remounting',
+      withShareableRoute: false,
+      leave: 'page',
+      returnToPage: true,
+    },
+  ] as const)('does not redirect after $scenario', async ({
+    withShareableRoute,
+    leave,
+    returnToPage,
+  }) => {
+    mocks.currentUserId = 'owner-1';
+    let resolveDeletion: (response: Response) => void;
+    const deletion = new Promise<Response>((resolve) => {
+      resolveDeletion = resolve;
+    });
+    const pageFetch = mockPageFetch('edit');
+    const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+      const url = String(input);
+      if (url === `/api/pages/${PAGE_ID}` && init?.method === 'DELETE') return deletion;
+      if (url === `/api/pages/${WIKI_TARGET_ID}`) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({ ...pageResponse('edit'), id: WIKI_TARGET_ID, title: 'Next Page' }),
+          ),
+        );
+      }
+      if (url === `/api/pages/${WIKI_TARGET_ID}/access`) {
+        return Promise.resolve(new Response('{}'));
+      }
+      return pageFetch(input);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { queryClient, router } = renderPage({
+      withShareableRoute,
+      initialEntries: ['/settings', `/test-page-${PAGE_ID}`],
+    });
+    await screen.findByTestId('page-body');
+    await userEvent.click(screen.getByRole('button', { name: 'Page actions' }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Move to Trash' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Move to Trash' }));
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        `/api/pages/${PAGE_ID}`,
+        expect.objectContaining({ method: 'DELETE' }),
+      ),
+    );
+
+    await act(async () => {
+      if (leave === 'back') {
+        await router.navigate(-1);
+      } else {
+        await router.navigate(leave === 'page' ? `/next-page-${WIKI_TARGET_ID}` : '/settings');
+      }
+    });
+    if (leave === 'page') {
+      await screen.findByTestId('page-body');
+    } else {
+      expect(screen.queryByTestId('page-body')).not.toBeInTheDocument();
+    }
+    if (returnToPage) {
+      await act(async () => {
+        await router.navigate(-1);
+      });
+      await screen.findByTestId('page-body');
+    }
+    const destination = returnToPage
+      ? `/test-page-${PAGE_ID}`
+      : leave === 'page'
+        ? `/next-page-${WIKI_TARGET_ID}`
+        : '/settings';
+    expect(screen.getByTestId('location')).toHaveTextContent(destination);
+
+    await act(async () => {
+      resolveDeletion(new Response(JSON.stringify({ deleted: true })));
+      await deletion;
+    });
+    await waitFor(() => expect(queryClient.isMutating()).toBe(0));
+    expect(screen.getByTestId('location').textContent).toBe(destination);
+  });
+
+  it.each([
+    null,
+    PARENT_FOLDER_ID,
+  ])('replaces the removed page in history with its exit destination (parent: %s)', async (parentId) => {
+    mocks.currentUserId = 'owner-1';
+    const pageFetch = mockPageFetch('edit');
+    const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+      if (String(input) === `/api/pages/${PAGE_ID}`) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify(
+              init?.method === 'DELETE' ? { deleted: true } : { ...pageResponse('edit'), parentId },
+            ),
+          ),
+        );
+      }
+      return pageFetch(input);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    const { router } = renderPage({
+      withShareableRoute: true,
+      initialEntries: ['/settings', `/test-page-${PAGE_ID}`],
+    });
+    await screen.findByTestId('page-body');
+    await userEvent.click(screen.getByRole('button', { name: 'Page actions' }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Move to Trash' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Move to Trash' }));
+
+    await waitFor(() =>
+      expect(screen.getByTestId('location').textContent).toBe(
+        parentId ? `/folder/folder-${parentId}` : '/',
+      ),
+    );
+
+    await act(async () => {
+      await router.navigate(-1);
+    });
+    expect(screen.getByTestId('location').textContent).toBe('/settings');
+  });
+
+  it('does not redirect when the identity retires before removal finishes', async () => {
+    mocks.currentUserId = 'owner-1';
+    let resolveDeletion: (response: Response) => void;
+    const deletion = new Promise<Response>((resolve) => {
+      resolveDeletion = resolve;
+    });
+    const pageFetch = mockPageFetch('edit');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((input: RequestInfo | URL, init?: RequestInit) =>
+        String(input) === `/api/pages/${PAGE_ID}` && init?.method === 'DELETE'
+          ? deletion
+          : pageFetch(input),
+      ),
+    );
+    const { queryClient, lifecycle } = renderPage({ withShareableRoute: true });
+    await screen.findByTestId('page-body');
+    await userEvent.click(screen.getByRole('button', { name: 'Page actions' }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Move to Trash' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Move to Trash' }));
+    await waitFor(() => expect(queryClient.isMutating()).toBe(1));
+    lifecycle.retire();
+
+    await act(async () => {
+      resolveDeletion(new Response(JSON.stringify({ deleted: true })));
+      await deletion;
+    });
+    await waitFor(() => expect(queryClient.isMutating()).toBe(0));
+    expect(screen.getByTestId('location').textContent).toBe(`/test-page-${PAGE_ID}`);
+  });
+
+  it('uses the new location after moving a page without collaboration updates', async () => {
+    mocks.currentUserId = 'owner-1';
+    let storedParentId: string | null = PARENT_FOLDER_ID;
+    const pageFetch = mockPageFetch('edit');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+        if (String(input) === `/api/pages/${PAGE_ID}/move`) {
+          storedParentId = null;
+          return Promise.resolve(new Response('{}'));
+        }
+        if (String(input) === `/api/pages/${PAGE_ID}`) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify(
+                init?.method === 'DELETE'
+                  ? { deleted: true }
+                  : { ...pageResponse('edit'), parentId: storedParentId },
+              ),
+            ),
+          );
+        }
+        return pageFetch(input);
+      }),
+    );
+    const { queryClient } = renderPage({ withShareableRoute: true });
+    await screen.findByTestId('page-body');
+    await userEvent.click(screen.getByRole('button', { name: 'Page actions' }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Move' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Move here' }));
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog', { name: 'Move item' })).not.toBeInTheDocument(),
+    );
+    expect(queryClient.getQueryData(['pages', 'detail', PAGE_ID])).toMatchObject({
+      parentId: null,
+    });
+    await userEvent.click(screen.getByRole('button', { name: 'Page actions' }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Move to Trash' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Move to Trash' }));
+    await waitFor(() => expect(screen.getByTestId('location').textContent).toBe('/'));
+  });
+
+  it('does not redirect when removal fails', async () => {
+    mocks.currentUserId = 'owner-1';
+    const pageFetch = mockPageFetch('edit');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((input: RequestInfo | URL, init?: RequestInit) =>
+        String(input) === `/api/pages/${PAGE_ID}` && init?.method === 'DELETE'
+          ? Promise.resolve(
+              new Response(JSON.stringify({ message: 'Removal failed' }), { status: 500 }),
+            )
+          : pageFetch(input),
+      ),
+    );
+    const { queryClient } = renderPage({ withShareableRoute: true });
+    await screen.findByTestId('page-body');
+    await userEvent.click(screen.getByRole('button', { name: 'Page actions' }));
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Move to Trash' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Move to Trash' }));
+
+    await waitFor(() => expect(queryClient.isMutating()).toBe(0));
+    expect(screen.getByTestId('location').textContent).toBe(`/test-page-${PAGE_ID}`);
+    expect(screen.getByRole('alertdialog')).toBeInTheDocument();
+  });
 });
 
 describe('Page request errors', () => {
   beforeEach(() => {
+    mocks.currentUserId = 'current-user';
     mocks.share = {
       isAnonymous: false,
       capabilities: EDIT_CAPABILITIES,
@@ -541,6 +889,7 @@ describe('Page request errors', () => {
 
 describe('Page access recording retries', () => {
   beforeEach(() => {
+    mocks.currentUserId = 'current-user';
     vi.useFakeTimers({ shouldAdvanceTime: true });
     mocks.loggerError.mockReset();
     mocks.share = {

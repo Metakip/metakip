@@ -1,4 +1,4 @@
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createMockFolderTreeNode, createMockPageTreeNode } from '../test-utils/factories';
 import { createTestQueryClient, createWrapper } from '../test-utils/wrapper';
@@ -15,11 +15,26 @@ vi.mock('./toast', () => ({
 }));
 
 import {
+  canAdministerEntity,
+  canMoveEntity,
+  canRemoveEntityFromView,
   canRenameEntity,
   resolveRemovalShareSource,
-  useBulkLeaveEntities,
   useEntityDeletion,
 } from './entity-actions';
+
+describe('canMoveEntity', () => {
+  it.each([
+    ['admin', true, true],
+    ['admin', false, false],
+    ['edit', true, false],
+    ['view', true, false],
+    [null, true, false],
+    [undefined, true, false],
+  ] as const)('requires item and source administration (%s, %s)', (permission, sourceIsAdmin, expected) => {
+    expect(canMoveEntity(permission, sourceIsAdmin)).toBe(expected);
+  });
+});
 
 describe('canRenameEntity', () => {
   it.each([
@@ -38,6 +53,29 @@ describe('canRenameEntity', () => {
   });
 });
 
+describe('canAdministerEntity', () => {
+  it('allows owners and entity admins', () => {
+    expect(canAdministerEntity({ ownerId: 'user-1' }, 'user-1')).toBe(true);
+    expect(canAdministerEntity({ ownerId: 'owner', userPermission: 'admin' }, 'user-1')).toBe(true);
+    expect(canAdministerEntity({ ownerId: 'owner', userPermission: 'edit' }, 'user-1')).toBe(false);
+  });
+});
+
+describe('canRemoveEntityFromView', () => {
+  it.each(['direct', 'public'] as const)('allows removal of %s shares', (shareSource) => {
+    expect(canRemoveEntityFromView({ ownerId: 'owner', shareSource }, 'user-1')).toBe(true);
+  });
+
+  it('rejects inherited access and the owner', () => {
+    expect(canRemoveEntityFromView({ ownerId: 'owner', shareSource: 'workspace' }, 'user-1')).toBe(
+      false,
+    );
+    expect(canRemoveEntityFromView({ ownerId: 'user-1', shareSource: 'direct' }, 'user-1')).toBe(
+      false,
+    );
+  });
+});
+
 describe('resolveRemovalShareSource', () => {
   it('hides personal removal when workspace access would remain after a direct grant is removed', () => {
     expect(resolveRemovalShareSource('direct', true)).toBe('workspace');
@@ -50,7 +88,7 @@ describe('resolveRemovalShareSource', () => {
   });
 });
 
-describe('useBulkLeaveEntities', () => {
+describe('useEntityDeletion', () => {
   let queryClient: ReturnType<typeof createTestQueryClient>;
   let fetchMock: ReturnType<typeof vi.fn>;
 
@@ -85,8 +123,9 @@ describe('useBulkLeaveEntities', () => {
         json: () => Promise.resolve({ deleted: true }),
       });
     const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
+    const onSuccess = vi.fn();
     const { result } = renderHook(
-      () => useEntityDeletion({ entityType: 'folder', currentUserId: 'owner-1' }),
+      () => useEntityDeletion({ entityType: 'folder', currentUserId: 'owner-1', onSuccess }),
       { wrapper: createWrapper(queryClient) },
     );
 
@@ -105,6 +144,7 @@ describe('useBulkLeaveEntities', () => {
     );
     expect(toastMocks.showSuccessToast).not.toHaveBeenCalled();
     expect(invalidateSpy).not.toHaveBeenCalled();
+    expect(onSuccess).not.toHaveBeenCalled();
 
     await act(async () => {
       await result.current.moveToTrash(
@@ -117,6 +157,7 @@ describe('useBulkLeaveEntities', () => {
       method: 'DELETE',
     });
     expect(toastMocks.showSuccessToast).toHaveBeenCalledWith('Moved "Project" To Trash');
+    expect(onSuccess).toHaveBeenCalledOnce();
   });
 
   it('does not report success for an undecodable delete response', async () => {
@@ -180,8 +221,11 @@ describe('useBulkLeaveEntities', () => {
       ok: true,
       json: () => Promise.resolve({ deleted: true }),
     });
+    const onSuccess = vi.fn(() => {
+      expect(queryClient.getQueryData(['pageTree'])).toEqual([remaining]);
+    });
     const { result } = renderHook(
-      () => useEntityDeletion({ entityType: 'page', currentUserId: 'owner-1' }),
+      () => useEntityDeletion({ entityType: 'page', currentUserId: 'owner-1', onSuccess }),
       { wrapper: createWrapper(queryClient) },
     );
 
@@ -199,6 +243,107 @@ describe('useBulkLeaveEntities', () => {
       { id: 'page-2', title: 'Remaining' },
     ]);
     expect(consumeSelfLeave('page-1')).toBe(true);
+    expect(onSuccess).toHaveBeenCalledOnce();
+  });
+
+  it.each([
+    'trash',
+    'remove',
+  ] as const)('keeps cache updates and feedback but skips screen callbacks after unmounting (%s)', async (action) => {
+    queryClient.setQueryData(['pageTree'], [createMockPageTreeNode({ id: 'page-1' })]);
+    let finishRequest: ((response: Response) => void) | undefined;
+    fetchMock.mockReturnValue(
+      new Promise<Response>((resolve) => {
+        finishRequest = resolve;
+      }),
+    );
+    const onSuccess = vi.fn();
+    const { result, unmount } = renderHook(
+      () => useEntityDeletion({ entityType: 'page', currentUserId: 'admin-1', onSuccess }),
+      { wrapper: createWrapper(queryClient) },
+    );
+    const entity = {
+      id: 'page-1',
+      type: 'page' as const,
+      title: 'Shared page',
+      ownerId: 'owner-1',
+      userPermission: 'admin' as const,
+      shareSource: 'direct' as const,
+    };
+    let removal: Promise<unknown> | undefined;
+    act(() => {
+      removal =
+        action === 'trash'
+          ? result.current.moveToTrash(entity)
+          : result.current.removeFromView(entity);
+    });
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
+    unmount();
+
+    await act(async () => {
+      finishRequest?.(
+        new Response(JSON.stringify(action === 'trash' ? { deleted: true } : { ok: true })),
+      );
+      await removal;
+    });
+
+    expect(onSuccess).not.toHaveBeenCalled();
+    expect(queryClient.getQueryData(['pageTree'])).toEqual([]);
+    expect(toastMocks.showSuccessToast).toHaveBeenCalledOnce();
+  });
+
+  it.each([
+    ['trash', false],
+    ['trash', true],
+    ['remove', false],
+    ['remove', true],
+  ] as const)('uses the latest callback for a still-mounted %s action (active: %s)', async (action, active) => {
+    let finishRequest: ((response: Response) => void) | undefined;
+    fetchMock.mockReturnValue(
+      new Promise<Response>((resolve) => {
+        finishRequest = resolve;
+      }),
+    );
+    const initialCallback = vi.fn();
+    const latestCallback = vi.fn();
+    const initialProps: { onSuccess: (() => void) | undefined } = {
+      onSuccess: initialCallback,
+    };
+    const { result, rerender } = renderHook(
+      ({ onSuccess }: { onSuccess: (() => void) | undefined }) =>
+        useEntityDeletion({ entityType: 'page', currentUserId: 'admin-1', onSuccess }),
+      {
+        initialProps,
+        wrapper: createWrapper(queryClient),
+      },
+    );
+    const entity = {
+      id: 'page-1',
+      type: 'page' as const,
+      title: 'Shared page',
+      ownerId: 'owner-1',
+      userPermission: 'admin' as const,
+      shareSource: 'direct' as const,
+    };
+    let removal: Promise<unknown> | undefined;
+    act(() => {
+      removal =
+        action === 'trash'
+          ? result.current.moveToTrash(entity)
+          : result.current.removeFromView(entity);
+    });
+    await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
+    rerender({ onSuccess: active ? latestCallback : undefined });
+
+    await act(async () => {
+      finishRequest?.(
+        new Response(JSON.stringify(action === 'trash' ? { deleted: true } : { ok: true })),
+      );
+      await removal;
+    });
+
+    expect(initialCallback).not.toHaveBeenCalled();
+    expect(latestCallback).toHaveBeenCalledTimes(active ? 1 : 0);
   });
 
   it('removes a confirmed folder subtree and its pages from navigation caches', async () => {
@@ -278,8 +423,9 @@ describe('useBulkLeaveEntities', () => {
       ok: true,
       json: () => Promise.resolve({ ok: true }),
     });
+    const onSuccess = vi.fn();
     const { result } = renderHook(
-      () => useEntityDeletion({ entityType: 'page', currentUserId: 'admin-1' }),
+      () => useEntityDeletion({ entityType: 'page', currentUserId: 'admin-1', onSuccess }),
       { wrapper: createWrapper(queryClient) },
     );
 
@@ -303,6 +449,7 @@ describe('useBulkLeaveEntities', () => {
       '“Shared roadmap” removed from your view',
     );
     expect(consumeSelfLeave('shared-page')).toBe(true);
+    expect(onSuccess).toHaveBeenCalledOnce();
   });
 
   it('keeps the explicit trash action available to a non-owner admin', async () => {
@@ -350,39 +497,5 @@ describe('useBulkLeaveEntities', () => {
     ).rejects.toThrow('inherits access and cannot be removed directly');
 
     expect(fetchMock).not.toHaveBeenCalled();
-  });
-
-  it('refreshes navigation after some leave requests succeed and another fails', async () => {
-    fetchMock.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve({ ok: true }),
-    });
-    fetchMock.mockResolvedValueOnce({
-      ok: false,
-      json: () => Promise.resolve({ message: 'Cannot leave inherited page' }),
-    });
-    fetchMock.mockResolvedValueOnce({
-      ok: true,
-      json: () => Promise.resolve({ ok: true }),
-    });
-    const invalidateSpy = vi.spyOn(queryClient, 'invalidateQueries');
-    const { result } = renderHook(() => useBulkLeaveEntities('page'), {
-      wrapper: createWrapper(queryClient),
-    });
-
-    result.current.mutate({ entityIds: ['page-1', 'page-2', 'page-3'] });
-
-    await waitFor(() => expect(result.current.isError).toBe(true));
-    expect(fetchMock).toHaveBeenCalledTimes(3);
-    expect(toastMocks.showSuccessToast).not.toHaveBeenCalled();
-    for (const queryKey of [
-      ['pageTree'],
-      ['folderTree'],
-      ['shared-with-me'],
-      ['pages', 'recent'],
-      ['favorites'],
-    ]) {
-      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey });
-    }
   });
 });

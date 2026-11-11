@@ -207,11 +207,11 @@ export function PageTreeRow({
               type: isFolder ? 'folder' : 'page',
               title,
               icon: icon ?? null,
-              ...(ownerId != null ? { ownerId } : {}),
-              ...(createdBy != null ? { createdBy } : {}),
-              ...(userPermission !== undefined ? { userPermission } : {}),
-              ...(shareSource !== undefined ? { shareSource } : {}),
-              ...(canMove !== undefined ? { canMove } : {}),
+              ownerId: ownerId ?? undefined,
+              createdBy: createdBy ?? undefined,
+              userPermission,
+              shareSource,
+              canMove,
             }}
             isFavorite={isFavorite}
             triggerClassName="p-1 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 cursor-pointer transition-colors"
@@ -221,7 +221,9 @@ export function PageTreeRow({
             {...(isActive
               ? {
                   onDeleted: () =>
-                    navigate(parentId ? buildFolderPath('folder', parentId) : getWorkspacePath()),
+                    navigate(parentId ? buildFolderPath('folder', parentId) : getWorkspacePath(), {
+                      replace: true,
+                    }),
                 }
               : {})}
           />

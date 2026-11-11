@@ -78,6 +78,15 @@ describe('MoveDialog', () => {
     expect(screen.getByRole('button', { name: 'Move here' })).toBeDisabled();
   });
 
+  it('shows loading state and blocks confirmation until destinations load', () => {
+    render(
+      <MoveDialog isOpen folders={[]} isLoading allowRoot onClose={vi.fn()} onConfirm={vi.fn()} />,
+    );
+
+    expect(screen.getByRole('status')).toHaveTextContent('Loading destinations');
+    expect(screen.getByRole('button', { name: 'Move here' })).toBeDisabled();
+  });
+
   it('blocks a moving folder and all of its descendants', async () => {
     const child = folder({ id: 'child', parentId: 'moving', name: 'Child folder' });
     const moving = folder({

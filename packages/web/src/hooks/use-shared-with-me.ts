@@ -39,10 +39,14 @@ export function useSharedWithMe(limit?: number) {
   });
 }
 
-export function useSharedWithMeTree(limit?: number) {
+export function useSharedWithMeTree(
+  limit?: number,
+  { enabled = true }: { enabled?: boolean } = {},
+) {
   return useQuery({
     queryKey: limit === undefined ? ['shared-with-me', 'tree'] : ['shared-with-me', 'tree', limit],
     queryFn: () => fetchSharedWithMeTree(limit),
+    enabled,
     refetchOnWindowFocus: () => !isBulkRemovalInProgress(),
     refetchOnReconnect: () => !isBulkRemovalInProgress(),
   });

@@ -95,7 +95,7 @@ describe('PageTreeRow keyboard actions', () => {
   it.each([
     ['page', false],
     ['folder', true],
-  ] as const)('navigates an active removed %s to its parent folder', async (_type, isFolder) => {
+  ] as const)('replaces an active removed %s with its parent folder in history', async (_type, isFolder) => {
     const user = userEvent.setup();
     mocks.navigate.mockReset();
     render(
@@ -104,17 +104,17 @@ describe('PageTreeRow keyboard actions', () => {
 
     await user.click(screen.getByRole('button', { name: 'Complete removal' }));
 
-    expect(mocks.navigate).toHaveBeenCalledWith('/folder/folder-folder-1');
+    expect(mocks.navigate).toHaveBeenCalledWith('/folder/folder-folder-1', { replace: true });
   });
 
-  it('navigates an active top-level item Home after removal', async () => {
+  it('replaces an active top-level item with Home in history after removal', async () => {
     const user = userEvent.setup();
     mocks.navigate.mockReset();
     render(<PageTreeRow id="folder-1" title="Folder" isFolder isActive />);
 
     await user.click(screen.getByRole('button', { name: 'Complete removal' }));
 
-    expect(mocks.navigate).toHaveBeenCalledWith('/');
+    expect(mocks.navigate).toHaveBeenCalledWith('/', { replace: true });
   });
 
   it.each([

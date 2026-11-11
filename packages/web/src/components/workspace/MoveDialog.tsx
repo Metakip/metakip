@@ -9,6 +9,7 @@ interface MoveDialogProps {
   folders: FolderTreeNode[];
   onClose: () => void;
   onConfirm: (folderId: string | null) => void;
+  isLoading?: boolean;
   movingFolderIds?: string[];
   movingOwnerId?: string | null | undefined;
   allowRoot?: boolean;
@@ -26,6 +27,7 @@ export function MoveDialog({
   folders,
   onClose,
   onConfirm,
+  isLoading = false,
   movingFolderIds = [],
   movingOwnerId,
   allowRoot = true,
@@ -179,7 +181,13 @@ export function MoveDialog({
               <Home size={16} />
               <span className="text-sm font-medium">Root</span>
             </button>
-            {folders.map((folder) => renderFolder(folder))}
+            {isLoading ? (
+              <p role="status" className="px-3 py-2 text-sm text-zinc-500 dark:text-zinc-400">
+                Loading destinations…
+              </p>
+            ) : (
+              folders.map((folder) => renderFolder(folder))
+            )}
           </div>
 
           <div className="mt-4 flex items-center justify-end gap-2">
@@ -193,7 +201,7 @@ export function MoveDialog({
             <button
               type="button"
               onClick={() => onConfirm(selectedFolderId)}
-              disabled={selectedFolderId === null && !allowRoot}
+              disabled={isLoading || (selectedFolderId === null && !allowRoot)}
               className="px-4 py-2 text-sm font-medium text-white bg-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 rounded-md hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
             >
               Move here

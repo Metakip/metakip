@@ -34,6 +34,7 @@ import { useExplorerViewMode } from '../hooks/useExplorerViewMode';
 import { useStableValueWhile } from '../hooks/useStableValue';
 import { isBulkRemovalInProgress } from '../utils/bulkRemovalState';
 import {
+  canMoveEntity,
   canRenameEntity,
   preservesEffectiveOwnerAtRoot,
   resolveRemovalShareSource,
@@ -210,9 +211,8 @@ export default function HomeView() {
         userPermission: folder.userPermission,
         shareSource: 'workspace' as const,
         canMove:
-          folder.userPermission === 'admin' &&
           !!folder.ownerId &&
-          workspaceAdminOwnerIds.has(folder.ownerId),
+          canMoveEntity(folder.userPermission, workspaceAdminOwnerIds.has(folder.ownerId)),
       }));
     const pageItems = (pages ?? [])
       .filter(
@@ -236,9 +236,8 @@ export default function HomeView() {
         userPermission: page.userPermission,
         shareSource: 'workspace' as const,
         canMove:
-          page.userPermission === 'admin' &&
           !!page.ownerId &&
-          workspaceAdminOwnerIds.has(page.ownerId),
+          canMoveEntity(page.userPermission, workspaceAdminOwnerIds.has(page.ownerId)),
       }));
     return [...folderItems, ...pageItems];
   }, [folders, pages, workspaceOwnerIds, workspaceAdminOwnerIds]);

@@ -1,5 +1,5 @@
 import type { SharePermission } from '@metakip/shared';
-import { canRenameEntity } from '../../utils/entity-actions';
+import { canMoveEntity, canRenameEntity } from '../../utils/entity-actions';
 
 export type SidebarPlacement = 'owned' | 'workspace' | 'shared' | 'alias';
 
@@ -28,13 +28,12 @@ export function deriveSidebarCapabilities({
   placement,
   sourceIsAdmin = false,
 }: SidebarCapabilityInput): SidebarCapabilities {
-  const isAdmin = userPermission === 'admin';
   const canMove =
     placement === 'owned'
       ? true
       : placement === 'alias'
         ? ownerId === currentUserId
-        : isAdmin && sourceIsAdmin;
+        : canMoveEntity(userPermission, sourceIsAdmin);
   const canCreateChild =
     entityType === 'folder' && (userPermission === 'edit' || userPermission === 'admin');
   const canRename = canRenameEntity(
