@@ -8,9 +8,9 @@ vi.mock('../utils/toast', () => ({
   showInfoToast: vi.fn(),
 }));
 
-import { useFavorites, useToggleFavorite } from './use-favorites';
+import { useStars, useToggleStar } from './use-stars';
 
-describe('useFavorites', () => {
+describe('useStars', () => {
   let queryClient: ReturnType<typeof createTestQueryClient>;
   let fetchMock: ReturnType<typeof vi.fn>;
 
@@ -25,16 +25,24 @@ describe('useFavorites', () => {
     queryClient.clear();
   });
 
-  it('fetches favorites successfully', async () => {
+  it('fetches stars successfully', async () => {
     fetchMock.mockResolvedValueOnce({
       ok: true,
       json: () =>
         Promise.resolve({
-          favorites: [{ pageId: 'p1', title: 'Page 1', icon: null, createdAt: null }],
+          stars: [
+            {
+              entityType: 'page',
+              entityId: 'p1',
+              title: 'Page 1',
+              icon: null,
+              createdAt: null,
+            },
+          ],
         }),
     });
 
-    const { result } = renderHook(() => useFavorites(), {
+    const { result } = renderHook(() => useStars(), {
       wrapper: createWrapper(queryClient),
     });
 
@@ -46,7 +54,6 @@ describe('useFavorites', () => {
       {
         entityType: 'page',
         entityId: 'p1',
-        pageId: 'p1',
         title: 'Page 1',
         icon: null,
         createdAt: null,
@@ -57,7 +64,7 @@ describe('useFavorites', () => {
   it('handles fetch error', async () => {
     fetchMock.mockResolvedValueOnce({ ok: false });
 
-    const { result } = renderHook(() => useFavorites(), {
+    const { result } = renderHook(() => useStars(), {
       wrapper: createWrapper(queryClient),
     });
 
@@ -66,10 +73,10 @@ describe('useFavorites', () => {
     });
   });
 
-  it('adds a favorite when the item is not already favorited', async () => {
+  it('stars an item when it is not already starred', async () => {
     fetchMock.mockResolvedValueOnce({ ok: true });
 
-    const { result } = renderHook(() => useToggleFavorite(), {
+    const { result } = renderHook(() => useToggleStar(), {
       wrapper: createWrapper(queryClient),
     });
 
@@ -79,21 +86,21 @@ describe('useFavorites', () => {
         entityId: 'f1',
         title: 'Folder 1',
         icon: null,
-        isFavorite: false,
+        isStarred: false,
       });
     });
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/favorites', {
+    expect(fetchMock).toHaveBeenCalledWith('/api/stars', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ entityType: 'folder', entityId: 'f1' }),
     });
   });
 
-  it('removes a favorite when the item is already favorited', async () => {
+  it('unstars an item when it is already starred', async () => {
     fetchMock.mockResolvedValueOnce({ ok: true });
 
-    const { result } = renderHook(() => useToggleFavorite(), {
+    const { result } = renderHook(() => useToggleStar(), {
       wrapper: createWrapper(queryClient),
     });
 
@@ -101,11 +108,11 @@ describe('useFavorites', () => {
       await result.current.mutateAsync({
         entityType: 'folder',
         entityId: 'f1',
-        isFavorite: true,
+        isStarred: true,
       });
     });
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/favorites/folder/f1', {
+    expect(fetchMock).toHaveBeenCalledWith('/api/stars/folder/f1', {
       method: 'DELETE',
     });
   });

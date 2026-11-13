@@ -2,7 +2,7 @@ import type { PageDetailPayload, SharePermission } from '@metakip/shared';
 import { Maximize2, MessageSquare, Minimize2, Share, Star } from 'lucide-react';
 import { useState } from 'react';
 import { useShareContext } from '../../contexts/ShareContext';
-import { useFavorites } from '../../hooks/use-favorites';
+import { useStars } from '../../hooks/use-stars';
 import { useEntityActions } from '../../hooks/useEntityActions';
 import { usePageActionEligibility } from '../../hooks/usePageActionEligibility';
 import { Tooltip } from '../Tooltip';
@@ -34,14 +34,10 @@ export function PageActions({
   const { isAnonymous } = useShareContext();
   const [menuOpen, setMenuOpen] = useState(false);
   const eligibility = usePageActionEligibility(page, permission, !isAnonymous && menuOpen);
-  const { data: favorites } = useFavorites({ enabled: !isAnonymous });
-  const isFavorite =
-    favorites?.some(
-      (favorite) =>
-        favorite.entityType === 'page' &&
-        (favorite.entityId === page.id || favorite.pageId === page.id),
-    ) ?? false;
-  const favoriteLabel = isFavorite ? 'Remove from favorites' : 'Add to favorites';
+  const { data: stars } = useStars({ enabled: !isAnonymous });
+  const isStarred =
+    stars?.some((star) => star.entityType === 'page' && star.entityId === page.id) ?? false;
+  const starLabel = isStarred ? 'Unstar page' : 'Star page';
   const actions = useEntityActions({
     item: {
       id: page.id,
@@ -55,7 +51,7 @@ export function PageActions({
       shareSource:
         eligibility.removal.status === 'ready' ? eligibility.removal.shareSource : undefined,
     },
-    isFavorite,
+    isStarred,
     onDeleted,
   });
 
@@ -64,18 +60,18 @@ export function PageActions({
   return (
     <>
       <div className="hidden shrink-0 items-center gap-1 md:flex">
-        <Tooltip label={favoriteLabel} position="bottom">
+        <Tooltip label={actions.star.label} position="bottom">
           <button
             type="button"
-            onClick={actions.favorite.onClick}
-            aria-label={favoriteLabel}
+            onClick={actions.star.onClick}
+            aria-label={starLabel}
             className={`rounded-md p-2 transition-colors cursor-pointer ${
-              isFavorite
+              isStarred
                 ? 'text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
                 : 'text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800'
             }`}
           >
-            <Star size={16} fill={isFavorite ? 'currentColor' : 'none'} />
+            <Star size={16} fill={isStarred ? 'currentColor' : 'none'} />
           </button>
         </Tooltip>
         {canComment && (
@@ -117,7 +113,7 @@ export function PageActions({
         onOpenChange={setMenuOpen}
         items={[
           {
-            ...actions.favorite,
+            ...actions.star,
             className: 'md:hidden',
           },
           ...(canComment

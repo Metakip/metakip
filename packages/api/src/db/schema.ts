@@ -711,8 +711,8 @@ export const pageVersions = pgTable(
   }),
 );
 
-export const userFavorites = pgTable(
-  'user_favorites',
+export const userStars = pgTable(
+  'user_stars',
   {
     id: uuid('id').defaultRandom().primaryKey(),
     userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
@@ -722,7 +722,7 @@ export const userFavorites = pgTable(
   },
   (table) => ({
     userEntityUnique: unique().on(table.userId, table.entityType, table.entityId),
-    entityIdx: index('user_favorites_entity_idx').on(table.entityType, table.entityId),
+    entityIdx: index('user_stars_entity_idx').on(table.entityType, table.entityId),
   }),
 );
 

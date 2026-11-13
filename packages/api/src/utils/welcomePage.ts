@@ -24,7 +24,7 @@ Feel free to delete this page whenever you want.
 7. A [CLI](${METAKIP_CLI_DOCS_URL}) for you and your agents to work with Metakip
 8. Table of contents (hover over the bars on the right for more details)
 9. Exporting to md
-10. Favorites
+10. Starred items
 11. Command palette and search
 12. Light and dark themes
 13. Trash and restore
@@ -107,7 +107,7 @@ export async function ensureAccountSetupComplete(
 
   await executeQuery(
     executor,
-    sql`insert into user_favorites (user_id, entity_type, entity_id)
+    sql`insert into user_stars (user_id, entity_type, entity_id)
         values (${userId}, 'page', ${page.id})
         on conflict (user_id, entity_type, entity_id) do nothing`,
   );

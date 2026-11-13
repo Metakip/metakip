@@ -2266,7 +2266,7 @@ describe('pages API', () => {
       expect(ownerPurgeRes.status).toBe(200);
     });
 
-    it('removes polymorphic grant, public-visit, and favorite metadata', async () => {
+    it('removes polymorphic grant, public-visit, and star metadata', async () => {
       const app = await createTestApp();
       const owner = await createTestUser();
       const recipient = await createTestUser();
@@ -2283,7 +2283,7 @@ describe('pages API', () => {
         [page.id, recipient.id],
       );
       await query(
-        `insert into user_favorites (user_id, entity_type, entity_id)
+        `insert into user_stars (user_id, entity_type, entity_id)
          values ($1, 'page', $2)`,
         [recipient.id, page.id],
       );
@@ -2298,14 +2298,14 @@ describe('pages API', () => {
       });
       expect(purgeRes.status).toBe(200);
 
-      const leftovers = await query<{ grants: string; visits: string; favorites: string }>(
+      const leftovers = await query<{ grants: string; visits: string; stars: string }>(
         `select
            (select count(*) from shares where entity_type = 'page' and entity_id = $1)::text as grants,
            (select count(*) from page_public_access_visits where page_id = $1)::text as visits,
-           (select count(*) from user_favorites where entity_type = 'page' and entity_id = $1)::text as favorites`,
+           (select count(*) from user_stars where entity_type = 'page' and entity_id = $1)::text as stars`,
         [page.id],
       );
-      expect(leftovers.rows[0]).toEqual({ grants: '0', visits: '0', favorites: '0' });
+      expect(leftovers.rows[0]).toEqual({ grants: '0', visits: '0', stars: '0' });
     });
 
     it('returns 404 for non-existent page', async () => {

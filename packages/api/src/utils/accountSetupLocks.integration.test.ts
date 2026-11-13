@@ -18,11 +18,11 @@ describe('account setup locks', () => {
       [user.id, WELCOME_PAGE_TITLE],
     );
     expect(pages.rowCount).toBe(1);
-    const favorites = await query(
-      `select id from user_favorites where user_id = $1 and entity_type = 'page' and entity_id = $2`,
+    const stars = await query(
+      `select id from user_stars where user_id = $1 and entity_type = 'page' and entity_id = $2`,
       [user.id, pages.rows[0]?.id],
     );
-    expect(favorites.rowCount).toBe(1);
+    expect(stars.rowCount).toBe(1);
     const account = await query<{
       account_setup_completed_at: Date | null;
       onboarding_completed_at: Date | null;

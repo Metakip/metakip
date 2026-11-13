@@ -18,8 +18,8 @@ import {
 } from '../utils/entity-actions';
 import { showErrorToast, showSuccessToast } from '../utils/toast';
 import { useBulkMoveFolders, useBulkMovePages } from './use-bulk-actions';
-import { useToggleFavorite } from './use-favorites';
 import { useFolderTree } from './use-folders';
+import { useToggleStar } from './use-stars';
 import { useWorkspaceMemberships } from './use-workspace';
 import { useAuth } from './useAuth';
 
@@ -35,7 +35,7 @@ export type EntityActionOptions = {
     shareSource?: EntityShareSource | undefined;
     canMove?: boolean | undefined;
   };
-  isFavorite?: boolean;
+  isStarred?: boolean;
   onRename?: () => void;
   onDeleted?: () => void;
   onCopy?: () => void;
@@ -43,7 +43,7 @@ export type EntityActionOptions = {
 
 export function useEntityActions({
   item,
-  isFavorite = false,
+  isStarred = false,
   onRename,
   onDeleted,
   onCopy,
@@ -53,7 +53,7 @@ export function useEntityActions({
   const { isAnonymous } = useShareContext();
   const { data: session } = useAuth();
   const currentUserId = session?.user?.id;
-  const toggleFavoriteMutation = useToggleFavorite();
+  const toggleStarMutation = useToggleStar();
   const bulkMovePagesMutation = useBulkMovePages();
   const bulkMoveFoldersMutation = useBulkMoveFolders();
   const [moveDialogOpen, setMoveDialogOpen] = useState(false);
@@ -130,15 +130,15 @@ export function useEntityActions({
     }
   };
 
-  const handleToggleFavorite = () => {
+  const handleToggleStar = () => {
     if (!identityLifecycle.isActive()) return;
-    toggleFavoriteMutation.mutate({
+    toggleStarMutation.mutate({
       entityType: item.type,
       entityId: item.id,
       title: item.title,
       icon: item.icon ?? null,
       ownerId: item.ownerId ?? null,
-      isFavorite,
+      isStarred,
     });
   };
 
@@ -234,10 +234,10 @@ export function useEntityActions({
   );
 
   return {
-    favorite: {
-      label: isFavorite ? 'Unfavorite' : 'Favorite',
-      icon: <Star size={14} className={isFavorite ? 'text-yellow-500 fill-yellow-500' : ''} />,
-      onClick: handleToggleFavorite,
+    star: {
+      label: isStarred ? 'Unstar' : 'Star',
+      icon: <Star size={14} className={isStarred ? 'text-yellow-500 fill-yellow-500' : ''} />,
+      onClick: handleToggleStar,
     },
     rename:
       onRename && canRename

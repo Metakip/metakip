@@ -12,7 +12,6 @@ import backlinksRoute from './routes/backlinks';
 import bulkRemovalRoute from './routes/bulk-removal';
 import collaboratorDisplayRoute from './routes/collaborators';
 import exportRoute from './routes/export';
-import favoritesRoute from './routes/favorites';
 import foldersRoute, { foldersPublicRoute } from './routes/folders';
 import importRoute from './routes/import';
 import invitationsRoute from './routes/invitations';
@@ -21,6 +20,7 @@ import onboardingRoute from './routes/onboarding';
 import pagesRoute, { pagesPublicRoute } from './routes/pages';
 import searchRoute from './routes/search';
 import sharesRoute from './routes/shares';
+import starsRoute from './routes/stars';
 import tagsRoute from './routes/tags';
 import templatesRoute from './routes/templates';
 import testSetupRoute from './routes/test-setup';
@@ -126,7 +126,7 @@ export async function createApp() {
   app.route('/api/shares', collaboratorDisplayRoute);
   app.route('/api/shares', sharesRoute);
 
-  app.route('/api/favorites', favoritesRoute);
+  app.route('/api/stars', starsRoute);
 
   app.route('/api/pages', versionsRoute);
 

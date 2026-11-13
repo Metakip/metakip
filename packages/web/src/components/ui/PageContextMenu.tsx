@@ -17,7 +17,7 @@ export function PageContextMenu({
   const { isAnonymous } = useShareContext();
   const actions = useEntityActions(options);
   const items = [
-    !isAnonymous && actions.favorite,
+    !isAnonymous && actions.star,
     actions.rename,
     !isAnonymous && actions.share,
     ...actions.items,

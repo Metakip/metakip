@@ -37,6 +37,16 @@ const commitLink = (hash: string): MarketingLink => ({
 
 export const CHANGELOG_ENTRIES: readonly ChangelogEntry[] = [
   {
+    id: 'favorites-renamed-to-stars',
+    date: '2026-11-13',
+    title: 'Favorites are now Stars',
+    details: [
+      'Use Star and Unstar to keep important pages and folders close at hand.',
+      'Your existing favorites are preserved and now appear in the Starred section of the sidebar and dashboard.',
+    ],
+    links: [{ kind: 'app', label: 'Open The Metakip App →' }],
+  },
+  {
     id: 'mobile-app-install-and-shortcuts',
     date: '2026-10-25',
     title: 'Make Metakip feel at home on your phone',

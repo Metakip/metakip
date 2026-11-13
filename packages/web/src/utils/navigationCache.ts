@@ -12,7 +12,7 @@ import {
 } from './treeCache';
 
 type RecentPageCacheItem = { id: string; title: string };
-type FavoriteCacheItem = {
+type StarredEntityCacheItem = {
   entityType: ShareEntityType;
   entityId: string;
   title: string;
@@ -52,15 +52,15 @@ export function updatePageNavigationCache(
     );
   }
   if (updates.title !== undefined || updates.icon !== undefined) {
-    queryClient.setQueryData<FavoriteCacheItem[]>(['favorites'], (favorites) =>
-      favorites?.map((favorite) =>
-        favorite.entityType === 'page' && favorite.entityId === pageId
+    queryClient.setQueryData<StarredEntityCacheItem[]>(['stars'], (stars) =>
+      stars?.map((star) =>
+        star.entityType === 'page' && star.entityId === pageId
           ? {
-              ...favorite,
+              ...star,
               ...(updates.title !== undefined ? { title: updates.title } : {}),
               ...(updates.icon !== undefined ? { icon: updates.icon } : {}),
             }
-          : favorite,
+          : star,
       ),
     );
   }
@@ -75,15 +75,15 @@ export function updateFolderNavigationCache(
     updateFolderInTree(folders, folderId, updates),
   );
   if (updates.name !== undefined || updates.icon !== undefined) {
-    queryClient.setQueryData<FavoriteCacheItem[]>(['favorites'], (favorites) =>
-      favorites?.map((favorite) =>
-        favorite.entityType === 'folder' && favorite.entityId === folderId
+    queryClient.setQueryData<StarredEntityCacheItem[]>(['stars'], (stars) =>
+      stars?.map((star) =>
+        star.entityType === 'folder' && star.entityId === folderId
           ? {
-              ...favorite,
+              ...star,
               ...(updates.name !== undefined ? { title: updates.name } : {}),
               ...(updates.icon !== undefined ? { icon: updates.icon } : {}),
             }
-          : favorite,
+          : star,
       ),
     );
   }
@@ -96,8 +96,8 @@ export function removePageFromNavigationCache(queryClient: QueryClient, pageId: 
   queryClient.setQueriesData<RecentPageCacheItem[]>({ queryKey: ['pages', 'recent'] }, (pages) =>
     pages?.filter((page) => page.id !== pageId),
   );
-  queryClient.setQueryData<FavoriteCacheItem[]>(['favorites'], (favorites) =>
-    favorites?.filter((favorite) => favorite.entityType !== 'page' || favorite.entityId !== pageId),
+  queryClient.setQueryData<StarredEntityCacheItem[]>(['stars'], (stars) =>
+    stars?.filter((star) => star.entityType !== 'page' || star.entityId !== pageId),
   );
 }
 
@@ -126,10 +126,9 @@ export function removeFolderFromNavigationCache(queryClient: QueryClient, folder
   queryClient.setQueriesData<RecentPageCacheItem[]>({ queryKey: ['pages', 'recent'] }, (pages) =>
     pages?.filter((page) => !removedPageIds.has(page.id)),
   );
-  queryClient.setQueryData<FavoriteCacheItem[]>(['favorites'], (favorites) =>
-    favorites?.filter(
-      (favorite) =>
-        !removedPageIds.has(favorite.entityId) && !removedFolderIds.has(favorite.entityId),
+  queryClient.setQueryData<StarredEntityCacheItem[]>(['stars'], (stars) =>
+    stars?.filter(
+      (star) => !removedPageIds.has(star.entityId) && !removedFolderIds.has(star.entityId),
     ),
   );
 }

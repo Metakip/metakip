@@ -27,7 +27,7 @@ export function useEmptyAllTrash() {
         ['folderTree'],
         ['pageTree'],
         ['pages', 'recent'],
-        ['favorites'],
+        ['stars'],
         ['shared-with-me'],
       ]) {
         queryClient.invalidateQueries({ queryKey });

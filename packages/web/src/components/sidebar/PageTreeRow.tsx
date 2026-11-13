@@ -26,7 +26,7 @@ interface PageTreeRowProps {
   depth?: number;
   hasChildren?: boolean;
   isExpanded?: boolean;
-  isFavorite?: boolean;
+  isStarred?: boolean;
   showDragHandle?: boolean;
   onToggleExpand?: (() => void) | undefined;
   onCreateChild?: (() => void) | undefined;
@@ -55,7 +55,7 @@ export function PageTreeRow({
   depth = 0,
   hasChildren = false,
   isExpanded = false,
-  isFavorite = false,
+  isStarred = false,
   showDragHandle = false,
   onToggleExpand,
   onCreateChild,
@@ -213,7 +213,7 @@ export function PageTreeRow({
               shareSource,
               canMove,
             }}
-            isFavorite={isFavorite}
+            isStarred={isStarred}
             triggerClassName="p-1 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 cursor-pointer transition-colors"
             menuClassName="w-40 bg-white dark:bg-zinc-900 border border-black/5 dark:border-white/5 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.5)] rounded-2xl p-1.5 flex flex-col z-[9999]"
             onOpenChange={setIsMenuOpen}

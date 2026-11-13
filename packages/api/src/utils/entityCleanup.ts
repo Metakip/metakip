@@ -22,7 +22,7 @@ export async function purgeEntityAccessMetadata(
   );
   await executeQuery(
     executor,
-    sql`delete from user_favorites where entity_type = ${entityType} and entity_id = any(${sql.param([...entityIds])}::uuid[])`,
+    sql`delete from user_stars where entity_type = ${entityType} and entity_id = any(${sql.param([...entityIds])}::uuid[])`,
   );
 
   if (entityType === 'page') {

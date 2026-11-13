@@ -28,8 +28,8 @@ vi.mock('../../contexts/ShareContext', () => ({
 vi.mock('../../hooks/useAuth', () => ({
   useAuth: () => ({ data: { user: { id: 'current-user' } } }),
 }));
-vi.mock('../../hooks/use-favorites', () => ({
-  useFavorites: () => ({ data: [] }),
+vi.mock('../../hooks/use-stars', () => ({
+  useStars: () => ({ data: [] }),
 }));
 vi.mock('../../hooks/use-folders', () => ({
   useFolderTree: () => ({

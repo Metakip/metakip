@@ -6,7 +6,7 @@ import { query } from '../db/query';
 import { requireAuth } from '../middleware/auth';
 import { ensureFolderAccess, ensurePageAccess } from '../utils/share-access';
 
-type FavoriteRow = {
+type StarRow = {
   entity_type: ShareEntityType;
   entity_id: string;
   title: string;
@@ -16,9 +16,9 @@ type FavoriteRow = {
   created_at: Date | null;
 };
 
-const favoritesRoute = new Hono();
+const starsRoute = new Hono();
 
-favoritesRoute.use('*', requireAuth);
+starsRoute.use('*', requireAuth);
 
 const parseEntityType = (value: unknown): ShareEntityType => {
   if (value === 'page' || value === 'folder') {
@@ -39,10 +39,10 @@ const ensureEntityAccess = async (
   await ensureFolderAccess(entityId, userId);
 };
 
-favoritesRoute.get('/', async (c) => {
-  const user = c.get('user') as { id: string };
+starsRoute.get('/', async (c) => {
+  const user = c.get('user');
 
-  const result = await query(
+  const result = await query<StarRow>(
     sql`select
        uf.entity_type,
        uf.entity_id,
@@ -86,7 +86,7 @@ favoritesRoute.get('/', async (c) => {
          else null
        end as share_source,
        uf.created_at
-     from user_favorites uf
+     from user_stars uf
      left join pages p on p.id = uf.entity_id and uf.entity_type = 'page' and p.is_deleted = false
      left join folders f on f.id = uf.entity_id and uf.entity_type = 'folder' and f.is_deleted = false
      where uf.user_id = ${user.id}
@@ -102,10 +102,9 @@ favoritesRoute.get('/', async (c) => {
      order by uf.created_at desc nulls last`,
   );
 
-  const favorites = (result.rows as FavoriteRow[]).map((row) => ({
+  const stars = result.rows.map((row) => ({
     entityType: row.entity_type,
     entityId: row.entity_id,
-    ...(row.entity_type === 'page' ? { pageId: row.entity_id } : {}),
     title: row.title,
     icon: row.icon,
     ownerId: row.owner_id,
@@ -113,45 +112,39 @@ favoritesRoute.get('/', async (c) => {
     createdAt: row.created_at,
   }));
 
-  return c.json({ favorites });
+  return c.json({ stars });
 });
 
-favoritesRoute.post('/', async (c) => {
+starsRoute.post('/', async (c) => {
   const body = await c.req.json().catch(() => null);
   if (!body || typeof body !== 'object') {
     throw new HTTPException(400, { message: 'Invalid body' });
   }
 
-  const raw = body as { entityType?: unknown; entityId?: unknown; pageId?: unknown };
-  const entityType = raw.entityType === undefined ? 'page' : parseEntityType(raw.entityType);
-  const entityId =
-    typeof raw.entityId === 'string'
-      ? raw.entityId
-      : entityType === 'page' && typeof raw.pageId === 'string'
-        ? raw.pageId
-        : null;
-
-  if (!entityId) {
+  const raw = body as { entityType?: unknown; entityId?: unknown };
+  const entityType = parseEntityType(raw.entityType);
+  if (typeof raw.entityId !== 'string' || !raw.entityId) {
     throw new HTTPException(400, { message: 'entityId is required' });
   }
+  const entityId = raw.entityId;
 
-  const existsResult = await query(
+  const existsResult = await query<{ id: string; is_deleted: boolean | null }>(
     entityType === 'page'
       ? sql`select id, is_deleted from pages where id = ${entityId} limit 1`
       : sql`select id, is_deleted from folders where id = ${entityId} limit 1`,
   );
-  const entity = existsResult.rows[0] as { id: string; is_deleted: boolean | null } | undefined;
+  const entity = existsResult.rows[0];
   if (!entity || entity.is_deleted) {
     throw new HTTPException(404, {
       message: `${entityType === 'page' ? 'Page' : 'Folder'} not found`,
     });
   }
 
-  const user = c.get('user') as { id: string };
+  const user = c.get('user');
   await ensureEntityAccess(entityType, entityId, user.id);
 
   const insertResult = await query(
-    sql`insert into user_favorites (user_id, entity_type, entity_id) values (${user.id}, ${entityType}, ${entityId}) on conflict (user_id, entity_type, entity_id) do nothing returning id`,
+    sql`insert into user_stars (user_id, entity_type, entity_id) values (${user.id}, ${entityType}, ${entityId}) on conflict (user_id, entity_type, entity_id) do nothing returning id`,
   );
 
   if (insertResult.rowCount === 0) {
@@ -161,34 +154,17 @@ favoritesRoute.post('/', async (c) => {
   return c.json({ ok: true }, 201);
 });
 
-favoritesRoute.delete('/:entityType/:entityId', async (c) => {
+starsRoute.delete('/:entityType/:entityId', async (c) => {
   const entityType = parseEntityType(c.req.param('entityType'));
   const entityId = c.req.param('entityId');
-  const user = c.get('user') as { id: string };
+  const user = c.get('user');
 
   await ensureEntityAccess(entityType, entityId, user.id);
   await query(
-    sql`delete from user_favorites where user_id = ${user.id} and entity_type = ${entityType} and entity_id = ${entityId}`,
+    sql`delete from user_stars where user_id = ${user.id} and entity_type = ${entityType} and entity_id = ${entityId}`,
   );
 
   return c.json({ deleted: true });
 });
 
-favoritesRoute.delete('/:pageId', async (c) => {
-  const pageId = c.req.param('pageId');
-  const pageResult = await query(sql`select id from pages where id = ${pageId} limit 1`);
-  if (!pageResult.rows[0]) {
-    throw new HTTPException(404, { message: 'Page not found' });
-  }
-
-  const user = c.get('user') as { id: string };
-  await ensurePageAccess(pageId, user.id);
-
-  await query(
-    sql`delete from user_favorites where user_id = ${user.id} and entity_type = 'page' and entity_id = ${pageId}`,
-  );
-
-  return c.json({ deleted: true });
-});
-
-export default favoritesRoute;
+export default starsRoute;

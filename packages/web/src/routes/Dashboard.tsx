@@ -22,11 +22,11 @@ import {
   useBulkRemoveEntities,
 } from '../hooks/use-bulk-actions';
 import { useCopyFolder, useCopyPage } from '../hooks/use-copy';
-import { useFavorites } from '../hooks/use-favorites';
 import { useFolderTree, useUpdateFolder } from '../hooks/use-folders';
 import { useFolderCollaborators, usePageCollaborators } from '../hooks/use-page-collaborators';
 import { usePageTree, useUpdatePage } from '../hooks/use-pages';
 import { useSharedWithMe } from '../hooks/use-shared-with-me';
+import { useStars } from '../hooks/use-stars';
 import { useWorkspaceMemberships } from '../hooks/use-workspace';
 import { useAuth } from '../hooks/useAuth';
 import { useEntityCreationActions } from '../hooks/useEntityCreationActions';
@@ -44,7 +44,7 @@ import { getInitialQueriesState } from '../utils/queryState';
 import { showSuccessToast } from '../utils/toast';
 import { buildFolderPath, buildPagePath } from '../utils/url';
 import {
-  buildFavoriteDashboardItems,
+  buildStarredDashboardItems,
   type DashboardFilter,
   type DashboardItem,
   sharedItemToDashboardItem,
@@ -83,8 +83,8 @@ export default function HomeView() {
   const workspaceMembershipsQuery = useWorkspaceMemberships();
   const { data: workspaceMemberships, refetch: refetchWorkspaceMemberships } =
     workspaceMembershipsQuery;
-  const favoritesQuery = useFavorites();
-  const { data: favorites, refetch: refetchFavorites } = favoritesQuery;
+  const starsQuery = useStars();
+  const { data: stars, refetch: refetchStars } = starsQuery;
   const { data: session } = useAuth();
   const currentUserId = session?.user?.id;
 
@@ -97,12 +97,12 @@ export default function HomeView() {
   }, [refetchPages, refetchFolders, refetchSharedWithMe]);
 
   const bulkRemoveMutation = useBulkRemoveEntities();
-  const refreshedFavoriteKeys = useMemo(
-    () => new Set(favorites?.map((fav) => `${fav.entityType}:${fav.entityId}`) ?? []),
-    [favorites],
+  const refreshedStarKeys = useMemo(
+    () => new Set(stars?.map((star) => `${star.entityType}:${star.entityId}`) ?? []),
+    [stars],
   );
-  const favoriteKeys = useStableValueWhile(refreshedFavoriteKeys, bulkRemoveMutation.isPending);
-  const isFavorite = (item: ExplorerItemData) => favoriteKeys.has(`${item.type}:${item.id}`);
+  const starKeys = useStableValueWhile(refreshedStarKeys, bulkRemoveMutation.isPending);
+  const isStarred = (item: ExplorerItemData) => starKeys.has(`${item.type}:${item.id}`);
 
   const entityCreation = useEntityCreationActions();
   const updatePageMutation = useUpdatePage();
@@ -291,41 +291,21 @@ export default function HomeView() {
     return uniqueItems.sort(sortDashboardItemsByActivity);
   }, [activeFilter, ownedBaseItems, sharedBaseItems]);
 
-  const favoritePageIds = useMemo(
-    () =>
-      (favorites ?? [])
-        .filter((favorite) => favorite.entityType === 'page')
-        .map((favorite) => favorite.entityId),
-    [favorites],
-  );
   const pageIds = useMemo(
-    () =>
-      Array.from(
-        new Set([
-          ...filteredBaseItems.filter((item) => item.type === 'page').map((item) => item.id),
-          ...favoritePageIds,
-        ]),
-      ),
-    [favoritePageIds, filteredBaseItems],
+    () => [
+      ...filteredBaseItems.filter((item) => item.type === 'page').map((item) => item.id),
+      ...(stars ?? []).filter((star) => star.entityType === 'page').map((star) => star.entityId),
+    ],
+    [filteredBaseItems, stars],
   );
   const { data: collaboratorsMap } = usePageCollaborators(pageIds);
 
-  const favoriteFolderIds = useMemo(
-    () =>
-      (favorites ?? [])
-        .filter((favorite) => favorite.entityType === 'folder')
-        .map((favorite) => favorite.entityId),
-    [favorites],
-  );
   const folderIds = useMemo(
-    () =>
-      Array.from(
-        new Set([
-          ...filteredBaseItems.filter((item) => item.type === 'folder').map((item) => item.id),
-          ...favoriteFolderIds,
-        ]),
-      ),
-    [favoriteFolderIds, filteredBaseItems],
+    () => [
+      ...filteredBaseItems.filter((item) => item.type === 'folder').map((item) => item.id),
+      ...(stars ?? []).filter((star) => star.entityType === 'folder').map((star) => star.entityId),
+    ],
+    [filteredBaseItems, stars],
   );
   const { data: folderCollaboratorsMap } = useFolderCollaborators(folderIds);
 
@@ -343,15 +323,15 @@ export default function HomeView() {
     [filteredBaseItems, collaboratorsMap, folderCollaboratorsMap],
   );
   const allItems = useStableValueWhile(refreshedItems, bulkRemoveMutation.isPending);
-  const favoriteItems = useMemo(
+  const starredItems = useMemo(
     () =>
-      buildFavoriteDashboardItems({
+      buildStarredDashboardItems({
         activeFilter,
         allItems,
         collaboratorsByFolderId: folderCollaboratorsMap,
         collaboratorsByPageId: collaboratorsMap,
         currentUserId,
-        favorites,
+        stars,
         folders,
         pages,
         workspaceAdminOwnerIds,
@@ -361,7 +341,7 @@ export default function HomeView() {
       allItems,
       collaboratorsMap,
       currentUserId,
-      favorites,
+      stars,
       folderCollaboratorsMap,
       folders,
       pages,
@@ -369,8 +349,8 @@ export default function HomeView() {
     ],
   );
   const itemsByKey = useMemo(
-    () => new Map([...allItems, ...favoriteItems].map((item) => [`${item.type}:${item.id}`, item])),
-    [allItems, favoriteItems],
+    () => new Map([...allItems, ...starredItems].map((item) => [`${item.type}:${item.id}`, item])),
+    [allItems, starredItems],
   );
   const selectionItems = useMemo(() => Array.from(itemsByKey.values()), [itemsByKey]);
   const visibleItemKeys = useMemo(() => new Set(itemsByKey.keys()), [itemsByKey]);
@@ -655,7 +635,7 @@ export default function HomeView() {
     foldersQuery,
     sharedWithMeQuery,
     workspaceMembershipsQuery,
-    favoritesQuery,
+    starsQuery,
   ]);
   const heading = FILTERS.find((filter) => filter.value === activeFilter)?.label ?? 'All';
   const emptyMessage =
@@ -700,7 +680,7 @@ export default function HomeView() {
                   refetchFolders(),
                   refetchSharedWithMe(),
                   refetchWorkspaceMemberships(),
-                  refetchFavorites(),
+                  refetchStars(),
                 ]);
               }}
               className="px-3 py-1 bg-red-100 dark:bg-red-900/40 hover:bg-red-200 dark:hover:bg-red-900/60 rounded text-sm transition-colors cursor-pointer"
@@ -710,7 +690,7 @@ export default function HomeView() {
           </div>
         ) : initialQueriesState.status === 'loading' ? (
           <ExplorerLoadingState />
-        ) : allItems.length === 0 && favoriteItems.length === 0 ? (
+        ) : allItems.length === 0 && starredItems.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <FileText size={48} className="text-zinc-300 dark:text-zinc-600 mb-4" />
             <h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-50 mb-2">
@@ -721,14 +701,14 @@ export default function HomeView() {
         ) : (
           <DashboardItemSections
             allItems={allItems}
-            favoriteItems={favoriteItems}
+            starredItems={starredItems}
             viewMode={viewMode}
             currentUserId={currentUserId}
             canSelect={!bulkRemoveMutation.isPending}
             hasSelection={hasSelection}
             isEditingAllowed={canRenameEditingTarget}
             editingTarget={editingTarget}
-            isFavorite={isFavorite}
+            isStarred={isStarred}
             isSelected={selection.isSelected}
             onSelect={(item, event) => {
               event.stopPropagation();

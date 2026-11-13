@@ -431,7 +431,7 @@ describe('useRestorePage', () => {
       '/api/pages/p1/restore',
       expect.objectContaining({ method: 'PATCH' }),
     );
-    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['favorites'] });
+    expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: ['stars'] });
   });
 });
 

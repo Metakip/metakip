@@ -14,15 +14,15 @@ import {
   createIdentityLifecycle,
   IdentityLifecycleProvider,
 } from '../../contexts/IdentityLifecycleContext';
-import type { Favorite } from '../../hooks/use-favorites';
+import type { StarredEntity } from '../../hooks/use-stars';
 import { createMockFolderTreeNode } from '../../test-utils/factories';
 import { render } from '../../test-utils/render';
 import type { ShareDialog } from './ShareDialog';
 
 const mocks = vi.hoisted(() => ({
-  favorites: [] as Favorite[],
-  favoriteQuery: vi.fn(),
-  toggleFavorite: vi.fn(),
+  stars: [] as StarredEntity[],
+  starQuery: vi.fn(),
+  toggleStar: vi.fn(),
   isAnonymous: false,
   pages: [] as Pick<PageTreeNode, 'id' | 'workspaceAccess'>[],
   shared: [] as SharedNavigationItem[],
@@ -39,12 +39,12 @@ const mocks = vi.hoisted(() => ({
 vi.mock('../../contexts/ShareContext', () => ({
   useShareContext: () => ({ isAnonymous: mocks.isAnonymous }),
 }));
-vi.mock('../../hooks/use-favorites', () => ({
-  useFavorites: (options: unknown) => {
-    mocks.favoriteQuery(options);
-    return { data: mocks.favorites };
+vi.mock('../../hooks/use-stars', () => ({
+  useStars: (options: unknown) => {
+    mocks.starQuery(options);
+    return { data: mocks.stars };
   },
-  useToggleFavorite: () => ({ mutate: mocks.toggleFavorite }),
+  useToggleStar: () => ({ mutate: mocks.toggleStar }),
 }));
 vi.mock('../../hooks/useAuth', () => ({
   useAuth: () => ({ data: { user: { id: 'current-user' } } }),
@@ -116,7 +116,7 @@ const page: AccountPagePayload = {
   capabilities: { canEdit: true, canComment: true, canDelete: true, canCopy: true },
 };
 
-const favorite: Favorite = {
+const starredEntity: StarredEntity = {
   entityType: 'page',
   entityId: page.id,
   title: page.title,
@@ -146,7 +146,7 @@ function renderActions(overrides: Partial<ComponentProps<typeof PageActions>> = 
 
 describe('PageActions', () => {
   beforeEach(() => {
-    mocks.favorites = [];
+    mocks.stars = [];
     mocks.isAnonymous = false;
     mocks.pages = [];
     mocks.shared = [];
@@ -161,45 +161,46 @@ describe('PageActions', () => {
   it.each([
     false,
     true,
-  ])('shares favorite state and handlers across controls (%s)', async (saved) => {
-    mocks.favorites = saved ? [favorite] : [];
+  ])('shares starred state and handlers across controls (%s)', async (saved) => {
+    mocks.stars = saved ? [starredEntity] : [];
     renderActions();
 
+    expect(screen.getByText(saved ? 'Unstar' : 'Star')).toBeInTheDocument();
     await userEvent.click(
-      screen.getByRole('button', { name: saved ? 'Remove from favorites' : 'Add to favorites' }),
+      screen.getByRole('button', { name: saved ? 'Unstar page' : 'Star page' }),
     );
     await userEvent.click(screen.getByRole('button', { name: 'Page actions' }));
     const menuItem = await screen.findByRole('menuitem', {
-      name: saved ? 'Unfavorite' : 'Favorite',
+      name: saved ? 'Unstar' : 'Star',
     });
     expect(menuItem).toHaveClass('md:hidden');
     await userEvent.click(menuItem);
 
-    expect(mocks.toggleFavorite).toHaveBeenCalledTimes(2);
-    for (const [variables] of mocks.toggleFavorite.mock.calls) {
+    expect(mocks.toggleStar).toHaveBeenCalledTimes(2);
+    for (const [variables] of mocks.toggleStar.mock.calls) {
       expect(variables).toEqual({
         entityType: 'page',
         entityId: page.id,
         title: page.title,
         icon: page.icon,
         ownerId: page.ownerId,
-        isFavorite: saved,
+        isStarred: saved,
       });
     }
   });
 
-  it('recognizes legacy page IDs without treating a folder as the page favorite', () => {
-    mocks.favorites = [{ ...favorite, entityType: 'folder' }];
+  it('matches page stars by entity type and ID', () => {
+    mocks.stars = [{ ...starredEntity, entityType: 'folder' }];
     const view = renderActions();
-    expect(screen.getByRole('button', { name: 'Add to favorites' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Star page' })).toBeInTheDocument();
     view.unmount();
 
-    mocks.favorites = [{ ...favorite, entityId: 'legacy-id', pageId: page.id }];
+    mocks.stars = [{ ...starredEntity, entityId: 'another-page' }];
     renderActions();
-    expect(screen.getByRole('button', { name: 'Remove from favorites' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Star page' })).toBeInTheDocument();
   });
 
-  it('favorites a public-only page without account ownership metadata', async () => {
+  it('stars a public-only page without account ownership metadata', async () => {
     const publicPage: PublicPagePayload = {
       accessScope: 'public',
       id: page.id,
@@ -214,9 +215,9 @@ describe('PageActions', () => {
       capabilities: { canEdit: false, canComment: false, canDelete: false, canCopy: true },
     };
     renderActions({ page: publicPage, permission: 'view', canComment: false });
-    await userEvent.click(screen.getByRole('button', { name: 'Add to favorites' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Star page' }));
 
-    expect(mocks.toggleFavorite).toHaveBeenCalledWith(
+    expect(mocks.toggleStar).toHaveBeenCalledWith(
       expect.objectContaining({ entityType: 'page', entityId: publicPage.id, ownerId: null }),
     );
   });
@@ -265,14 +266,14 @@ describe('PageActions', () => {
     expect(screen.queryByRole('menuitem', { name: /comments/i })).not.toBeInTheDocument();
   });
 
-  it('does not render account controls or load favorites for anonymous visitors', () => {
+  it('does not render account controls or load stars for anonymous visitors', () => {
     mocks.isAnonymous = true;
     renderActions();
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
-    expect(mocks.favoriteQuery).toHaveBeenLastCalledWith({ enabled: false });
+    expect(mocks.starQuery).toHaveBeenLastCalledWith({ enabled: false });
   });
 
-  it('does not mutate favorites after the identity retires', async () => {
+  it('does not mutate stars after the identity retires', async () => {
     const lifecycle = createIdentityLifecycle();
     render(
       <IdentityLifecycleProvider lifecycle={lifecycle}>
@@ -292,10 +293,10 @@ describe('PageActions', () => {
       </IdentityLifecycleProvider>,
     );
     lifecycle.retire();
-    await userEvent.click(screen.getByRole('button', { name: 'Add to favorites' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Star page' }));
     await userEvent.click(screen.getByRole('button', { name: 'Page actions' }));
-    await userEvent.click(await screen.findByRole('menuitem', { name: 'Favorite' }));
-    expect(mocks.toggleFavorite).not.toHaveBeenCalled();
+    await userEvent.click(await screen.findByRole('menuitem', { name: 'Star' }));
+    expect(mocks.toggleStar).not.toHaveBeenCalled();
   });
 
   it('uses one copy of each entity action in the toolbar menu', async () => {
@@ -304,7 +305,7 @@ describe('PageActions', () => {
     const labels = (await screen.findAllByRole('menuitem')).map((item) => item.textContent);
 
     expect(labels).toEqual([
-      'Favorite',
+      'Star',
       'Comments',
       'Share',
       'Full width',

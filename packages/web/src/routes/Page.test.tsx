@@ -77,9 +77,9 @@ vi.mock('../hooks/use-pages', () => ({
 vi.mock('../hooks/use-folders', () => ({
   useFolderTree: () => ({ data: [], isSuccess: true }),
 }));
-vi.mock('../hooks/use-favorites', () => ({
-  useFavorites: () => ({ data: [] }),
-  useToggleFavorite: () => ({ mutate: vi.fn() }),
+vi.mock('../hooks/use-stars', () => ({
+  useStars: () => ({ data: [] }),
+  useToggleStar: () => ({ mutate: vi.fn() }),
 }));
 vi.mock('../hooks/use-shared-with-me', () => ({
   useSharedWithMeTree: () => ({ data: [], isSuccess: true }),

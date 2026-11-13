@@ -1,7 +1,7 @@
 import type { ExplorerItemData } from '../components/workspace/ExplorerItem';
 import type { SelectionItem } from '../contexts/SelectionContext';
 
-export type DashboardSection = 'all-items' | 'favorites';
+export type DashboardSection = 'all-items' | 'starred';
 
 export type DashboardSelectionAnchor = {
   index: number;

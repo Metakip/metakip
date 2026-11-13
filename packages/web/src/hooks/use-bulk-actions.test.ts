@@ -26,8 +26,8 @@ import {
   useBulkMovePages,
   useBulkRemoveEntities,
 } from './use-bulk-actions';
-import { useFavorites } from './use-favorites';
 import { usePageCollaborators } from './use-page-collaborators';
+import { useStars } from './use-stars';
 
 describe('bulk removal planning', () => {
   it('trashes only owned items and personally removes every eligible non-owned item', () => {
@@ -307,8 +307,8 @@ describe('useBulkRemoveEntities', () => {
     });
     fetchMock.mockImplementation((url: string, init?: RequestInit) => {
       if (url === '/api/bulk-removal' && init?.method === 'POST') return removal;
-      if (url.endsWith('/favorites')) {
-        return Promise.resolve({ ok: true, json: () => Promise.resolve({ favorites: [] }) });
+      if (url.endsWith('/stars')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ stars: [] }) });
       }
       return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
     });
@@ -316,7 +316,7 @@ describe('useBulkRemoveEntities', () => {
     const { result } = renderHook(
       () => {
         const bulkRemoval = useBulkRemoveEntities();
-        useFavorites();
+        useStars();
         usePageCollaborators(['page-1']);
         return bulkRemoval;
       },
@@ -326,7 +326,7 @@ describe('useBulkRemoveEntities', () => {
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledTimes(2);
     });
-    await queryClient.invalidateQueries({ queryKey: ['favorites'], refetchType: 'none' });
+    await queryClient.invalidateQueries({ queryKey: ['stars'], refetchType: 'none' });
     await queryClient.invalidateQueries({ queryKey: ['pageCollaborators'], refetchType: 'none' });
 
     result.current.mutate({
