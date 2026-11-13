@@ -35,6 +35,24 @@ describe('collaborator display queries', () => {
     queryClient.clear();
   });
 
+  it.each([
+    ['page', usePageCollaborators],
+    ['folder', useFolderCollaborators],
+  ] as const)('normalizes duplicate %s IDs for requests and query identity', async (_, useCollaborators) => {
+    const { result, rerender } = renderHook(({ ids }) => useCollaborators(ids), {
+      initialProps: { ids: ['b', 'a', 'b'] },
+      wrapper: createWrapper(queryClient),
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(requestedIds(String(fetchMock.mock.calls[0]?.[0]))).toEqual(['a', 'b']);
+
+    rerender({ ids: ['a', 'b'] });
+
+    expect(result.current.isSuccess).toBe(true);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it('loads more than 100 page collaborator lists as one merged query result', async () => {
     const ids = entityIds(205);
     const { result } = renderHook(() => usePageCollaborators(ids), {

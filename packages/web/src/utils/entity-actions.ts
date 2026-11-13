@@ -16,7 +16,7 @@ const invalidateRemovalQueries = (
   queryClient.invalidateQueries({ queryKey: ['folderTree'] });
   queryClient.invalidateQueries({ queryKey: ['shared-with-me'] });
   queryClient.invalidateQueries({ queryKey: ['pages', 'recent'] });
-  queryClient.invalidateQueries({ queryKey: ['favorites'] });
+  queryClient.invalidateQueries({ queryKey: ['stars'] });
   if (!includeTrash) return;
   if (entityType === 'folder') {
     queryClient.invalidateQueries({ queryKey: ['trashFolders'] });

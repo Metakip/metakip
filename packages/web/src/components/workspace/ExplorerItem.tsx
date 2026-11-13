@@ -36,7 +36,7 @@ interface ExplorerItemProps {
   item: ExplorerItemData;
   viewMode: 'card' | 'list';
   isSelected: boolean;
-  isFavorite?: boolean;
+  isStarred?: boolean;
   onSelect: (e: React.MouseEvent | React.KeyboardEvent) => void;
   onNavigate: (e: React.MouseEvent | React.KeyboardEvent) => void;
   onRename?: () => void;
@@ -56,7 +56,7 @@ export function ExplorerItem({
   item,
   viewMode,
   isSelected,
-  isFavorite = false,
+  isStarred = false,
   onSelect,
   onNavigate,
   onRename = () => {},
@@ -188,7 +188,7 @@ export function ExplorerItem({
           <div className="shrink-0">
             <PageContextMenu
               item={item}
-              isFavorite={isFavorite}
+              isStarred={isStarred}
               triggerClassName="item-action p-1.5 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 cursor-pointer"
               onRename={onRename}
               {...(onCopy ? { onCopy } : {})}
@@ -244,7 +244,7 @@ export function ExplorerItem({
         <div className="absolute top-3 right-3 z-10">
           <PageContextMenu
             item={item}
-            isFavorite={isFavorite}
+            isStarred={isStarred}
             triggerClassName="item-action p-1.5 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 cursor-pointer"
             onRename={onRename}
             {...(onCopy ? { onCopy } : {})}

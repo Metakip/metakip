@@ -120,7 +120,7 @@ const BULK_REMOVAL_QUERY_KEYS = [
   ['pages', 'recent'],
   ['pages', 'detail'],
   ['folders', 'detail'],
-  ['favorites'],
+  ['stars'],
   ['tags'],
   ['shares'],
   ['pageCollaborators'],

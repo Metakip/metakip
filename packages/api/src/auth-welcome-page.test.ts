@@ -95,7 +95,7 @@ afterEach(() => {
 });
 
 describe('Better Auth welcome page hook', () => {
-  it('creates a canonical, favorited welcome page through the Google callback', async () => {
+  it('creates a canonical, starred welcome page through the Google callback', async () => {
     const email = `welcome-${randomUUID()}@example.com`;
     const callbackResponse = await completeGoogleSignup(createAuth(), email);
     expect(callbackResponse.status).toBe(302);
@@ -141,13 +141,13 @@ describe('Better Auth welcome page hook', () => {
     document.destroy();
 
     const metadata = await testQuery<{
-      favorites: number;
+      stars: number;
       tagConnections: number;
       workspaceVersions: number;
     }>(
       `select
-         (select count(*)::int from user_favorites
-          where user_id = $1 and entity_type = 'page' and entity_id = $2) as favorites,
+         (select count(*)::int from user_stars
+          where user_id = $1 and entity_type = 'page' and entity_id = $2) as stars,
          (select count(*)::int from connections
           where source_id = $2 and connection_type = 'tag') as "tagConnections",
          (select count(*)::int from workspace_access_versions
@@ -155,7 +155,7 @@ describe('Better Auth welcome page hook', () => {
       [userId, page.id],
     );
     expect(metadata.rows[0]).toEqual({
-      favorites: 1,
+      stars: 1,
       tagConnections: 2,
       workspaceVersions: 1,
     });

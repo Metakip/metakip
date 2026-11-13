@@ -14,7 +14,6 @@ import { useEntityCommands } from '../../contexts/EntityCommandContext';
 import { useIdentityLifecycle, useIdentityNavigate } from '../../contexts/IdentityLifecycleContext';
 import { useShareContext } from '../../contexts/ShareContext';
 import { useIsBulkRemovalPending } from '../../hooks/use-bulk-actions';
-import { useFavorites } from '../../hooks/use-favorites';
 import { useFolderTree, useUpdateFolder } from '../../hooks/use-folders';
 import {
   useImportMarkdown,
@@ -23,6 +22,7 @@ import {
   useUpdatePage,
 } from '../../hooks/use-pages';
 import { useSharedWithMeTree } from '../../hooks/use-shared-with-me';
+import { useStars } from '../../hooks/use-stars';
 import { useLeaveWorkspace, useWorkspaceMemberships } from '../../hooks/use-workspace';
 import { useAuth } from '../../hooks/useAuth';
 import { useEntityCreationActions } from '../../hooks/useEntityCreationActions';
@@ -62,8 +62,8 @@ export function PageTree() {
   const { data: refreshedPages, refetch: refetchPages } = pagesQuery;
   const foldersQuery = useFolderTree();
   const { data: refreshedFolders, refetch: refetchFolders } = foldersQuery;
-  const favoritesQuery = useFavorites();
-  const { data: refreshedFavorites, refetch: refetchFavorites } = favoritesQuery;
+  const starsQuery = useStars();
+  const { data: refreshedStars, refetch: refetchStars } = starsQuery;
   const recentsQuery = useRecentPages(SIDEBAR_PREVIEW_LIMIT);
   const { data: refreshedRecentPages, refetch: refetchRecents } = recentsQuery;
   const sharedNavigationQuery = useSharedWithMeTree();
@@ -76,7 +76,7 @@ export function PageTree() {
   const isBulkRemovalPending = useIsBulkRemovalPending();
   const pages = useStableValueWhile(refreshedPages, isBulkRemovalPending);
   const folders = useStableValueWhile(refreshedFolders, isBulkRemovalPending);
-  const favorites = useStableValueWhile(refreshedFavorites, isBulkRemovalPending);
+  const stars = useStableValueWhile(refreshedStars, isBulkRemovalPending);
   const recentPages = useStableValueWhile(refreshedRecentPages, isBulkRemovalPending);
   const sharedNavigation = useStableValueWhile(refreshedSharedNavigation, isBulkRemovalPending);
   const workspaceMemberships = useStableValueWhile(
@@ -84,14 +84,13 @@ export function PageTree() {
     isBulkRemovalPending,
   );
 
-  const favoriteKeys = useMemo(
-    () => new Set(favorites?.map((fav) => `${fav.entityType}:${fav.entityId}`) ?? []),
-    [favorites],
+  const starKeys = useMemo(
+    () => new Set(stars?.map((star) => `${star.entityType}:${star.entityId}`) ?? []),
+    [stars],
   );
-  const isFavoriteEntity = useCallback(
-    (entityType: 'folder' | 'page', entityId: string) =>
-      favoriteKeys.has(`${entityType}:${entityId}`),
-    [favoriteKeys],
+  const isStarredEntity = useCallback(
+    (entityType: 'folder' | 'page', entityId: string) => starKeys.has(`${entityType}:${entityId}`),
+    [starKeys],
   );
 
   const { createPageAndNavigate, createFolder } = useEntityCreationActions();
@@ -115,7 +114,7 @@ export function PageTree() {
     allPagesByFolder,
     canRenameSidebarEntity,
     directSharedNavigation,
-    favoriteRows,
+    starredRows,
     foldersByParent,
     getSidebarAuthorization,
     getSidebarCapabilities,
@@ -129,7 +128,7 @@ export function PageTree() {
     currentUserId,
     pages: pages ?? [],
     folders: folders ?? [],
-    favorites: favorites ?? [],
+    stars: stars ?? [],
     recentPages: recentPages ?? [],
     sharedNavigation: sharedNavigation ?? [],
     workspaceMemberships: workspaceMemberships ?? [],
@@ -217,7 +216,7 @@ export function PageTree() {
       editingTarget,
       getAuthorization: getSidebarAuthorization,
       getCapabilities: getSidebarCapabilities,
-      isFavoriteEntity,
+      isStarredEntity,
       toggleFolderExpanded: sidebar.toggleFolder,
       createPageInFolder: handleCreatePageInFolder,
       startEditing: (kind, id, value) => setEditingTarget({ kind, id, value }),
@@ -231,7 +230,7 @@ export function PageTree() {
       getSidebarAuthorization,
       getSidebarCapabilities,
       handleCreatePageInFolder,
-      isFavoriteEntity,
+      isStarredEntity,
       onRenameKeyDown,
       saveRename,
       setEditingTarget,
@@ -243,7 +242,7 @@ export function PageTree() {
   const initialQueriesState = getInitialQueriesState([
     pagesQuery,
     foldersQuery,
-    favoritesQuery,
+    starsQuery,
     recentsQuery,
     sharedNavigationQuery,
     workspaceMembershipsQuery,
@@ -295,7 +294,7 @@ export function PageTree() {
             void Promise.all([
               refetchPages(),
               refetchFolders(),
-              refetchFavorites(),
+              refetchStars(),
               refetchRecents(),
               refetchSharedNavigation(),
               refetchWorkspaceMemberships(),
@@ -362,10 +361,10 @@ export function PageTree() {
 
       <div className="flex-1 overflow-y-auto px-2 py-2 space-y-3">
         <SidebarAliasSection
-          title="Favorites"
-          collapsed={sidebar.collapsedSections.has('favorites')}
-          onToggle={() => sidebar.toggleSection('favorites')}
-          rows={favoriteRows}
+          title="Starred"
+          collapsed={sidebar.collapsedSections.has('starred')}
+          onToggle={() => sidebar.toggleSection('starred')}
+          rows={starredRows}
           runtime={sidebarTreeRuntime}
         />
         <SidebarAliasSection

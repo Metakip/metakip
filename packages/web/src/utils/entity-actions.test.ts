@@ -364,7 +364,7 @@ describe('useEntityDeletion', () => {
       ],
     );
     queryClient.setQueryData(
-      ['favorites'],
+      ['stars'],
       [
         { entityType: 'folder', entityId: 'folder-child', title: 'Child folder' },
         { entityType: 'page', entityId: 'page-1', title: 'Child page' },
@@ -391,7 +391,7 @@ describe('useEntityDeletion', () => {
     expect(queryClient.getQueryData(['pages', 'recent', 8])).toEqual([
       { id: 'page-2', title: 'Remaining' },
     ]);
-    expect(queryClient.getQueryData(['favorites'])).toEqual([]);
+    expect(queryClient.getQueryData(['stars'])).toEqual([]);
   });
 
   it('clears self-leave coordination when a direct page leave fails', async () => {

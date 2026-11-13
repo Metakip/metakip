@@ -25,7 +25,7 @@ describe('resolveDashboardShiftSelection', () => {
   it('selects a single item when shift-click crosses dashboard sections', () => {
     expect(
       resolveDashboardShiftSelection({
-        anchor: { index: 0, section: 'favorites' },
+        anchor: { index: 0, section: 'starred' },
         index: 1,
         items: ITEMS,
         section: 'all-items',
@@ -33,12 +33,12 @@ describe('resolveDashboardShiftSelection', () => {
     ).toEqual({ kind: 'select' });
   });
 
-  it('drops selection for a favorite that is no longer visible', () => {
+  it('drops selection for a starred item that is no longer visible', () => {
     expect(
       retainVisibleDashboardSelection(
         [
           { id: 'visible-page', type: 'page' },
-          { id: 'unfavorited-page', type: 'page' },
+          { id: 'unstarred-page', type: 'page' },
         ],
         new Set(['page:visible-page']),
       ),

@@ -22,10 +22,10 @@ import {
   useBulkRemoveEntities,
 } from '../hooks/use-bulk-actions';
 import { useCopyFolder, useCopyPage } from '../hooks/use-copy';
-import { useFavorites } from '../hooks/use-favorites';
 import { useFolderTree, useUpdateFolder } from '../hooks/use-folders';
 import { useFolderCollaborators, usePageCollaborators } from '../hooks/use-page-collaborators';
 import { usePageTree, useUpdatePage } from '../hooks/use-pages';
+import { useStars } from '../hooks/use-stars';
 import { useWorkspaceMemberships } from '../hooks/use-workspace';
 import { useAuth } from '../hooks/useAuth';
 import { useEntityCreationActions } from '../hooks/useEntityCreationActions';
@@ -57,7 +57,7 @@ export default function FolderEntry() {
     enabled: !isAnonymous,
   });
   const { data: folders, refetch: refetchFolders } = foldersQuery;
-  const { data: favorites } = useFavorites({ enabled: !isAnonymous });
+  const { data: stars } = useStars({ enabled: !isAnonymous });
   const { data: workspaceMemberships } = useWorkspaceMemberships({ enabled: !isAnonymous });
   const { data: session } = useAuth();
   const currentUserId = session?.user?.id;
@@ -65,12 +65,12 @@ export default function FolderEntry() {
   const canCreateChildren = !isAnonymous && capabilities.canEdit;
 
   const bulkRemoveMutation = useBulkRemoveEntities();
-  const refreshedFavoriteKeys = useMemo(
-    () => new Set(favorites?.map((fav) => `${fav.entityType}:${fav.entityId}`) ?? []),
-    [favorites],
+  const refreshedStarKeys = useMemo(
+    () => new Set(stars?.map((star) => `${star.entityType}:${star.entityId}`) ?? []),
+    [stars],
   );
-  const favoriteKeys = useStableValueWhile(refreshedFavoriteKeys, bulkRemoveMutation.isPending);
-  const isFavoriteItem = (item: ExplorerItemData) => favoriteKeys.has(`${item.type}:${item.id}`);
+  const starKeys = useStableValueWhile(refreshedStarKeys, bulkRemoveMutation.isPending);
+  const isStarredItem = (item: ExplorerItemData) => starKeys.has(`${item.type}:${item.id}`);
 
   const entityCreation = useEntityCreationActions();
   const updatePageMutation = useUpdatePage();
@@ -214,9 +214,9 @@ export default function FolderEntry() {
     }
   }, [canRenameEditingTarget, editingItem, editingTarget]);
 
-  const favoriteItems = useMemo(
-    () => allItems.filter((item) => favoriteKeys.has(`${item.type}:${item.id}`)),
-    [allItems, favoriteKeys],
+  const starredItems = useMemo(
+    () => allItems.filter((item) => starKeys.has(`${item.type}:${item.id}`)),
+    [allItems, starKeys],
   );
 
   const allItemIndexMap = useMemo(
@@ -523,19 +523,19 @@ export default function FolderEntry() {
           </div>
         ) : viewMode === 'card' ? (
           <div className="space-y-8 animate-fade-in">
-            {favoriteItems.length > 0 && (
+            {starredItems.length > 0 && (
               <div>
                 <h2 className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3 px-1">
-                  Favorites
+                  Starred
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {favoriteItems.map((item) => (
+                  {starredItems.map((item) => (
                     <ExplorerItem
                       key={`${item.type}-${item.id}`}
                       item={item}
                       viewMode="card"
                       isSelected={selection.isSelected(item.id)}
-                      isFavorite={isFavoriteItem(item)}
+                      isStarred={isStarredItem(item)}
                       onSelect={(e) => {
                         e.stopPropagation();
                         selection.toggle({ id: item.id, type: item.type });
@@ -565,7 +565,7 @@ export default function FolderEntry() {
                     item={item}
                     viewMode="card"
                     isSelected={selection.isSelected(item.id)}
-                    isFavorite={isFavoriteItem(item)}
+                    isStarred={isStarredItem(item)}
                     onSelect={(e) => {
                       e.stopPropagation();
                       selection.toggle({ id: item.id, type: item.type });
@@ -595,10 +595,10 @@ export default function FolderEntry() {
           </div>
         ) : (
           <div className="space-y-8">
-            {favoriteItems.length > 0 && (
+            {starredItems.length > 0 && (
               <div>
                 <h2 className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3 px-1">
-                  Favorites
+                  Starred
                 </h2>
                 <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-clip">
                   <div className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-3 px-4 py-2 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-800">
@@ -609,13 +609,13 @@ export default function FolderEntry() {
                     <span className="w-8" />
                   </div>
                   <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                    {favoriteItems.map((item) => (
+                    {starredItems.map((item) => (
                       <ExplorerItem
                         key={`${item.type}-${item.id}`}
                         item={item}
                         viewMode="list"
                         isSelected={selection.isSelected(item.id)}
-                        isFavorite={isFavoriteItem(item)}
+                        isStarred={isStarredItem(item)}
                         onSelect={(e) => {
                           e.stopPropagation();
                           selection.toggle({ id: item.id, type: item.type });
@@ -655,7 +655,7 @@ export default function FolderEntry() {
                       item={item}
                       viewMode="list"
                       isSelected={selection.isSelected(item.id)}
-                      isFavorite={isFavoriteItem(item)}
+                      isStarred={isStarredItem(item)}
                       onSelect={(e) => {
                         e.stopPropagation();
                         selection.toggle({ id: item.id, type: item.type });

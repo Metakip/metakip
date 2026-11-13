@@ -7,9 +7,9 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { useClipboard } from '../../contexts/ClipboardContext';
 import { useIdentityNavigate } from '../../contexts/IdentityLifecycleContext';
 import { useSelection } from '../../contexts/SelectionContext';
-import { type Favorite, useToggleFavorite } from '../../hooks/use-favorites';
 import { useCreatePage } from '../../hooks/use-pages';
 import { useGrantEntityAccess } from '../../hooks/use-share';
+import { type StarredEntity, useToggleStar } from '../../hooks/use-stars';
 import { createTestQueryClient } from '../../test-utils/render';
 import {
   beginBulkRemoval,
@@ -43,7 +43,7 @@ vi.mock('../../hooks/useAuth', () => ({
 import { AuthIdentityBoundary } from './AuthIdentityBoundary';
 
 const identityClients = new Map<string, QueryClient>();
-let pendingFavoriteMutation: Promise<void> | null = null;
+let pendingStarMutation: Promise<void> | null = null;
 let pendingGrantMutation: Promise<unknown> | null = null;
 let pendingCreateNavigation: Promise<void> | null = null;
 
@@ -83,44 +83,43 @@ function StatefulChild() {
   );
 }
 
-const FAVORITE_A: Favorite = {
+const STAR_A: StarredEntity = {
   entityType: 'page',
   entityId: 'page-a',
-  pageId: 'page-a',
-  title: 'A private favorite',
+  title: 'A private starred item',
   icon: null,
   ownerId: 'user-a',
   createdAt: null,
 };
 
-const FAVORITE_B: Favorite = {
+const STAR_B: StarredEntity = {
   entityType: 'page',
   entityId: 'page-b',
-  pageId: 'page-b',
-  title: 'B private favorite',
+  title: 'B private starred item',
   icon: null,
   ownerId: 'user-b',
   createdAt: null,
 };
 
-function DeferredFavoriteMutationChild() {
+function DeferredStarMutationChild() {
   const queryClient = useRecordIdentityClient();
-  const toggleFavorite = useToggleFavorite();
+  const toggleStar = useToggleStar();
 
   return (
     <button
       type="button"
       onClick={() => {
-        queryClient.setQueryData(['favorites'], [FAVORITE_A]);
-        pendingFavoriteMutation = toggleFavorite.mutateAsync({
-          pageId: 'page-a-new',
-          title: 'A pending favorite',
+        queryClient.setQueryData(['stars'], [STAR_A]);
+        pendingStarMutation = toggleStar.mutateAsync({
+          entityType: 'page',
+          entityId: 'page-a-new',
+          title: 'A pending starred item',
           ownerId: 'user-a',
-          isFavorite: false,
+          isStarred: false,
         });
       }}
     >
-      Start favorite mutation
+      Start star mutation
     </button>
   );
 }
@@ -182,7 +181,7 @@ describe('AuthIdentityBoundary', () => {
     mocks.isInitialError = false;
     mocks.refetch.mockReset();
     identityClients.clear();
-    pendingFavoriteMutation = null;
+    pendingStarMutation = null;
     pendingGrantMutation = null;
     pendingCreateNavigation = null;
     mocks.lateNavigation.mockReset();
@@ -386,11 +385,11 @@ describe('AuthIdentityBoundary', () => {
 
   it('skips a retired identity when its optimistic mutation fails late', async () => {
     const user = userEvent.setup();
-    let resolveFavoriteRequest: ((response: Response) => void) | undefined;
-    const favoriteRequest = new Promise<Response>((resolve) => {
-      resolveFavoriteRequest = resolve;
+    let resolveStarRequest: ((response: Response) => void) | undefined;
+    const starRequest = new Promise<Response>((resolve) => {
+      resolveStarRequest = resolve;
     });
-    const fetchMock = vi.fn(() => favoriteRequest);
+    const fetchMock = vi.fn(() => starRequest);
     vi.stubGlobal('fetch', fetchMock);
     const outerQueryClient = createTestQueryClient();
 
@@ -398,19 +397,19 @@ describe('AuthIdentityBoundary', () => {
       <ToastProvider>
         <QueryClientProvider client={outerQueryClient}>
           <AuthIdentityBoundary>
-            <DeferredFavoriteMutationChild />
+            <DeferredStarMutationChild />
           </AuthIdentityBoundary>
         </QueryClientProvider>
       </ToastProvider>,
     );
 
-    await user.click(await screen.findByRole('button', { name: 'Start favorite mutation' }));
+    await user.click(await screen.findByRole('button', { name: 'Start star mutation' }));
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     const userAQueryClient = identityClients.get('user-a');
     expect(userAQueryClient).toBeDefined();
-    expect(userAQueryClient?.getQueryData<Favorite[]>(['favorites'])).toEqual([
-      expect.objectContaining({ title: 'A pending favorite' }),
-      FAVORITE_A,
+    expect(userAQueryClient?.getQueryData<StarredEntity[]>(['stars'])).toEqual([
+      expect.objectContaining({ title: 'A pending starred item' }),
+      STAR_A,
     ]);
 
     mocks.userId = 'user-b';
@@ -419,29 +418,29 @@ describe('AuthIdentityBoundary', () => {
         <ToastProvider>
           <QueryClientProvider client={outerQueryClient}>
             <AuthIdentityBoundary>
-              <DeferredFavoriteMutationChild />
+              <DeferredStarMutationChild />
             </AuthIdentityBoundary>
           </QueryClientProvider>
         </ToastProvider>,
       ),
     );
 
-    await screen.findByRole('button', { name: 'Start favorite mutation' });
+    await screen.findByRole('button', { name: 'Start star mutation' });
     const userBQueryClient = identityClients.get('user-b');
     expect(userBQueryClient).toBeDefined();
     expect(userBQueryClient).not.toBe(userAQueryClient);
-    expect(userAQueryClient?.getQueryData(['favorites'])).toBeUndefined();
-    userBQueryClient?.setQueryData(['favorites'], [FAVORITE_B]);
+    expect(userAQueryClient?.getQueryData(['stars'])).toBeUndefined();
+    userBQueryClient?.setQueryData(['stars'], [STAR_B]);
 
     await act(async () => {
-      resolveFavoriteRequest?.({ ok: false } as Response);
-      await favoriteRequest;
-      await pendingFavoriteMutation?.catch(() => undefined);
+      resolveStarRequest?.({ ok: false } as Response);
+      await starRequest;
+      await pendingStarMutation?.catch(() => undefined);
     });
 
-    expect(userAQueryClient?.getQueryData(['favorites'])).toBeUndefined();
-    expect(userBQueryClient?.getQueryData<Favorite[]>(['favorites'])).toEqual([FAVORITE_B]);
-    expect(screen.queryByText('Failed to update favorite')).not.toBeInTheDocument();
+    expect(userAQueryClient?.getQueryData(['stars'])).toBeUndefined();
+    expect(userBQueryClient?.getQueryData<StarredEntity[]>(['stars'])).toEqual([STAR_B]);
+    expect(screen.queryByText('Failed to update star')).not.toBeInTheDocument();
   });
 
   it('does not start a mutation request after async optimistic setup retires', async () => {
@@ -458,19 +457,19 @@ describe('AuthIdentityBoundary', () => {
       <ToastProvider>
         <QueryClientProvider client={outerQueryClient}>
           <AuthIdentityBoundary>
-            <DeferredFavoriteMutationChild />
+            <DeferredStarMutationChild />
           </AuthIdentityBoundary>
         </QueryClientProvider>
       </ToastProvider>,
     );
 
-    await screen.findByRole('button', { name: 'Start favorite mutation' });
+    await screen.findByRole('button', { name: 'Start star mutation' });
     const userAQueryClient = identityClients.get('user-a');
     expect(userAQueryClient).toBeDefined();
     const cancelSpy = vi
       .spyOn(userAQueryClient as QueryClient, 'cancelQueries')
       .mockReturnValue(cancellation);
-    await user.click(screen.getByRole('button', { name: 'Start favorite mutation' }));
+    await user.click(screen.getByRole('button', { name: 'Start star mutation' }));
     await waitFor(() => expect(cancelSpy).toHaveBeenCalledOnce());
     expect(fetchMock).not.toHaveBeenCalled();
 
@@ -480,23 +479,23 @@ describe('AuthIdentityBoundary', () => {
         <ToastProvider>
           <QueryClientProvider client={outerQueryClient}>
             <AuthIdentityBoundary>
-              <DeferredFavoriteMutationChild />
+              <DeferredStarMutationChild />
             </AuthIdentityBoundary>
           </QueryClientProvider>
         </ToastProvider>,
       ),
     );
-    await screen.findByRole('button', { name: 'Start favorite mutation' });
+    await screen.findByRole('button', { name: 'Start star mutation' });
 
     await act(async () => {
       finishCancellation?.();
       await cancellation;
-      await pendingFavoriteMutation?.catch(() => undefined);
+      await pendingStarMutation?.catch(() => undefined);
     });
 
     expect(fetchMock).not.toHaveBeenCalled();
-    expect(userAQueryClient?.getQueryData(['favorites'])).toBeUndefined();
-    expect(screen.queryByText('Failed to update favorite')).not.toBeInTheDocument();
+    expect(userAQueryClient?.getQueryData(['stars'])).toBeUndefined();
+    expect(screen.queryByText('Failed to update star')).not.toBeInTheDocument();
   });
 
   it('skips hook and per-call callbacks when a grant succeeds after identity retirement', async () => {

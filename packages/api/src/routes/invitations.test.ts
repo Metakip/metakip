@@ -433,17 +433,17 @@ describe('invitation API', () => {
     ]);
     expect(user.rows[0]?.onboarding_completed_at).not.toBeNull();
     expect(user.rows[0]?.account_setup_completed_at).not.toBeNull();
-    const welcome = await query<{ favorite: boolean }>(
+    const welcome = await query<{ starred: boolean }>(
       `select exists (
-         select 1 from user_favorites favorite
-         where favorite.user_id = $1 and favorite.entity_type = 'page'
-           and favorite.entity_id = page.id
-       ) as favorite
+         select 1 from user_stars star
+         where star.user_id = $1 and star.entity_type = 'page'
+           and star.entity_id = page.id
+       ) as starred
        from pages page
        where page.created_by = $1 and page.title = $2 and page.is_deleted = false`,
       [recipient.id, WELCOME_PAGE_TITLE],
     );
-    expect(welcome.rows).toEqual([{ favorite: true }]);
+    expect(welcome.rows).toEqual([{ starred: true }]);
 
     await query(
       `update pages set title = 'My renamed welcome page'

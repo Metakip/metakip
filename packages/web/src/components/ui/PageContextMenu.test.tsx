@@ -27,8 +27,8 @@ vi.mock('../../hooks/use-bulk-actions', () => ({
   useBulkMoveFolders: () => ({ mutate: mocks.moveFolders }),
   useBulkMovePages: () => ({ mutate: mocks.movePages }),
 }));
-vi.mock('../../hooks/use-favorites', () => ({
-  useToggleFavorite: () => ({ mutate: vi.fn() }),
+vi.mock('../../hooks/use-stars', () => ({
+  useToggleStar: () => ({ mutate: vi.fn() }),
 }));
 vi.mock('../../hooks/use-folders', () => ({
   useFolderTree: (options: unknown) => {
@@ -160,7 +160,7 @@ describe('PageContextMenu permissions', () => {
     expect(labels()).not.toContain('Export');
     expect(labels()).not.toContain('Move');
     expect(labels()).not.toContain('Move to Trash');
-    expect(labels()).not.toContain('Favorite');
+    expect(labels()).not.toContain('Star');
     expect(labels()).not.toContain('Share');
   });
 
@@ -178,19 +178,19 @@ describe('PageContextMenu permissions', () => {
     {
       role: 'viewer',
       permission: 'view' as const,
-      expected: ['Favorite', 'Share', 'Export', 'Copy'],
+      expected: ['Star', 'Share', 'Export', 'Copy'],
       absent: ['Rename', 'Move', 'Move to Trash', 'Remove for me'],
     },
     {
       role: 'editor',
       permission: 'edit' as const,
-      expected: ['Favorite', 'Rename', 'Share', 'Export', 'Copy'],
+      expected: ['Star', 'Rename', 'Share', 'Export', 'Copy'],
       absent: ['Move', 'Move to Trash', 'Remove for me'],
     },
     {
       role: 'admin',
       permission: 'admin' as const,
-      expected: ['Favorite', 'Rename', 'Share', 'Export', 'Move to Trash', 'Move', 'Copy'],
+      expected: ['Star', 'Rename', 'Share', 'Export', 'Move to Trash', 'Move', 'Copy'],
       absent: [],
     },
   ])('renders the $role action boundary', ({ permission, expected, absent }) => {

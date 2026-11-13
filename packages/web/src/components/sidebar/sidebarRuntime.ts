@@ -28,7 +28,7 @@ export type SidebarTreeRuntime = {
     entityType: 'page' | 'folder',
     entityId: string,
   ) => SidebarEntityAuthorization | undefined;
-  isFavoriteEntity: (entityType: 'page' | 'folder', entityId: string) => boolean;
+  isStarredEntity: (entityType: 'page' | 'folder', entityId: string) => boolean;
   toggleFolderExpanded: (folderId: string) => void;
   createPageInFolder: (folderId: string) => void;
   startEditing: (kind: 'page' | 'folder', id: string, value: string) => void;

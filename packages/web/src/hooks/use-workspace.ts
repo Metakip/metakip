@@ -44,7 +44,7 @@ export const WORKSPACE_ACCESS_QUERY_KEYS = [
   ['pageTree'],
   ['folderTree'],
   ['pages', 'recent'],
-  ['favorites'],
+  ['stars'],
   ['tags'],
   ['shares'],
   ['pageCollaborators'],

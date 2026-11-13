@@ -1,7 +1,7 @@
 import type { FolderTreeNode, PageTreeNode, SharedNavigationItem } from '@metakip/shared';
 import { useMemo } from 'react';
-import type { Favorite } from '../../hooks/use-favorites';
 import type { RecentPage } from '../../hooks/use-pages';
+import type { StarredEntity } from '../../hooks/use-stars';
 import type { WorkspaceMembership } from '../../hooks/use-workspace';
 import { resolveRemovalShareSource } from '../../utils/entity-actions';
 import { buildPagesByFolder, collectAllFolderIds, getRootPages } from '../../utils/page-tree';
@@ -22,7 +22,7 @@ export function useSidebarModel(options: {
   currentUserId: string | undefined;
   pages: PageTreeNode[];
   folders: FolderTreeNode[];
-  favorites: Favorite[];
+  stars: StarredEntity[];
   recentPages: RecentPage[];
   sharedNavigation: SharedNavigationItem[];
   workspaceMemberships: WorkspaceMembership[];
@@ -31,7 +31,7 @@ export function useSidebarModel(options: {
     currentUserId,
     pages,
     folders,
-    favorites,
+    stars,
     recentPages,
     sharedNavigation,
     workspaceMemberships,
@@ -140,23 +140,23 @@ export function useSidebarModel(options: {
         ...workspaceGroups.flatMap((group) => collectAllFolderIds(group.folders)),
       ]),
     ];
-    const favoriteRows: SidebarAliasRow[] = favorites.map((favorite) => {
-      const entity = entitiesByKey.get(`${favorite.entityType}:${favorite.entityId}`);
-      const sharedItem = sharedByKey.get(`${favorite.entityType}:${favorite.entityId}`);
+    const starredRows: SidebarAliasRow[] = stars.map((star) => {
+      const entity = entitiesByKey.get(`${star.entityType}:${star.entityId}`);
+      const sharedItem = sharedByKey.get(`${star.entityType}:${star.entityId}`);
       const shareSource = resolveRemovalShareSource(
         sharedItem?.source,
-        favorite.entityType === 'page'
-          ? pageById.get(favorite.entityId)?.workspaceAccess === true
-          : folderById.get(favorite.entityId)?.workspaceAccess === true,
+        star.entityType === 'page'
+          ? pageById.get(star.entityId)?.workspaceAccess === true
+          : folderById.get(star.entityId)?.workspaceAccess === true,
       );
       return {
-        key: `${favorite.entityType}-${favorite.entityId}`,
+        key: `${star.entityType}-${star.entityId}`,
         row: {
-          entityType: favorite.entityType,
-          id: favorite.entityId,
-          title: favorite.title,
-          icon: favorite.icon,
-          ownerId: entity?.ownerId ?? favorite.ownerId ?? null,
+          entityType: star.entityType,
+          id: star.entityId,
+          title: star.title,
+          icon: star.icon,
+          ownerId: entity?.ownerId ?? star.ownerId ?? null,
           createdBy: entity?.createdBy ?? null,
           userPermission: entity?.userPermission ?? null,
           parentId: entity?.parentId ?? sharedItem?.parentId,
@@ -201,7 +201,7 @@ export function useSidebarModel(options: {
       allPagesByFolder,
       canRenameSidebarEntity,
       directSharedNavigation,
-      favoriteRows,
+      starredRows,
       foldersByParent,
       getSidebarAuthorization,
       getSidebarCapabilities,
@@ -213,13 +213,5 @@ export function useSidebarModel(options: {
       sidebarFolderIds,
       workspaceGroups,
     };
-  }, [
-    currentUserId,
-    favorites,
-    folders,
-    pages,
-    recentPages,
-    sharedNavigation,
-    workspaceMemberships,
-  ]);
+  }, [currentUserId, stars, folders, pages, recentPages, sharedNavigation, workspaceMemberships]);
 }

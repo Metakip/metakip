@@ -1475,7 +1475,7 @@ describe('folders API', () => {
       expect(ownerPurge.status).toBe(200);
     });
 
-    it('purges subtree grants, public visits, and favorites', async () => {
+    it('purges subtree grants, public visits, and stars', async () => {
       const app = await createTestApp();
       const owner = await createTestUser();
       const recipient = await createTestUser();
@@ -1499,7 +1499,7 @@ describe('folders API', () => {
         [page.id, recipient.id],
       );
       await query(
-        `insert into user_favorites (user_id, entity_type, entity_id)
+        `insert into user_stars (user_id, entity_type, entity_id)
          values ($1, 'folder', $2), ($1, 'page', $3)`,
         [recipient.id, child.id, page.id],
       );
@@ -1519,20 +1519,20 @@ describe('folders API', () => {
         grants: string;
         folder_visits: string;
         page_visits: string;
-        favorites: string;
+        stars: string;
       }>(
         `select
            (select count(*) from shares where entity_id = any($1::uuid[]))::text as grants,
            (select count(*) from folder_public_access_visits where folder_id = any($1::uuid[]))::text as folder_visits,
            (select count(*) from page_public_access_visits where page_id = $2)::text as page_visits,
-           (select count(*) from user_favorites where entity_id = any($1::uuid[]))::text as favorites`,
+           (select count(*) from user_stars where entity_id = any($1::uuid[]))::text as stars`,
         [[root.id, child.id, page.id], page.id],
       );
       expect(leftovers.rows[0]).toEqual({
         grants: '0',
         folder_visits: '0',
         page_visits: '0',
-        favorites: '0',
+        stars: '0',
       });
     });
 
@@ -1563,7 +1563,7 @@ describe('folders API', () => {
         [page.id, recipient.id],
       );
       await query(
-        `insert into user_favorites (user_id, entity_type, entity_id)
+        `insert into user_stars (user_id, entity_type, entity_id)
          values ($1, 'folder', $2), ($1, 'page', $3)`,
         [recipient.id, child.id, page.id],
       );
@@ -1636,7 +1636,7 @@ describe('folders API', () => {
         grants: string;
         folder_visits: string;
         page_visits: string;
-        favorites: string;
+        stars: string;
       }>(
         `select
            child.is_deleted as child_deleted,
@@ -1645,7 +1645,7 @@ describe('folders API', () => {
            (select count(*) from shares where entity_id = any($1::uuid[]))::text as grants,
            (select count(*) from folder_public_access_visits where folder_id = $2)::text as folder_visits,
            (select count(*) from page_public_access_visits where page_id = $3)::text as page_visits,
-           (select count(*) from user_favorites where entity_id = any($1::uuid[]))::text as favorites
+           (select count(*) from user_stars where entity_id = any($1::uuid[]))::text as stars
          from folders child
          join pages page on page.id = $3
          where child.id = $2`,
@@ -1658,7 +1658,7 @@ describe('folders API', () => {
         grants: '2',
         folder_visits: '1',
         page_visits: '1',
-        favorites: '2',
+        stars: '2',
       });
     });
 

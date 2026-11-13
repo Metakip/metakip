@@ -61,7 +61,7 @@ export function SidebarEntityRow({
       canMove={capabilities.canMove}
       depth={depth}
       isActive={runtime.activePageId === entity.id}
-      isFavorite={runtime.isFavoriteEntity(entity.entityType, entity.id)}
+      isStarred={runtime.isStarredEntity(entity.entityType, entity.id)}
       hasChildren={hasChildren}
       isExpanded={isExpanded}
       isFolder={isFolder}

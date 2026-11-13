@@ -47,7 +47,7 @@ describe('useEmptyAllTrash', () => {
       ['folderTree'],
       ['pageTree'],
       ['pages', 'recent'],
-      ['favorites'],
+      ['stars'],
       ['shared-with-me'],
     ]) {
       expect(invalidateSpy).toHaveBeenCalledWith({ queryKey });

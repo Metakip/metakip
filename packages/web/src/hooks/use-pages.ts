@@ -184,7 +184,7 @@ export function useUpdatePage() {
       queryClient.invalidateQueries({ queryKey: ['shared-with-me'] });
       queryClient.invalidateQueries({ queryKey: ['pages', 'detail', pageId] });
       queryClient.invalidateQueries({ queryKey: ['pages', 'recent'] });
-      queryClient.invalidateQueries({ queryKey: ['favorites'] });
+      queryClient.invalidateQueries({ queryKey: ['stars'] });
       queryClient.invalidateQueries({ queryKey: ['shares'] });
       if (!silent) {
         showSuccessToast('Page updated');
@@ -211,7 +211,7 @@ export function useRestorePage() {
       queryClient.invalidateQueries({ queryKey: ['pageTree'] });
       queryClient.invalidateQueries({ queryKey: ['trashPages'] });
       queryClient.invalidateQueries({ queryKey: ['pages', 'recent'] });
-      queryClient.invalidateQueries({ queryKey: ['favorites'] });
+      queryClient.invalidateQueries({ queryKey: ['stars'] });
       showSuccessToast('Page restored');
     },
     meta: { errorMessage: 'Failed to restore page' },
@@ -225,7 +225,7 @@ export function usePermanentDeletePage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trashPages'] });
       queryClient.invalidateQueries({ queryKey: ['pages', 'recent'] });
-      queryClient.invalidateQueries({ queryKey: ['favorites'] });
+      queryClient.invalidateQueries({ queryKey: ['stars'] });
       showSuccessToast('Page permanently deleted');
     },
     meta: { errorMessage: 'Failed to permanently delete page' },
@@ -239,7 +239,7 @@ export function useEmptyTrash({ silent = false }: { silent?: boolean } = {}) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['trashPages'] });
       queryClient.invalidateQueries({ queryKey: ['pages', 'recent'] });
-      queryClient.invalidateQueries({ queryKey: ['favorites'] });
+      queryClient.invalidateQueries({ queryKey: ['stars'] });
       if (!silent) {
         showSuccessToast('Trash emptied');
       }

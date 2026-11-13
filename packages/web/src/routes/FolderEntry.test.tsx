@@ -133,7 +133,7 @@ vi.mock('../hooks/use-folders', () => ({
   useCreateFolder: mocks.idleMutation,
   useUpdateFolder: mocks.idleMutation,
 }));
-vi.mock('../hooks/use-favorites', () => ({ useFavorites: () => ({ data: [] }) }));
+vi.mock('../hooks/use-stars', () => ({ useStars: () => ({ data: [] }) }));
 vi.mock('../hooks/use-workspace', () => ({ useWorkspaceMemberships: () => ({ data: [] }) }));
 vi.mock('../hooks/use-page-collaborators', () => ({
   usePageCollaborators: (ids: string[]) => {

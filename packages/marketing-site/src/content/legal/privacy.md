@@ -11,7 +11,7 @@ We process information needed to provide and protect the hosted service. Metakip
 
 - Account and sign-in information, including your name, email address, profile image when provided by your identity provider, account records, session identifiers, IP address, and browser user-agent. Google and GitHub provide sign-in for the hosted service.
 - Workspace content you create, import, upload, or share, including pages, folders, properties, files, comments, replies, page history, guest-contributor details, and sharing and permission settings.
-- Operational and usage information, including API request method and route, response status and timing, content length, errors, page visits, favorites, and API-token audit events.
+- Operational and usage information, including API request method and route, response status and timing, content length, errors, page visits, stars, and API-token audit events.
 - Invitation information, including invitee email addresses, invitation status, and email delivery attempts. Invitation emails are sent using Resend.
 - Information you include in support or privacy-request emails.
 

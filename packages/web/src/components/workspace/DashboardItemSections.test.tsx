@@ -21,9 +21,9 @@ vi.mock('./ExplorerItem', () => ({
 import { DashboardItemSections, type DashboardSection } from './DashboardItemSections';
 
 const ITEM: ExplorerItemData = {
-  id: 'favorite-page',
+  id: 'starred-page',
   type: 'page',
-  title: 'Favorite page',
+  title: 'Starred page',
   updatedAt: new Date('2026-01-01'),
   ownerId: 'current-user',
 };
@@ -40,14 +40,14 @@ function RenameHarness() {
   return (
     <DashboardItemSections
       allItems={[ITEM]}
-      favoriteItems={[ITEM]}
+      starredItems={[ITEM]}
       viewMode="list"
       currentUserId="current-user"
       canSelect
       hasSelection={false}
       isEditingAllowed
       editingTarget={editingTarget}
-      isFavorite={() => true}
+      isStarred={() => true}
       isSelected={() => false}
       onSelect={() => {}}
       onNavigate={() => {}}
@@ -62,15 +62,15 @@ function RenameHarness() {
 }
 
 describe('DashboardItemSections', () => {
-  it('edits only the selected section when a favorite also appears in all items', async () => {
+  it('edits only the selected section when a starred item also appears in all items', async () => {
     const user = userEvent.setup();
     render(<RenameHarness />);
 
-    const favoriteRename = screen.getAllByRole('button', { name: 'Favorite page: idle' }).at(0);
-    if (!favoriteRename) throw new Error('Favorite rename action was not rendered');
-    await user.click(favoriteRename);
+    const starredRename = screen.getAllByRole('button', { name: 'Starred page: idle' }).at(0);
+    if (!starredRename) throw new Error('Starred rename action was not rendered');
+    await user.click(starredRename);
 
-    expect(screen.getAllByRole('button', { name: 'Favorite page: editing' })).toHaveLength(1);
-    expect(screen.getAllByRole('button', { name: 'Favorite page: idle' })).toHaveLength(1);
+    expect(screen.getAllByRole('button', { name: 'Starred page: editing' })).toHaveLength(1);
+    expect(screen.getAllByRole('button', { name: 'Starred page: idle' })).toHaveLength(1);
   });
 });

@@ -5,7 +5,7 @@ import type {
   SharedWithMeItem,
 } from '@metakip/shared';
 import type { ExplorerItemData } from '../components/workspace/ExplorerItem';
-import type { Favorite } from '../hooks/use-favorites';
+import type { StarredEntity } from '../hooks/use-stars';
 import { canMoveEntity } from '../utils/entity-actions';
 
 export type DashboardFilter = 'all' | 'owned-by-me' | 'shared-with-me';
@@ -40,13 +40,13 @@ export const sharedItemToDashboardItem = (item: SharedWithMeItem): DashboardItem
   activityAt: item.sortAt ?? item.updatedAt ?? item.createdAt ?? item.entityUpdatedAt ?? new Date(),
 });
 
-export function buildFavoriteDashboardItems({
+export function buildStarredDashboardItems({
   activeFilter,
   allItems,
   collaboratorsByFolderId,
   collaboratorsByPageId,
   currentUserId,
-  favorites,
+  stars,
   folders,
   pages,
   workspaceAdminOwnerIds,
@@ -56,7 +56,7 @@ export function buildFavoriteDashboardItems({
   collaboratorsByFolderId: Record<string, CollaboratorDisplay[]> | undefined;
   collaboratorsByPageId: Record<string, CollaboratorDisplay[]> | undefined;
   currentUserId: string | undefined;
-  favorites: Favorite[] | undefined;
+  stars: StarredEntity[] | undefined;
   folders: FolderTreeNode[] | undefined;
   pages: PageTreeNode[] | undefined;
   workspaceAdminOwnerIds: ReadonlySet<string>;
@@ -72,65 +72,38 @@ export function buildFavoriteDashboardItems({
   };
   indexFolders(folders ?? []);
 
-  return (favorites ?? [])
-    .flatMap((favorite): DashboardItem[] => {
-      if (favorite.entityType !== 'page' && favorite.entityType !== 'folder') return [];
+  return (stars ?? [])
+    .map((star): DashboardItem => {
+      const dashboardItem = allItemsByKey.get(`${star.entityType}:${star.entityId}`);
+      if (dashboardItem) return dashboardItem;
 
-      const key = `${favorite.entityType}:${favorite.entityId}`;
-      const dashboardItem = allItemsByKey.get(key);
-      if (dashboardItem) return [dashboardItem];
+      const page = star.entityType === 'page' ? pagesById.get(star.entityId) : undefined;
+      const folder = star.entityType === 'folder' ? foldersById.get(star.entityId) : undefined;
+      const entity = page ?? folder;
+      const collaborators = (
+        star.entityType === 'page' ? collaboratorsByPageId : collaboratorsByFolderId
+      )?.[star.entityId];
 
-      if (favorite.entityType === 'page') {
-        const page = pagesById.get(favorite.entityId);
-        return [
-          {
-            id: favorite.entityId,
-            type: 'page',
-            title: page?.title ?? favorite.title,
-            icon: page?.icon ?? favorite.icon,
-            updatedAt: page?.updatedAt ?? favorite.createdAt ?? new Date(),
-            activityAt: page?.updatedAt ?? favorite.createdAt ?? new Date(),
-            ...(page?.coverType !== undefined ? { coverType: page.coverType } : {}),
-            ...(page?.coverValue !== undefined ? { coverValue: page.coverValue } : {}),
-            ownerId: page?.ownerId ?? favorite.ownerId ?? null,
-            createdBy: page?.createdBy,
-            userPermission: page?.userPermission,
-            ...(favorite.shareSource ? { shareSource: favorite.shareSource } : {}),
-            ...(collaboratorsByPageId?.[favorite.entityId]
-              ? { collaborators: collaboratorsByPageId[favorite.entityId] }
-              : {}),
-            canMove:
-              page?.ownerId === currentUserId ||
-              (page?.workspaceAccess === true &&
-                !!page.ownerId &&
-                canMoveEntity(page.userPermission, workspaceAdminOwnerIds.has(page.ownerId))),
-          },
-        ];
-      }
-
-      const folder = foldersById.get(favorite.entityId);
-      return [
-        {
-          id: favorite.entityId,
-          type: 'folder',
-          title: folder?.name ?? favorite.title,
-          icon: folder?.icon ?? favorite.icon,
-          updatedAt: folder?.updatedAt ?? favorite.createdAt ?? new Date(),
-          activityAt: folder?.updatedAt ?? favorite.createdAt ?? new Date(),
-          ownerId: folder?.ownerId ?? favorite.ownerId ?? null,
-          createdBy: folder?.createdBy,
-          userPermission: folder?.userPermission,
-          ...(favorite.shareSource ? { shareSource: favorite.shareSource } : {}),
-          ...(collaboratorsByFolderId?.[favorite.entityId]
-            ? { collaborators: collaboratorsByFolderId[favorite.entityId] }
-            : {}),
-          canMove:
-            folder?.ownerId === currentUserId ||
-            (folder?.workspaceAccess === true &&
-              !!folder.ownerId &&
-              canMoveEntity(folder.userPermission, workspaceAdminOwnerIds.has(folder.ownerId))),
-        },
-      ];
+      return {
+        id: star.entityId,
+        type: star.entityType,
+        title: page?.title ?? folder?.name ?? star.title,
+        icon: entity?.icon ?? star.icon,
+        updatedAt: entity?.updatedAt ?? star.createdAt ?? new Date(),
+        activityAt: entity?.updatedAt ?? star.createdAt ?? new Date(),
+        ...(page?.coverType !== undefined ? { coverType: page.coverType } : {}),
+        ...(page?.coverValue !== undefined ? { coverValue: page.coverValue } : {}),
+        ownerId: entity?.ownerId ?? star.ownerId ?? null,
+        createdBy: entity?.createdBy,
+        userPermission: entity?.userPermission,
+        ...(star.shareSource ? { shareSource: star.shareSource } : {}),
+        ...(collaborators ? { collaborators } : {}),
+        canMove:
+          entity?.ownerId === currentUserId ||
+          (entity?.workspaceAccess === true &&
+            !!entity.ownerId &&
+            canMoveEntity(entity.userPermission, workspaceAdminOwnerIds.has(entity.ownerId))),
+      };
     })
     .filter((item) => {
       if (activeFilter === 'owned-by-me') return item.ownerId === currentUserId;

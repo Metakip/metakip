@@ -17,10 +17,10 @@ interface DashboardItemSectionsProps {
   canSelect: boolean;
   currentUserId: string | undefined;
   editingTarget: EditingTarget;
-  favoriteItems: ExplorerItemData[];
+  starredItems: ExplorerItemData[];
   hasSelection: boolean;
   isEditingAllowed: boolean;
-  isFavorite: (item: ExplorerItemData) => boolean;
+  isStarred: (item: ExplorerItemData) => boolean;
   isSelected: (id: string) => boolean;
   onEditChange: (value: string) => void;
   onEditKeyDown: (event: React.KeyboardEvent) => void;
@@ -46,7 +46,7 @@ function ItemSection({
   editingTarget,
   hasSelection,
   isEditingAllowed,
-  isFavorite,
+  isStarred,
   isSelected,
   onEditChange,
   onEditKeyDown,
@@ -66,7 +66,7 @@ function ItemSection({
       item={item}
       viewMode={viewMode}
       isSelected={isSelected(item.id)}
-      isFavorite={isFavorite(item)}
+      isStarred={isStarred(item)}
       canSelect={canSelect}
       onSelect={(event) => onSelect(item, event)}
       onNavigate={(event) => onNavigate(item, index, event, items, section)}
@@ -118,16 +118,16 @@ function ItemSection({
 }
 
 export function DashboardItemSections(props: DashboardItemSectionsProps) {
-  const { allItems, favoriteItems } = props;
+  const { allItems, starredItems } = props;
   return (
     <div className={props.viewMode === 'card' ? 'space-y-8 animate-fade-in' : 'space-y-8'}>
-      {favoriteItems.length > 0 && (
-        <ItemSection {...props} title="Favorites" items={favoriteItems} section="favorites" />
+      {starredItems.length > 0 && (
+        <ItemSection {...props} title="Starred" items={starredItems} section="starred" />
       )}
       {allItems.length > 0 && (
         <ItemSection
           {...props}
-          {...(favoriteItems.length > 0 ? { title: 'All Items' } : {})}
+          {...(starredItems.length > 0 ? { title: 'All Items' } : {})}
           items={allItems}
           section="all-items"
         />

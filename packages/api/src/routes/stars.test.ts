@@ -9,50 +9,52 @@ import {
   createTestWorkspaceMember,
 } from '../test-utils';
 
-describe('favorites API', () => {
+describe('stars API', () => {
   describe('auth guard', () => {
     it('returns 401 without session cookie', async () => {
       const app = await createTestApp();
-      const res = await app.request('/api/favorites');
+      const res = await app.request('/api/stars');
       expect(res.status).toBe(401);
     });
 
     it('returns 401 with invalid session token', async () => {
       const app = await createTestApp();
-      const res = await app.request('/api/favorites', {
+      const res = await app.request('/api/stars', {
         headers: { Cookie: 'better-auth.session_token=invalid-token' },
       });
       expect(res.status).toBe(401);
     });
   });
 
-  describe('GET /api/favorites', () => {
-    it('lists favorites for the user', async () => {
+  describe('GET /api/stars', () => {
+    it('lists stars for the user', async () => {
       const app = await createTestApp();
       const user = await createTestUser();
       const session = await createTestSession(user.id);
       const page = await createTestPage(user.id);
 
-      await app.request('/api/favorites', {
+      await app.request('/api/stars', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Cookie: session.Cookie,
           Origin: 'http://localhost:5173',
         },
-        body: JSON.stringify({ pageId: page.id }),
+        body: JSON.stringify({ entityType: 'page', entityId: page.id }),
       });
 
-      const res = await app.request(`/api/favorites`, {
+      const res = await app.request(`/api/stars`, {
         headers: { Cookie: session.Cookie },
       });
 
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.favorites.length).toBeGreaterThanOrEqual(1);
+      expect(body.stars.length).toBeGreaterThanOrEqual(1);
+      expect(body.stars[0]).toMatchObject({ entityType: 'page', entityId: page.id });
+      expect(body.stars[0]).not.toHaveProperty('pageId');
     });
 
-    it('preserves a direct source for a favorite page nested in a shared folder', async () => {
+    it('preserves a direct source for a starred page nested in a shared folder', async () => {
       const app = await createTestApp();
       const owner = await createTestUser();
       const recipient = await createTestUser();
@@ -66,7 +68,7 @@ describe('favorites API', () => {
         [sharedFolder.id, recipient.id, page.id],
       );
 
-      const addFavorite = await app.request('/api/favorites', {
+      const addStar = await app.request('/api/stars', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -75,19 +77,19 @@ describe('favorites API', () => {
         },
         body: JSON.stringify({ entityType: 'page', entityId: page.id }),
       });
-      expect(addFavorite.status).toBe(201);
+      expect(addStar.status).toBe(201);
 
-      const favorites = await app.request('/api/favorites', {
+      const stars = await app.request('/api/stars', {
         headers: { Cookie: recipientSession.Cookie },
       });
-      expect(favorites.status).toBe(200);
-      const body = (await favorites.json()) as { favorites: Array<Record<string, unknown>> };
-      expect(body.favorites).toContainEqual(
+      expect(stars.status).toBe(200);
+      const body = (await stars.json()) as { stars: Array<Record<string, unknown>> };
+      expect(body.stars).toContainEqual(
         expect.objectContaining({ entityId: page.id, shareSource: 'direct' }),
       );
     });
 
-    it('preserves a public source for a favorite nested page with a public visit', async () => {
+    it('preserves a public source for a starred nested page with a public visit', async () => {
       const app = await createTestApp();
       const owner = await createTestUser();
       const visitor = await createTestUser();
@@ -107,7 +109,7 @@ describe('favorites API', () => {
       });
       expect(pageVisit.status).toBe(200);
 
-      const addFavorite = await app.request('/api/favorites', {
+      const addStar = await app.request('/api/stars', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -116,14 +118,14 @@ describe('favorites API', () => {
         },
         body: JSON.stringify({ entityType: 'page', entityId: page.id }),
       });
-      expect(addFavorite.status).toBe(201);
+      expect(addStar.status).toBe(201);
 
-      const favorites = await app.request('/api/favorites', {
+      const stars = await app.request('/api/stars', {
         headers: { Cookie: visitorSession.Cookie },
       });
-      expect(favorites.status).toBe(200);
-      const body = (await favorites.json()) as { favorites: Array<Record<string, unknown>> };
-      expect(body.favorites).toContainEqual(
+      expect(stars.status).toBe(200);
+      const body = (await stars.json()) as { stars: Array<Record<string, unknown>> };
+      expect(body.stars).toContainEqual(
         expect.objectContaining({ entityId: page.id, shareSource: 'public' }),
       );
 
@@ -158,7 +160,7 @@ describe('favorites API', () => {
         [page.id, member.id],
       );
 
-      const addFavorite = await app.request('/api/favorites', {
+      const addStar = await app.request('/api/stars', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -167,46 +169,46 @@ describe('favorites API', () => {
         },
         body: JSON.stringify({ entityType: 'page', entityId: page.id }),
       });
-      expect(addFavorite.status).toBe(201);
+      expect(addStar.status).toBe(201);
 
-      const favorites = await app.request('/api/favorites', {
+      const stars = await app.request('/api/stars', {
         headers: { Cookie: memberSession.Cookie },
       });
-      expect(favorites.status).toBe(200);
-      const body = (await favorites.json()) as { favorites: Array<Record<string, unknown>> };
-      expect(body.favorites).toContainEqual(
+      expect(stars.status).toBe(200);
+      const body = (await stars.json()) as { stars: Array<Record<string, unknown>> };
+      expect(body.stars).toContainEqual(
         expect.objectContaining({ entityId: page.id, shareSource: 'workspace' }),
       );
     });
   });
 
-  describe('POST /api/favorites', () => {
-    it('adds a page to favorites', async () => {
+  describe('POST /api/stars', () => {
+    it('stars a page', async () => {
       const app = await createTestApp();
       const user = await createTestUser();
       const session = await createTestSession(user.id);
       const page = await createTestPage(user.id);
 
-      const res = await app.request('/api/favorites', {
+      const res = await app.request('/api/stars', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Cookie: session.Cookie,
           Origin: 'http://localhost:5173',
         },
-        body: JSON.stringify({ pageId: page.id }),
+        body: JSON.stringify({ entityType: 'page', entityId: page.id }),
       });
 
       expect(res.status).toBe(201);
     });
 
-    it('adds a folder to favorites', async () => {
+    it('stars a folder', async () => {
       const app = await createTestApp();
       const user = await createTestUser();
       const session = await createTestSession(user.id);
-      const folder = await createTestFolder(user.id, { name: 'Favorite Folder' });
+      const folder = await createTestFolder(user.id, { name: 'Starred Folder' });
 
-      const res = await app.request('/api/favorites', {
+      const res = await app.request('/api/stars', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -218,63 +220,67 @@ describe('favorites API', () => {
 
       expect(res.status).toBe(201);
 
-      const listRes = await app.request('/api/favorites', {
+      const listRes = await app.request('/api/stars', {
         headers: { Cookie: session.Cookie },
       });
       expect(listRes.status).toBe(200);
       const body = await listRes.json();
-      expect(body.favorites).toContainEqual(
+      expect(body.stars).toContainEqual(
         expect.objectContaining({
           entityType: 'folder',
           entityId: folder.id,
-          title: 'Favorite Folder',
+          title: 'Starred Folder',
         }),
       );
     });
 
-    it('is idempotent (second favorite returns 200)', async () => {
+    it('is idempotent (starring twice returns 200)', async () => {
       const app = await createTestApp();
       const user = await createTestUser();
       const session = await createTestSession(user.id);
       const page = await createTestPage(user.id);
 
-      await app.request('/api/favorites', {
+      await app.request('/api/stars', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Cookie: session.Cookie,
           Origin: 'http://localhost:5173',
         },
-        body: JSON.stringify({ pageId: page.id }),
+        body: JSON.stringify({ entityType: 'page', entityId: page.id }),
       });
 
-      const res = await app.request('/api/favorites', {
+      const res = await app.request('/api/stars', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Cookie: session.Cookie,
           Origin: 'http://localhost:5173',
         },
-        body: JSON.stringify({ pageId: page.id }),
+        body: JSON.stringify({ entityType: 'page', entityId: page.id }),
       });
 
       expect(res.status).toBe(200);
       expect((await res.json()).ok).toBe(true);
     });
 
-    it('returns 400 when pageId is missing', async () => {
+    it.each([
+      {},
+      { entityType: 'page' },
+      { entityId: 'page-1' },
+    ])('returns 400 when entityType or entityId is missing (%j)', async (body) => {
       const app = await createTestApp();
       const user = await createTestUser();
       const session = await createTestSession(user.id);
 
-      const res = await app.request('/api/favorites', {
+      const res = await app.request('/api/stars', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Cookie: session.Cookie,
           Origin: 'http://localhost:5173',
         },
-        body: JSON.stringify({}),
+        body: JSON.stringify(body),
       });
 
       expect(res.status).toBe(400);
@@ -285,38 +291,41 @@ describe('favorites API', () => {
       const user = await createTestUser();
       const session = await createTestSession(user.id);
 
-      const res = await app.request('/api/favorites', {
+      const res = await app.request('/api/stars', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Cookie: session.Cookie,
           Origin: 'http://localhost:5173',
         },
-        body: JSON.stringify({ pageId: '00000000-0000-0000-0000-000000000000' }),
+        body: JSON.stringify({
+          entityType: 'page',
+          entityId: '00000000-0000-0000-0000-000000000000',
+        }),
       });
 
       expect(res.status).toBe(404);
     });
   });
 
-  describe('DELETE /api/favorites/:pageId', () => {
-    it('removes a page from favorites', async () => {
+  describe('DELETE /api/stars/:entityType/:entityId', () => {
+    it('unstars a page', async () => {
       const app = await createTestApp();
       const user = await createTestUser();
       const session = await createTestSession(user.id);
       const page = await createTestPage(user.id);
 
-      await app.request('/api/favorites', {
+      await app.request('/api/stars', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Cookie: session.Cookie,
           Origin: 'http://localhost:5173',
         },
-        body: JSON.stringify({ pageId: page.id }),
+        body: JSON.stringify({ entityType: 'page', entityId: page.id }),
       });
 
-      const res = await app.request(`/api/favorites/${page.id}`, {
+      const res = await app.request(`/api/stars/page/${page.id}`, {
         method: 'DELETE',
         headers: { Cookie: session.Cookie },
       });
@@ -325,17 +334,35 @@ describe('favorites API', () => {
       expect((await res.json()).deleted).toBe(true);
     });
 
-    it('returns 404 for non-existent page', async () => {
+    it('does not accept the legacy page-only route', async () => {
       const app = await createTestApp();
       const user = await createTestUser();
       const session = await createTestSession(user.id);
+      const page = await createTestPage(user.id);
 
-      const res = await app.request('/api/favorites/00000000-0000-0000-0000-000000000000', {
+      await app.request('/api/stars', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Cookie: session.Cookie,
+          Origin: 'http://localhost:5173',
+        },
+        body: JSON.stringify({ entityType: 'page', entityId: page.id }),
+      });
+
+      const res = await app.request(`/api/stars/${page.id}`, {
         method: 'DELETE',
         headers: { Cookie: session.Cookie },
       });
 
       expect(res.status).toBe(404);
+      const listRes = await app.request('/api/stars', {
+        headers: { Cookie: session.Cookie },
+      });
+      const body = (await listRes.json()) as { stars: Array<Record<string, unknown>> };
+      expect(body.stars).toContainEqual(
+        expect.objectContaining({ entityType: 'page', entityId: page.id }),
+      );
     });
   });
 });

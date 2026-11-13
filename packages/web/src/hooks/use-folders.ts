@@ -153,7 +153,7 @@ export function useRestoreFolder() {
       queryClient.invalidateQueries({ queryKey: ['trashFolders'] });
       queryClient.invalidateQueries({ queryKey: ['trashPages'] });
       queryClient.invalidateQueries({ queryKey: ['pages', 'recent'] });
-      queryClient.invalidateQueries({ queryKey: ['favorites'] });
+      queryClient.invalidateQueries({ queryKey: ['stars'] });
       queryClient.invalidateQueries({ queryKey: ['shared-with-me'] });
       showSuccessToast('Folder restored');
     },
@@ -169,7 +169,7 @@ export function usePermanentDeleteFolder() {
       queryClient.invalidateQueries({ queryKey: ['trashFolders'] });
       queryClient.invalidateQueries({ queryKey: ['trashPages'] });
       queryClient.invalidateQueries({ queryKey: ['pages', 'recent'] });
-      queryClient.invalidateQueries({ queryKey: ['favorites'] });
+      queryClient.invalidateQueries({ queryKey: ['stars'] });
       showSuccessToast('Folder permanently deleted');
     },
     meta: { errorMessage: 'Failed to permanently delete folder' },
@@ -184,7 +184,7 @@ export function useEmptyFolderTrash({ silent = false }: { silent?: boolean } = {
       queryClient.invalidateQueries({ queryKey: ['trashFolders'] });
       queryClient.invalidateQueries({ queryKey: ['trashPages'] });
       queryClient.invalidateQueries({ queryKey: ['pages', 'recent'] });
-      queryClient.invalidateQueries({ queryKey: ['favorites'] });
+      queryClient.invalidateQueries({ queryKey: ['stars'] });
       if (!silent) {
         showSuccessToast('Trash emptied');
       }
@@ -207,7 +207,7 @@ export function useUpdateFolder() {
       updateFolderNavigationCache(queryClient, folderId, updates);
       queryClient.invalidateQueries({ queryKey: ['folderTree'] });
       queryClient.invalidateQueries({ queryKey: ['shared-with-me'] });
-      queryClient.invalidateQueries({ queryKey: ['favorites'] });
+      queryClient.invalidateQueries({ queryKey: ['stars'] });
       queryClient.invalidateQueries({ queryKey: ['folders', 'detail', folderId] });
       queryClient.invalidateQueries({ queryKey: ['shares'] });
       showSuccessToast('Folder updated');
