@@ -31,11 +31,12 @@ describe('SelectionToolbar', () => {
       />,
     );
 
+    expect(screen.getByRole('toolbar', { name: 'Selection actions' })).toBeInTheDocument();
     expect(screen.getByText('Removing 14 items…')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Remove' })).toBeDisabled();
-    expect(screen.getByRole('button', { name: 'Copy' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Remove' })).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('button', { name: 'Copy' })).toHaveAttribute('aria-disabled', 'true');
     for (const button of screen.getAllByRole('button', { name: 'Deselect all' })) {
-      expect(button).toBeDisabled();
+      expect(button).toHaveAttribute('aria-disabled', 'true');
     }
   });
 
