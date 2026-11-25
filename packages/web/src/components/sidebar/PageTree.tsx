@@ -1,3 +1,4 @@
+import * as stylex from '@stylexjs/stylex';
 import {
   ChevronDown,
   ChevronRight,
@@ -31,7 +32,9 @@ import { formatShortcut, SHORTCUT_PATTERNS } from '../../utils/keyboardShortcuts
 import { getInitialQueriesState } from '../../utils/queryState';
 import { showErrorToast } from '../../utils/toast';
 import { buildPagePath, extractUuidFromSlug, getWorkspacePath } from '../../utils/url';
+import { actionColors } from '../ui/ActionColors.stylex';
 import { LoadingIndicator } from '../ui/LoadingIndicator';
+import { styles } from './PageTree.stylex';
 import { SidebarEntityRow } from './SidebarEntityRow';
 import { SidebarAliasSection } from './SidebarSections';
 import {
@@ -250,7 +253,7 @@ export function PageTree() {
 
   if (initialQueriesState.status === 'loading') {
     return (
-      <div className="flex h-full items-center justify-center">
+      <div {...stylex.props(styles.loadingState)}>
         <LoadingIndicator label="Loading sidebar" />
       </div>
     );
@@ -258,16 +261,14 @@ export function PageTree() {
 
   if (isAnonymous) {
     return (
-      <div className="flex flex-col h-full">
-        <div className="flex-1 overflow-y-auto px-2 py-2 space-y-3">
-          <div className="px-3 py-4 text-center">
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-3">
-              Sign in to access your pages
-            </p>
+      <div {...stylex.props(styles.layout)}>
+        <div {...stylex.props(styles.content)}>
+          <div {...stylex.props(styles.signInCard)}>
+            <p {...stylex.props(styles.signInDescription)}>Sign in to access your pages</p>
             <button
               type="button"
               onClick={() => navigate('/login')}
-              className="px-4 py-2 text-sm font-medium text-white bg-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors cursor-pointer"
+              {...stylex.props(actionColors.contrast, styles.signInButton)}
             >
               Sign In
             </button>
@@ -279,10 +280,7 @@ export function PageTree() {
 
   if (initialQueriesState.status === 'paused' || initialQueriesState.status === 'error') {
     return (
-      <div
-        role="alert"
-        className="m-4 space-y-2 rounded-md border border-red-200 bg-zinc-100 p-3 text-sm text-red-500 dark:border-red-900/30 dark:bg-zinc-800/50"
-      >
+      <div role="alert" {...stylex.props(styles.errorState)}>
         <p>
           {initialQueriesState.status === 'paused'
             ? 'Navigation is paused. Check your connection.'
@@ -300,7 +298,7 @@ export function PageTree() {
               refetchWorkspaceMemberships(),
             ]);
           }}
-          className="rounded border border-red-200 px-2 py-1 text-xs hover:bg-red-50 dark:border-red-900/40 dark:hover:bg-red-950/30 cursor-pointer"
+          {...stylex.props(styles.retryButton)}
         >
           Retry
         </button>
@@ -315,14 +313,16 @@ export function PageTree() {
   const hasSharedContent = sharedPreview.length > 0 || visibleWorkspaceGroups.length > 0;
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="shrink-0 px-2 pt-2 pb-1">
-        <div className="flex items-center justify-center gap-1">
-          <label
-            className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-all text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 cursor-pointer"
-            title="Import markdown file"
-          >
-            <input type="file" accept=".md" className="hidden" onChange={handleImportMarkdown} />
+    <div {...stylex.props(styles.layout)}>
+      <div {...stylex.props(styles.toolbar)}>
+        <div {...stylex.props(styles.toolbarButtons)}>
+          <label {...stylex.props(styles.toolbarButton)} title="Import markdown file">
+            <input
+              type="file"
+              accept=".md"
+              {...stylex.props(styles.hiddenInput)}
+              onChange={handleImportMarkdown}
+            />
             <Download size={16} />
           </label>
           <button
@@ -330,7 +330,7 @@ export function PageTree() {
             onClick={() => {
               void handleCreateRootFolder();
             }}
-            className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-all text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 cursor-pointer"
+            {...stylex.props(styles.toolbarButton)}
             title={`Create folder (${createFolderShortcut})`}
             data-testid="new-folder-btn"
           >
@@ -341,7 +341,7 @@ export function PageTree() {
             onClick={() => {
               void handleCreateRootPage();
             }}
-            className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-all text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 cursor-pointer"
+            {...stylex.props(styles.toolbarButton)}
             title={`Create note (${createNoteShortcut})`}
             data-testid="new-page-btn"
           >
@@ -350,7 +350,7 @@ export function PageTree() {
           <button
             type="button"
             onClick={sidebar.toggleAll}
-            className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-all text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 cursor-pointer"
+            {...stylex.props(styles.toolbarButton)}
             title={sidebar.allExpanded ? 'Collapse all folders' : 'Expand all folders'}
             data-testid="toggle-expand-all-btn"
           >
@@ -359,7 +359,7 @@ export function PageTree() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-2 py-2 space-y-3">
+      <div {...stylex.props(styles.content)}>
         <SidebarAliasSection
           title="Starred"
           collapsed={sidebar.collapsedSections.has('starred')}
@@ -376,38 +376,38 @@ export function PageTree() {
         />
 
         {hasSharedContent && (
-          <div className="mb-2">
+          <div {...stylex.props(styles.sharedSection)}>
             <button
               type="button"
               onClick={() => sidebar.toggleSection('shared')}
               aria-expanded={!sidebar.collapsedSections.has('shared')}
-              className="flex items-center px-1 mb-2 text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider cursor-pointer hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors w-full text-left"
+              {...stylex.props(styles.sectionToggle)}
             >
               {sidebar.collapsedSections.has('shared') ? (
-                <ChevronRight size={14} className="mr-1 shrink-0" />
+                <ChevronRight size={14} {...stylex.props(styles.sectionChevron)} />
               ) : (
-                <ChevronDown size={14} className="mr-1 shrink-0" />
+                <ChevronDown size={14} {...stylex.props(styles.sectionChevron)} />
               )}
               <span>Shared With Me</span>
             </button>
             {!sidebar.collapsedSections.has('shared') && (
-              <div className="space-y-1">
+              <div {...stylex.props(styles.sidebarList)}>
                 {visibleWorkspaceGroups.map((group) => {
                   const isCollapsed = sidebar.collapsedWorkspaceIds.has(group.ownerId);
                   return (
                     <div key={`workspace-${group.ownerId}`}>
-                      <div className="flex items-center gap-1 px-3 py-1">
+                      <div {...stylex.props(styles.workspaceHeader)}>
                         <button
                           type="button"
                           onClick={() => sidebar.toggleWorkspace(group.ownerId)}
-                          className="flex min-w-0 flex-1 items-center text-left text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 cursor-pointer"
+                          {...stylex.props(styles.workspaceButton)}
                         >
                           {isCollapsed ? (
-                            <ChevronRight size={13} className="mr-1 shrink-0" />
+                            <ChevronRight size={13} {...stylex.props(styles.workspaceChevron)} />
                           ) : (
-                            <ChevronDown size={13} className="mr-1 shrink-0" />
+                            <ChevronDown size={13} {...stylex.props(styles.workspaceChevron)} />
                           )}
-                          <span className="truncate">
+                          <span {...stylex.props(styles.workspaceName)}>
                             {group.ownerName
                               ? `${group.ownerName}'s Workspace`
                               : 'Shared Workspace'}
@@ -425,13 +425,13 @@ export function PageTree() {
                               memberId: currentUserId,
                             });
                           }}
-                          className="rounded p-1 text-zinc-400 hover:bg-black/5 hover:text-red-600 disabled:opacity-40 dark:hover:bg-white/10 cursor-pointer"
+                          {...stylex.props(styles.leaveWorkspaceButton)}
                         >
                           <LogOut size={12} />
                         </button>
                       </div>
                       {!isCollapsed && (
-                        <div className="space-y-0.5">
+                        <div {...stylex.props(styles.workspaceItems)}>
                           {group.folders.map((folder) => (
                             <WorkspaceFolderBranch
                               runtime={sidebarTreeRuntime}
@@ -466,7 +466,7 @@ export function PageTree() {
                   <button
                     type="button"
                     onClick={() => navigate(`${getWorkspacePath()}?filter=shared-with-me`)}
-                    className="w-full px-4 py-1.5 text-left text-xs text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 cursor-pointer"
+                    {...stylex.props(styles.viewMoreButton)}
                   >
                     View more
                   </button>
@@ -481,17 +481,17 @@ export function PageTree() {
             type="button"
             onClick={() => sidebar.toggleSection('owned')}
             aria-expanded={!sidebar.collapsedSections.has('owned')}
-            className="flex items-center px-1 mb-2 text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider cursor-pointer hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors w-full text-left"
+            {...stylex.props(styles.sectionToggle)}
           >
             {sidebar.collapsedSections.has('owned') ? (
-              <ChevronRight size={14} className="mr-1 shrink-0" />
+              <ChevronRight size={14} {...stylex.props(styles.sectionChevron)} />
             ) : (
-              <ChevronDown size={14} className="mr-1 shrink-0" />
+              <ChevronDown size={14} {...stylex.props(styles.sectionChevron)} />
             )}
             <span>Owned By Me</span>
           </button>
           {!sidebar.collapsedSections.has('owned') && (
-            <div className="space-y-0.5">
+            <div {...stylex.props(styles.workspaceItems)}>
               {rootFolders.map((folder) => (
                 <OwnedFolderBranch
                   runtime={sidebarTreeRuntime}
@@ -519,9 +519,7 @@ export function PageTree() {
                 />
               ))}
               {rootFolders.length === 0 && rootPages.length === 0 && (
-                <div className="pl-10 pr-3 py-2 text-sm text-zinc-500 dark:text-zinc-400">
-                  No notes yet
-                </div>
+                <div {...stylex.props(styles.noNotes)}>No notes yet</div>
               )}
             </div>
           )}

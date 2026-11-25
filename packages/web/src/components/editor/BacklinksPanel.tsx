@@ -1,7 +1,9 @@
+import * as stylex from '@stylexjs/stylex';
 import { ArrowLeft, ArrowRight, Link2, LockKeyhole } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useBacklinks, useOutgoingLinks } from '../../hooks/use-backlinks';
 import { buildPagePath } from '../../utils/url';
+import { styles } from './BacklinksPanel.stylex';
 
 interface BacklinksPanelProps {
   pageId: string;
@@ -19,37 +21,33 @@ export function BacklinksPanel({ pageId }: BacklinksPanelProps) {
   }
 
   return (
-    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/30 p-4 mb-6">
-      <div className="flex items-center gap-2 mb-3">
-        <Link2 size={14} className="text-zinc-500 dark:text-zinc-400" />
-        <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
-          Links
-        </span>
+    <div {...stylex.props(styles.panel)}>
+      <div {...stylex.props(styles.heading)}>
+        <Link2 size={14} {...stylex.props(styles.headingIcon)} />
+        <span {...stylex.props(styles.headingLabel)}>Links</span>
       </div>
 
       {hasBacklinks && (
-        <div className="mb-4">
-          <div className="flex items-center gap-1.5 mb-2">
-            <ArrowLeft size={12} className="text-zinc-400 dark:text-zinc-500" />
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">
+        <div {...stylex.props(styles.section)}>
+          <div {...stylex.props(styles.sectionHeading)}>
+            <ArrowLeft size={12} {...stylex.props(styles.sectionIcon)} />
+            <span {...stylex.props(styles.sectionLabel)}>
               {backlinks.length} linked mention{backlinks.length > 1 ? 's' : ''}
             </span>
           </div>
-          <div className="space-y-1">
+          <div {...stylex.props(styles.linkList)}>
             {backlinks.slice(0, 5).map((link) => (
               <Link
                 key={link.id}
                 to={buildPagePath(link.sourceTitle, link.sourcePageId)}
-                className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors"
+                {...stylex.props(styles.link)}
               >
-                <span className="text-base">{link.sourceIcon || '📄'}</span>
-                <span className="truncate">{link.sourceTitle}</span>
+                <span {...stylex.props(styles.pageIcon)}>{link.sourceIcon || '📄'}</span>
+                <span {...stylex.props(styles.pageTitle)}>{link.sourceTitle}</span>
               </Link>
             ))}
             {backlinks.length > 5 && (
-              <p className="text-xs text-zinc-400 dark:text-zinc-500 px-2">
-                +{backlinks.length - 5} more
-              </p>
+              <p {...stylex.props(styles.moreLinks)}>+{backlinks.length - 5} more</p>
             )}
           </div>
         </div>
@@ -57,22 +55,24 @@ export function BacklinksPanel({ pageId }: BacklinksPanelProps) {
 
       {hasOutgoing && (
         <div>
-          <div className="flex items-center gap-1.5 mb-2">
-            <ArrowRight size={12} className="text-zinc-400 dark:text-zinc-500" />
-            <span className="text-xs text-zinc-500 dark:text-zinc-400">
+          <div {...stylex.props(styles.sectionHeading)}>
+            <ArrowRight size={12} {...stylex.props(styles.sectionIcon)} />
+            <span {...stylex.props(styles.sectionLabel)}>
               {outgoing.length} outgoing link{outgoing.length > 1 ? 's' : ''}
             </span>
           </div>
-          <div className="space-y-1">
+          <div {...stylex.props(styles.linkList)}>
             {outgoing.slice(0, 5).map((link) =>
               link.targetPageId ? (
                 <Link
                   key={link.id}
                   to={buildPagePath(link.targetPageTitle || link.targetTitle, link.targetPageId)}
-                  className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 transition-colors"
+                  {...stylex.props(styles.link)}
                 >
-                  <span className="text-base">{link.targetPageIcon || '📄'}</span>
-                  <span className="truncate">{link.targetPageTitle || link.targetTitle}</span>
+                  <span {...stylex.props(styles.pageIcon)}>{link.targetPageIcon || '📄'}</span>
+                  <span {...stylex.props(styles.pageTitle)}>
+                    {link.targetPageTitle || link.targetTitle}
+                  </span>
                 </Link>
               ) : (
                 <div
@@ -82,21 +82,21 @@ export function BacklinksPanel({ pageId }: BacklinksPanelProps) {
                       ? "You don't have access to this page."
                       : 'This link is unavailable.'
                   }
-                  className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-zinc-400 dark:text-zinc-500"
+                  {...stylex.props(styles.unavailableLink)}
                 >
                   {link.targetState === 'restricted' ? (
                     <LockKeyhole size={14} aria-hidden="true" />
                   ) : (
-                    <span className="text-base">{link.targetPageIcon || '📄'}</span>
+                    <span {...stylex.props(styles.pageIcon)}>{link.targetPageIcon || '📄'}</span>
                   )}
-                  <span className="truncate">{link.targetPageTitle || link.targetTitle}</span>
+                  <span {...stylex.props(styles.pageTitle)}>
+                    {link.targetPageTitle || link.targetTitle}
+                  </span>
                 </div>
               ),
             )}
             {outgoing.length > 5 && (
-              <p className="text-xs text-zinc-400 dark:text-zinc-500 px-2">
-                +{outgoing.length - 5} more
-              </p>
+              <p {...stylex.props(styles.moreLinks)}>+{outgoing.length - 5} more</p>
             )}
           </div>
         </div>

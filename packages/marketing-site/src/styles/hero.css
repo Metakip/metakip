@@ -135,7 +135,7 @@
   min-width: 0;
   flex: 1;
   overflow-x: auto;
-  font-family: "Geist Mono", monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 11px;
 }
 .home-page .copy-button {

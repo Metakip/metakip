@@ -19,10 +19,6 @@ export const initializeThemeController = (): void => {
     document
       .querySelector('meta[name="theme-color"]')
       ?.setAttribute('content', isDark ? '#090909' : '#ffffff');
-    document.querySelectorAll<HTMLLinkElement>('[data-theme-icon]').forEach((icon) => {
-      const href = icon.getAttribute(`data-theme-icon-${isDark ? 'dark' : 'light'}`);
-      if (href) icon.href = href;
-    });
     document.querySelectorAll<HTMLButtonElement>('[data-theme-option]').forEach((option) => {
       option.setAttribute('aria-pressed', String(option.dataset.themeOption === theme));
     });

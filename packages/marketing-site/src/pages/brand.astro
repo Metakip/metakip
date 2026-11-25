@@ -7,34 +7,15 @@ import '../styles/brandPage.css';
 // biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
 const PAGE_TITLE = 'Brand Assets | Metakip';
 // biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
-const PAGE_DESCRIPTION = 'The Metakip mark in light and dark PNGs, with direct download links.';
+const PAGE_DESCRIPTION = 'Download the Metakip logo as a PNG or SVG.';
 // biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
 const PAGE_URL = `${SITE_ORIGIN}/brand`;
-// biome-ignore lint/correctness/noUnusedVariables: Used by the Astro template below.
-const logoAssets = [
-  {
-    title: 'Light Mode',
-    filename: 'metakip.png',
-    svgFilename: 'metakip.svg',
-    href: '/metakip.png',
-    svgHref: '/metakip.svg',
-    previewClass: 'light',
-  },
-  {
-    title: 'Dark Mode',
-    filename: 'metakip-dark.png',
-    svgFilename: 'metakip-dark.svg',
-    href: '/metakip-dark.png',
-    svgHref: '/metakip-dark.svg',
-    previewClass: 'dark',
-  },
-];
 ---
 
 <SiteLayout title={PAGE_TITLE} description={PAGE_DESCRIPTION} url={PAGE_URL}>
   <main class="brand-page marketing-page">
     <header class="brand-intro">
-      <h1>Brand assets</h1>
+      <h1>Brand Assets</h1>
       <a class="brand-download-all" href="/metakip-brand-assets.zip" download>
         Download all assets
         <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -45,53 +26,33 @@ const logoAssets = [
       </a>
     </header>
 
-    <section class="brand-assets" aria-label="Metakip logo files">
-      {logoAssets.map((asset) => (
-        <article class="brand-asset">
-          <div class:list={['brand-preview', asset.previewClass]}>
-            <img
-              src={asset.href}
-              alt={`Metakip mark for ${asset.title.toLowerCase()}`}
-              width="512"
-              height="512"
-            />
-          </div>
-          <div class="brand-asset-info">
-            <div class="brand-details">
-              <h2>{asset.title}</h2>
-              <a class="brand-direct-link" href={asset.href} target="_blank" rel="noreferrer" aria-label={`Open ${asset.filename}`}>
-                metakip.com{asset.href}<span aria-hidden="true">↗</span>
-              </a>
-            </div>
-            <div class="brand-downloads" aria-label={`${asset.title} downloads`}>
-              <a
-                class="brand-download"
-                href={asset.href}
-                download={asset.filename}
-                aria-label={`Download ${asset.title} PNG`}
-              >
-                PNG
-              </a>
-              <a
-                class="brand-download brand-download-secondary"
-                href={asset.svgHref}
-                download={asset.svgFilename}
-                aria-label={`Download ${asset.title} SVG`}
-              >
-                SVG
-              </a>
-            </div>
-          </div>
-        </article>
-      ))}
+    <section aria-labelledby="brand-logo-title">
+      <div class="brand-preview">
+        <img src="/metakip.png" alt="Metakip mark" width="512" height="512" />
+      </div>
+      <div class="brand-asset-info">
+        <div class="brand-details">
+          <h2 id="brand-logo-title">Metakip Logo</h2>
+          <a class="brand-direct-link" href="/metakip.png" target="_blank" rel="noreferrer" aria-label="Open metakip.png">
+            metakip.com/metakip.png<span aria-hidden="true">↗</span>
+          </a>
+        </div>
+        <div class="brand-downloads">
+          <a class="brand-download" href="/metakip.png" download aria-label="Download Metakip logo as PNG">
+            PNG
+          </a>
+          <a class="brand-download brand-download-secondary" href="/metakip.svg" download aria-label="Download Metakip logo as SVG">
+            SVG
+          </a>
+        </div>
+      </div>
     </section>
-
   </main>
 </SiteLayout>
 
 <style>
   .brand-page {
-    width: min(72rem, calc(100% - 2.5rem));
+    width: min(44rem, calc(100% - 2.5rem));
     margin: 0 auto;
     padding: 5rem 0 6rem;
   }
@@ -106,33 +67,14 @@ const logoAssets = [
     line-height: 1.05;
   }
 
-  .brand-assets {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: clamp(1rem, 2vw, 1.5rem);
-  }
-
-  .brand-asset {
-    min-width: 0;
-  }
-
   .brand-preview {
     display: grid;
     aspect-ratio: 1.78;
     place-items: center;
     overflow: hidden;
-    border: 1px solid;
+    border: 1px solid #d4d4d4;
     border-radius: 0.2rem;
-  }
-
-  .brand-preview.light {
-    border-color: #d4d4d4;
     background-color: #fff;
-  }
-
-  .brand-preview.dark {
-    border-color: #292929;
-    background-color: #111111;
   }
 
   .brand-preview img {
@@ -174,7 +116,7 @@ const logoAssets = [
     max-width: 100%;
     overflow-wrap: anywhere;
     color: var(--muted);
-    font-family: 'Geist Mono', ui-monospace, monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 0.625rem;
     text-decoration: none;
     text-underline-offset: 0.25em;
@@ -211,12 +153,6 @@ const logoAssets = [
   .brand-download-secondary {
     background: transparent;
     color: var(--text);
-  }
-
-  @media (max-width: 680px) {
-    .brand-assets { grid-template-columns: 1fr; }
-    .brand-preview { aspect-ratio: 1.78; }
-    .brand-asset-info { padding-inline: 0; }
   }
 
   @media (max-width: 480px) {

@@ -1,7 +1,9 @@
+import * as stylex from '@stylexjs/stylex';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { EmojiPicker } from './EmojiPicker';
+import { styles } from './EmojiPicker.stylex';
 
 const emojiData = [
   {
@@ -146,8 +148,10 @@ describe('EmojiPicker', () => {
     await user.click(screen.getByRole('button', { name: 'Add page icon' }));
     await screen.findByRole('gridcell', { name: 'Grinning face' });
 
-    expect(screen.getByRole('grid').parentElement).toHaveClass('overflow-x-hidden');
-    expect(screen.getByRole('row')).toHaveClass('flex');
+    expect(screen.getByRole('grid').parentElement).toHaveClass(
+      stylex.props(styles.viewport).className ?? '',
+    );
+    expect(screen.getByRole('row')).toHaveClass(stylex.props(styles.row).className ?? '');
     await waitFor(() => {
       expect(screen.getByRole('grid')).toHaveStyle('--frimousse-list-columns: 2');
     });

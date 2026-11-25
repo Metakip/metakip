@@ -37,7 +37,7 @@ describe('CollabStatus', () => {
 
     expect(screen.getByText('User 1')).toBeInTheDocument();
     expect(screen.getByText('Connecting')).toBeInTheDocument();
-    const dot = document.querySelector('.bg-amber-500');
+    const dot = document.querySelector('[data-status="connecting"]');
     expect(dot).toBeInTheDocument();
   });
 
@@ -47,7 +47,7 @@ describe('CollabStatus', () => {
 
     expect(screen.getByText('User 1')).toBeInTheDocument();
     expect(screen.getByText('Live')).toBeInTheDocument();
-    const dot = document.querySelector('.bg-emerald-500');
+    const dot = document.querySelector('[data-status="connected"]');
     expect(dot).toBeInTheDocument();
   });
 
@@ -80,7 +80,7 @@ describe('CollabStatus', () => {
 
     expect(screen.getByText('User 1')).toBeInTheDocument();
     expect(screen.getByText('Offline')).toBeInTheDocument();
-    const dot = document.querySelector('.bg-rose-500');
+    const dot = document.querySelector('[data-status="disconnected"]');
     expect(dot).toBeInTheDocument();
   });
 

@@ -1,8 +1,9 @@
+import * as stylex from '@stylexjs/stylex';
 import { IconCheck, IconInfoCircle, IconX } from '@tabler/icons-react';
-import clsx from 'clsx';
 import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { styles } from './toast.stylex';
 
 type ToastDismissReason = 'action' | 'dismiss' | 'clear' | 'timeout';
 
@@ -84,23 +85,16 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <>
       {children}
       {createPortal(
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[70] flex flex-col gap-2 pointer-events-none">
+        <div {...stylex.props(styles.container)}>
           {toasts.map((toast) => (
-            <div
-              key={toast.id}
-              className={clsx(
-                'pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg border animate-slide-down',
-                'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-50',
-              )}
-              style={{ minWidth: '240px', maxWidth: '420px' }}
-            >
-              <span className="shrink-0 text-zinc-500 dark:text-zinc-400">{toast.icon}</span>
-              <span className="text-sm font-medium">{toast.message}</span>
+            <div key={toast.id} {...stylex.props(styles.toast)}>
+              <span {...stylex.props(styles.icon)}>{toast.icon}</span>
+              <span {...stylex.props(styles.message)}>{toast.message}</span>
               {toast.action && (
                 <>
                   <button
                     type="button"
-                    className="cursor-pointer shrink-0 font-medium text-sm underline"
+                    {...stylex.props(styles.actionButton)}
                     onClick={() => {
                       try {
                         toast.action?.onClick();
@@ -114,7 +108,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                   <button
                     type="button"
                     aria-label="Dismiss upload error"
-                    className="cursor-pointer shrink-0"
+                    {...stylex.props(styles.dismissButton)}
                     onClick={() => toast.dismiss('dismiss')}
                   >
                     <IconX size={14} />

@@ -1,6 +1,8 @@
+import * as stylex from '@stylexjs/stylex';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { render } from '../../test-utils/render';
+import { styles } from './CommentComposer.stylex';
 import { InlineCommentComposer } from './InlineCommentComposer';
 
 describe('InlineCommentComposer', () => {
@@ -14,8 +16,10 @@ describe('InlineCommentComposer', () => {
       />,
     );
 
+    const textareaClassNames =
+      stylex.props(styles.textarea, styles.textareaLarge).className?.split(' ') ?? [];
     expect(screen.getByRole('textbox', { name: 'New comment on selection' })).toHaveClass(
-      'focus-visible:ring-0',
+      ...textareaClassNames,
     );
     expect(screen.queryByText(/0\/10,000/)).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Cancel comment')).not.toBeInTheDocument();

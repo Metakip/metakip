@@ -1,0 +1,39 @@
+/* Generated from tokens/colors.json by scripts/generate-colors.mjs. */
+:root {
+  --metakip-product-light-surface: var(--metakip-neutral-zinc-50);
+  --metakip-product-light-surface-subtle: var(--metakip-neutral-zinc-100);
+  --metakip-product-light-surface-raised: var(--metakip-neutral-zinc-200);
+  --metakip-product-light-border: var(--metakip-neutral-zinc-300);
+  --metakip-product-light-text: var(--metakip-neutral-zinc-900);
+  --metakip-product-light-text-muted: var(--metakip-neutral-zinc-600);
+  --metakip-product-dark-surface: var(--metakip-neutral-zinc-950);
+  --metakip-product-dark-surface-subtle: var(--metakip-neutral-zinc-900);
+  --metakip-product-dark-surface-raised: var(--metakip-neutral-zinc-800);
+  --metakip-product-dark-border: var(--metakip-neutral-zinc-700);
+  --metakip-product-dark-text: var(--metakip-neutral-zinc-50);
+  --metakip-product-dark-text-muted: var(--metakip-neutral-zinc-400);
+  --metakip-neutral-white: #ffffff;
+  --metakip-neutral-zinc-50: #fafafa;
+  --metakip-neutral-zinc-100: #f4f4f5;
+  --metakip-neutral-zinc-200: #e4e4e7;
+  --metakip-neutral-zinc-300: #d4d4d8;
+  --metakip-neutral-zinc-400: #a1a1aa;
+  --metakip-neutral-zinc-500: #71717a;
+  --metakip-neutral-zinc-600: #52525b;
+  --metakip-neutral-zinc-700: #3f3f46;
+  --metakip-neutral-zinc-800: #27272a;
+  --metakip-neutral-zinc-900: #18181b;
+  --metakip-neutral-zinc-950: #09090b;
+  --metakip-links-light-default: #2563eb;
+  --metakip-links-light-hover: #1d4ed8;
+  --metakip-links-dark-default: #60a5fa;
+  --metakip-links-dark-hover: #93c5fd;
+  --metakip-marketing-light-background: #ffffff;
+  --metakip-marketing-light-text: #000000;
+  --metakip-marketing-light-text-muted: #666666;
+  --metakip-marketing-light-border: #e5e5e5;
+  --metakip-marketing-dark-background: #090909;
+  --metakip-marketing-dark-text: #f5f5f5;
+  --metakip-marketing-dark-text-muted: #aaaaaa;
+  --metakip-marketing-dark-border: #292929;
+}

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { createNewPage, focusEditor } from '../fixtures';
+import { createNewPage, editorFormattingToolbar, focusEditor } from '../fixtures';
 
 test.describe('Headings: markdown shortcuts', () => {
   test('preview heading text aligns with the paragraph text', async ({ page }) => {
@@ -107,7 +107,6 @@ test.describe('Headings: toolbar buttons', () => {
     await focusEditor(page);
     await page.keyboard.type('Hello');
     await page.keyboard.press('Control+a');
-    const toolbar = page.locator('.floating-toolbar').first();
-    await expect(toolbar).toBeVisible({ timeout: 5000 });
+    await expect(editorFormattingToolbar(page)).toBeVisible({ timeout: 5000 });
   });
 });

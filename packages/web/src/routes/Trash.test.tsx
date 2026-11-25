@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
@@ -79,11 +79,8 @@ describe('Trash', () => {
     renderTrash();
 
     expect(screen.getByText('Deleted page')).toBeInTheDocument();
-    const folderTitle = screen.getByText('Deleted folder');
-    const folderRow = folderTitle.closest('div.flex.items-center.justify-between');
-    expect(folderRow).not.toBeNull();
-
-    await user.click(within(folderRow as HTMLElement).getByRole('button', { name: 'Restore' }));
+    expect(screen.getByText('Deleted folder')).toBeInTheDocument();
+    await user.click(screen.getByTitle('Restore folder'));
 
     expect(mocks.restoreFolder).toHaveBeenCalledWith('folder-1');
     expect(mocks.restorePage).not.toHaveBeenCalled();

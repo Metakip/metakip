@@ -1,3 +1,4 @@
+import * as stylex from '@stylexjs/stylex';
 import {
   ChevronDown,
   ChevronRight,
@@ -12,12 +13,14 @@ import { Link } from 'react-router-dom';
 import type { ExplorerViewMode } from '../../hooks/useExplorerViewMode';
 import { buildFolderPath } from '../../utils/url';
 import { AppShellToolbar } from '../AppShellToolbar';
-import { KebabMenu, type KebabMenuItem } from '../ui/KebabMenu';
+import { KebabMenu, type KebabMenuItem, type KebabMenuRadioOption } from '../ui/KebabMenu';
+import { styles } from './ExplorerToolbar.stylex';
 
 type BreadcrumbFolder = { id: string; name: string };
 type ExplorerFilter = {
   label: string;
-  options: readonly { label: string; selected: boolean; onSelect: () => void }[];
+  value: string;
+  options: readonly KebabMenuRadioOption[];
 };
 
 type ExplorerToolbarProps = {
@@ -48,25 +51,30 @@ export function ExplorerToolbar({
 }: ExplorerToolbarProps) {
   const home = (
     <>
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center">
+      <span {...stylex.props(styles.homeIcon)}>
         <Home size={16} />
       </span>
-      <span className="font-medium">Home</span>
+      <span {...stylex.props(styles.homeLabel)}>Home</span>
     </>
   );
 
-  const filterItems: KebabMenuItem[] =
-    filter?.options.map((option) => ({
-      label: option.label,
-      onClick: option.onSelect,
-      className: option.selected ? 'bg-zinc-100 dark:bg-zinc-800' : '',
-    })) ?? [];
-  const viewItems: KebabMenuItem[] = VIEW_OPTIONS.map(({ mode, label, Icon }) => ({
-    label,
-    icon: <Icon size={16} />,
-    onClick: () => onViewModeChange(mode),
-    className: viewMode === mode ? 'bg-zinc-100 dark:bg-zinc-800' : '',
-  }));
+  const filterMenu = filter
+    ? {
+        triggerLabel: filter.label,
+        group: { ...filter, type: 'radio-group' as const, label: 'Show filter' },
+      }
+    : undefined;
+  const viewMenu = {
+    type: 'radio-group' as const,
+    label: 'View mode',
+    value: viewMode,
+    options: VIEW_OPTIONS.map(({ mode, label, Icon }) => ({
+      value: mode,
+      label,
+      icon: <Icon size={16} />,
+      onSelect: () => onViewModeChange(mode),
+    })),
+  };
   const newFolderItem: KebabMenuItem = {
     label: 'New Folder',
     icon: <FolderPlus size={16} />,
@@ -77,42 +85,44 @@ export function ExplorerToolbar({
     newFolderItem,
   ];
   const compactItems: KebabMenuItem[] = [
-    ...filterItems.map((item) => ({ ...item, label: `Show: ${item.label}` })),
-    ...viewItems.map((item, index) => ({
-      ...item,
-      ...(index === 0 && filter ? { dividerBefore: true } : {}),
-    })),
+    ...(filterMenu
+      ? [
+          {
+            ...filterMenu.group,
+            options: filterMenu.group.options.map((option) => ({
+              ...option,
+              label: `Show: ${option.label}`,
+            })),
+          },
+        ]
+      : []),
+    { ...viewMenu, dividerBefore: Boolean(filterMenu) },
     ...(canCreate ? [{ ...newFolderItem, dividerBefore: true }] : []),
   ];
 
   return (
-    <AppShellToolbar className="bg-zinc-50 py-2 dark:bg-zinc-950 md:py-3">
-      <div className="flex min-h-9 items-center justify-between gap-4">
-        <div className="flex min-w-0 items-center gap-1 overflow-x-auto whitespace-nowrap text-sm text-zinc-500 [scrollbar-width:none] dark:text-zinc-400 [&::-webkit-scrollbar]:hidden">
+    <AppShellToolbar>
+      <div {...stylex.props(styles.toolbarRow)}>
+        <div {...stylex.props(styles.breadcrumb)} data-explorer-breadcrumb="">
           {homeHref ? (
-            <Link
-              to={homeHref}
-              className="flex h-8 items-center gap-1 transition-colors hover:text-zinc-900 dark:hover:text-zinc-100"
-            >
+            <Link to={homeHref} {...stylex.props(styles.homeLink)}>
               {home}
             </Link>
           ) : (
-            <span className="flex h-8 items-center gap-1">{home}</span>
+            <span {...stylex.props(styles.homeStatic)}>{home}</span>
           )}
-          {filter && (
+          {filterMenu && (
             <>
-              <ChevronRight size={16} className="mx-1 shrink-0 min-[32rem]:hidden" />
-              <span className="truncate font-medium text-zinc-900 dark:text-zinc-100 min-[32rem]:hidden">
-                {filter.label}
-              </span>
+              <ChevronRight size={16} {...stylex.props(styles.compactSeparator)} />
+              <span {...stylex.props(styles.compactFilter)}>{filterMenu.triggerLabel}</span>
             </>
           )}
           {breadcrumbs.map((folder) => (
             <Fragment key={folder.id}>
-              <ChevronRight size={16} className="mx-1 shrink-0" />
+              <ChevronRight size={16} {...stylex.props(styles.separator)} />
               <Link
                 to={buildFolderPath(folder.name, folder.id)}
-                className="flex h-8 items-center truncate transition-colors hover:text-zinc-900 dark:hover:text-zinc-100"
+                {...stylex.props(styles.folderLink)}
               >
                 {folder.name}
               </Link>
@@ -120,30 +130,35 @@ export function ExplorerToolbar({
           ))}
         </div>
 
-        <div className="flex shrink-0 items-center gap-2">
-          {filter && (
-            <div className="hidden min-[32rem]:block">
+        <div {...stylex.props(styles.actions)}>
+          {filterMenu && (
+            <div {...stylex.props(styles.wideOnly)}>
               <KebabMenu
-                ariaLabel={`Show: ${filter.label}`}
-                items={filterItems}
+                ariaLabel={`Show: ${filterMenu.triggerLabel}`}
+                items={[filterMenu.group]}
+                popupWidth="11rem"
                 triggerContent={
                   <>
-                    <span>{filter.label}</span>
+                    <span>{filterMenu.triggerLabel}</span>
                     <ChevronDown size={16} />
                   </>
                 }
-                triggerClassName="flex h-8 cursor-pointer items-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 text-sm text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-                menuClassName="flex w-44 flex-col rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl dark:border-zinc-700 dark:bg-zinc-900"
+                triggerStyle={styles.filterTrigger}
+                popupStyle={styles.actionsPopup}
               />
             </div>
           )}
-          <div className="hidden items-center gap-1 rounded-lg bg-zinc-100 dark:bg-zinc-800 min-[32rem]:flex">
+          <div {...stylex.props(styles.viewMode)}>
             {VIEW_OPTIONS.map(({ mode, label, Icon }) => (
               <button
                 key={mode}
                 type="button"
                 onClick={() => onViewModeChange(mode)}
-                className={`p-2 rounded-md transition-colors cursor-pointer ${viewMode === mode ? 'bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-zinc-100' : 'text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100'}`}
+                {...stylex.props(
+                  styles.viewButton,
+                  viewMode === mode ? styles.viewButtonActive : styles.viewButtonIdle,
+                )}
+                aria-pressed={viewMode === mode}
                 title={label}
               >
                 <Icon size={16} />
@@ -151,32 +166,33 @@ export function ExplorerToolbar({
             ))}
           </div>
           {canCreate && (
-            <div className="flex items-stretch">
+            <div {...stylex.props(styles.createActions)}>
               <button
                 type="button"
                 onClick={() => void onCreatePage()}
                 aria-label="New page"
-                className="flex h-8 cursor-pointer items-center gap-1.5 rounded-lg border border-zinc-200 bg-white pl-3 pr-2 text-sm text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 min-[32rem]:rounded-r-none min-[32rem]:border-r-0"
+                {...stylex.props(styles.newPageButton)}
               >
                 <FilePlus2 size={16} />
-                <span className="hidden sm:inline">New Page</span>
+                <span {...stylex.props(styles.newPageLabel)}>New Page</span>
               </button>
-              <div className="hidden min-[32rem]:block">
+              <div {...stylex.props(styles.wideOnly)}>
                 <KebabMenu
                   ariaLabel="Open new item menu"
                   items={newItems}
+                  popupWidth="11rem"
                   triggerContent={<ChevronDown size={16} />}
-                  triggerClassName="flex h-8 cursor-pointer items-center rounded-r-lg border border-zinc-200 bg-white px-1.5 text-sm text-zinc-700 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
-                  menuClassName="flex w-44 flex-col rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl dark:border-zinc-700 dark:bg-zinc-900"
+                  triggerStyle={styles.newMenuTrigger}
+                  popupStyle={styles.actionsPopup}
                 />
               </div>
             </div>
           )}
-          <div className="min-[32rem]:hidden">
+          <div {...stylex.props(styles.compactOnly)}>
             <KebabMenu
               ariaLabel="More explorer actions"
               items={compactItems}
-              triggerClassName="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg text-zinc-500 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+              triggerStyle={styles.compactTrigger}
             />
           </div>
         </div>

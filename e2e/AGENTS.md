@@ -125,7 +125,7 @@ test('my test', async ({ page }) => {
 - Editor content: `.codemirror-editor .cm-content`
 - Slash menu: `[data-testid="slash-menu"]`
 - Wiki link suggestions: `[data-testid="wikilink-suggestions"]`
-- Floating toolbar buttons: `.floating-toolbar button[title="..."]`
+- Floating toolbar buttons: `editorFormattingToolbar(page).getByRole('button', { name: '...' })`
 - Page title input: `input[data-testid="page-title"]`
 - Headings: `.cm-md-heading-1` through `.cm-md-heading-6`
 - Bold: `.cm-md-strong`

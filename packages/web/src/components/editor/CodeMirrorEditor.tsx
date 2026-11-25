@@ -35,7 +35,9 @@ import { TableOfContents } from './TableOfContents';
 import { useEditorActiveStates } from './useEditorActiveStates';
 import './editor.css';
 import type { HocuspocusProvider, WebSocketStatus } from '@hocuspocus/provider';
+import * as stylex from '@stylexjs/stylex';
 import { uploadPageImage } from '../../utils/imageUpload';
+import { styles } from './CodeMirrorEditor.stylex';
 import { createEditorCommandRegistry } from './editorCommandRegistry';
 import { createEditorFormattingCommands } from './editorFormattingCommands';
 import { createEditorTableCommands } from './editorTableCommands';
@@ -58,6 +60,7 @@ interface CodeMirrorEditorProps {
   commentAnchors?: readonly CommentAnchor[];
   commentThreads?: readonly PageCommentThread[];
   hideInlineCommentCards?: boolean;
+  hideTableOfContents?: boolean;
   canComment?: boolean;
   canModerateComments?: boolean;
   activeCommentAnchor?: CommentAnchor | null;
@@ -84,6 +87,7 @@ export function CodeMirrorEditor({
   commentAnchors = EMPTY_COMMENT_ANCHORS,
   commentThreads = EMPTY_COMMENT_THREADS,
   hideInlineCommentCards = false,
+  hideTableOfContents = false,
   canComment = false,
   canModerateComments = false,
   activeCommentAnchor = null,
@@ -101,6 +105,9 @@ export function CodeMirrorEditor({
   const [headings, setHeadings] = useState<readonly EditorHeading[]>([]);
   const [activeHeadingFrom, setActiveHeadingFrom] = useState<number | null>(null);
   const [isTableOfContentsHovered, setIsTableOfContentsHovered] = useState(false);
+  useEffect(() => {
+    if (hideTableOfContents) setIsTableOfContentsHovered(false);
+  }, [hideTableOfContents]);
   const initialContentReadyRef = useRef(false);
   const { isAnonymous } = useShareContext();
   const { data: session } = useAuth();
@@ -431,27 +438,26 @@ export function CodeMirrorEditor({
   return (
     <div
       ref={wrapperRef}
-      className={`editor-wrapper relative min-h-[500px] ${
+      className={`editor-wrapper ${stylex.props(styles.wrapper).className ?? ''} ${
         isReadOnly ? '' : 'editor-scroll-past-end'
-      } ${isEditorReady ? '' : 'flex items-center justify-center'} ${
+      } ${isEditorReady ? '' : (stylex.props(styles.loadingAlignment).className ?? '')} ${
         hasInlineCommentRail ? 'editor-wrapper--with-inline-comment-rail' : ''
       }`}
+      data-code-mirror-wrapper=""
     >
       {editorLoadState.status === 'error' ? (
-        <div className="flex max-w-md flex-col items-center gap-3 p-8 text-center" role="alert">
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">
-            Couldn&apos;t load the page content.
-          </p>
+        <div {...stylex.props(styles.errorState)} role="alert">
+          <p {...stylex.props(styles.errorDescription)}>Couldn&apos;t load the page content.</p>
           <button
             type="button"
             onClick={handleEditorLoadRetry}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-900"
+            {...stylex.props(styles.retryButton)}
           >
             <RefreshCw size={14} /> Retry
           </button>
         </div>
       ) : editorLoadState.status === 'loading' ? (
-        <div className="absolute inset-0 z-10 flex items-center justify-center">
+        <div {...stylex.props(styles.loadingOverlay)}>
           <LoadingIndicator label="Loading page" size="md" />
         </div>
       ) : null}
@@ -487,35 +493,16 @@ export function CodeMirrorEditor({
           onAddComment={() => editorComments.setIsCommentComposerOpen(true)}
           canComment={canComment && commentSelection !== null}
           commentOnly={isReadOnly}
-          onBold={editorCommands.command('bold').execute}
-          onItalic={editorCommands.command('italic').execute}
-          onStrike={editorCommands.command('strikethrough').execute}
-          onCode={editorCommands.command('code').execute}
-          onLink={editorCommands.command('link').execute}
-          onBlockquote={editorCommands.command('blockquote').execute}
-          onH1={editorCommands.command('h1').execute}
-          onH2={editorCommands.command('h2').execute}
-          onH3={editorCommands.command('h3').execute}
-          onH4={editorCommands.command('h4').execute}
-          onH5={editorCommands.command('h5').execute}
-          onH6={editorCommands.command('h6').execute}
-          onBulletList={editorCommands.command('bullet-list').execute}
-          onOrderedList={editorCommands.command('ordered-list').execute}
-          onTaskList={editorCommands.command('task-list').execute}
-          onInsertTable={editorCommands.command('table').execute}
-          onAddRowBefore={editorCommands.command('add-row-before').execute}
-          onAddRowAfter={editorCommands.command('add-row-after').execute}
-          onAddColBefore={editorCommands.command('add-column-before').execute}
-          onAddColAfter={editorCommands.command('add-column-after').execute}
-          onDeleteRow={editorCommands.command('delete-row').execute}
-          onDeleteCol={editorCommands.command('delete-column').execute}
-          onDeleteTable={editorCommands.command('delete-table').execute}
-          {...activeStates}
+          commands={editorCommands}
+          activeStates={activeStates}
         />
       )}
-      <div ref={setContainer} className={`codemirror-editor ${isEditorReady ? '' : 'invisible'}`} />
+      <div
+        ref={setContainer}
+        className={`codemirror-editor ${isEditorReady ? '' : (stylex.props(styles.editorNotReady).className ?? '')}`}
+      />
       {hasInlineCommentRail && (
-        <div className="inline-comment-card-rail">
+        <div className="inline-comment-card-rail" data-inline-comment-rail="">
           {!isTableOfContentsHovered &&
             inlineCommentPositions.map(({ thread, top }) => {
               const anchor = thread.anchor;
@@ -554,14 +541,16 @@ export function CodeMirrorEditor({
             onCancel={editorComments.closeCommentComposer}
           />
         )}
-      <TableOfContents
-        headings={headings}
-        activeHeadingFrom={activeHeadingFrom}
-        onHoverChange={setIsTableOfContentsHovered}
-        onHeadingSelect={(heading) => {
-          if (editor) scrollToEditorHeading(editor, heading);
-        }}
-      />
+      {!hideTableOfContents && (
+        <TableOfContents
+          headings={headings}
+          activeHeadingFrom={activeHeadingFrom}
+          onHoverChange={setIsTableOfContentsHovered}
+          onHeadingSelect={(heading) => {
+            if (editor) scrollToEditorHeading(editor, heading);
+          }}
+        />
+      )}
     </div>
   );
 }

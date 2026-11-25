@@ -33,7 +33,10 @@ const VIEW_CAPABILITIES: CapabilitySet = {
 
 vi.mock('../components/AppShellToolbar', () => ({
   AppShellToolbar: ({ children }: { children: ReactNode }) => <>{children}</>,
-  useAppShellOutletContext: () => ({ contentContainer: mocks.contentContainer }),
+  useAppShellOutletContext: () => ({
+    contentContainer: mocks.contentContainer,
+    isDesktopLayout: true,
+  }),
 }));
 vi.mock('../components/AppShell', () => ({
   AppShell: ({ contentState }: { contentState: AppShellContentState }) =>
@@ -342,7 +345,10 @@ describe('Page permission presentation', () => {
 
     await screen.findByTestId('page-body');
 
-    expect(document.querySelector('.page-layout')).not.toHaveClass('page-layout--wide');
+    expect(document.querySelector('[data-page-layout]')).toHaveAttribute(
+      'data-page-layout',
+      'default',
+    );
     expect(screen.queryByRole('button', { name: 'Full width' })).not.toBeInTheDocument();
   });
 
@@ -356,13 +362,19 @@ describe('Page permission presentation', () => {
     expect(screen.queryByRole('button', { name: 'Full width' })).not.toBeInTheDocument();
     await user.click(menu);
     await user.click(await screen.findByRole('menuitem', { name: 'Full width' }));
-    expect(document.querySelector('.page-layout')).toHaveClass('page-layout--wide');
+    expect(document.querySelector('[data-page-layout]')).toHaveAttribute(
+      'data-page-layout',
+      'wide',
+    );
     expect(localStorage.getItem(`metakip-page-full-width:${PAGE_ID}`)).toBe('true');
 
     await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
     await user.click(menu);
     await user.click(await screen.findByRole('menuitem', { name: 'Default width' }));
-    expect(document.querySelector('.page-layout')).not.toHaveClass('page-layout--wide');
+    expect(document.querySelector('[data-page-layout]')).toHaveAttribute(
+      'data-page-layout',
+      'default',
+    );
     expect(localStorage.getItem(`metakip-page-full-width:${PAGE_ID}`)).toBe('false');
   });
 

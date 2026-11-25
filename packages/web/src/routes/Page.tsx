@@ -11,6 +11,7 @@ import {
   parsePageDetailPayload,
   type SharePermission,
 } from '@metakip/shared';
+import * as stylex from '@stylexjs/stylex';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { FileQuestion, LogIn, RefreshCw, ShieldOff } from 'lucide-react';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
@@ -55,6 +56,8 @@ import {
   getWorkspacePath,
   getWorkspacePathPrefix,
 } from '../utils/url';
+import { styles } from './Page.stylex';
+import './Page.layout.css';
 
 const API_BASE = '/api';
 const COMMENTS_OPEN_STORAGE_KEY = 'metakip-comments-open';
@@ -92,7 +95,7 @@ async function fetchPage(pageId: string): Promise<PageDetailPayload> {
 export default function Page() {
   const { slugAndId } = useParams<{ slugAndId: string }>();
   const location = useLocation();
-  const { contentContainer } = useAppShellOutletContext();
+  const { contentContainer, isDesktopLayout } = useAppShellOutletContext();
   const pageId = slugAndId ? extractUuidFromSlug(slugAndId) : undefined;
   const navigate = useIdentityNavigate();
   const [provider, setProvider] = useState<HocuspocusProvider | null>(null);
@@ -369,11 +372,9 @@ export default function Page() {
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><text y="28" font-size="28">${icon}</text></svg>`;
       const dataUrl = `data:image/svg+xml,${encodeURIComponent(svg)}`;
       if (existingLink) {
-        existingLink.removeAttribute('data-theme-icon');
         existingLink.href = dataUrl;
       }
     } else if (existingLink) {
-      existingLink.dataset.themeIcon = '192';
       existingLink.href = getApplicationFaviconHref();
     }
 
@@ -487,23 +488,17 @@ export default function Page() {
   );
 
   if (!pageId) {
-    return (
-      <div className="max-w-4xl mx-auto px-6 py-8 md:py-12 text-zinc-400 animate-fade-in">
-        Page not found.
-      </div>
-    );
+    return <div {...stylex.props(styles.notFoundContainer)}>Page not found.</div>;
   }
 
   if (error) {
     if (error instanceof ApiError && error.status === 403) {
       return (
-        <div className="max-w-4xl mx-auto px-6 py-8 md:py-12 animate-fade-in">
-          <div className="flex flex-col items-center gap-4 text-center py-16">
-            <ShieldOff size={48} className="text-zinc-300 dark:text-zinc-600" />
-            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-              You don&apos;t have access
-            </h2>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+        <div {...stylex.props(styles.errorContainer)}>
+          <div {...stylex.props(styles.accessErrorState)}>
+            <ShieldOff size={48} {...stylex.props(styles.errorIcon)} />
+            <h2 {...stylex.props(styles.errorTitle)}>You don&apos;t have access</h2>
+            <p {...stylex.props(styles.errorDescription)}>
               Your access to this page may have been removed. Contact the page owner to request
               access.
             </p>
@@ -513,31 +508,27 @@ export default function Page() {
     }
     if (error instanceof ApiError && error.status === 404) {
       return (
-        <div className="mx-auto max-w-4xl px-6 py-8 md:py-12 animate-fade-in">
-          <div className="flex flex-col items-center gap-4 py-16 text-center">
-            <FileQuestion size={48} className="text-zinc-300 dark:text-zinc-600" />
-            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-              Page not found
-            </h2>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">It may have been deleted.</p>
+        <div {...stylex.props(styles.errorContainer)}>
+          <div {...stylex.props(styles.errorState)}>
+            <FileQuestion size={48} {...stylex.props(styles.errorIcon)} />
+            <h2 {...stylex.props(styles.errorTitle)}>Page not found</h2>
+            <p {...stylex.props(styles.errorDescription)}>It may have been deleted.</p>
           </div>
         </div>
       );
     }
     return (
-      <div className="mx-auto max-w-4xl px-6 py-8 md:py-12 animate-fade-in">
-        <div className="flex flex-col items-center gap-4 py-16 text-center">
-          <FileQuestion size={48} className="text-zinc-300 dark:text-zinc-600" />
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-            Couldn&apos;t load this page
-          </h2>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+      <div {...stylex.props(styles.errorContainer)}>
+        <div {...stylex.props(styles.errorState)}>
+          <FileQuestion size={48} {...stylex.props(styles.errorIcon)} />
+          <h2 {...stylex.props(styles.errorTitle)}>Couldn&apos;t load this page</h2>
+          <p {...stylex.props(styles.errorDescription)}>
             The server returned an error. Your page has not been changed.
           </p>
           <button
             type="button"
             onClick={() => void refetchPage()}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-900"
+            {...stylex.props(styles.retryButton)}
           >
             <RefreshCw size={14} /> Retry
           </button>
@@ -548,7 +539,7 @@ export default function Page() {
 
   if (!page) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center text-zinc-400 animate-fade-in">
+      <div {...stylex.props(styles.loadingState)}>
         <PageLoadingState />
       </div>
     );
@@ -557,37 +548,40 @@ export default function Page() {
   return (
     <EditorReadOnlyProvider readOnly={readOnly}>
       <div
-        className={`app-shell-full-width page-layout flex w-full min-w-0 flex-col ${wideModeActive ? 'page-layout--wide' : ''}`}
+        {...stylex.props(styles.pageLayout)}
+        data-page-layout-root=""
+        data-page-layout={wideModeActive ? 'wide' : 'default'}
       >
-        <AppShellToolbar className="bg-zinc-50 py-2 dark:bg-zinc-950 md:py-3">
-          <div className="flex min-h-9 w-full min-w-0 items-center justify-between text-sm font-medium text-zinc-500 dark:text-zinc-400">
+        <AppShellToolbar>
+          <div {...stylex.props(styles.toolbarContent)}>
             {isAnonymous ? (
               <button
                 type="button"
                 onClick={() => navigate('/login')}
-                className="flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800 cursor-pointer"
+                {...stylex.props(styles.signInButton)}
               >
                 <LogIn size={16} />
                 Sign in
               </button>
             ) : (
-              <div className="min-w-0 flex-1">
+              <div {...stylex.props(styles.breadcrumbContainer)}>
                 <Breadcrumbs pages={flatPages} folders={flatFolders} currentPageId={pageId} />
               </div>
             )}
-            <div className="flex shrink-0 items-center gap-3">
+            <div {...stylex.props(styles.toolbarActions)}>
               {collabPermission === 'view' && !effectiveCapabilities.canEdit && (
-                <span className="hidden items-center gap-1.5 rounded-full bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400 sm:flex">
+                <span {...stylex.props(styles.permissionPill, styles.permissionPillView)}>
                   View Access
                 </span>
               )}
               {collabPermission === 'commenter' && (
-                <span className="hidden items-center gap-1.5 rounded-full bg-zinc-100 px-2 py-1 text-xs font-medium text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 sm:flex">
+                <span {...stylex.props(styles.permissionPill, styles.permissionPillCommenter)}>
                   Comment Access
                 </span>
               )}
               {!isAnonymous && (
                 <PageActions
+                  isDesktopLayout={isDesktopLayout}
                   key={pageId}
                   page={page}
                   permission={pagePermission}
@@ -614,21 +608,23 @@ export default function Page() {
         </AppShellToolbar>
 
         <div
-          className={`page-editor-container flex w-full min-w-0 items-start justify-center gap-4 ${commentsPanelDocked ? 'page-comments-open' : ''}`}
+          data-page-editor-container=""
+          data-comments-docked={commentsPanelDocked ? 'true' : 'false'}
         >
           <main
-            className={`page-editor-content w-full min-w-0 max-w-[var(--page-content-width)] px-6 animate-fade-in ${
-              showInlineCommentRail ? 'page-editor-content--with-inline-comment-rail' : ''
-            } ${commentsPanelDocked ? 'flex-1 page-editor-with-comments' : 'mx-auto'}`}
+            {...stylex.props(styles.editorContent)}
+            data-page-editor-content=""
+            data-comment-rail={showInlineCommentRail ? '' : undefined}
+            data-testid="page-editor-content"
           >
-            <div className="mb-6">
-              <div className="relative flex-1 flex items-center mt-16">
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 flex items-center justify-center w-[42px] h-[42px]">
+            <div {...stylex.props(styles.pageHeading)}>
+              <div {...stylex.props(styles.pageHeadingRow)}>
+                <div {...stylex.props(styles.pageIconContainer)}>
                   <EditorReadOnlyProvider readOnly={readOnly}>
                     <PageIcon pageId={pageId} initialIcon={page?.icon ?? null} />
                   </EditorReadOnlyProvider>
                 </div>
-                <div className="pl-[54px] w-full">
+                <div {...stylex.props(styles.pageTitleContainer)}>
                   <PageTitle
                     pageId={pageId}
                     initialTitle={page?.title ?? 'Untitled'}
@@ -652,6 +648,7 @@ export default function Page() {
               commentAnchors={commentAnchors}
               commentThreads={commentThreads}
               hideInlineCommentCards={!showInlineCommentRail}
+              hideTableOfContents={commentsPanelDocked}
               activeCommentAnchor={activeCommentAnchor}
               onCommentAnchorHoverChange={setActiveCommentAnchor}
               canComment={effectiveCapabilities.canComment && !isAnonymous}

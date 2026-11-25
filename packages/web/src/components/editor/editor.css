@@ -1,10 +1,3 @@
-.scroll-smooth:has(.codemirror-editor) {
-  /* CodeMirror owns scroll anchoring while correcting estimated row heights. */
-  overflow-anchor: none;
-  /* Do not animate CodeMirror's scrollTop corrections. */
-  scroll-behavior: auto;
-}
-
 .codemirror-editor {
   min-height: 500px;
   padding: 1rem;
@@ -156,17 +149,16 @@
 .codemirror-editor .cm-md-link,
 .codemirror-editor .cm-md-link-source,
 .codemirror-editor .cm-md-wiki-link {
-  color: #2563eb;
+  color: var(--color-app-link);
   text-decoration: underline;
   text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
   text-underline-offset: 2px;
   cursor: pointer;
 }
 
-.dark .codemirror-editor .cm-md-link,
-.dark .codemirror-editor .cm-md-link-source,
-.dark .codemirror-editor .cm-md-wiki-link {
-  color: #60a5fa;
+.codemirror-editor .cm-md-link:hover,
+.codemirror-editor .cm-md-wiki-link:hover {
+  color: var(--color-app-link-hover);
 }
 
 .codemirror-editor .cm-md-link-source {
@@ -340,10 +332,6 @@
   font-weight: 600;
 }
 
-.link-editor-btn-save:hover {
-  background: #1d4ed8;
-}
-
 .link-editor-btn-remove {
   background: transparent;
   color: #ef4444;
@@ -385,10 +373,6 @@
 
 .dark .link-editor-btn-save {
   background: #2563eb;
-}
-
-.dark .link-editor-btn-save:hover {
-  background: #1d4ed8;
 }
 
 .dark .link-editor-btn-remove {
@@ -507,10 +491,6 @@
   font-weight: 600;
 }
 
-.math-editor-btn-done:hover {
-  background: #1d4ed8;
-}
-
 .dark .math-editor-popup {
   background: #18181b;
   border-color: #27272a;
@@ -542,10 +522,6 @@
 
 .dark .math-editor-btn-done {
   background: #2563eb;
-}
-
-.dark .math-editor-btn-done:hover {
-  background: #1d4ed8;
 }
 
 .codemirror-editor .cm-md-math[role="button"] {

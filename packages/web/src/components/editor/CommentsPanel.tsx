@@ -7,6 +7,7 @@ import {
   type PageCommentThread,
   pageCommentThreadsResponseSchema,
 } from '@metakip/shared';
+import * as stylex from '@stylexjs/stylex';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Check, MessageSquare, RotateCcw, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -26,11 +27,8 @@ import {
 } from '../../utils/pageCommentMutations';
 import { Dropdown } from '../ui/FormControls';
 import { KebabMenu } from '../ui/KebabMenu';
-import {
-  commentCancelButtonClass,
-  commentSubmitButtonClass,
-  commentTextareaFocusClass,
-} from './commentComposerStyles';
+import { styles as composerStyles } from './CommentComposer.stylex';
+import { commentCardMarker, commentThreadMarker, styles } from './CommentsPanel.stylex';
 
 type CommentsPanelProps = {
   pageId: string;
@@ -84,10 +82,10 @@ function CommentCard({
   const canDelete = isAuthor || canModerate;
   const authorName = comment.authorName || 'Former user';
   const moreActions = !comment.deletedAt && canDelete && !editing && (
-    <div className="absolute right-2 top-2 opacity-0 transition-opacity group-hover/comment:opacity-100 group-focus-within/comment:opacity-100">
+    <div {...stylex.props(styles.commentMoreActions)} data-comment-more-actions="">
       <KebabMenu
         ariaLabel={`More actions for comment by ${authorName}`}
-        triggerClassName="cursor-pointer rounded p-1 text-zinc-500 hover:bg-zinc-200 dark:hover:bg-zinc-700"
+        triggerStyle={styles.commentMenuTrigger}
         items={[
           ...(isAuthor
             ? [
@@ -108,21 +106,19 @@ function CommentCard({
   );
 
   return (
-    <article className="group/comment relative rounded-lg border border-zinc-200 p-3 transition-colors hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900">
-      <div className="mb-2 flex min-w-0 items-center gap-2 pr-8">
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-zinc-200 text-[10px] text-zinc-700 dark:bg-zinc-700 dark:text-zinc-200">
+    <article {...stylex.props(styles.commentCard, commentCardMarker)} data-comment-card="">
+      <div {...stylex.props(styles.commentHeader)}>
+        <span {...stylex.props(styles.commentAvatar)}>
           {comment.authorImage ? (
-            <img src={comment.authorImage} alt="" className="h-full w-full object-cover" />
+            <img src={comment.authorImage} alt="" {...stylex.props(styles.commentAvatarImage)} />
           ) : (
             getInitial(authorName)
           )}
         </span>
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-xs font-medium text-zinc-800 dark:text-zinc-200">
-            {authorName}
-          </p>
+        <div {...stylex.props(styles.commentAuthor)}>
+          <p {...stylex.props(styles.commentAuthorName)}>{authorName}</p>
           <time
-            className="block text-[11px] text-zinc-500"
+            {...stylex.props(styles.commentTimestamp)}
             dateTime={comment.updatedAt}
             title={formatTimestamp(comment.updatedAt)}
           >
@@ -133,10 +129,10 @@ function CommentCard({
       </div>
       {moreActions}
       {comment.deletedAt ? (
-        <p className="text-sm italic text-zinc-500">This comment was deleted.</p>
+        <p {...stylex.props(styles.deletedComment)}>This comment was deleted.</p>
       ) : editing ? (
         <form
-          className="space-y-2"
+          {...stylex.props(styles.editForm)}
           onSubmit={(event) => {
             event.preventDefault();
             if (body.trim() && !saveMutation.isPending) saveMutation.mutate(body.trim());
@@ -156,35 +152,35 @@ function CommentCard({
               }
             }}
             aria-label="Edit comment"
-            className={`min-h-20 w-full resize-y rounded-md border border-zinc-300 bg-white p-2 text-sm text-zinc-900 ${commentTextareaFocusClass} dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100`}
+            className={
+              stylex.props(composerStyles.textarea, composerStyles.textareaMultiline).className
+            }
           />
-          <div className="flex justify-end gap-2">
+          <div {...stylex.props(styles.composerActions)}>
             <button
               type="button"
               onClick={() => {
                 setBody(comment.body ?? '');
                 setEditing(false);
               }}
-              className={commentCancelButtonClass}
+              className={stylex.props(composerStyles.cancelButton).className}
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!body.trim() || saveMutation.isPending}
-              className={commentSubmitButtonClass}
+              className={stylex.props(composerStyles.submitButton).className}
             >
               Save
             </button>
           </div>
         </form>
       ) : (
-        <p className="whitespace-pre-wrap break-words text-sm text-zinc-700 dark:text-zinc-300">
-          {comment.body}
-        </p>
+        <p {...stylex.props(styles.commentBody)}>{comment.body}</p>
       )}
       {(deleteMutation.isError || saveMutation.isError) && (
-        <p role="alert" className="mt-2 text-xs text-zinc-600 dark:text-zinc-400">
+        <p role="alert" {...stylex.props(styles.errorMessage)}>
           {(deleteMutation.error ?? saveMutation.error)?.message ?? 'Could not update comment'}
         </p>
       )}
@@ -230,8 +226,11 @@ function ThreadCard({
     <fieldset
       aria-label="Comment thread"
       data-comment-anchor-key={anchorKey}
-      className="group/thread relative m-0 min-w-0 space-y-2 border-0 border-b border-zinc-200 p-0 pb-4 last:border-0 dark:border-zinc-800"
-      onMouseEnter={() => onAnchorHoverChange?.(anchor)}
+      {...stylex.props(styles.thread, commentThreadMarker)}
+      data-comment-thread=""
+      onMouseEnter={() => {
+        onAnchorHoverChange?.(anchor);
+      }}
       onMouseLeave={(event) => {
         const relatedElement = event.relatedTarget instanceof Element ? event.relatedTarget : null;
         const relatedAnchorKey =
@@ -239,24 +238,26 @@ function ThreadCard({
             .commentAnchorKey ?? null;
         if (relatedAnchorKey !== anchorKey) onAnchorHoverChange?.(null);
       }}
-      onFocusCapture={() => onAnchorHoverChange?.(anchor)}
+      onFocusCapture={() => {
+        onAnchorHoverChange?.(anchor);
+      }}
       onBlurCapture={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
           onAnchorHoverChange?.(null);
         }
       }}
     >
-      <div className="pr-8">
+      <div {...stylex.props(styles.quoteContainer)}>
         <blockquote
-          className={`rounded-r border-l-2 border-zinc-400 px-3 py-2 text-xs text-zinc-700 transition-colors dark:border-zinc-600 dark:text-zinc-300 ${active ? 'bg-zinc-200 dark:bg-zinc-800' : 'bg-zinc-100 dark:bg-zinc-900'}`}
+          {...stylex.props(styles.quote, active ? styles.quoteActive : styles.quoteInactive)}
         >
           “{anchorQuote}”
         </blockquote>
         {thread.status === 'resolved' && (
-          <span className="mt-1 block text-[11px] text-zinc-500">Resolved</span>
+          <span {...stylex.props(styles.resolvedLabel)}>Resolved</span>
         )}
       </div>
-      <div className="absolute right-0 top-0 opacity-0 transition-opacity group-hover/thread:opacity-100 group-focus-within/thread:opacity-100">
+      <div {...stylex.props(styles.threadActions)} data-comment-thread-actions="">
         <button
           type="button"
           disabled={statusMutation.isPending}
@@ -265,7 +266,7 @@ function ThreadCard({
           }
           title={thread.status === 'resolved' ? 'Reopen' : 'Resolve'}
           onClick={() => statusMutation.mutate(thread.status === 'resolved' ? 'open' : 'resolved')}
-          className="cursor-pointer rounded p-1 text-zinc-500 hover:bg-zinc-200 disabled:opacity-50 dark:hover:bg-zinc-700"
+          {...stylex.props(styles.threadStatusButton)}
         >
           {thread.status === 'resolved' ? <RotateCcw size={14} /> : <Check size={14} />}
         </button>
@@ -284,7 +285,7 @@ function ThreadCard({
           event.preventDefault();
           if (reply.trim() && !replyMutation.isPending) replyMutation.mutate();
         }}
-        className="space-y-2"
+        {...stylex.props(composerStyles.form)}
       >
         <textarea
           value={reply}
@@ -299,30 +300,32 @@ function ThreadCard({
           aria-label="Reply to comment thread"
           placeholder="Reply…"
           rows={1}
-          className={`min-h-9 w-full resize-y rounded-md border border-zinc-300 bg-white px-2 py-2 text-sm text-zinc-900 ${commentTextareaFocusClass} dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100`}
+          className={
+            stylex.props(composerStyles.textarea, composerStyles.textareaCompact).className
+          }
         />
-        <div className="flex justify-end gap-2">
+        <div {...stylex.props(styles.composerActions)}>
           <button
             type="button"
             onClick={() => {
               setReply('');
               replyMutation.reset();
             }}
-            className={commentCancelButtonClass}
+            className={stylex.props(composerStyles.cancelButton).className}
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={!reply.trim() || replyMutation.isPending}
-            className={commentSubmitButtonClass}
+            className={stylex.props(composerStyles.submitButton).className}
           >
             {replyMutation.isPending ? 'Sending…' : 'Send'}
           </button>
         </div>
       </form>
       {(statusMutation.isError || replyMutation.isError) && (
-        <p role="alert" className="text-xs text-zinc-600 dark:text-zinc-400">
+        <p role="alert" {...stylex.props(styles.errorMessage)}>
           {(statusMutation.error ?? replyMutation.error)?.message ?? 'Could not update thread'}
         </p>
       )}
@@ -408,13 +411,13 @@ export function CommentsPanel({
 
   const panelContent = (
     <>
-      <header className="flex items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
+      <header {...stylex.props(styles.panelHeader)}>
         {isDrawer ? (
-          <Dialog.Title className="flex items-center gap-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+          <Dialog.Title className={stylex.props(styles.panelTitle).className}>
             <MessageSquare size={16} /> Comments
           </Dialog.Title>
         ) : (
-          <h2 className="flex items-center gap-2 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+          <h2 {...stylex.props(styles.panelTitle)}>
             <MessageSquare size={16} /> Comments
           </h2>
         )}
@@ -422,7 +425,7 @@ export function CommentsPanel({
           <Dialog.Close
             type="button"
             aria-label="Close comments"
-            className="cursor-pointer rounded-md p-1.5 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            className={stylex.props(styles.closeButton).className}
           >
             <X size={16} />
           </Dialog.Close>
@@ -431,20 +434,20 @@ export function CommentsPanel({
             type="button"
             onClick={onClose}
             aria-label="Close comments"
-            className="cursor-pointer rounded-md p-1.5 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+            {...stylex.props(styles.closeButton)}
           >
             <X size={16} />
           </button>
         )}
       </header>
-      <div className="border-b border-zinc-200 p-4 dark:border-zinc-800">
+      <div {...stylex.props(styles.newCommentSection)}>
         {selectedAnchor && (
-          <div className="mb-3 flex items-center justify-between gap-2">
-            <span className="text-xs text-zinc-600 dark:text-zinc-400">Comment on selection</span>
+          <div {...stylex.props(styles.selectionHeader)}>
+            <span {...stylex.props(styles.selectionLabel)}>Comment on selection</span>
             <button
               type="button"
               onClick={onClearSelection}
-              className="cursor-pointer rounded-md px-2 py-1 text-xs font-medium text-zinc-600 hover:bg-zinc-200 dark:text-zinc-300 dark:hover:bg-zinc-700"
+              {...stylex.props(styles.clearSelectionButton)}
             >
               Clear selection
             </button>
@@ -456,7 +459,7 @@ export function CommentsPanel({
               event.preventDefault();
               if (body.trim() && !createMutation.isPending) createMutation.mutate();
             }}
-            className="space-y-2"
+            {...stylex.props(composerStyles.form)}
           >
             <textarea
               value={body}
@@ -473,43 +476,45 @@ export function CommentsPanel({
               aria-label="New comment"
               placeholder="Comment on this selection…"
               rows={2}
-              className={`w-full resize-y rounded-md border border-zinc-300 bg-white p-2 text-sm text-zinc-900 focus:border-zinc-500 ${commentTextareaFocusClass} dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100`}
+              className={
+                stylex.props(composerStyles.textarea, composerStyles.textareaMultiline).className
+              }
             />
-            <div className="flex justify-end gap-2">
+            <div {...stylex.props(styles.composerActions)}>
               <button
                 type="button"
                 onClick={() => {
                   setBody('');
                   createMutation.reset();
                 }}
-                className={commentCancelButtonClass}
+                className={stylex.props(composerStyles.cancelButton).className}
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={!body.trim() || createMutation.isPending}
-                className={commentSubmitButtonClass}
+                className={stylex.props(composerStyles.submitButton).className}
               >
                 {createMutation.isPending ? 'Sending…' : 'Comment'}
               </button>
             </div>
             {createMutation.isError && (
-              <p role="alert" className="text-xs text-zinc-600 dark:text-zinc-400">
+              <p role="alert" {...stylex.props(styles.errorMessage)}>
                 {errorMessage(createMutation.error)}
               </p>
             )}
           </form>
         ) : (
-          <div className="space-y-3">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          <div {...stylex.props(styles.selectionHelp)}>
+            <p {...stylex.props(styles.selectionPrompt)}>
               Select text in the page to start a comment thread.
             </p>
             {isDrawer && onStartSelection && (
               <button
                 type="button"
                 onClick={onStartSelection}
-                className="cursor-pointer rounded-md border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-900"
+                {...stylex.props(styles.selectTextButton)}
               >
                 Select text on page
               </button>
@@ -517,8 +522,8 @@ export function CommentsPanel({
           </div>
         )}
       </div>
-      <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-2 dark:border-zinc-800">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Discussion</h3>
+      <div {...stylex.props(styles.discussionHeader)}>
+        <h3 {...stylex.props(styles.discussionTitle)}>Discussion</h3>
         <Dropdown
           value={status}
           onChange={setStatus}
@@ -528,18 +533,20 @@ export function CommentsPanel({
             { value: 'resolved', label: 'Resolved' },
             { value: 'all', label: 'All' },
           ]}
-          triggerClassName="h-8 px-2 text-xs"
+          triggerStyle={styles.statusDropdown}
         />
       </div>
-      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {commentsQuery.isLoading && <p className="text-sm text-zinc-500">Loading comments…</p>}
+      <div {...stylex.props(styles.threadList)} data-comment-thread-list="">
+        {commentsQuery.isLoading && (
+          <p {...stylex.props(styles.statusMessage)}>Loading comments…</p>
+        )}
         {commentsQuery.isError && (
-          <p role="alert" className="text-sm text-zinc-600 dark:text-zinc-400">
+          <p role="alert" {...stylex.props(styles.statusMessage, styles.statusErrorMessage)}>
             {errorMessage(commentsQuery.error)}
           </p>
         )}
         {!commentsQuery.isLoading && !commentsQuery.isError && threads.length === 0 && (
-          <p className="py-6 text-center text-sm text-zinc-500">
+          <p {...stylex.props(styles.emptyThreads)}>
             No {status === 'all' ? '' : status} threads yet.
           </p>
         )}
@@ -564,7 +571,7 @@ export function CommentsPanel({
             type="button"
             disabled={commentsQuery.isFetchingNextPage}
             onClick={() => void commentsQuery.fetchNextPage()}
-            className="w-full cursor-pointer rounded-md border border-zinc-200 px-3 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-50 disabled:cursor-wait disabled:opacity-50 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-900"
+            {...stylex.props(styles.loadMoreButton)}
           >
             {commentsQuery.isFetchingNextPage ? 'Loading…' : 'Load more threads'}
           </button>
@@ -575,10 +582,7 @@ export function CommentsPanel({
 
   if (!isDrawer) {
     return (
-      <aside
-        aria-label="Comments"
-        className="sticky top-3 z-40 flex h-[calc(100dvh-var(--app-toolbar-height)-1.5rem)] w-[var(--comments-panel-width)] flex-col rounded-[2rem] border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950"
-      >
+      <aside aria-label="Comments" {...stylex.props(styles.sidePanel)}>
         {panelContent}
       </aside>
     );
@@ -593,12 +597,12 @@ export function CommentsPanel({
       }}
     >
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 z-[var(--z-index-overlay)] bg-zinc-950/30 backdrop-blur-[1px]" />
+        <Dialog.Backdrop className={stylex.props(styles.drawerBackdrop).className} />
         <Dialog.Popup
           initialFocus
           finalFocus
           aria-modal="true"
-          className="fixed right-[var(--comments-panel-inset)] top-3 bottom-3 z-[var(--z-index-modal)] flex w-[85vw] max-w-[var(--comments-panel-width)] flex-col rounded-[2rem] border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950 md:top-[calc(var(--app-toolbar-height)+0.75rem)]"
+          className={stylex.props(styles.drawerPanel).className}
         >
           {panelContent}
         </Dialog.Popup>

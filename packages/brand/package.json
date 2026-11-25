@@ -1,0 +1,23 @@
+{
+  "name": "@metakip/brand",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Metakip brand assets and foundational design tokens",
+  "exports": {
+    "./colors.css": "./colors.css",
+    "./fonts.css": "./fonts.css"
+  },
+  "dependencies": {
+    "@fontsource/inter": "5.2.8"
+  },
+  "devDependencies": {
+    "jszip": "^3.10.1",
+    "sharp": "^0.35.3"
+  },
+  "scripts": {
+    "generate:brand-assets": "node scripts/generate-brand-assets.mjs",
+    "check:brand-assets": "node scripts/generate-brand-assets.mjs --check",
+    "generate:colors": "node scripts/generate-colors.mjs",
+    "check:colors": "node scripts/generate-colors.mjs --check"
+  }
+}

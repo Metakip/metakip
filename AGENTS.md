@@ -5,7 +5,7 @@
 1. **Environment detection**: `process.env.NODE_ENV === "production"`
 2. **Yjs storage**: binary buffers in PostgreSQL (`pages.ydoc`)
 3. **CORS**: allowlist-based in production
-4. **Buttons**: `cursor-pointer`
+4. **Buttons**: Set `cursor: pointer` in the owning stylesheet
 5. **Better Auth baseURL**: must be FRONTEND URL (5173), not API (3001)
 6. **API does not serve static files**: Caddy serves `packages/web/dist` directly
 7. **Deploy**: configs in `deploy/`, scripts: `setup.sh` (one-time) + `deploy.sh` (incremental)
@@ -22,7 +22,7 @@
    - For a fresh dev setup or new server: `setup.sh` runs `db:migrate`. No `db:push` or legacy stub tables are needed.
 9. The default branch in this repo is `master`.
 10. Never run lsp diagnostics. Instead run pnpm typecheck and pnpm format. Iterate until fixed.
-11. **Brand assets**: When changing the Metakip logo, update `packages/marketing-site/public/metakip.svg` and `metakip-dark.svg` separately before running `pnpm --filter @metakip/marketing-site generate:brand-assets`; the command regenerates the PNGs and ZIP but not the SVGs.
+11. **Brand assets**: The canonical Metakip logo is `packages/brand/assets/logos/metakip.svg`. After editing it, run `pnpm --filter @metakip/brand generate:brand-assets` to refresh the downloads, transparent PNG, and shared app favicons.
 
 ## Code Style
 
@@ -31,6 +31,11 @@
 - **Named imports** preferred
 - **File naming**: `camelCase.ts` utils, `PascalCase.tsx` components, `use*.ts` hooks
 - **Strict TypeScript**: `noImplicitReturns`, `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`
+
+## User-Facing Copy
+
+- Use **Title Case** for all user-facing UI headings and tooltips, including desktop controls. Preserve proper nouns, acronyms, and user-authored content.
+- Keep body copy and explanatory descriptions in sentence case unless a product-specific convention requires otherwise.
 
 ## Commit Messages
 

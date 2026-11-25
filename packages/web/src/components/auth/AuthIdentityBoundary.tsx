@@ -1,3 +1,4 @@
+import * as stylex from '@stylexjs/stylex';
 import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { type ReactNode, useLayoutEffect, useMemo, useRef } from 'react';
 import {
@@ -12,12 +13,14 @@ import { resetSelfLeaveState } from '../../utils/leave-page';
 import { clearToasts } from '../../utils/toast';
 import { AppProviders } from '../AppProviders';
 import { LoadingIndicator } from '../ui/LoadingIndicator';
+import { styles } from './AuthBoundary.stylex';
+import { styles as loadingStyles } from './RouteLoading.stylex';
 
 const ANONYMOUS_IDENTITY = 'anonymous';
 
 function IdentityLoadingState() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white dark:bg-zinc-950">
+    <div {...stylex.props(loadingStyles.root)}>
       <LoadingIndicator label="Loading application" size="md" />
     </div>
   );
@@ -25,19 +28,11 @@ function IdentityLoadingState() {
 
 function IdentityErrorState({ onRetry }: { onRetry: () => void }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white dark:bg-zinc-950">
-      <div className="flex max-w-md flex-col items-center gap-4 p-8 text-center">
-        <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-          Couldn&apos;t load your session
-        </h2>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
-          Check your connection and try again.
-        </p>
-        <button
-          type="button"
-          onClick={onRetry}
-          className="cursor-pointer rounded-lg border border-zinc-200 px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-900"
-        >
+    <div {...stylex.props(styles.centered)}>
+      <div {...stylex.props(styles.errorPanel)}>
+        <h2 {...stylex.props(styles.errorTitle)}>Couldn&apos;t load your session</h2>
+        <p {...stylex.props(styles.errorCopy)}>Check your connection and try again.</p>
+        <button type="button" onClick={onRetry} {...stylex.props(styles.retryButton)}>
           Retry
         </button>
       </div>

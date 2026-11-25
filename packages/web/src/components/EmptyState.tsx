@@ -1,4 +1,7 @@
+import * as stylex from '@stylexjs/stylex';
 import type React from 'react';
+import { styles } from './EmptyState.stylex';
+import { actionColors } from './ui/ActionColors.stylex';
 
 type EmptyStateProps = {
   icon: React.ReactNode;
@@ -18,25 +21,20 @@ export function EmptyState({
   compact = false,
 }: EmptyStateProps) {
   return (
-    <div
-      className={`flex flex-col items-center justify-center text-center ${
-        compact ? 'py-6 px-3' : 'py-12 px-6'
-      }`}
-    >
-      <div
-        className={`rounded-full bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 ${
-          compact ? 'p-3' : 'p-4'
-        }`}
-      >
+    <div {...stylex.props(styles.root, compact ? styles.compact : styles.regular)}>
+      <div {...stylex.props(styles.icon, compact ? styles.iconCompact : styles.iconRegular)}>
         {icon}
       </div>
-      <h3
-        className={`mt-4 font-semibold text-zinc-900 dark:text-zinc-100 ${compact ? 'text-sm' : 'text-base'}`}
-      >
+      <h3 {...stylex.props(styles.title, compact ? styles.titleCompact : styles.titleRegular)}>
         {title}
       </h3>
       {description && (
-        <p className={`mt-1 text-zinc-500 dark:text-zinc-400 ${compact ? 'text-xs' : 'text-sm'}`}>
+        <p
+          {...stylex.props(
+            styles.description,
+            compact ? styles.descriptionCompact : styles.descriptionRegular,
+          )}
+        >
           {description}
         </p>
       )}
@@ -44,7 +42,7 @@ export function EmptyState({
         <button
           type="button"
           onClick={onAction}
-          className="mt-4 inline-flex items-center rounded-md bg-zinc-900 dark:bg-zinc-100 px-3 py-2 text-sm font-medium text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200"
+          {...stylex.props(actionColors.contrast, styles.action)}
         >
           {actionLabel}
         </button>

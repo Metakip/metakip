@@ -1,7 +1,13 @@
+import * as stylex from '@stylexjs/stylex';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { useFloatingToolbar } from '../../hooks/useFloatingToolbar';
+import { createEditorCommandRegistry } from './editorCommandRegistry';
+import { createEditorFormattingCommands } from './editorFormattingCommands';
+import { createEditorTableCommands } from './editorTableCommands';
 import type { FloatingToolbarProps } from './FloatingToolbar';
+import { styles } from './FloatingToolbar.stylex';
+import { INACTIVE_STATES } from './useEditorActiveStates';
 
 const floatingMocks = vi.hoisted(() => ({
   isPositioned: false,
@@ -36,33 +42,26 @@ function createPosition(): Range {
   } as unknown as Range;
 }
 
-function createProps(overrides: Partial<FloatingToolbarProps> = {}): FloatingToolbarProps {
+function createProps(
+  overrides: Partial<FloatingToolbarProps> = {},
+  onBold: () => void = vi.fn(),
+): FloatingToolbarProps {
   return {
-    isInTableActive: false,
-    onAddColAfter: vi.fn(),
-    onAddColBefore: vi.fn(),
-    onAddRowAfter: vi.fn(),
-    onAddRowBefore: vi.fn(),
-    onBlockquote: vi.fn(),
-    onBold: vi.fn(),
-    onBulletList: vi.fn(),
-    onCode: vi.fn(),
-    onDeleteCol: vi.fn(),
-    onDeleteRow: vi.fn(),
-    onDeleteTable: vi.fn(),
-    onH1: vi.fn(),
-    onH2: vi.fn(),
-    onH3: vi.fn(),
-    onH4: vi.fn(),
-    onH5: vi.fn(),
-    onH6: vi.fn(),
-    onInsertTable: vi.fn(),
-    onItalic: vi.fn(),
-    onLink: vi.fn(),
+    activeStates: INACTIVE_STATES,
+    commands: createEditorCommandRegistry(
+      {
+        ...createEditorFormattingCommands({
+          editor: null,
+          keepVisible: vi.fn(),
+          reposition: vi.fn(),
+          updateActiveStates: vi.fn(),
+        }),
+        ...createEditorTableCommands(null, vi.fn(), vi.fn()),
+        handleBold: onBold,
+      },
+      false,
+    ),
     onInteractionStart: vi.fn(),
-    onOrderedList: vi.fn(),
-    onStrike: vi.fn(),
-    onTaskList: vi.fn(),
     position: createPosition(),
     visible: true,
     ...overrides,
@@ -98,14 +97,9 @@ function FloatingToolbarHarness({ onBold }: { onBold: () => void }) {
 
   return (
     <FloatingToolbar
-      {...createProps({
-        onBold: () => {
-          keepVisible();
-          onBold();
-        },
-        onInteractionStart: keepVisible,
-        position,
-        visible,
+      {...createProps({ onInteractionStart: keepVisible, position, visible }, () => {
+        keepVisible();
+        onBold();
       })}
     />
   );
@@ -144,16 +138,18 @@ describe('FloatingToolbar', () => {
     const props = createProps();
     const { rerender } = render(<FloatingToolbar {...props} />);
 
-    expect(screen.getByTitle('Bold (Ctrl+B)').parentElement).toHaveClass('invisible');
+    const invisibleClass = stylex.props(styles.invisible).className ?? '';
+    expect(screen.getByTitle('Bold (Ctrl+B)').parentElement).toHaveClass(invisibleClass);
 
     floatingMocks.isPositioned = true;
     rerender(<FloatingToolbar {...props} />);
 
-    expect(screen.getByTitle('Bold (Ctrl+B)').parentElement).not.toHaveClass('invisible');
+    expect(screen.getByTitle('Bold (Ctrl+B)').parentElement).not.toHaveClass(invisibleClass);
   });
 
   it('adds a comment action without replacing formatting controls', () => {
     const onAddComment = vi.fn();
+    floatingMocks.isPositioned = true;
     render(<FloatingToolbar {...createProps({ canComment: true, onAddComment })} />);
 
     expect(screen.getByTitle('Bold (Ctrl+B)')).toBeInTheDocument();
@@ -162,6 +158,7 @@ describe('FloatingToolbar', () => {
   });
 
   it('shows only the comment action in comment-only mode', () => {
+    floatingMocks.isPositioned = true;
     render(
       <FloatingToolbar
         {...createProps({ commentOnly: true, canComment: true, onAddComment: vi.fn() })}
@@ -199,7 +196,9 @@ describe('FloatingToolbar', () => {
       vi.advanceTimersByTime(100);
     });
 
-    expect(screen.getByTitle('Bold (Ctrl+B)').parentElement).not.toHaveClass('invisible');
+    expect(screen.getByTitle('Bold (Ctrl+B)').parentElement).not.toHaveClass(
+      stylex.props(styles.invisible).className ?? '',
+    );
     expect(getSelection().isCollapsed).toBe(true);
     expect(getSelection().anchorNode).toBe(row);
 
@@ -210,14 +209,43 @@ describe('FloatingToolbar', () => {
       document.dispatchEvent(new Event('selectionchange'));
       vi.advanceTimersByTime(100);
     });
-    expect(screen.getByTitle('Bold (Ctrl+B)').parentElement).toHaveClass('invisible');
+    expect(screen.getByTitle('Bold (Ctrl+B)').parentElement).toHaveClass(
+      stylex.props(styles.invisible).className ?? '',
+    );
   });
 
   it('prevents mouse presses from taking the editor selection', () => {
-    render(<FloatingToolbar {...createProps({ isInTableActive: true })} />);
+    render(
+      <FloatingToolbar
+        {...createProps({ activeStates: { ...INACTIVE_STATES, isInTableActive: true } })}
+      />,
+    );
     const event = new MouseEvent('mousedown', { bubbles: true, cancelable: true });
     fireEvent(screen.getByTitle('Add Row Above'), event);
     expect(event.defaultPrevented).toBe(true);
+  });
+
+  it('announces active formatting without treating insert or delete as toggles', () => {
+    floatingMocks.isPositioned = true;
+    const activeStates = {
+      ...INACTIVE_STATES,
+      isBoldActive: true,
+      isH3Active: true,
+      isTaskListActive: true,
+      isInTableActive: true,
+    };
+    render(<FloatingToolbar {...createProps({ activeStates })} />);
+
+    expect(screen.getByRole('button', { name: /^Bold/, pressed: true })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Italic/, pressed: false })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Heading 3', pressed: true })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Task List', pressed: true })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Insert Table' })).not.toHaveAttribute(
+      'aria-pressed',
+    );
+    expect(screen.getByRole('button', { name: 'Delete Table' })).not.toHaveAttribute(
+      'aria-pressed',
+    );
   });
 
   it('runs a formatting command after selection collapses during a slow button press', () => {
@@ -242,7 +270,9 @@ describe('FloatingToolbar', () => {
       vi.advanceTimersByTime(301);
     });
 
-    expect(boldButton.parentElement).not.toHaveClass('invisible');
+    expect(boldButton.parentElement).not.toHaveClass(
+      stylex.props(styles.invisible).className ?? '',
+    );
     expect(floatingMocks.setPositionReference).toHaveBeenLastCalledWith(
       expect.objectContaining({ getBoundingClientRect: expect.any(Function) }),
     );

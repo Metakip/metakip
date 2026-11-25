@@ -1,13 +1,10 @@
 ---
-import '../styles/fonts.css';
+import '@metakip/brand/fonts.css';
+import '@metakip/brand/colors.css';
 // biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
 import { ClientRouter, slide } from 'astro:transitions';
 // biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
 import appleTouchIcon from '../../../shared/assets/app-favicon/apple-touch-icon.png';
-// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
-import darkIcon192 from '../../../shared/assets/app-favicon/icon-dark-192.png';
-// biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
-import darkIcon512 from '../../../shared/assets/app-favicon/icon-dark-512.png';
 // biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
 import lightIcon192 from '../../../shared/assets/app-favicon/icon-light-192.png';
 // biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
@@ -83,30 +80,17 @@ const structuredDataJson = structuredData ? serializeStructuredData(structuredDa
             type="image/png"
             sizes="192x192"
             href={lightIcon192.src}
-            data-theme-icon="192"
-            data-theme-icon-light={lightIcon192.src}
-            data-theme-icon-dark={darkIcon192.src}
         />
         <link
             rel="icon"
             type="image/png"
             sizes="512x512"
             href={lightIcon512.src}
-            data-theme-icon="512"
-            data-theme-icon-light={lightIcon512.src}
-            data-theme-icon-dark={darkIcon512.src}
         />
         <link
             rel="apple-touch-icon"
             sizes="180x180"
             href={appleTouchIcon.src}
-        />
-        <link
-            rel="preload"
-            href="/fonts/Geist.woff2"
-            as="font"
-            type="font/woff2"
-            crossorigin
         />
         <title>{title}</title>
         {structuredDataJson && (
@@ -137,26 +121,26 @@ const structuredDataJson = structuredData ? serializeStructuredData(structuredDa
 <style is:global>
     :root {
         color-scheme: light;
-        font-family: Geist, ui-sans-serif, system-ui, sans-serif;
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
         /* Change these tokens to update the site's accent palette in one place. */
         --accent: var(--text);
         --accent-hover: color-mix(in srgb, var(--text) 85%, var(--background));
         --accent-text: var(--text);
         --accent-fold: var(--muted);
-        --background: #ffffff;
-        --text: #000000;
-        --muted: #666666;
-        --line: #e5e5e5;
+        --background: var(--metakip-marketing-light-background);
+        --text: var(--metakip-marketing-light-text);
+        --muted: var(--metakip-marketing-light-text-muted);
+        --line: var(--metakip-marketing-light-border);
         background: var(--background);
         color: var(--text);
     }
 
     :root.dark {
         color-scheme: dark;
-        --background: #090909;
-        --text: #f5f5f5;
-        --muted: #aaaaaa;
-        --line: #292929;
+        --background: var(--metakip-marketing-dark-background);
+        --text: var(--metakip-marketing-dark-text);
+        --muted: var(--metakip-marketing-dark-text-muted);
+        --line: var(--metakip-marketing-dark-border);
         background: var(--background);
         color: var(--text);
     }

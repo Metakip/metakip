@@ -1,0 +1,146 @@
+import * as stylex from '@stylexjs/stylex';
+import { colors } from '../theme.stylex';
+
+export const styles = stylex.create({
+  container: {
+    position: 'relative',
+    zIndex: 50,
+    display: 'flex',
+    width: '100%',
+    maxWidth: 240,
+    flexShrink: 0,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    overflow: 'visible',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    borderColor:
+      'light-dark(rgb(255 255 255 / 60%), color-mix(in srgb, var(--metakip-product-dark-border) 50%, transparent))',
+    borderRadius: '2rem',
+    padding: '0.75rem',
+    backgroundColor:
+      'light-dark(rgb(255 255 255 / 70%), color-mix(in srgb, var(--metakip-product-dark-surface-subtle) 70%, transparent))',
+    boxShadow: '0 8px 30px light-dark(rgb(0 0 0 / 8%), rgb(0 0 0 / 30%))',
+    backdropFilter: 'blur(24px)',
+  },
+  content: {
+    display: 'flex',
+    width: '100%',
+    flexDirection: 'column',
+  },
+  actions: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: '0.5rem',
+  },
+  actionButton: {
+    borderWidth: 0,
+    borderRadius: '0.75rem',
+    padding: '0.5rem',
+    transitionProperty: 'color, background-color',
+    transitionDuration: '150ms',
+    cursor: 'pointer',
+    backgroundColor: {
+      default: 'transparent',
+      ':hover': colors.hoverOverlay,
+    },
+    color: {
+      default: colors.textSubtle,
+      ':hover': colors.textStrong,
+    },
+  },
+  trashButton: {
+    position: 'relative',
+  },
+  trashIndicator: {
+    position: 'absolute',
+    top: '0.375rem',
+    right: '0.375rem',
+    width: '0.5rem',
+    height: '0.5rem',
+    borderRadius: '50%',
+    backgroundColor: 'light-dark(var(--metakip-neutral-zinc-900), var(--metakip-neutral-white))',
+    boxShadow: '0 1px 2px rgb(0 0 0 / 10%)',
+  },
+  userCard: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    borderRadius: '0.75rem',
+    padding: '0.5rem',
+    transitionProperty: 'background-color',
+    transitionDuration: '150ms',
+    cursor: 'pointer',
+    backgroundColor: {
+      default: 'transparent',
+      ':hover':
+        'light-dark(color-mix(in srgb, white 50%, transparent), color-mix(in srgb, var(--metakip-product-dark-surface-raised) 50%, transparent))',
+    },
+  },
+  avatar: {
+    width: '2rem',
+    height: '2rem',
+    flexShrink: 0,
+    overflow: 'hidden',
+    borderRadius: '50%',
+    backgroundColor: colors.selection,
+    boxShadow: '0 1px 2px rgb(0 0 0 / 10%)',
+    outline: `1px solid ${colors.hoverOverlay}`,
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+  },
+  avatarFallback: {
+    display: 'flex',
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: 'var(--metakip-neutral-zinc-400)',
+  },
+  userDetails: {
+    minWidth: 0,
+    flex: 1,
+  },
+  userName: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    color: colors.textStrong,
+    fontSize: '0.875rem',
+    lineHeight: '1.25rem',
+    fontWeight: 500,
+  },
+  userEmail: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    color: colors.textSubtle,
+    fontSize: '0.75rem',
+    lineHeight: '1rem',
+  },
+  signOutButton: {
+    borderWidth: 0,
+    borderRadius: '0.5rem',
+    padding: '0.375rem',
+    opacity: {
+      default: 0,
+      [stylex.when.ancestor(':hover')]: 1,
+      [stylex.when.ancestor(':focus-within')]: 1,
+    },
+    transitionProperty: 'color, background-color, opacity',
+    transitionDuration: '150ms',
+    cursor: 'pointer',
+    backgroundColor: {
+      default: 'transparent',
+      ':hover': 'color-mix(in srgb, #ef4444 10%, transparent)',
+    },
+    color: {
+      default: colors.textFaint,
+      ':hover': colors.dangerText,
+    },
+  },
+});

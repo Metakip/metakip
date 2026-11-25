@@ -1,36 +1,113 @@
 import { Menu } from '@base-ui/react/menu';
+import type { StyleXStyles } from '@stylexjs/stylex';
+import * as stylex from '@stylexjs/stylex';
 import { MoreHorizontal } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { type CSSProperties, Fragment, type ReactNode } from 'react';
+import { styles } from './KebabMenu.stylex';
 
-export type KebabMenuItem = {
+type KebabMenuAction = {
+  type?: 'action';
   label: string;
   icon?: ReactNode;
   onClick: () => void;
-  className?: string;
+  variant?: 'default' | 'destructive';
   disabled?: boolean;
   dividerBefore?: boolean;
 };
 
+export type KebabMenuRadioOption = {
+  label: string;
+  value: string;
+  onSelect: () => void;
+  icon?: ReactNode;
+  disabled?: boolean;
+};
+
+type KebabMenuRadioGroup = {
+  type: 'radio-group';
+  label: string;
+  value: string;
+  options: readonly KebabMenuRadioOption[];
+  dividerBefore?: boolean;
+};
+
+export type KebabMenuItem = KebabMenuAction | KebabMenuRadioGroup;
+
 type KebabMenuProps = {
   items: KebabMenuItem[];
   triggerContent?: ReactNode;
-  triggerClassName?: string;
-  menuClassName?: string;
+  triggerStyle?: StyleXStyles;
+  popupStyle?: StyleXStyles;
+  popupWidth?: '10rem' | '11rem' | '12rem';
   ariaLabel?: string;
   onOpenChange?: (isOpen: boolean) => void;
 };
 
-const defaultMenuItemClass =
-  'flex items-center gap-2.5 px-2.5 py-2 text-xs font-medium text-zinc-700 dark:text-zinc-300 data-highlighted:bg-black/5 dark:data-highlighted:bg-white/10 w-full text-left cursor-pointer rounded-xl outline-none transition-colors data-disabled:cursor-not-allowed data-disabled:opacity-50';
-
-const defaultMenuClass =
-  'w-40 bg-white dark:bg-zinc-900 border border-black/5 dark:border-white/5 shadow-xl rounded-xl p-1.5 flex flex-col z-[9999]';
+function MenuItems({ items }: { items: KebabMenuItem[] }) {
+  return items.map((item, index) => (
+    // biome-ignore lint/suspicious/noArrayIndexKey: labels are display text and may repeat.
+    <Fragment key={`${item.label}-${index}`}>
+      {item.dividerBefore && (
+        <Menu.Separator className={stylex.props(styles.separator).className} />
+      )}
+      {item.type === 'radio-group' ? (
+        <Menu.RadioGroup
+          aria-label={item.label}
+          value={item.value}
+          onValueChange={(value: unknown) => {
+            const option = item.options.find((candidate) => candidate.value === value);
+            if (!option) throw new Error('Menu selected an unknown radio option');
+            option.onSelect();
+          }}
+        >
+          {item.options.map((option) => (
+            <Menu.RadioItem
+              key={option.value}
+              value={option.value}
+              disabled={option.disabled}
+              closeOnClick
+              onClick={(event) => event.stopPropagation()}
+              {...stylex.props(
+                styles.menuItem,
+                item.value === option.value && styles.selectedMenuItem,
+                option.disabled && styles.disabledMenuItem,
+              )}
+              data-kebab-menu-item=""
+            >
+              {option.icon}
+              {option.label}
+            </Menu.RadioItem>
+          ))}
+        </Menu.RadioGroup>
+      ) : (
+        <Menu.Item
+          disabled={item.disabled}
+          onClick={(event) => {
+            event.stopPropagation();
+            item.onClick();
+          }}
+          {...stylex.props(
+            styles.menuItem,
+            item.variant === 'destructive' && styles.destructiveItem,
+            item.disabled && styles.disabledMenuItem,
+          )}
+          data-kebab-menu-item=""
+          data-kebab-destructive={item.variant === 'destructive' ? '' : undefined}
+        >
+          {item.icon}
+          {item.label}
+        </Menu.Item>
+      )}
+    </Fragment>
+  ));
+}
 
 export function KebabMenu({
   items,
   triggerContent,
-  triggerClassName,
-  menuClassName,
+  triggerStyle,
+  popupStyle,
+  popupWidth,
   ariaLabel = 'Open menu',
   onOpenChange,
 }: KebabMenuProps) {
@@ -38,34 +115,26 @@ export function KebabMenu({
     <Menu.Root modal={false} onOpenChange={onOpenChange}>
       <Menu.Trigger
         aria-label={ariaLabel}
-        className={`${triggerClassName ?? ''} cursor-pointer data-popup-open:opacity-100 data-popup-open:bg-zinc-200 dark:data-popup-open:bg-zinc-700 data-popup-open:text-zinc-900 dark:data-popup-open:text-zinc-100`}
+        className={({ open }) =>
+          stylex.props(styles.trigger, triggerStyle, open && styles.triggerOpen).className ?? ''
+        }
         onClick={(event) => event.stopPropagation()}
       >
         {triggerContent ?? <MoreHorizontal size={16} />}
       </Menu.Trigger>
       <Menu.Portal>
-        <Menu.Positioner side="bottom" align="end" sideOffset={6} className="z-[9999]">
+        <Menu.Positioner
+          side="bottom"
+          align="end"
+          sideOffset={6}
+          className={stylex.props(styles.positioner).className}
+        >
           <Menu.Popup
-            className={`${menuClassName ?? defaultMenuClass} max-h-[var(--available-height)] overflow-y-auto outline-none origin-[var(--transform-origin)] transition-[opacity,transform] duration-100 data-starting-style:scale-95 data-starting-style:opacity-0 data-ending-style:scale-95 data-ending-style:opacity-0`}
+            data-kebab-popup=""
+            {...stylex.props(styles.popup, popupStyle)}
+            style={popupWidth ? ({ '--kebab-menu-width': popupWidth } as CSSProperties) : undefined}
           >
-            {items.map((item) => (
-              <div key={item.label}>
-                {item.dividerBefore && (
-                  <Menu.Separator className="mx-1 my-1 h-px bg-zinc-200 dark:bg-zinc-700" />
-                )}
-                <Menu.Item
-                  disabled={item.disabled}
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    item.onClick();
-                  }}
-                  className={`${defaultMenuItemClass} ${item.className ?? ''}`}
-                >
-                  {item.icon}
-                  {item.label}
-                </Menu.Item>
-              </div>
-            ))}
+            <MenuItems items={items} />
           </Menu.Popup>
         </Menu.Positioner>
       </Menu.Portal>

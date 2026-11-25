@@ -1,3 +1,4 @@
+import * as stylex from '@stylexjs/stylex';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { FileQuestion, RefreshCw, ShieldOff } from 'lucide-react';
 import { type ReactElement, useEffect, useMemo, useRef } from 'react';
@@ -17,6 +18,7 @@ import {
   type ShareableEntityType,
 } from '../../utils/shareableEntityPayload';
 import { AppShell, type AppShellContentState } from '../AppShell';
+import { styles } from './ShareablePageRoute.stylex';
 
 type EntityType = ShareableEntityType;
 type PublicEntityPayload = ShareableEntityPayload;
@@ -55,20 +57,14 @@ function RouteRetryState({
   onRetry: () => void;
 }) {
   return (
-    <div className="flex max-w-md flex-col items-center gap-4 p-8 text-center">
-      <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-        Couldn&apos;t load this {entityType}
-      </h2>
-      <p className="text-sm text-zinc-500 dark:text-zinc-400">
+    <div {...stylex.props(styles.retryState)}>
+      <h2 {...stylex.props(styles.stateTitle)}>Couldn&apos;t load this {entityType}</h2>
+      <p {...stylex.props(styles.stateDescription)}>
         {reason === 'paused'
           ? 'Check your connection and try again.'
           : 'The server returned an error. Try again in a moment.'}
       </p>
-      <button
-        type="button"
-        onClick={onRetry}
-        className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-zinc-200 px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-50 dark:border-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-900"
-      >
+      <button type="button" onClick={onRetry} {...stylex.props(styles.retryButton)}>
         <RefreshCw size={14} /> Retry
       </button>
     </div>
@@ -84,19 +80,19 @@ function RouteErrorState({
 }) {
   const isForbidden = kind === 'forbidden';
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white dark:bg-zinc-950">
-      <div className="flex max-w-md flex-col items-center gap-4 p-8 text-center">
+    <div {...stylex.props(styles.errorPage)}>
+      <div {...stylex.props(styles.errorState)}>
         {isForbidden ? (
-          <ShieldOff size={48} className="text-zinc-300 dark:text-zinc-600" />
+          <ShieldOff size={48} {...stylex.props(styles.stateIcon)} />
         ) : (
-          <FileQuestion size={48} className="text-zinc-300 dark:text-zinc-600" />
+          <FileQuestion size={48} {...stylex.props(styles.stateIcon)} />
         )}
-        <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+        <h2 {...stylex.props(styles.stateTitle)}>
           {isForbidden
             ? `You don't have access`
             : `${entityType === 'folder' ? 'Folder' : 'Page'} not found`}
         </h2>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400">
+        <p {...stylex.props(styles.stateDescription)}>
           {isForbidden
             ? 'Your access may have been removed or the item may now be restricted.'
             : 'It may have been deleted.'}
@@ -296,7 +292,11 @@ export function ShareablePageRoute({ entityType, loadingState }: ShareablePageRo
         entityType === 'folder' && isFolderDetailPayload(providerEntity) ? providerEntity : null
       }
     >
-      <AppShell contentState={shellContentState} />
+      <AppShell
+        contentState={shellContentState}
+        fullWidth
+        hasToolbar={routeState.kind === 'ready'}
+      />
     </ShareProvider>
   );
 }

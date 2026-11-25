@@ -1,4 +1,5 @@
 import { METAKIP_CLI_DOCS_URL, METAKIP_DOCS_URL } from '@metakip/shared';
+import * as stylex from '@stylexjs/stylex';
 import { ArrowUpRight } from 'lucide-react';
 import chatgptIcon from '../../../../marketing-site/public/agents/chatgpt.svg?url';
 import claudeIcon from '../../../../marketing-site/public/agents/claude.svg?url';
@@ -7,6 +8,7 @@ import hermesIcon from '../../../../marketing-site/public/agents/nous-girl.png?u
 import openclawIcon from '../../../../marketing-site/public/agents/openclaw.svg?url';
 import opencodeIcon from '../../../../marketing-site/public/agents/opencode.svg?url';
 import piIcon from '../../../../marketing-site/public/agents/pi.svg?url';
+import { agentLinkMarker, styles } from './AgentSetupStep.stylex';
 import { OnboardingActionButton } from './OnboardingActionButton';
 
 const AGENT_GUIDES = `${METAKIP_DOCS_URL}/agents/`;
@@ -78,84 +80,67 @@ export function AgentSetupStep({
 }) {
   return (
     <>
-      <div className="w-full max-w-2xl">
-        <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Step 2 of 2</p>
-        <h1 className="mt-5 text-3xl font-semibold tracking-tight text-zinc-950 dark:text-white">
-          Connect your AI Agent
-        </h1>
-        <p className="mt-3 max-w-xl text-sm leading-6 text-zinc-500 dark:text-zinc-400">
+      <div {...stylex.props(styles.content)}>
+        <p {...stylex.props(styles.stepLabel)}>Step 2 of 2</p>
+        <h1 {...stylex.props(styles.title)}>Connect your AI Agent</h1>
+        <p {...stylex.props(styles.description)}>
           Select your agent for setup instructions specific to its connection options.
         </p>
 
-        <div className="mt-8 grid gap-3 sm:grid-cols-2">
+        <div {...stylex.props(styles.agentGrid)}>
           {agentGuides.map((guide) => (
             <a
               key={guide.slug}
               href={`${AGENT_GUIDES}${guide.slug}/`}
               target="_blank"
               rel="noreferrer"
-              className="group flex min-h-14 cursor-pointer items-center gap-3 rounded-lg border border-zinc-200 bg-white px-3 py-3 transition-colors hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/50"
+              {...stylex.props(styles.agentLink, agentLinkMarker)}
+              data-agent-link=""
             >
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-white">
+              <span {...stylex.props(styles.agentIconContainer)}>
                 <img
                   src={guide.icon}
                   alt=""
                   aria-hidden="true"
-                  className={
-                    guide.icon === hermesIcon
-                      ? 'size-full object-contain'
-                      : 'size-3/4 object-contain'
-                  }
+                  {...stylex.props(
+                    guide.icon === hermesIcon ? styles.agentIconLarge : styles.agentIcon,
+                  )}
                   width="36"
                   height="36"
                   loading="lazy"
                 />
               </span>
-              <span className="min-w-0 flex-1 text-sm font-medium text-zinc-900 dark:text-zinc-50">
-                {guide.name}
-              </span>
+              <span {...stylex.props(styles.agentName)}>{guide.name}</span>
               <ArrowUpRight
                 size={16}
                 aria-hidden="true"
-                className="shrink-0 text-zinc-400 transition-colors group-hover:text-zinc-700 dark:group-hover:text-zinc-200"
+                {...stylex.props(styles.agentExternalIcon)}
+                data-agent-external-icon=""
               />
             </a>
           ))}
         </div>
 
-        <p className="mt-5 text-sm leading-6 text-zinc-500 dark:text-zinc-400">
+        <p {...stylex.props(styles.alternateGuidance)}>
           Using a different agent? See the{' '}
-          <a
-            href={MCP_GUIDE}
-            target="_blank"
-            rel="noreferrer"
-            className="cursor-pointer underline decoration-zinc-300 underline-offset-4 hover:text-zinc-900 dark:decoration-zinc-700 dark:hover:text-zinc-100"
-          >
+          <a href={MCP_GUIDE} target="_blank" rel="noreferrer" {...stylex.props(styles.guideLink)}>
             MCP Guide
           </a>{' '}
           or{' '}
-          <a
-            href={CLI_GUIDE}
-            target="_blank"
-            rel="noreferrer"
-            className="cursor-pointer underline decoration-zinc-300 underline-offset-4 hover:text-zinc-900 dark:decoration-zinc-700 dark:hover:text-zinc-100"
-          >
+          <a href={CLI_GUIDE} target="_blank" rel="noreferrer" {...stylex.props(styles.guideLink)}>
             CLI Guide
           </a>
           .
         </p>
 
         {completionError ? (
-          <p
-            role="alert"
-            className="mt-5 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300"
-          >
+          <p role="alert" {...stylex.props(styles.errorMessage)}>
             {completionError}
           </p>
         ) : null}
       </div>
 
-      <footer className="mt-8 flex min-h-9 w-full max-w-2xl items-center justify-start">
+      <footer {...stylex.props(styles.footer)}>
         <OnboardingActionButton onClick={onFinish} disabled={isWorking} isWorking={isWorking}>
           Open App
         </OnboardingActionButton>

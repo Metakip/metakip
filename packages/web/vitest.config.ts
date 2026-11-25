@@ -1,9 +1,11 @@
 import path from 'node:path';
+import stylex from '@stylexjs/unplugin';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
+import { stylexOptions } from './vite/stylexOptions';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [stylex.vite(stylexOptions), react()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),

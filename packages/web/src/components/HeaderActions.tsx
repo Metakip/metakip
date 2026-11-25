@@ -1,6 +1,8 @@
 import { METAKIP_DOCS_URL, METAKIP_GITHUB_URL } from '@metakip/shared';
+import * as stylex from '@stylexjs/stylex';
 import { BookOpen, Github, Monitor, Moon, Sun } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
+import { styles } from './HeaderActions.stylex';
 
 export function HeaderActions() {
   const { theme, setTheme } = useTheme();
@@ -12,26 +14,29 @@ export function HeaderActions() {
   };
 
   return (
-    <div className="flex items-center gap-1 p-1 rounded-full">
+    <div {...stylex.props(styles.root)}>
       <button
         type="button"
         onClick={toggleTheme}
-        className="relative p-1.5 rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors text-zinc-600 dark:text-zinc-300 overflow-hidden w-7 h-7 flex items-center justify-center cursor-pointer"
+        {...stylex.props(styles.themeButton)}
         title={`Theme: ${theme}`}
       >
-        <div className="relative w-full h-full flex items-center justify-center">
+        <div {...stylex.props(styles.iconFrame)}>
           <div
-            className={`absolute transition-all duration-300 ${theme === 'light' ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 -rotate-90'}`}
+            {...stylex.props(styles.icon, theme === 'light' ? styles.visible : styles.sunHidden)}
           >
             <Sun size={14} />
           </div>
           <div
-            className={`absolute transition-all duration-300 ${theme === 'dark' ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 rotate-90'}`}
+            {...stylex.props(styles.icon, theme === 'dark' ? styles.visible : styles.moonHidden)}
           >
             <Moon size={14} />
           </div>
           <div
-            className={`absolute transition-all duration-300 ${theme === 'system' ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 rotate-90'}`}
+            {...stylex.props(
+              styles.icon,
+              theme === 'system' ? styles.visible : styles.systemHidden,
+            )}
           >
             <Monitor size={14} />
           </div>
@@ -42,7 +47,7 @@ export function HeaderActions() {
         href={METAKIP_DOCS_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="p-1.5 rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors text-zinc-600 dark:text-zinc-300 cursor-pointer"
+        {...stylex.props(styles.externalLink)}
         title="Documentation"
         aria-label="Documentation"
       >
@@ -53,7 +58,7 @@ export function HeaderActions() {
         href={METAKIP_GITHUB_URL}
         target="_blank"
         rel="noopener noreferrer"
-        className="p-1.5 rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors text-zinc-600 dark:text-zinc-300 cursor-pointer"
+        {...stylex.props(styles.externalLink)}
         title="GitHub Repository"
       >
         <Github size={14} />

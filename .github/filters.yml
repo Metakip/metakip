@@ -9,15 +9,20 @@ collab:
 
 web:
   - 'packages/web/**'
+  - 'packages/brand/**'
 
 marketing_site:
   - 'packages/marketing-site/**'
+  - 'packages/brand/**'
+  - 'packages/shared/assets/app-favicon/**'
 
 e2e:
   - 'e2e/**'
 
 docs:
   - 'docs/**'
+  - 'packages/brand/**'
+  - 'packages/shared/assets/app-favicon/**'
   - 'docs/package.json'
   - 'package.json'
   - 'pnpm-lock.yaml'

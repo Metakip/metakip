@@ -1,5 +1,5 @@
 import { expect, type Page, type Response, test } from '@playwright/test';
-import { createNewPage, focusEditor } from '../fixtures';
+import { createNewPage, focusEditor, waitForLiveCollaboration } from '../fixtures';
 
 async function createAnotherPage(page: Page): Promise<void> {
   const currentUrl = page.url();
@@ -372,7 +372,7 @@ test.describe('Properties panel', () => {
   test('17: shows saved content tags in the property suggestion dropdown', async ({ page }) => {
     test.setTimeout(60_000);
     await createNewPage(page);
-    await page.locator('main .bg-emerald-500').waitFor({ state: 'visible', timeout: 15_000 });
+    await waitForLiveCollaboration(page);
     await focusEditor(page);
 
     const contentTag = 'contenttag';

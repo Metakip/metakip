@@ -1,4 +1,5 @@
 import { METAKIP_DOCS_URL } from '@metakip/shared';
+import * as stylex from '@stylexjs/stylex';
 import clsx from 'clsx';
 import { BookOpen, LogOut, Search, Settings, Trash2, User } from 'lucide-react';
 import { useIdentityNavigate } from '../contexts/IdentityLifecycleContext';
@@ -8,6 +9,7 @@ import { useAuth } from '../hooks/useAuth';
 import { authClient } from '../lib/auth-client';
 import { formatShortcut, SHORTCUT_PATTERNS } from '../utils/keyboardShortcuts';
 import { getWorkspacePath } from '../utils/url';
+import { styles } from './ProfilePill.stylex';
 import { ThemeToggle } from './ThemeToggle';
 import { Tooltip } from './Tooltip';
 
@@ -36,14 +38,9 @@ export function ProfilePill({ className }: ProfilePillProps) {
   };
 
   return (
-    <div
-      className={clsx(
-        'relative z-50 flex w-full max-w-[240px] flex-shrink-0 flex-col justify-center overflow-visible rounded-[2rem] border border-white/60 bg-white/70 p-3 shadow-[0_8px_30px_rgb(0,0,0,0.08)] backdrop-blur-2xl dark:border-zinc-700/50 dark:bg-zinc-900/70 dark:shadow-[0_8px_30px_rgb(0,0,0,0.3)]',
-        className,
-      )}
-    >
-      <div className="flex w-full flex-col">
-        <div className="flex items-center justify-between mb-2">
+    <div className={clsx(stylex.props(styles.container).className, className)}>
+      <div {...stylex.props(styles.content)}>
+        <div {...stylex.props(styles.actions)}>
           <ThemeToggle />
           <Tooltip label="Documentation" position="top">
             <a
@@ -51,7 +48,7 @@ export function ProfilePill({ className }: ProfilePillProps) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Documentation"
-              className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
+              {...stylex.props(styles.actionButton)}
             >
               <BookOpen size={18} />
             </a>
@@ -60,7 +57,7 @@ export function ProfilePill({ className }: ProfilePillProps) {
             <button
               type="button"
               onClick={() => navigate(getWorkspacePath('settings'))}
-              className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
+              {...stylex.props(styles.actionButton)}
             >
               <Settings size={18} />
             </button>
@@ -69,51 +66,45 @@ export function ProfilePill({ className }: ProfilePillProps) {
             <button
               type="button"
               onClick={() => navigate(getWorkspacePath('trash'))}
-              className="relative p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
+              {...stylex.props(styles.actionButton, styles.trashButton)}
             >
               <Trash2 size={18} />
-              {hasTrashItems && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-zinc-900 dark:bg-white shadow-sm" />
-              )}
+              {hasTrashItems && <span {...stylex.props(styles.trashIndicator)} />}
             </button>
           </Tooltip>
           <Tooltip label={`Search (${searchShortcut})`} position="top">
             <button
               type="button"
               onClick={() => window.dispatchEvent(new Event('open-search'))}
-              className="p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
+              {...stylex.props(styles.actionButton)}
             >
               <Search size={18} />
             </button>
           </Tooltip>
         </div>
-        <div className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/50 dark:hover:bg-zinc-800/50 transition-colors group cursor-pointer">
-          <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden flex-shrink-0 shadow-sm ring-1 ring-black/5 dark:ring-white/10">
+        <div {...stylex.props(stylex.defaultMarker(), styles.userCard)}>
+          <div {...stylex.props(styles.avatar)}>
             {session?.user?.image ? (
               <img
                 src={session.user.image}
                 alt={session.user.name || 'User'}
-                className="w-full h-full object-cover"
+                {...stylex.props(styles.avatarImage)}
                 referrerPolicy="no-referrer"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-zinc-400">
+              <div {...stylex.props(styles.avatarFallback)}>
                 <User size={16} />
               </div>
             )}
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
-              {session?.user?.name || 'User'}
-            </div>
-            <div className="text-xs text-zinc-500 dark:text-zinc-400 truncate">
-              {session?.user?.email}
-            </div>
+          <div {...stylex.props(styles.userDetails)}>
+            <div {...stylex.props(styles.userName)}>{session?.user?.name || 'User'}</div>
+            <div {...stylex.props(styles.userEmail)}>{session?.user?.email}</div>
           </div>
           <button
             type="button"
             onClick={handleSignOut}
-            className="p-1.5 text-zinc-400 dark:text-zinc-500 hover:text-red-600 dark:hover:text-red-400 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-500/10 transition-all cursor-pointer"
+            {...stylex.props(styles.signOutButton)}
             title="Sign Out"
           >
             <LogOut size={16} />

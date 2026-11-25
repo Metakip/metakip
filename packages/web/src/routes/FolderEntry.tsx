@@ -1,9 +1,11 @@
-import type { CollaboratorDisplay, FolderTreeNode } from '@metakip/shared';
+import type { FolderTreeNode } from '@metakip/shared';
+import * as stylex from '@stylexjs/stylex';
 import { FileText } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { ExplorerItem, type ExplorerItemData } from '../components/workspace/ExplorerItem';
+import type { ExplorerItemData } from '../components/workspace/ExplorerItem';
+import { ExplorerItemSections } from '../components/workspace/ExplorerItemSections';
 import { ExplorerLoadingState } from '../components/workspace/ExplorerLoadingState';
 import { ExplorerToolbar } from '../components/workspace/ExplorerToolbar';
 import { MoveDialog } from '../components/workspace/MoveDialog';
@@ -41,6 +43,7 @@ import {
   getWorkspacePath,
   getWorkspacePathPrefix,
 } from '../utils/url';
+import { styles } from './ExplorerRoute.stylex';
 import { getFolderContentsModel } from './folderContentsModel';
 
 export default function FolderEntry() {
@@ -83,20 +86,12 @@ export default function FolderEntry() {
   const clipboard = useClipboard();
   const selection = useSelection();
 
-  const filterOutSelf = useMemo(
-    () =>
-      (collaborators: CollaboratorDisplay[]): CollaboratorDisplay[] =>
-        currentUserId
-          ? collaborators.filter((collaborator) => collaborator.userId !== currentUserId)
-          : collaborators,
-    [currentUserId],
-  );
-
   const [viewMode, setViewMode] = useExplorerViewMode();
   const [moveDialogOpen, setMoveDialogOpen] = useState(false);
   const [editingTarget, setEditingTarget] = useState<{
     kind: 'page' | 'folder';
     id: string;
+    section: 'all-items';
     value: string;
   } | null>(null);
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
@@ -243,7 +238,12 @@ export default function FolderEntry() {
       if (isAnonymous) {
         navigate(buildFolderPath(folder.name, folder.id));
       } else {
-        setEditingTarget({ kind: 'folder', id: folder.id, value: folder.name });
+        setEditingTarget({
+          kind: 'folder',
+          id: folder.id,
+          section: 'all-items',
+          value: folder.name,
+        });
       }
     } catch {
       // Error toast handled globally by MutationCache.onError
@@ -278,7 +278,12 @@ export default function FolderEntry() {
       (candidate) => candidate.type === item.type && candidate.id === item.id,
     );
     if (!currentItem || !canRenameEntity(currentItem, latestUserId)) return;
-    setEditingTarget({ kind: currentItem.type, id: currentItem.id, value: currentItem.title });
+    setEditingTarget({
+      kind: currentItem.type,
+      id: currentItem.id,
+      section: 'all-items',
+      value: currentItem.title,
+    });
   };
 
   const handleSaveRename = () => {
@@ -469,18 +474,16 @@ export default function FolderEntry() {
 
   if (!folderId) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <FileText size={48} className="text-zinc-300 dark:text-zinc-600 mb-4" />
-        <h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-50 mb-2">Invalid folder</h3>
-        <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm">
-          This folder URL is not valid.
-        </p>
+      <div {...stylex.props(styles.emptyState)}>
+        <FileText size={48} {...stylex.props(styles.emptyIcon)} />
+        <h3 {...stylex.props(styles.emptyTitle)}>Invalid folder</h3>
+        <p {...stylex.props(styles.emptyDescription)}>This folder URL is not valid.</p>
       </div>
     );
   }
 
   return (
-    <div className="app-shell-full-width explorer-page flex w-full min-w-0 flex-col">
+    <div {...stylex.props(styles.route)}>
       <ExplorerToolbar
         breadcrumbs={breadcrumbPath}
         homeHref={getWorkspacePath()}
@@ -491,9 +494,9 @@ export default function FolderEntry() {
         onCreateFolder={handleCreateFolder}
       />
 
-      <div className="explorer-content mx-auto mt-4 w-full max-w-4xl space-y-4 px-6 md:px-12">
+      <div className={`explorer-content ${stylex.props(styles.content).className ?? ''}`}>
         {initialQueriesState.status === 'error' || initialQueriesState.status === 'paused' ? (
-          <div className="p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-md flex items-center justify-between">
+          <div {...stylex.props(styles.loadError)}>
             <span>
               {initialQueriesState.status === 'paused'
                 ? 'Loading is paused. Check your connection.'
@@ -502,7 +505,7 @@ export default function FolderEntry() {
             <button
               type="button"
               onClick={() => void Promise.all([refetchPages(), refetchFolders()])}
-              className="px-3 py-1 bg-red-100 dark:bg-red-900/40 hover:bg-red-200 dark:hover:bg-red-900/60 rounded text-sm transition-colors"
+              {...stylex.props(styles.retryErrorButton)}
             >
               Retry
             </button>
@@ -510,181 +513,44 @@ export default function FolderEntry() {
         ) : initialQueriesState.status === 'loading' ? (
           <ExplorerLoadingState />
         ) : allItems.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <FileText size={48} className="text-zinc-300 dark:text-zinc-600 mb-4" />
-            <h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-50 mb-2">
-              No items yet
-            </h3>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm">
+          <div {...stylex.props(styles.emptyState)}>
+            <FileText size={48} {...stylex.props(styles.emptyIcon)} />
+            <h3 {...stylex.props(styles.emptyTitle)}>No items yet</h3>
+            <p {...stylex.props(styles.emptyDescription)}>
               {canCreateChildren
                 ? 'Create a new page or folder to get started.'
                 : 'No items in this folder.'}
             </p>
           </div>
-        ) : viewMode === 'card' ? (
-          <div className="space-y-8 animate-fade-in">
-            {starredItems.length > 0 && (
-              <div>
-                <h2 className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3 px-1">
-                  Starred
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {starredItems.map((item) => (
-                    <ExplorerItem
-                      key={`${item.type}-${item.id}`}
-                      item={item}
-                      viewMode="card"
-                      isSelected={selection.isSelected(item.id)}
-                      isStarred={isStarredItem(item)}
-                      onSelect={(e) => {
-                        e.stopPropagation();
-                        selection.toggle({ id: item.id, type: item.type });
-                      }}
-                      onNavigate={(e) =>
-                        handleItemClick(item, allItemIndexMap.get(item.id) ?? 0, e)
-                      }
-                      {...(canRenameEntity(item, currentUserId)
-                        ? { onRename: () => handleRenameItem(item) }
-                        : {})}
-                      collaborators={filterOutSelf(item.collaborators ?? [])}
-                      canSelect={!isAnonymous && !bulkRemoveMutation.isPending}
-                      showContextMenu={!isAnonymous}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-            <div>
-              <h2 className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3 px-1">
-                All Pages
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {allItems.map((item, index) => (
-                  <ExplorerItem
-                    key={`${item.type}-${item.id}`}
-                    item={item}
-                    viewMode="card"
-                    isSelected={selection.isSelected(item.id)}
-                    isStarred={isStarredItem(item)}
-                    onSelect={(e) => {
-                      e.stopPropagation();
-                      selection.toggle({ id: item.id, type: item.type });
-                    }}
-                    onNavigate={(e) => handleItemClick(item, index, e)}
-                    {...(canRenameEntity(item, currentUserId)
-                      ? { onRename: () => handleRenameItem(item) }
-                      : {})}
-                    isEditing={
-                      canRenameEditingTarget &&
-                      editingTarget?.kind === item.type &&
-                      editingTarget.id === item.id
-                    }
-                    editValue={editingTarget?.value ?? ''}
-                    onEditChange={(value) =>
-                      setEditingTarget((prev) => (prev ? { ...prev, value } : null))
-                    }
-                    onEditSave={handleSaveRename}
-                    onEditKeyDown={handleEditKeyDown}
-                    collaborators={filterOutSelf(item.collaborators ?? [])}
-                    canSelect={!isAnonymous && !bulkRemoveMutation.isPending}
-                    showContextMenu={!isAnonymous}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
         ) : (
-          <div className="space-y-8">
-            {starredItems.length > 0 && (
-              <div>
-                <h2 className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3 px-1">
-                  Starred
-                </h2>
-                <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-clip">
-                  <div className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-3 px-4 py-2 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-800">
-                    <span className="w-8" />
-                    <span className="-ml-10">Name</span>
-                    <span className="hidden md:block w-28">Shared with</span>
-                    <span className="hidden md:block w-36">Last edited</span>
-                    <span className="w-8" />
-                  </div>
-                  <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                    {starredItems.map((item) => (
-                      <ExplorerItem
-                        key={`${item.type}-${item.id}`}
-                        item={item}
-                        viewMode="list"
-                        isSelected={selection.isSelected(item.id)}
-                        isStarred={isStarredItem(item)}
-                        onSelect={(e) => {
-                          e.stopPropagation();
-                          selection.toggle({ id: item.id, type: item.type });
-                        }}
-                        onNavigate={(e) =>
-                          handleItemClick(item, allItemIndexMap.get(item.id) ?? 0, e)
-                        }
-                        {...(canRenameEntity(item, currentUserId)
-                          ? { onRename: () => handleRenameItem(item) }
-                          : {})}
-                        collaborators={filterOutSelf(item.collaborators ?? [])}
-                        canSelect={!isAnonymous && !bulkRemoveMutation.isPending}
-                        showContextMenu={!isAnonymous}
-                        showCheckboxes={hasSelection}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-            <div>
-              <h2 className="text-[11px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3 px-1">
-                All Pages
-              </h2>
-              <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-clip">
-                <div className="grid grid-cols-[auto_1fr_auto_auto_auto] gap-3 px-4 py-2 text-xs font-medium text-zinc-400 dark:text-zinc-500 uppercase tracking-wider border-b border-zinc-200 dark:border-zinc-800">
-                  <span className="w-8" />
-                  <span className="-ml-10">Name</span>
-                  <span className="hidden md:block w-28">Shared with</span>
-                  <span className="hidden md:block w-36">Last edited</span>
-                  <span className="w-8" />
-                </div>
-                <div className="divide-y divide-zinc-100 dark:divide-zinc-800">
-                  {allItems.map((item, index) => (
-                    <ExplorerItem
-                      key={`${item.type}-${item.id}`}
-                      item={item}
-                      viewMode="list"
-                      isSelected={selection.isSelected(item.id)}
-                      isStarred={isStarredItem(item)}
-                      onSelect={(e) => {
-                        e.stopPropagation();
-                        selection.toggle({ id: item.id, type: item.type });
-                      }}
-                      onNavigate={(e) => handleItemClick(item, index, e)}
-                      {...(canRenameEntity(item, currentUserId)
-                        ? { onRename: () => handleRenameItem(item) }
-                        : {})}
-                      isEditing={
-                        canRenameEditingTarget &&
-                        editingTarget?.kind === item.type &&
-                        editingTarget.id === item.id
-                      }
-                      editValue={editingTarget?.value ?? ''}
-                      onEditChange={(value) =>
-                        setEditingTarget((prev) => (prev ? { ...prev, value } : null))
-                      }
-                      onEditSave={handleSaveRename}
-                      onEditKeyDown={handleEditKeyDown}
-                      collaborators={filterOutSelf(item.collaborators ?? [])}
-                      canSelect={!isAnonymous && !bulkRemoveMutation.isPending}
-                      showContextMenu={!isAnonymous}
-                      showCheckboxes={hasSelection}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+          <ExplorerItemSections
+            sections={[
+              { id: 'starred', title: 'Starred', items: starredItems },
+              { id: 'all-items', title: 'All Pages', items: allItems },
+            ]}
+            viewMode={viewMode}
+            showContextMenu={!isAnonymous}
+            currentUserId={currentUserId}
+            canSelect={!isAnonymous && !bulkRemoveMutation.isPending}
+            hasSelection={hasSelection}
+            editingTarget={canRenameEditingTarget ? editingTarget : null}
+            isStarred={isStarredItem}
+            isSelected={selection.isSelected}
+            onSelect={(item, event) => {
+              event.stopPropagation();
+              selection.toggle({ id: item.id, type: item.type });
+            }}
+            onNavigate={(item, index, event) =>
+              handleItemClick(item, allItemIndexMap.get(item.id) ?? index, event)
+            }
+            onRename={handleRenameItem}
+            onEditChange={(value) =>
+              setEditingTarget((previous) => (previous ? { ...previous, value } : null))
+            }
+            onEditSave={handleSaveRename}
+            onEditKeyDown={handleEditKeyDown}
+            animation="fast"
+          />
         )}
 
         {!isAnonymous && (

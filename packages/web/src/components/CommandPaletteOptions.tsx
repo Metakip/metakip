@@ -1,6 +1,8 @@
 import type { V1SearchSnippet, V1SearchTextMatch } from '@metakip/shared';
+import * as stylex from '@stylexjs/stylex';
 import { BookOpen, FilePlus2, FileText, Folder, History, Trash2 } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { styles } from './CommandPaletteOptions.stylex';
 
 export type SearchResult = {
   id: string;
@@ -35,10 +37,7 @@ function HighlightedText({
   for (const [index, match] of matches.entries()) {
     if (match.start > cursor) parts.push(text.slice(cursor, match.start));
     parts.push(
-      <mark
-        key={index}
-        className="rounded bg-amber-200/80 px-0.5 text-zinc-900 dark:bg-amber-700/60 dark:text-zinc-100"
-      >
+      <mark key={index} {...stylex.props(styles.highlight)}>
         {text.slice(match.start, match.end)}
       </mark>,
     );
@@ -48,12 +47,14 @@ function HighlightedText({
   return <>{parts}</>;
 }
 
-function optionClass(selected: boolean, padding: string): string {
-  return `flex w-full cursor-pointer items-center gap-3 rounded-xl px-3 ${padding} text-left transition-colors ${
-    selected
-      ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100'
-      : 'text-zinc-600 hover:bg-zinc-50 dark:text-zinc-400 dark:hover:bg-zinc-800/60'
-  }`;
+function optionClass(selected: boolean, result: boolean): string {
+  return (
+    stylex.props(
+      styles.option,
+      result ? styles.resultOption : styles.quickOption,
+      selected && styles.selectedOption,
+    ).className ?? ''
+  );
 }
 
 type PaletteOptionsProps = {
@@ -78,24 +79,17 @@ export function CommandPaletteOptions({
   onClearRecent,
 }: PaletteOptionsProps) {
   return (
-    <div className="max-h-[60vh] min-h-24 overflow-y-auto p-2 sm:p-3">
+    <div {...stylex.props(styles.options)}>
       {!query ? (
         <div id="command-palette-list" role="listbox" aria-label="Search suggestions">
           {recentSearches.length > 0 && (
             // biome-ignore lint/a11y/useSemanticElements: listbox groups are not form field groups
             <div role="group" aria-labelledby="recent-searches-heading">
-              <div className="flex items-center justify-between px-3 pb-2 pt-1">
-                <div
-                  id="recent-searches-heading"
-                  className="text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500"
-                >
+              <div {...stylex.props(styles.sectionHeader)}>
+                <div id="recent-searches-heading" {...stylex.props(styles.sectionTitle)}>
                   Recent searches
                 </div>
-                <button
-                  type="button"
-                  onClick={onClearRecent}
-                  className="cursor-pointer rounded px-1.5 py-1 text-xs text-zinc-400 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
-                >
+                <button type="button" onClick={onClearRecent} {...stylex.props(styles.clearButton)}>
                   Clear
                 </button>
               </div>
@@ -109,20 +103,17 @@ export function CommandPaletteOptions({
                   aria-selected={selectedIndex === index}
                   onMouseEnter={() => onHover(index)}
                   onClick={() => onSelect(index)}
-                  className={optionClass(selectedIndex === index, 'py-2.5')}
+                  className={optionClass(selectedIndex === index, false)}
                 >
-                  <History aria-hidden="true" className="h-4 w-4 shrink-0 text-zinc-400" />
-                  <span className="min-w-0 flex-1 truncate text-sm">{recentSearch}</span>
+                  <History aria-hidden="true" {...stylex.props(styles.recentIcon)} />
+                  <span {...stylex.props(styles.recentText)}>{recentSearch}</span>
                 </button>
               ))}
             </div>
           )}
           {/* biome-ignore lint/a11y/useSemanticElements: listbox groups are not form field groups */}
           <div role="group" aria-labelledby="quick-actions-heading">
-            <div
-              id="quick-actions-heading"
-              className="px-3 pb-2 pt-1 text-xs font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-500"
-            >
+            <div id="quick-actions-heading" {...stylex.props(styles.quickSectionTitle)}>
               Quick actions
             </div>
             {QUICK_ACTIONS.map((action, index) => {
@@ -138,16 +129,14 @@ export function CommandPaletteOptions({
                   aria-selected={selectedIndex === optionIndex}
                   onMouseEnter={() => onHover(optionIndex)}
                   onClick={() => onSelect(optionIndex)}
-                  className={optionClass(selectedIndex === optionIndex, 'py-2.5')}
+                  className={optionClass(selectedIndex === optionIndex, false)}
                 >
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-zinc-200/60 text-zinc-600 dark:bg-zinc-700/60 dark:text-zinc-300">
-                    <Icon aria-hidden="true" className="h-4 w-4" />
+                  <span {...stylex.props(styles.quickActionIcon)}>
+                    <Icon aria-hidden="true" {...stylex.props(styles.smallIcon)} />
                   </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-medium">{action.title}</span>
-                    <span className="mt-0.5 block truncate text-xs text-zinc-500 dark:text-zinc-400">
-                      {action.description}
-                    </span>
+                  <span {...stylex.props(styles.optionText)}>
+                    <span {...stylex.props(styles.actionTitle)}>{action.title}</span>
+                    <span {...stylex.props(styles.actionDescription)}>{action.description}</span>
                   </span>
                 </button>
               );
@@ -155,16 +144,13 @@ export function CommandPaletteOptions({
           </div>
         </div>
       ) : isLoading ? (
-        <div
-          role="status"
-          className="px-4 py-8 text-center text-sm text-zinc-500 dark:text-zinc-400"
-        >
+        <div role="status" {...stylex.props(styles.searching)}>
           Searching your workspace…
         </div>
       ) : results.length === 0 ? (
-        <div className="px-4 py-10 text-center">
-          <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">No results found</p>
-          <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+        <div {...stylex.props(styles.emptyResults)}>
+          <p {...stylex.props(styles.emptyTitle)}>No results found</p>
+          <p {...stylex.props(styles.emptyDescription)}>
             We couldn't find anything matching &quot;{query}&quot;
           </p>
         </div>
@@ -180,19 +166,19 @@ export function CommandPaletteOptions({
               aria-selected={selectedIndex === index}
               onMouseEnter={() => onHover(index)}
               onClick={() => onSelect(index)}
-              className={optionClass(selectedIndex === index, 'py-3')}
+              className={optionClass(selectedIndex === index, true)}
             >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-zinc-200/60 text-zinc-600 dark:bg-zinc-700/60 dark:text-zinc-300">
+              <span {...stylex.props(styles.quickActionIcon)}>
                 {result.icon ? (
                   result.icon
                 ) : result.type === 'folder' ? (
-                  <Folder aria-hidden="true" className="h-4 w-4" />
+                  <Folder aria-hidden="true" {...stylex.props(styles.smallIcon)} />
                 ) : (
-                  <FileText aria-hidden="true" className="h-4 w-4" />
+                  <FileText aria-hidden="true" {...stylex.props(styles.smallIcon)} />
                 )}
               </span>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm font-medium">
+              <span {...stylex.props(styles.optionText)}>
+                <span {...stylex.props(styles.resultTitle)}>
                   {result.titleMatches ? (
                     <HighlightedText text={result.title} matches={result.titleMatches} />
                   ) : (
@@ -200,17 +186,12 @@ export function CommandPaletteOptions({
                   )}
                 </span>
                 {result.snippet && (
-                  <span
-                    data-testid="search-result-snippet"
-                    className="mt-1 block line-clamp-2 text-xs leading-5 text-zinc-500 dark:text-zinc-400"
-                  >
+                  <span data-testid="search-result-snippet" {...stylex.props(styles.resultSnippet)}>
                     <HighlightedText {...result.snippet} />
                   </span>
                 )}
                 {result.breadcrumb.length > 0 && (
-                  <span className="mt-1 block truncate text-xs text-zinc-400 dark:text-zinc-500">
-                    {result.breadcrumb.join(' / ')}
-                  </span>
+                  <span {...stylex.props(styles.breadcrumb)}>{result.breadcrumb.join(' / ')}</span>
                 )}
               </span>
             </button>

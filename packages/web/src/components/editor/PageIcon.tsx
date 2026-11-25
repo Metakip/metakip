@@ -1,9 +1,11 @@
+import * as stylex from '@stylexjs/stylex';
 import { FileText } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useIsReadOnly } from '../../contexts/EditorReadOnlyContext';
 import { useShareContext } from '../../contexts/ShareContext';
 import { useUpdatePage } from '../../hooks/use-pages';
 import { EmojiPicker } from '../EmojiPicker';
+import { styles } from './PageIcon.stylex';
 
 interface PageIconProps {
   pageId: string;
@@ -35,8 +37,8 @@ export function PageIcon({ pageId, initialIcon }: PageIconProps) {
   };
 
   const content = (
-    <div className="flex items-center justify-center w-10 h-10 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-4xl">
-      {icon ? icon : <FileText className="w-8 h-8 text-zinc-400 dark:text-zinc-500" />}
+    <div {...stylex.props(styles.root)}>
+      {icon ? icon : <FileText {...stylex.props(styles.fallbackIcon)} />}
     </div>
   );
 

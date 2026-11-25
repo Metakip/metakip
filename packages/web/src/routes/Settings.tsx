@@ -1,14 +1,17 @@
 import { METAKIP_DOCS_URL } from '@metakip/shared';
+import * as stylex from '@stylexjs/stylex';
 import { useQueryClient } from '@tanstack/react-query';
 import { BookOpen, Download, FolderOpen } from 'lucide-react';
 import { useState } from 'react';
 import { ObsidianImportDialog } from '../components/import/ObsidianImportDialog';
 import { ApiTokensPanel } from '../components/settings/ApiTokensPanel';
 import { InstallAppCard } from '../components/settings/InstallAppCard';
+import { actionColors } from '../components/ui/ActionColors.stylex';
 import { WorkspaceMembersPanel } from '../components/workspace/WorkspaceMembersPanel';
 import { WorkspacePageToolbar } from '../components/workspace/WorkspacePageToolbar';
 import { useIdentityLifecycle } from '../contexts/IdentityLifecycleContext';
 import { showErrorToast, showSuccessToast } from '../utils/toast';
+import { styles } from './Settings.stylex';
 
 export default function Settings() {
   const queryClient = useQueryClient();
@@ -44,30 +47,26 @@ export default function Settings() {
   };
 
   return (
-    <div className="max-w-3xl space-y-8">
+    <div {...stylex.props(styles.settings)}>
       <WorkspacePageToolbar title="Settings" />
       <div>
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Settings</h1>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-          Manage your account and data.
-        </p>
+        <h1 {...stylex.props(styles.pageTitle)}>Settings</h1>
+        <p {...stylex.props(styles.pageDescription)}>Manage your account and data.</p>
         <a
           href={METAKIP_DOCS_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-3 inline-flex items-center gap-2 text-sm font-medium text-zinc-700 hover:text-zinc-950 dark:text-zinc-300 dark:hover:text-white"
+          {...stylex.props(styles.documentationLink)}
         >
           <BookOpen size={16} />
           Read the documentation
         </a>
       </div>
 
-      <section className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-6">
-        <div className="mb-4">
-          <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-            Workspace members
-          </h2>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+      <section {...stylex.props(styles.card)}>
+        <div {...stylex.props(styles.memberHeader)}>
+          <h2 {...stylex.props(styles.sectionTitle)}>Workspace members</h2>
+          <p {...stylex.props(styles.sectionDescription)}>
             Invite people to collaborate on your workspace. Restricted pages and folders can opt out
             of inherited workspace access.
           </p>
@@ -76,18 +75,16 @@ export default function Settings() {
         <WorkspaceMembersPanel />
       </section>
 
-      <section className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-6">
+      <section {...stylex.props(styles.card)}>
         <ApiTokensPanel />
       </section>
 
       <InstallAppCard />
 
-      <section className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-6 space-y-4">
+      <section {...stylex.props(styles.card, styles.spacedCard)}>
         <div>
-          <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-            Import Obsidian vault
-          </h2>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          <h2 {...stylex.props(styles.sectionTitle)}>Import Obsidian vault</h2>
+          <p {...stylex.props(styles.sectionDescription)}>
             Import your entire Obsidian vault including notes, images, tags, and backlinks.
           </p>
         </div>
@@ -95,7 +92,7 @@ export default function Settings() {
           <button
             type="button"
             onClick={() => setShowImportDialog(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-zinc-900 dark:bg-zinc-700 rounded-md hover:bg-zinc-800 dark:hover:bg-zinc-600 transition-colors cursor-pointer"
+            {...stylex.props(actionColors.subdued, styles.primaryButton)}
           >
             <FolderOpen size={16} />
             Import Vault
@@ -103,12 +100,10 @@ export default function Settings() {
         </div>
       </section>
 
-      <section className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-6 space-y-4">
+      <section {...stylex.props(styles.card, styles.spacedCard)}>
         <div>
-          <h2 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
-            Export all pages
-          </h2>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          <h2 {...stylex.props(styles.sectionTitle)}>Export all pages</h2>
+          <p {...stylex.props(styles.sectionDescription)}>
             Download all pages as markdown files in a zip.
           </p>
         </div>
@@ -117,7 +112,7 @@ export default function Settings() {
             type="button"
             onClick={handleExportAll}
             disabled={isExporting}
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-zinc-900 dark:bg-zinc-700 rounded-md hover:bg-zinc-800 dark:hover:bg-zinc-600 transition-colors disabled:opacity-60 cursor-pointer"
+            {...stylex.props(actionColors.subdued, styles.primaryButton)}
           >
             <Download size={16} />
             {isExporting ? 'Exporting...' : 'Export All Pages'}

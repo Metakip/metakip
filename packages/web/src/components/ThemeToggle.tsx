@@ -1,6 +1,8 @@
+import * as stylex from '@stylexjs/stylex';
 import { Monitor, Moon, Sun } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import { formatShortcut, SHORTCUT_PATTERNS } from '../utils/keyboardShortcuts';
+import { styles } from './ThemeToggle.stylex';
 import { Tooltip } from './Tooltip';
 
 export function ThemeToggle() {
@@ -25,21 +27,21 @@ export function ThemeToggle() {
         type="button"
         aria-label="Toggle theme"
         onClick={toggleTheme}
-        className="relative flex h-8 w-8 cursor-pointer items-center justify-center overflow-hidden rounded-md p-2 text-zinc-600 transition-colors hover:bg-zinc-200 dark:text-zinc-300 dark:hover:bg-zinc-800"
+        {...stylex.props(styles.button)}
       >
-        <div className="relative w-full h-full flex items-center justify-center">
+        <div {...stylex.props(styles.iconStack)}>
           <div
-            className={`absolute transition-all duration-300 ${theme === 'light' ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 -rotate-90'}`}
+            {...stylex.props(styles.icon, theme === 'light' ? styles.visible : styles.hiddenLeft)}
           >
             <Sun size={16} />
           </div>
           <div
-            className={`absolute transition-all duration-300 ${theme === 'dark' ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 rotate-90'}`}
+            {...stylex.props(styles.icon, theme === 'dark' ? styles.visible : styles.hiddenRight)}
           >
             <Moon size={16} />
           </div>
           <div
-            className={`absolute transition-all duration-300 ${theme === 'system' ? 'opacity-100 scale-100 rotate-0' : 'opacity-0 scale-50 rotate-90'}`}
+            {...stylex.props(styles.icon, theme === 'system' ? styles.visible : styles.hiddenRight)}
           >
             <Monitor size={16} />
           </div>
