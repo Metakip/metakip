@@ -1,3 +1,4 @@
+import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 import { Navigate, useLocation, useParams } from 'react-router-dom';
 import { OnboardingStatusBoundary } from '../components/auth/OnboardingStatusBoundary';
@@ -6,6 +7,7 @@ import { ContentSetupStep } from '../components/onboarding/ContentSetupStep';
 import { useIdentityLifecycle, useIdentityNavigate } from '../contexts/IdentityLifecycleContext';
 import { useCompleteOnboarding } from '../hooks/useOnboarding';
 import { getOnboardingDestination, withImportedDestination } from '../utils/onboardingNavigation';
+import { styles } from './Onboarding.stylex';
 
 function OnboardingFlow({ onboardingStep }: { onboardingStep: '1' | '2' }) {
   const navigate = useIdentityNavigate();
@@ -39,8 +41,8 @@ function OnboardingFlow({ onboardingStep }: { onboardingStep: '1' | '2' }) {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50">
-      <main className="flex min-h-screen flex-col items-center justify-center px-5 py-10 sm:px-8">
+    <div {...stylex.props(styles.root)}>
+      <main {...stylex.props(styles.main)}>
         {onboardingStep === '1' ? (
           <ContentSetupStep
             completionError={completionError}

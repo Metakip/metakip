@@ -73,9 +73,17 @@ vi.mock('./KebabMenu', () => ({
       {items.map((item) => (
         <div key={item.label}>
           {item.dividerBefore && <hr />}
-          <button type="button" onClick={item.onClick}>
-            {item.label}
-          </button>
+          {item.type === 'radio-group' ? (
+            item.options.map((option) => (
+              <button key={option.value} type="button" onClick={option.onSelect}>
+                {option.label}
+              </button>
+            ))
+          ) : (
+            <button type="button" onClick={item.onClick}>
+              {item.label}
+            </button>
+          )}
         </div>
       ))}
     </div>

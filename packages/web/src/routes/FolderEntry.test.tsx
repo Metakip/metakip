@@ -76,6 +76,7 @@ const mocks = vi.hoisted(() => ({
   },
   toolbarProps: vi.fn(),
   explorerItems: vi.fn(),
+  explorerItemProps: vi.fn(),
   pageCollaboratorIds: vi.fn(),
   folderCollaboratorIds: vi.fn(),
   idleMutation: () => ({
@@ -156,8 +157,10 @@ vi.mock('../hooks/use-copy', () => ({
   useCopyPage: mocks.idleMutation,
 }));
 vi.mock('../components/workspace/ExplorerItem', () => ({
-  ExplorerItem: ({ item }: { item: { title: string; type: string } }) => {
+  ExplorerItem: (props: { item: { title: string; type: string }; showContextMenu?: boolean }) => {
+    const { item } = props;
     mocks.explorerItems(item);
+    mocks.explorerItemProps(props);
     return <div>{`${item.type}:${item.title}`}</div>;
   },
 }));
@@ -326,6 +329,9 @@ describe('FolderEntry access refresh', () => {
 
     expect(screen.getByText('folder:Public child folder')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /new page/i })).not.toBeInTheDocument();
+    expect(mocks.explorerItemProps).toHaveBeenCalledWith(
+      expect.objectContaining({ showContextMenu: false }),
+    );
     expect(mocks.folderCollaboratorIds).toHaveBeenLastCalledWith([
       '22222222-2222-4222-8222-222222222222',
     ]);

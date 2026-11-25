@@ -5,13 +5,14 @@ import {
   type SharePermission,
   truncateUnicodeCodePoints,
 } from '@metakip/shared';
-import clsx from 'clsx';
+import * as stylex from '@stylexjs/stylex';
 import { Check, FileText, Folder } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { formatDate } from '../../utils/date';
 import { PageContextMenu } from '../ui/PageContextMenu';
 import { CollaboratorAvatars } from './CollaboratorAvatars';
+import { explorerItemMarker, styles } from './ExplorerItem.stylex';
 
 export type ExplorerItemType = 'page' | 'folder';
 
@@ -41,11 +42,12 @@ interface ExplorerItemProps {
   onNavigate: (e: React.MouseEvent | React.KeyboardEvent) => void;
   onRename?: () => void;
   onCopy?: () => void;
-  isEditing?: boolean;
-  editValue?: string;
-  onEditChange?: (value: string) => void;
-  onEditSave?: () => void;
-  onEditKeyDown?: (e: React.KeyboardEvent) => void;
+  edit: {
+    value: string;
+    onChange: (value: string) => void;
+    onSave: () => void;
+    onKeyDown: (e: React.KeyboardEvent) => void;
+  } | null;
   collaborators?: CollaboratorDisplay[];
   canSelect?: boolean;
   showCheckboxes?: boolean;
@@ -61,20 +63,16 @@ export function ExplorerItem({
   onNavigate,
   onRename = () => {},
   onCopy,
-  isEditing = false,
-  editValue = '',
-  onEditChange,
-  onEditSave,
-  onEditKeyDown,
+  edit,
   collaborators = [],
   canSelect = true,
   showCheckboxes = false,
   showContextMenu = true,
 }: ExplorerItemProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const [isHovered, setIsHovered] = useState(false);
+  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const editLengthLimit = item.type === 'folder' ? MAX_FOLDER_NAME_LENGTH : MAX_PAGE_TITLE_LENGTH;
-
+  const isEditing = edit !== null;
   useEffect(() => {
     if (isEditing && inputRef.current) {
       inputRef.current.focus();
@@ -83,9 +81,16 @@ export function ExplorerItem({
   }, [isEditing]);
 
   const handleClick = (e: React.MouseEvent | React.KeyboardEvent) => {
-    if ((e.target as HTMLElement).closest('.item-action')) return;
     if (isEditing) return;
     onNavigate(e);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (isEditing || e.target !== e.currentTarget) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleClick(e);
+    }
   };
 
   const handleCheckboxClick = (e: React.MouseEvent) => {
@@ -97,6 +102,19 @@ export function ExplorerItem({
 
   const updatedDate =
     typeof item.updatedAt === 'string' ? item.updatedAt : item.updatedAt.toISOString();
+  const editInput = edit && (
+    <input
+      ref={inputRef}
+      type="text"
+      maxLength={editLengthLimit * 2}
+      value={edit.value}
+      onChange={(e) => edit.onChange(truncateUnicodeCodePoints(e.target.value, editLengthLimit))}
+      onBlur={edit.onSave}
+      onKeyDown={edit.onKeyDown}
+      {...stylex.props(styles.editInput)}
+      onClick={(e) => e.stopPropagation()}
+    />
+  );
 
   if (viewMode === 'list') {
     return (
@@ -104,93 +122,70 @@ export function ExplorerItem({
       <div
         role="button"
         tabIndex={0}
-        className={clsx(
-          'group grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-3 px-4 py-2.5 rounded-lg cursor-pointer transition-all duration-150 w-full text-left',
-          isSelected
-            ? 'bg-zinc-100 dark:bg-zinc-800'
-            : 'hover:bg-zinc-50 dark:hover:bg-zinc-900/50',
-        )}
+        {...stylex.props(styles.listRow, isSelected && styles.selected, explorerItemMarker)}
+        data-explorer-list-row=""
+        data-context-menu-open={isContextMenuOpen ? '' : undefined}
         onClick={handleClick}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        onKeyDown={(e) => {
-          if (isEditing) return;
-          if (e.target !== e.currentTarget) return;
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            handleClick(e);
-          }
-        }}
+        onKeyDown={handleKeyDown}
         data-entity-id={item.id}
         data-entity-type={item.type}
       >
         <div
-          className={clsx(
-            'flex items-center justify-center w-8 h-8 rounded-md shrink-0 transition-colors',
-            isSelected || isHovered || showCheckboxes
-              ? 'bg-transparent'
-              : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-500 dark:text-zinc-400',
+          {...stylex.props(
+            styles.listIcon,
+            !(isSelected || showCheckboxes) && styles.listIconBackground,
+            (isSelected || showCheckboxes) && styles.listSelectionVisible,
           )}
         >
-          {canSelect && (isSelected || isHovered || showCheckboxes) ? (
+          {canSelect && (
             <button
               type="button"
-              className={clsx(
-                'item-action flex items-center justify-center w-5 h-5 rounded border transition-colors cursor-pointer',
-                isSelected
-                  ? 'bg-zinc-900 dark:bg-zinc-100 border-zinc-900 dark:border-zinc-100 text-white dark:text-zinc-900'
-                  : 'border-zinc-300 dark:border-zinc-600 hover:border-zinc-500 dark:hover:border-zinc-400',
+              {...stylex.props(
+                styles.checkbox,
+                styles.listCheckbox,
+                isSelected ? styles.checkboxSelected : styles.checkboxUnselected,
+                showCheckboxes && styles.selectionAlwaysVisible,
               )}
               onClick={handleCheckboxClick}
             >
               {isSelected && <Check size={12} strokeWidth={3} />}
             </button>
-          ) : item.type === 'folder' ? (
-            <Folder size={18} />
-          ) : item.icon ? (
-            <span className="text-lg leading-none">{item.icon}</span>
-          ) : (
-            <FileText size={18} />
           )}
+          <span
+            {...stylex.props(
+              styles.listIconGraphic,
+              canSelect && styles.listIconGraphicSelectable,
+              canSelect && (isSelected || showCheckboxes) && styles.listIconGraphicHidden,
+            )}
+          >
+            {item.type === 'folder' ? (
+              <Folder size={18} />
+            ) : item.icon ? (
+              <span {...stylex.props(styles.listCustomIcon)}>{item.icon}</span>
+            ) : (
+              <FileText size={18} />
+            )}
+          </span>
         </div>
 
-        <div className="flex-1 min-w-0">
-          {isEditing ? (
-            <input
-              ref={inputRef}
-              type="text"
-              maxLength={editLengthLimit * 2}
-              value={editValue}
-              onChange={(e) =>
-                onEditChange?.(truncateUnicodeCodePoints(e.target.value, editLengthLimit))
-              }
-              onBlur={onEditSave}
-              onKeyDown={onEditKeyDown}
-              className="w-full max-w-xs bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-zinc-900 dark:text-zinc-100"
-              onClick={(e) => e.stopPropagation()}
-            />
-          ) : (
-            <span className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate block">
-              {item.title || 'Untitled'}
-            </span>
-          )}
+        <div {...stylex.props(styles.listTitleCell)}>
+          {editInput ?? <span {...stylex.props(styles.listTitle)}>{item.title || 'Untitled'}</span>}
         </div>
 
-        <div className="hidden md:block shrink-0 w-28">
+        <div {...stylex.props(styles.listCollaborators)}>
           {collaborators.length > 0 && <CollaboratorAvatars collaborators={collaborators} />}
         </div>
 
-        <span className="text-xs text-zinc-400 dark:text-zinc-500 hidden md:block w-36 shrink-0">
-          {formatDate(updatedDate)}
-        </span>
+        <span {...stylex.props(styles.listUpdatedDate)}>{formatDate(updatedDate)}</span>
 
         {showContextMenu && (
-          <div className="shrink-0">
+          <div {...stylex.props(styles.listMenu)}>
             <PageContextMenu
               item={item}
               isStarred={isStarred}
-              triggerClassName="item-action p-1.5 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 cursor-pointer"
+              triggerStyle={styles.itemAction}
               onRename={onRename}
+              onOpenChange={setIsContextMenuOpen}
               {...(onCopy ? { onCopy } : {})}
             />
           </div>
@@ -205,33 +200,21 @@ export function ExplorerItem({
     <div
       role="button"
       tabIndex={0}
-      className={clsx(
-        'group relative block w-full text-left p-5 bg-white dark:bg-zinc-900 border rounded-xl cursor-pointer transition-all duration-200 overflow-visible',
-        isSelected
-          ? 'border-zinc-900 dark:border-zinc-100 ring-2 ring-zinc-900 dark:ring-zinc-100'
-          : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600 hover:shadow-md hover:scale-[1.02]',
-      )}
+      {...stylex.props(styles.card, isSelected && styles.cardSelected, explorerItemMarker)}
+      data-explorer-card=""
+      data-context-menu-open={isContextMenuOpen ? '' : undefined}
       onClick={handleClick}
-      onKeyDown={(e) => {
-        if (isEditing) return;
-        if (e.target !== e.currentTarget) return;
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          handleClick(e);
-        }
-      }}
+      onKeyDown={handleKeyDown}
       data-entity-id={item.id}
       data-entity-type={item.type}
     >
       {canSelect && (
-        <div className="absolute top-3 left-3 z-10">
+        <div {...stylex.props(styles.cardCheckboxWrapper)}>
           <button
             type="button"
-            className={clsx(
-              'item-action flex items-center justify-center w-5 h-5 rounded border transition-colors cursor-pointer',
-              isSelected
-                ? 'bg-zinc-900 dark:bg-zinc-100 border-zinc-900 dark:border-zinc-100 text-white dark:text-zinc-900'
-                : 'bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm border-zinc-300 dark:border-zinc-600 opacity-0 group-hover:opacity-100 hover:border-zinc-500 dark:hover:border-zinc-400',
+            {...stylex.props(
+              styles.checkbox,
+              isSelected ? styles.checkboxSelected : styles.cardCheckboxUnselected,
             )}
             onClick={handleCheckboxClick}
           >
@@ -241,19 +224,21 @@ export function ExplorerItem({
       )}
 
       {showContextMenu && (
-        <div className="absolute top-3 right-3 z-10">
+        <div {...stylex.props(styles.cardMenu)}>
           <PageContextMenu
             item={item}
             isStarred={isStarred}
-            triggerClassName="item-action p-1.5 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 cursor-pointer"
+            triggerStyle={styles.itemAction}
             onRename={onRename}
+            onOpenChange={setIsContextMenuOpen}
             {...(onCopy ? { onCopy } : {})}
           />
         </div>
       )}
 
       <div
-        className="h-28 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg mb-3 flex items-center justify-center text-zinc-300 dark:text-zinc-600 overflow-hidden"
+        {...stylex.props(styles.cover)}
+        data-entity-cover=""
         style={{
           background:
             item.type === 'page' && item.coverType === 'gradient'
@@ -266,44 +251,26 @@ export function ExplorerItem({
         }}
       >
         {item.type === 'folder' ? (
-          <Folder size={40} className="text-zinc-400 dark:text-zinc-500" />
+          <Folder size={40} {...stylex.props(styles.folderCoverIcon)} />
         ) : item.icon ? (
-          <span className="text-4xl drop-shadow-sm">{item.icon}</span>
+          <span {...stylex.props(styles.coverEmoji)}>{item.icon}</span>
         ) : (
-          <FileText size={40} className="text-zinc-300 dark:text-zinc-600" />
+          <FileText size={40} {...stylex.props(styles.fileCoverIcon)} />
         )}
       </div>
 
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0 flex-1">
-          {isEditing ? (
-            <input
-              ref={inputRef}
-              type="text"
-              maxLength={editLengthLimit * 2}
-              value={editValue}
-              onChange={(e) =>
-                onEditChange?.(truncateUnicodeCodePoints(e.target.value, editLengthLimit))
-              }
-              onBlur={onEditSave}
-              onKeyDown={onEditKeyDown}
-              className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 text-zinc-900 dark:text-zinc-100"
-              onClick={(e) => e.stopPropagation()}
-            />
-          ) : (
-            <h3 className="font-semibold text-zinc-900 dark:text-zinc-50 text-sm truncate">
-              {item.title || 'Untitled'}
-            </h3>
-          )}
-          <div className="flex items-center gap-2 mt-0.5">
-            <p className="text-xs text-zinc-400 dark:text-zinc-500">
+      <div {...stylex.props(styles.cardInfo)}>
+        <div {...stylex.props(styles.cardTitleCell)}>
+          {editInput ?? <h3 {...stylex.props(styles.cardTitle)}>{item.title || 'Untitled'}</h3>}
+          <div {...stylex.props(styles.cardMetadata)}>
+            <p {...stylex.props(styles.updatedDate)}>
               {item.type === 'folder' ? 'Folder' : `Edited ${formatDate(updatedDate)}`}
             </p>
           </div>
         </div>
 
         {collaborators.length > 0 && (
-          <div className="shrink-0">
+          <div {...stylex.props(styles.cardCollaborators)}>
             <CollaboratorAvatars collaborators={collaborators} max={3} />
           </div>
         )}

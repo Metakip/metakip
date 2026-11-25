@@ -1,0 +1,14 @@
+{
+  "status": "current-baseline",
+  "families": {
+    "ui": {
+      "name": "Inter",
+      "fallback": ["ui-sans-serif", "system-ui", "sans-serif"],
+      "weights": [400, 500, 600, 700]
+    },
+    "code": {
+      "name": "system-monospace",
+      "fallback": ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace"]
+    }
+  }
+}

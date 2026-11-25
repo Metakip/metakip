@@ -1,9 +1,10 @@
 import path from 'node:path';
-import tailwindcss from '@tailwindcss/vite';
+import stylex from '@stylexjs/unplugin';
 import react from '@vitejs/plugin-react';
 import { defineConfig, loadEnv } from 'vite';
 import { appFaviconAssets } from './vite/appFaviconAssets';
 import { copyEmojiData } from './vite/emojiDataPlugin';
+import { stylexOptions } from './vite/stylexOptions';
 
 const monorepoRoot = path.resolve(__dirname, '../../');
 
@@ -12,7 +13,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     envDir: monorepoRoot,
-    plugins: [react(), tailwindcss(), copyEmojiData(), appFaviconAssets()],
+    plugins: [stylex.vite(stylexOptions), react(), copyEmojiData(), appFaviconAssets()],
     build: {
       rollupOptions: {
         output: {

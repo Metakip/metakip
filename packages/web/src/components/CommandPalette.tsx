@@ -1,4 +1,5 @@
 import { METAKIP_DOCS_URL } from '@metakip/shared';
+import * as stylex from '@stylexjs/stylex';
 import { Search, X } from 'lucide-react';
 import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { useIdentityNavigate } from '../contexts/IdentityLifecycleContext';
@@ -8,6 +9,7 @@ import { useEntityCreationActions } from '../hooks/useEntityCreationActions';
 import { useRecentSearches } from '../hooks/useRecentSearches';
 import { SHORTCUT_PATTERNS } from '../utils/keyboardShortcuts';
 import { buildEntityPath, getWorkspacePath } from '../utils/url';
+import { styles } from './CommandPalette.stylex';
 import { CommandPaletteOptions, QUICK_ACTIONS, type SearchResult } from './CommandPaletteOptions';
 
 const API_BASE = '/api';
@@ -237,29 +239,22 @@ function AuthenticatedCommandPalette({
 
   return (
     // biome-ignore lint/a11y/noStaticElementInteractions: clicking the backdrop closes the dialog
-    <div
-      role="presentation"
-      className="fixed inset-0 z-50 flex items-start justify-center bg-zinc-950/55 px-4 pt-[12vh] pb-4 backdrop-blur-sm animate-fade-in sm:pt-[16vh]"
-      onClick={closeDialog}
-    >
+    <div role="presentation" {...stylex.props(styles.backdrop)} onClick={closeDialog}>
       <div
         role="dialog"
         aria-modal="true"
         aria-label="Search"
-        className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl animate-slide-up dark:bg-zinc-900"
+        {...stylex.props(styles.dialog)}
         onClick={(event) => event.stopPropagation()}
         ref={dialogRef}
         onKeyDown={handleDialogKeyDown}
       >
-        <div className="flex items-center gap-3 px-5">
-          <Search
-            aria-hidden="true"
-            className="h-5 w-5 shrink-0 text-zinc-400 dark:text-zinc-500"
-          />
+        <div {...stylex.props(styles.searchHeader)}>
+          <Search aria-hidden="true" {...stylex.props(styles.searchIcon)} />
           <input
             ref={inputRef}
             role="combobox"
-            className="command-palette-search-input h-16 min-w-0 flex-1 border-0 bg-transparent text-lg text-zinc-900 placeholder:text-zinc-400 dark:text-zinc-100 dark:placeholder:text-zinc-500"
+            {...stylex.props(styles.searchInput)}
             aria-label="Search pages and folders"
             aria-autocomplete="list"
             aria-expanded={!trimmedQuery || hasResults}
@@ -277,12 +272,7 @@ function AuthenticatedCommandPalette({
             onKeyDown={handleInputKeyDown}
             placeholder="Search pages and folders..."
           />
-          {isLoading && (
-            <div
-              aria-hidden="true"
-              className="h-5 w-5 shrink-0 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-700 dark:border-zinc-600 dark:border-t-zinc-300"
-            />
-          )}
+          {isLoading && <div aria-hidden="true" {...stylex.props(styles.spinner)} />}
           {query ? (
             <button
               type="button"
@@ -294,9 +284,9 @@ function AuthenticatedCommandPalette({
                 setIsLoading(false);
                 inputRef.current?.focus();
               }}
-              className="cursor-pointer rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-200"
+              {...stylex.props(styles.clearButton)}
             >
-              <X aria-hidden="true" className="h-4 w-4" />
+              <X aria-hidden="true" {...stylex.props(styles.clearIcon)} />
             </button>
           ) : null}
         </div>
@@ -312,23 +302,17 @@ function AuthenticatedCommandPalette({
           onClearRecent={clearHistory}
         />
 
-        <div className="flex items-center gap-4 px-5 py-3 text-xs text-zinc-400 dark:text-zinc-500">
-          <span className="flex items-center gap-1.5">
-            <kbd className="rounded border border-zinc-200 px-1.5 py-0.5 font-sans dark:border-zinc-700">
-              ↑↓
-            </kbd>
+        <div {...stylex.props(styles.footer)}>
+          <span {...stylex.props(styles.footerItem)}>
+            <kbd {...stylex.props(styles.shortcutKey)}>↑↓</kbd>
             Navigate
           </span>
-          <span className="flex items-center gap-1.5">
-            <kbd className="rounded border border-zinc-200 px-1.5 py-0.5 font-sans dark:border-zinc-700">
-              ↵
-            </kbd>
+          <span {...stylex.props(styles.footerItem)}>
+            <kbd {...stylex.props(styles.shortcutKey)}>↵</kbd>
             Open
           </span>
-          <span className="flex items-center gap-1.5">
-            <kbd className="rounded border border-zinc-200 px-1.5 py-0.5 font-sans dark:border-zinc-700">
-              Esc
-            </kbd>
+          <span {...stylex.props(styles.footerItem)}>
+            <kbd {...stylex.props(styles.shortcutKey)}>Esc</kbd>
             Close
           </span>
         </div>

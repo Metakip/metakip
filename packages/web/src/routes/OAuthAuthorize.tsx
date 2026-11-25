@@ -1,8 +1,11 @@
+import * as stylex from '@stylexjs/stylex';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { actionColors } from '../components/ui/ActionColors.stylex';
 import { LoadingIndicator } from '../components/ui/LoadingIndicator';
 import { useAuth } from '../hooks/useAuth';
 import { authClient } from '../lib/auth-client';
+import { styles } from './OAuthAuthorize.stylex';
 
 const READ_SCOPE = 'pages:read';
 const COMMENT_SCOPE = 'pages:comment';
@@ -178,51 +181,52 @@ export default function OAuthAuthorize() {
 
   if (isPending || (!client && !loadError)) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+      <div {...stylex.props(styles.loadingPage)}>
         <LoadingIndicator label="Loading authorization" size="md" />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 dark:bg-zinc-950">
-      <div className="w-full max-w-lg rounded-xl border border-zinc-200 bg-white p-7 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+    <div {...stylex.props(styles.authorizePage)}>
+      <div {...stylex.props(styles.card)}>
         {loadError ? (
           <>
-            <h1 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
-              Authorization Unavailable
-            </h1>
-            <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">{loadError}</p>
+            <h1 {...stylex.props(styles.unavailableTitle)}>Authorization Unavailable</h1>
+            <p {...stylex.props(styles.unavailableDescription)}>{loadError}</p>
             <button
               type="button"
               onClick={() => navigate('/app')}
-              className="mt-6 cursor-pointer rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-zinc-700 dark:hover:bg-zinc-600"
+              {...stylex.props(
+                actionColors.subdued,
+                styles.button,
+                styles.primaryButton,
+                styles.returnButton,
+              )}
             >
               Return to Metakip
             </button>
           </>
         ) : client ? (
           <>
-            <p className="text-xs font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-              Connect application
-            </p>
-            <h1 className="mt-2 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
+            <p {...stylex.props(styles.eyebrow)}>Connect application</p>
+            <h1 {...stylex.props(styles.clientTitle)}>
               {client.client_name ?? client.client_id ?? 'Unknown application'}
             </h1>
             {clientWebsite ? (
-              <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+              <p {...stylex.props(styles.website)}>
                 Application website:{' '}
                 <a
                   href={clientWebsite.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="font-medium underline"
+                  {...stylex.props(styles.websiteLink)}
                 >
                   {clientWebsite.hostname}
                 </a>
               </p>
             ) : null}
-            <p className="mt-3 text-sm text-zinc-600 dark:text-zinc-400">
+            <p {...stylex.props(styles.requestDescription)}>
               {requestsPageAccess && requestsCommentAccess
                 ? 'This application is requesting access to your Metakip pages, folders, and comments.'
                 : requestsCommentAccess
@@ -231,12 +235,9 @@ export default function OAuthAuthorize() {
                     ? 'This application is requesting access to your Metakip pages and folders.'
                     : 'This application is requesting account and session access.'}
             </p>
-            <div className="mt-6 space-y-3">
+            <div {...stylex.props(styles.scopeList)}>
               {requestedPermissionScopes.map((scope) => (
-                <label
-                  key={scope}
-                  className="flex cursor-pointer items-start gap-3 rounded-lg border border-zinc-200 p-3 dark:border-zinc-700"
-                >
+                <label key={scope} {...stylex.props(styles.scopeOption)}>
                   <input
                     type="checkbox"
                     checked={selectedScopes.includes(scope)}
@@ -261,35 +262,29 @@ export default function OAuthAuthorize() {
                             ),
                       );
                     }}
-                    className="mt-0.5 h-4 w-4 cursor-pointer"
+                    {...stylex.props(styles.checkbox)}
                   />
                   <span>
-                    <span className="block text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                      {scopeLabel(scope)}
-                    </span>
+                    <span {...stylex.props(styles.scopeLabel)}>{scopeLabel(scope)}</span>
                   </span>
                 </label>
               ))}
               {requestsOfflineAccess ? (
-                <div className="rounded-lg border border-zinc-200 p-3 dark:border-zinc-700">
-                  <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                    Stay connected when you are away
-                  </p>
-                  <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+                <div {...stylex.props(styles.offlineNotice)}>
+                  <p {...stylex.props(styles.offlineTitle)}>Stay connected when you are away</p>
+                  <p {...stylex.props(styles.offlineDescription)}>
                     This application can remain connected after your browser session ends.
                   </p>
                 </div>
               ) : null}
             </div>
-            {submitError && (
-              <p className="mt-3 text-sm text-red-600 dark:text-red-400">{submitError}</p>
-            )}
-            <div className="mt-6 flex justify-end gap-3">
+            {submitError && <p {...stylex.props(styles.submitError)}>{submitError}</p>}
+            <div {...stylex.props(styles.actions)}>
               <button
                 type="button"
                 disabled={isSubmitting}
                 onClick={() => void submit(false)}
-                className="cursor-pointer rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                {...stylex.props(styles.button, styles.cancelButton)}
               >
                 Cancel
               </button>
@@ -297,7 +292,7 @@ export default function OAuthAuthorize() {
                 type="button"
                 disabled={isSubmitting || !canConnect}
                 onClick={() => void submit(true)}
-                className="cursor-pointer rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-700 dark:hover:bg-zinc-600"
+                {...stylex.props(actionColors.subdued, styles.button, styles.primaryButton)}
               >
                 {isSubmitting ? 'Connecting…' : 'Connect'}
               </button>

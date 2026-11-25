@@ -1,9 +1,12 @@
 import type { HocuspocusProvider, WebSocketStatus } from '@hocuspocus/provider';
 import type { CollaboratorDisplay } from '@metakip/shared';
+import type { StyleXStyles } from '@stylexjs/stylex';
+import * as stylex from '@stylexjs/stylex';
 import { useEffect, useState } from 'react';
 import { getInitial } from '../../utils/avatar';
 import { formatCollaboratorLabel } from '../../utils/formatCollaboratorLabel';
 import { Tooltip } from '../Tooltip';
+import { styles } from './CollabStatus.stylex';
 
 type CollabStatusProps = {
   provider: HocuspocusProvider | null;
@@ -20,10 +23,10 @@ type AwarenessUser = {
   emoji?: string;
 };
 
-const STATUS_PRESENTATION: Record<WebSocketStatus, { label: string; colorClass: string }> = {
-  connecting: { label: 'Connecting', colorClass: 'bg-amber-500' },
-  connected: { label: 'Live', colorClass: 'bg-emerald-500' },
-  disconnected: { label: 'Offline', colorClass: 'bg-rose-500' },
+const STATUS_PRESENTATION: Record<WebSocketStatus, { label: string; statusStyle: StyleXStyles }> = {
+  connecting: { label: 'Connecting', statusStyle: styles.connecting },
+  connected: { label: 'Live', statusStyle: styles.connected },
+  disconnected: { label: 'Offline', statusStyle: styles.disconnected },
 };
 
 function getCollaboratorLabel(user: AwarenessUser, collaborators: CollaboratorDisplay[]): string {
@@ -88,13 +91,13 @@ export function CollabStatus({ provider, status, collaborators = [] }: CollabSta
     };
   }, [provider]);
 
-  const { label, colorClass } = STATUS_PRESENTATION[status];
+  const { label, statusStyle } = STATUS_PRESENTATION[status];
 
   return (
-    <div className="flex items-center gap-2.5">
+    <div {...stylex.props(styles.root)}>
       {/* User Avatars — only when provider is available */}
       {provider && users.length > 0 && (
-        <div className="hidden items-center -space-x-2 sm:flex">
+        <div {...stylex.props(styles.avatarList)}>
           {users.slice(0, 5).map((user) => (
             <Tooltip
               key={user.id}
@@ -102,7 +105,7 @@ export function CollabStatus({ provider, status, collaborators = [] }: CollabSta
               position="bottom"
             >
               <div
-                className="relative flex h-7 w-7 items-center justify-center overflow-hidden rounded-full border-[2.5px] bg-zinc-100 transition-transform hover:z-10 hover:scale-110 dark:bg-zinc-800"
+                className={stylex.props(styles.avatar).className}
                 style={{
                   borderColor: user.color,
                   backgroundColor: user.avatar ? undefined : user.color,
@@ -112,22 +115,20 @@ export function CollabStatus({ provider, status, collaborators = [] }: CollabSta
                   <img
                     src={user.avatar}
                     alt={user.name}
-                    className="w-full h-full object-cover"
+                    {...stylex.props(styles.avatarImage)}
                     referrerPolicy="no-referrer"
                   />
                 ) : user.emoji ? (
-                  <span className="text-base">{user.emoji}</span>
+                  <span {...stylex.props(styles.avatarEmoji)}>{user.emoji}</span>
                 ) : (
-                  <span className="text-xs font-bold text-white">{getInitial(user.name)}</span>
+                  <span {...stylex.props(styles.avatarInitial)}>{getInitial(user.name)}</span>
                 )}
               </div>
             </Tooltip>
           ))}
           {users.length > 5 && (
             <Tooltip label={`${users.length - 5} more users`} position="bottom">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-zinc-200 bg-zinc-100 text-[10px] font-bold text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400">
-                +{users.length - 5}
-              </div>
+              <div {...stylex.props(styles.overflowCount)}>+{users.length - 5}</div>
             </Tooltip>
           )}
         </div>
@@ -135,10 +136,8 @@ export function CollabStatus({ provider, status, collaborators = [] }: CollabSta
 
       {/* Status Indicator */}
       <Tooltip label={label} position="bottom">
-        <span className="relative flex h-8 w-8 cursor-pointer items-center justify-center rounded-md transition-colors duration-200 hover:bg-zinc-100 dark:hover:bg-zinc-800">
-          <span
-            className={`inline-flex h-3 w-3 rounded-full transition-colors duration-300 ${colorClass}`}
-          />
+        <span {...stylex.props(styles.statusButton)}>
+          <span {...stylex.props(styles.statusDot, statusStyle)} data-status={status} />
         </span>
       </Tooltip>
     </div>

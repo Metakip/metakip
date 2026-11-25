@@ -1,4 +1,5 @@
 import { Toolbar } from '@base-ui/react/toolbar';
+import * as stylex from '@stylexjs/stylex';
 import {
   CheckSquare,
   ClipboardPaste,
@@ -11,12 +12,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { ConfirmDialog } from '../ConfirmDialog';
-
-const actionButtonClassName =
-  'flex shrink-0 items-center gap-1.5 whitespace-nowrap px-2.5 py-1.5 rounded-lg transition-colors text-sm cursor-pointer aria-disabled:opacity-30 aria-disabled:cursor-default aria-disabled:hover:bg-transparent';
-const regularActionButtonClassName = `${actionButtonClassName} hover:bg-zinc-100 dark:hover:bg-zinc-800`;
-const removeActionButtonClassName = `${actionButtonClassName} hover:bg-red-50 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400`;
-const separatorClassName = 'hidden md:block w-px h-5 bg-zinc-200 dark:bg-zinc-700 mx-1';
+import { styles } from './SelectionToolbar.stylex';
 
 interface SelectionToolbarProps {
   selectedCount: number;
@@ -68,6 +64,10 @@ export function SelectionToolbar({
 
   const allSelected = selectedCount === totalCount && totalCount > 0;
   const hasSelection = selectedCount > 0;
+  const copyDisabled = !hasSelection || isRemoving;
+  const moveDisabled = !hasSelection || !canMove || isRemoving;
+  const removeDisabled = !hasSelection || !canDelete || isRemoving;
+  const pasteDisabled = clipboardCount === 0 || !canPaste || isRemoving;
   const removalOutcomes = [
     trashCount > 0
       ? `${trashCount} item${trashCount === 1 ? '' : 's'} will be moved to Trash.`
@@ -86,7 +86,8 @@ export function SelectionToolbar({
     <>
       <Toolbar.Root
         aria-label="Selection actions"
-        className="fixed bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-40 flex w-max max-w-[calc(100vw-2rem)] flex-wrap items-center justify-center gap-1 px-3 py-2.5 sm:px-4 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white rounded-xl shadow-xl border border-zinc-200 dark:border-zinc-800 animate-slide-up"
+        {...stylex.props(styles.toolbar)}
+        data-selection-toolbar=""
       >
         {totalCount > 0 && (
           <Toolbar.Button
@@ -94,59 +95,73 @@ export function SelectionToolbar({
             onClick={allSelected ? onClear : onSelectAll}
             disabled={isRemoving}
             aria-label={allSelected ? 'Deselect all' : 'Select all'}
-            className="flex shrink-0 items-center gap-1.5 whitespace-nowrap px-2.5 py-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-sm cursor-pointer aria-disabled:opacity-50 aria-disabled:cursor-wait"
+            {...stylex.props(styles.selectButton, isRemoving && styles.pendingDisabled)}
+            data-selection-pending=""
             title={allSelected ? 'Deselect all' : 'Select all'}
           >
             {allSelected ? <CheckSquare size={14} /> : <Square size={14} />}
-            <span className="hidden md:inline">{allSelected ? 'Deselect all' : 'Select all'}</span>
+            <span {...stylex.props(styles.responsiveLabel)}>
+              {allSelected ? 'Deselect all' : 'Select all'}
+            </span>
           </Toolbar.Button>
         )}
-        {totalCount > 0 && <Toolbar.Separator className={separatorClassName} />}
-        <span className="shrink-0 whitespace-nowrap text-sm font-medium px-2">
+        {totalCount > 0 && (
+          <Toolbar.Separator className={stylex.props(styles.separator).className} />
+        )}
+        <span {...stylex.props(styles.selectionCount)}>
           {isRemoving
             ? `Removing ${selectedCount} item${selectedCount === 1 ? '' : 's'}…`
             : `${selectedCount} selected`}
         </span>
-        <Toolbar.Separator className={separatorClassName} />
+        <Toolbar.Separator className={stylex.props(styles.separator).className} />
         <Toolbar.Button
           type="button"
           onClick={onCopy}
-          disabled={!hasSelection || isRemoving}
+          disabled={copyDisabled}
           aria-label="Copy"
-          className={regularActionButtonClassName}
+          {...stylex.props(styles.actionButton, copyDisabled && styles.disabledActionButton)}
+          data-selection-action=""
           title="Copy"
         >
           <Copy size={14} />
-          <span className="hidden md:inline">Copy</span>
+          <span {...stylex.props(styles.responsiveLabel)}>Copy</span>
         </Toolbar.Button>
         <Toolbar.Button
           type="button"
           onClick={onCut}
-          disabled={!hasSelection || !canMove || isRemoving}
+          disabled={moveDisabled}
           aria-label="Cut"
-          className={regularActionButtonClassName}
+          {...stylex.props(styles.actionButton, moveDisabled && styles.disabledActionButton)}
+          data-selection-action=""
           title={canMove ? 'Cut' : 'Admin access is required to move selected items'}
         >
           <Scissors size={14} />
-          <span className="hidden md:inline">Cut</span>
+          <span {...stylex.props(styles.responsiveLabel)}>Cut</span>
         </Toolbar.Button>
         <Toolbar.Button
           type="button"
           onClick={onMove}
-          disabled={!hasSelection || !canMove || isRemoving}
+          disabled={moveDisabled}
           aria-label="Move"
-          className={regularActionButtonClassName}
+          {...stylex.props(styles.actionButton, moveDisabled && styles.disabledActionButton)}
+          data-selection-action=""
           title={canMove ? 'Move' : 'Admin access is required to move selected items'}
         >
           <FolderInput size={14} />
-          <span className="hidden md:inline">Move</span>
+          <span {...stylex.props(styles.responsiveLabel)}>Move</span>
         </Toolbar.Button>
         <Toolbar.Button
           type="button"
           onClick={() => setShowDeleteConfirm(true)}
-          disabled={!hasSelection || !canDelete || isRemoving}
+          disabled={removeDisabled}
           aria-label="Remove"
-          className={removeActionButtonClassName}
+          {...stylex.props(
+            styles.actionButton,
+            styles.removeButton,
+            removeDisabled && styles.disabledActionButton,
+          )}
+          data-selection-action=""
+          data-selection-remove=""
           title={
             isRemoving
               ? 'Removing selected items'
@@ -156,14 +171,15 @@ export function SelectionToolbar({
           }
         >
           <Trash2 size={14} />
-          <span className="hidden md:inline">Remove</span>
+          <span {...stylex.props(styles.responsiveLabel)}>Remove</span>
         </Toolbar.Button>
         <Toolbar.Button
           type="button"
           onClick={onPaste}
-          disabled={clipboardCount === 0 || !canPaste || isRemoving}
+          disabled={pasteDisabled}
           aria-label={`Paste ${clipboardCount} item${clipboardCount === 1 ? '' : 's'}`}
-          className={regularActionButtonClassName}
+          {...stylex.props(styles.actionButton, pasteDisabled && styles.disabledActionButton)}
+          data-selection-action=""
           title={
             canPaste
               ? `Paste ${clipboardCount} item${clipboardCount !== 1 ? 's' : ''}`
@@ -171,15 +187,18 @@ export function SelectionToolbar({
           }
         >
           <ClipboardPaste size={14} />
-          <span className="hidden md:inline">Paste {clipboardCount > 0 ? clipboardCount : ''}</span>
+          <span {...stylex.props(styles.responsiveLabel)}>
+            Paste {clipboardCount > 0 ? clipboardCount : ''}
+          </span>
         </Toolbar.Button>
-        <Toolbar.Separator className={separatorClassName} />
+        <Toolbar.Separator className={stylex.props(styles.separator).className} />
         <Toolbar.Button
           type="button"
           onClick={onClear}
           disabled={isRemoving}
           aria-label="Deselect all"
-          className="shrink-0 rounded-lg p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer aria-disabled:opacity-50 aria-disabled:cursor-wait"
+          {...stylex.props(styles.clearButton, isRemoving && styles.pendingDisabled)}
+          data-selection-pending=""
           title="Deselect all"
         >
           <X size={16} />

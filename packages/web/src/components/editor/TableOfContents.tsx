@@ -1,6 +1,8 @@
+import * as stylex from '@stylexjs/stylex';
 import clsx from 'clsx';
 import { useMemo, useState } from 'react';
 import type { EditorHeading } from '../../editor/codemirror/headings';
+import { styles } from './TableOfContents.stylex';
 
 interface HeadingNode extends EditorHeading {
   children?: HeadingNode[];
@@ -11,6 +13,7 @@ interface TableOfContentsProps {
   activeHeadingFrom: number | null;
   onHeadingSelect: (heading: EditorHeading) => void;
   onHoverChange?: (isHovered: boolean) => void;
+  className?: string;
 }
 
 export function TableOfContents({
@@ -18,6 +21,7 @@ export function TableOfContents({
   activeHeadingFrom,
   onHeadingSelect,
   onHoverChange,
+  className,
 }: TableOfContentsProps) {
   const [isHovered, setIsHovered] = useState(false);
   const headingTree = useMemo(() => {
@@ -43,19 +47,16 @@ export function TableOfContents({
         <button
           type="button"
           onClick={() => onHeadingSelect(heading)}
-          className={clsx(
-            'w-full text-left py-1.5 px-2 rounded-md transition-all duration-200',
-            'text-sm truncate',
-            isActive
-              ? 'bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 font-medium'
-              : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100',
-            depth > 0 && 'ml-2',
+          {...stylex.props(
+            styles.heading,
+            isActive ? styles.headingActive : styles.headingIdle,
+            depth > 0 && styles.headingNested,
           )}
           style={{
             paddingLeft: `${8 + depth * 12}px`,
           }}
         >
-          <span className="text-sm">{heading.text || 'Untitled'}</span>
+          <span>{heading.text || 'Untitled'}</span>
         </button>
         {hasChildren && heading.children?.map((child) => renderHeading(child, depth + 1))}
       </div>
@@ -87,12 +88,7 @@ export function TableOfContents({
           type="button"
           key={`${heading.id}:${heading.from}`}
           onClick={() => onHeadingSelect(heading)}
-          className={clsx(
-            'w-full h-[2px] shrink-0 rounded-full transition-all duration-300 mb-1.5',
-            isActive
-              ? 'bg-zinc-900 dark:bg-zinc-100'
-              : 'bg-zinc-400 dark:bg-zinc-600 hover:bg-zinc-600 dark:hover:bg-zinc-400',
-          )}
+          {...stylex.props(styles.tick, isActive ? styles.tickActive : styles.tickIdle)}
           style={{
             width: `${width}px`,
             marginLeft: 'auto',
@@ -111,10 +107,8 @@ export function TableOfContents({
   return (
     <section
       aria-label="Table of contents"
-      className={clsx(
-        'fixed right-2 top-1/2 -translate-y-1/2 z-30',
-        'transition-all duration-300 ease-out',
-      )}
+      className={clsx(stylex.props(styles.root).className, className)}
+      data-toc-outline=""
       onMouseEnter={() => {
         setIsHovered(true);
         onHoverChange?.(true);
@@ -125,38 +119,28 @@ export function TableOfContents({
       }}
     >
       <div
-        className={clsx(
-          'flex flex-col items-center py-4 px-2 rounded-l-xl',
-          'bg-transparent backdrop-blur-xl',
-          'border border-transparent',
-          'shadow-lg',
-          'transition-all duration-300 ease-out',
-          isHovered ? 'opacity-0 translate-x-2 pointer-events-none' : 'opacity-100 translate-x-0',
+        {...stylex.props(
+          styles.tickPanel,
+          isHovered ? styles.tickPanelHidden : styles.tickPanelVisible,
         )}
+        data-toc-tick-panel=""
       >
-        <div className="flex flex-col gap-0.5 max-h-[60vh] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div {...stylex.props(styles.tickList)} data-toc-tick-list="">
           {renderTickMarks()}
         </div>
       </div>
 
       <div
-        className={clsx(
-          'absolute right-0 top-1/2 min-w-[220px] max-w-[280px] -translate-y-1/2',
-          'bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl',
-          'border border-zinc-200/60 dark:border-zinc-700/50',
-          'shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)]',
-          'rounded-xl p-3',
-          'transition-all duration-300 ease-out',
-          'max-h-[70vh] overflow-y-auto',
-          !isHovered
-            ? 'opacity-0 translate-x-4 pointer-events-none scale-95'
-            : 'opacity-100 translate-x-0 scale-100',
+        {...stylex.props(
+          styles.contentPanel,
+          isHovered ? styles.contentPanelVisible : styles.contentPanelHidden,
         )}
+        data-toc-content-panel=""
       >
-        <div className="text-xs font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2 px-2">
-          On this page
+        <div {...stylex.props(styles.contentHeading)}>On this page</div>
+        <div {...stylex.props(styles.headingList)}>
+          {headingTree.map((heading) => renderHeading(heading))}
         </div>
-        <div className="space-y-0.5">{headingTree.map((heading) => renderHeading(heading))}</div>
       </div>
     </section>
   );

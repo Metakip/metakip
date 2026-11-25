@@ -2,14 +2,14 @@
 
 ## Brand assets
 
-The brand-asset generator centers the mark with a safe inset on a transparent 512×512 source
-canvas. The SVGs stay transparent; the light PNG has a white background and the dark PNG has a
-charcoal background, with the dark mark recolored white. It also rebuilds the all-assets archive.
-Run it with:
+The brand package's asset generator uses the canonical 512×512 SVG from
+`packages/brand/assets/logos/metakip.svg`. It publishes the transparent SVG and
+a PNG on white, both individually and in a ZIP. Run it with:
 
 ```sh
-pnpm --filter @metakip/marketing-site generate:brand-assets
+pnpm --filter @metakip/brand generate:brand-assets
 ```
 
-The command requires the `zip` utility. The generated files are written to `public/` and served as
-ordinary static assets.
+The downloads are served from `public/` as static assets. The command also
+refreshes the transparent marketing PNG and shared app favicons. The asset
+check compares the files inside the ZIP, ignoring ZIP timestamps and permissions.

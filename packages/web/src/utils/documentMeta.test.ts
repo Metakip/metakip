@@ -20,15 +20,13 @@ describe('resetDocumentMetadata', () => {
     resetDocumentMetadata();
 
     expect(favicon.getAttribute('href')).toBe('/icon-light-192.png');
-    expect(favicon.dataset.themeIcon).toBe('192');
   });
 
-  it('restores the dark app favicon when dark mode is active', () => {
+  it('restores the light app favicon when dark mode is active', () => {
     document.documentElement.classList.add('dark');
 
     resetDocumentMetadata();
 
-    expect(favicon.getAttribute('href')).toBe('/icon-dark-192.png');
-    expect(favicon.dataset.themeIcon).toBe('192');
+    expect(favicon.getAttribute('href')).toBe('/icon-light-192.png');
   });
 });

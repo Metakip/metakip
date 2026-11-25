@@ -22,7 +22,7 @@ export type EditorActiveStates = {
   isInTableActive: boolean;
 };
 
-const INACTIVE_STATES: EditorActiveStates = {
+export const INACTIVE_STATES: EditorActiveStates = {
   isBoldActive: false,
   isItalicActive: false,
   isStrikeActive: false,

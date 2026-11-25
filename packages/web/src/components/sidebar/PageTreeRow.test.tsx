@@ -68,7 +68,7 @@ describe('PageTreeRow keyboard actions', () => {
     await user.keyboard('{Enter}');
 
     expect(onNavigate).not.toHaveBeenCalled();
-    expect(menuButton.parentElement).toHaveClass('opacity-100');
+    expect(screen.getByTestId('page-tree-row')).toHaveAttribute('data-sidebar-menu-open', '');
   });
 
   it('limits inline names by Unicode code point without splitting emoji', () => {

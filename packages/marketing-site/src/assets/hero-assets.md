@@ -24,6 +24,6 @@ SVG assets are served locally from `public/agents/`. Original brand colors are r
 
 `hero-workspace-light.png` and `hero-workspace-dark.png` are illustrative workspace mockups created with the built-in image generation tool, using frames of the existing collaboration recordings as structure references.
 
-Mockup prompt: Adapt the product screenshot to Metakip branding in a landscape 16:9 knowledge editor with Geist typography. Include a sidebar with Project notes, Research, Meeting notes, Ideas, and Archive; a Project notes page with Product and Planning tags; the sentence "Keep the context here. Build on it together."; three next steps; and an orange Claude collaborator caret. Use paper and ink in light mode, off-black and off-white in dark mode, and orange (#ff6b2b) as the only accent. No metrics, gradients, old branding, or terminal overlay.
+Mockup prompt: Adapt the product screenshot to Metakip branding in a landscape 16:9 knowledge editor with Inter typography. Include a sidebar with Project notes, Research, Meeting notes, Ideas, and Archive; a Project notes page with Product and Planning tags; the sentence "Keep the context here. Build on it together."; three next steps; and an orange Claude collaborator caret. Use paper and ink in light mode, off-black and off-white in dark mode, and orange (#ff6b2b) as the only accent. No metrics, gradients, old branding, or terminal overlay.
 
 The terminal overlay is a real CLI command example, not a fabricated live agent session. The screenshots are illustrative, not evidence of a running agent integration.

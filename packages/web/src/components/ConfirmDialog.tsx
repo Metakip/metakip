@@ -6,7 +6,11 @@ import {
   useFloating,
   useInteractions,
 } from '@floating-ui/react';
+import * as stylex from '@stylexjs/stylex';
 import { useId, useRef } from 'react';
+import { styles } from './ConfirmDialog.stylex';
+import { actionColors } from './ui/ActionColors.stylex';
+import { styles as frame } from './ui/ModalFrame.stylex';
 
 type ConfirmDialogProps = {
   isOpen: boolean;
@@ -51,7 +55,7 @@ export function ConfirmDialog({
     <FloatingPortal>
       <FloatingOverlay
         lockScroll
-        className="z-[9999] flex items-center justify-center bg-zinc-900/40 backdrop-blur-sm px-4 animate-fade-in"
+        className={stylex.props(frame.overlay, frame.raisedOverlay).className}
       >
         <FloatingFocusManager
           context={context}
@@ -64,16 +68,16 @@ export function ConfirmDialog({
             aria-labelledby={titleId}
             aria-describedby={descriptionId}
             {...getFloatingProps()}
-            className="w-full max-w-md rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-6 shadow-xl animate-slide-up"
+            {...stylex.props(frame.panel, styles.content)}
           >
-            <h2 id={titleId} className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+            <h2 id={titleId} {...stylex.props(styles.title)}>
               {title}
             </h2>
-            <p id={descriptionId} className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+            <p id={descriptionId} {...stylex.props(styles.message)}>
               {message}
             </p>
 
-            <div className="mt-6 flex items-center justify-end gap-2">
+            <div {...stylex.props(styles.actions)}>
               {showCancel && (
                 <button
                   ref={cancelRef}
@@ -82,7 +86,7 @@ export function ConfirmDialog({
                     event.stopPropagation();
                     onCancel();
                   }}
-                  className="px-3 py-2 text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-50 cursor-pointer disabled:cursor-not-allowed"
+                  {...stylex.props(styles.cancel)}
                   disabled={loading}
                 >
                   {cancelText}
@@ -94,7 +98,7 @@ export function ConfirmDialog({
                   event.stopPropagation();
                   onConfirm();
                 }}
-                className="px-4 py-2 text-sm font-medium text-white bg-red-600 dark:bg-red-700 rounded-md hover:bg-red-700 dark:hover:bg-red-800 transition-colors disabled:opacity-60 cursor-pointer disabled:cursor-not-allowed"
+                {...stylex.props(actionColors.destructive, styles.confirm)}
                 disabled={loading}
               >
                 {loading ? loadingText : confirmText}

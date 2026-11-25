@@ -131,6 +131,7 @@ function renderActions(overrides: Partial<ComponentProps<typeof PageActions>> = 
         page={page}
         permission="admin"
         onDeleted={vi.fn()}
+        isDesktopLayout
         fullWidth={false}
         onToggleFullWidth={vi.fn()}
         canComment
@@ -163,17 +164,19 @@ describe('PageActions', () => {
     true,
   ])('shares starred state and handlers across controls (%s)', async (saved) => {
     mocks.stars = saved ? [starredEntity] : [];
-    renderActions();
+    const desktop = renderActions();
 
     expect(screen.getByText(saved ? 'Unstar' : 'Star')).toBeInTheDocument();
     await userEvent.click(
       screen.getByRole('button', { name: saved ? 'Unstar page' : 'Star page' }),
     );
+    desktop.unmount();
+    renderActions({ isDesktopLayout: false });
+    expect(screen.queryByRole('button', { name: /star page/i })).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Page actions' }));
     const menuItem = await screen.findByRole('menuitem', {
       name: saved ? 'Unstar' : 'Star',
     });
-    expect(menuItem).toHaveClass('md:hidden');
     await userEvent.click(menuItem);
 
     expect(mocks.toggleStar).toHaveBeenCalledTimes(2);
@@ -223,7 +226,7 @@ describe('PageActions', () => {
   });
 
   it.each(['desktop', 'menu'])('opens the shared dialog from %s controls', async (surface) => {
-    renderActions();
+    renderActions({ isDesktopLayout: surface === 'desktop' });
     if (surface === 'menu') {
       await userEvent.click(screen.getByRole('button', { name: 'Page actions' }));
       await userEvent.click(await screen.findByRole('menuitem', { name: 'Share' }));
@@ -245,12 +248,14 @@ describe('PageActions', () => {
     true,
   ])('shares the comments callback and open state (%s)', async (commentsOpen) => {
     const onToggleComments = vi.fn();
-    renderActions({ commentsOpen, onToggleComments });
+    const desktop = renderActions({ commentsOpen, onToggleComments });
     const button = screen.getByRole('button', {
       name: commentsOpen ? 'Close comments' : 'Open comments',
     });
     expect(button).toHaveAttribute('aria-pressed', String(commentsOpen));
     await userEvent.click(button);
+    desktop.unmount();
+    renderActions({ commentsOpen, onToggleComments, isDesktopLayout: false });
     await userEvent.click(screen.getByRole('button', { name: 'Page actions' }));
     await userEvent.click(
       await screen.findByRole('menuitem', { name: commentsOpen ? 'Close comments' : 'Comments' }),
@@ -258,8 +263,11 @@ describe('PageActions', () => {
     expect(onToggleComments).toHaveBeenCalledTimes(2);
   });
 
-  it('omits comments from both surfaces when the page cannot be commented on', async () => {
-    renderActions({ canComment: false });
+  it.each([
+    true,
+    false,
+  ])('omits comments when it is unavailable (desktop: %s)', async (isDesktopLayout) => {
+    renderActions({ canComment: false, isDesktopLayout });
     expect(screen.queryByRole('button', { name: /comments/i })).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Page actions' }));
     await screen.findByRole('menu');
@@ -273,7 +281,10 @@ describe('PageActions', () => {
     expect(mocks.starQuery).toHaveBeenLastCalledWith({ enabled: false });
   });
 
-  it('does not mutate stars after the identity retires', async () => {
+  it.each([
+    true,
+    false,
+  ])('does not mutate stars after the identity retires (desktop: %s)', async (isDesktopLayout) => {
     const lifecycle = createIdentityLifecycle();
     render(
       <IdentityLifecycleProvider lifecycle={lifecycle}>
@@ -282,6 +293,7 @@ describe('PageActions', () => {
             page={page}
             permission="admin"
             onDeleted={vi.fn()}
+            isDesktopLayout={isDesktopLayout}
             fullWidth={false}
             onToggleFullWidth={vi.fn()}
             canComment
@@ -293,21 +305,22 @@ describe('PageActions', () => {
       </IdentityLifecycleProvider>,
     );
     lifecycle.retire();
-    await userEvent.click(screen.getByRole('button', { name: 'Star page' }));
-    await userEvent.click(screen.getByRole('button', { name: 'Page actions' }));
-    await userEvent.click(await screen.findByRole('menuitem', { name: 'Star' }));
+    if (isDesktopLayout) {
+      await userEvent.click(screen.getByRole('button', { name: 'Star page' }));
+    } else {
+      await userEvent.click(screen.getByRole('button', { name: 'Page actions' }));
+      await userEvent.click(await screen.findByRole('menuitem', { name: 'Star' }));
+    }
     expect(mocks.toggleStar).not.toHaveBeenCalled();
   });
 
-  it('uses one copy of each entity action in the toolbar menu', async () => {
-    renderActions();
+  it.each([true, false])('offers each action only once (desktop: %s)', async (isDesktopLayout) => {
+    renderActions({ isDesktopLayout });
     await userEvent.click(screen.getByRole('button', { name: 'Page actions' }));
     const labels = (await screen.findAllByRole('menuitem')).map((item) => item.textContent);
 
     expect(labels).toEqual([
-      'Star',
-      'Comments',
-      'Share',
+      ...(isDesktopLayout ? [] : ['Star', 'Comments', 'Share']),
       'Full width',
       'Export',
       'Copy',

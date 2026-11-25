@@ -4,13 +4,14 @@ import {
   type SharePermission,
   truncateUnicodeCodePoints,
 } from '@metakip/shared';
-import clsx from 'clsx';
+import * as stylex from '@stylexjs/stylex';
 import { ChevronDown, ChevronRight, FileText, Plus } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useIdentityNavigate } from '../../contexts/IdentityLifecycleContext';
 import { buildEntityPath, buildFolderPath, getWorkspacePath } from '../../utils/url';
 import { PageContextMenu } from '../ui/PageContextMenu';
+import { pageTreeRowMarker, styles } from './PageTreeRow.stylex';
 
 interface PageTreeRowProps {
   id: string;
@@ -103,13 +104,14 @@ export function PageTreeRow({
     <div
       role="button"
       tabIndex={0}
-      className={clsx(
-        'group flex items-center h-8 pr-2 py-1 my-0.5 rounded-lg cursor-pointer transition-all duration-200 ease-in-out relative',
-        isActive
-          ? 'bg-black/5 dark:bg-white/10 text-zinc-900 dark:text-zinc-100 font-medium shadow-[0_1px_2px_rgba(0,0,0,0.02)]'
-          : 'text-zinc-600 dark:text-zinc-400 hover:bg-black/5 dark:hover:bg-white/10 hover:text-zinc-900 dark:hover:text-zinc-100',
-        isDragTarget && 'opacity-60',
+      {...stylex.props(
+        styles.row,
+        isActive ? styles.activeRow : styles.inactiveRow,
+        isDragTarget && styles.dragTarget,
+        pageTreeRowMarker,
       )}
+      data-sidebar-tree-row=""
+      data-sidebar-menu-open={isMenuOpen ? '' : undefined}
       style={{ paddingLeft: `${depth * 12 + 12}px`, marginLeft: '8px', marginRight: '8px' }}
       onClick={handleNavigate}
       onKeyDown={(e) => {
@@ -127,12 +129,10 @@ export function PageTreeRow({
       <button
         type="button"
         onClick={hasChildren ? handleToggleExpand : undefined}
-        className={clsx(
-          'flex items-center justify-center w-5 h-5 rounded-md mr-2 transition-colors',
-          showDragHandle ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer',
-          hasChildren
-            ? 'hover:bg-black/10 dark:hover:bg-white/10 text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300'
-            : 'text-zinc-400 dark:text-zinc-500 opacity-50',
+        {...stylex.props(
+          styles.expandButton,
+          showDragHandle ? styles.grabbable : styles.pointer,
+          hasChildren ? styles.expandable : styles.emptyExpandButton,
         )}
         aria-label={hasChildren ? 'Toggle nested pages' : 'Page'}
       >
@@ -143,24 +143,20 @@ export function PageTreeRow({
             <ChevronRight size={14} />
           )
         ) : isFolder ? (
-          <span className="text-sm leading-none">📁</span>
+          <span {...stylex.props(styles.pageIcon)}>📁</span>
         ) : icon ? (
-          <span className="text-sm leading-none">{icon}</span>
+          <span {...stylex.props(styles.pageIcon)}>{icon}</span>
         ) : (
           <FileText
             size={14}
-            className={clsx(
-              isActive ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-400 dark:text-zinc-500',
-            )}
+            {...stylex.props(isActive ? styles.activeIcon : styles.inactiveIcon)}
           />
         )}
       </button>
 
       <div
-        className={clsx(
-          'flex-1 flex items-center min-w-0 transition-[padding] duration-150',
-          isMenuOpen ? 'pr-14' : 'pr-2 group-hover:pr-14',
-        )}
+        {...stylex.props(styles.content, styles.contentMenuResponsive)}
+        data-sidebar-menu-content=""
       >
         {isEditing ? (
           <input
@@ -173,28 +169,21 @@ export function PageTreeRow({
             }
             onBlur={onEditSave}
             onKeyDown={onEditKeyDown}
-            className="flex-1 bg-white/50 dark:bg-black/20 border border-black/10 dark:border-white/10 rounded-md px-1 py-0.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 h-6 min-w-0 text-zinc-900 dark:text-zinc-100"
+            {...stylex.props(styles.editInput)}
             onClick={(e) => e.stopPropagation()}
           />
         ) : (
-          <span className="truncate text-sm leading-none pt-0.5">{title}</span>
+          <span {...stylex.props(styles.title)}>{title}</span>
         )}
       </div>
 
       {!isEditing && (
-        <div
-          className={clsx(
-            'absolute right-1 z-20 flex items-center gap-0.5 transition-opacity',
-            isMenuOpen
-              ? 'opacity-100 pointer-events-auto'
-              : 'opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto group-focus-within:opacity-100 group-focus-within:pointer-events-auto',
-          )}
-        >
+        <div {...stylex.props(styles.contextActions)} data-sidebar-context-actions="">
           {onCreateChild && (
             <button
               type="button"
               onClick={handleCreateChild}
-              className="p-1 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 cursor-pointer transition-colors"
+              {...stylex.props(styles.addButton)}
               title="Add page"
             >
               <Plus size={14} />
@@ -214,8 +203,8 @@ export function PageTreeRow({
               canMove,
             }}
             isStarred={isStarred}
-            triggerClassName="p-1 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 cursor-pointer transition-colors"
-            menuClassName="w-40 bg-white dark:bg-zinc-900 border border-black/5 dark:border-white/5 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.5)] rounded-2xl p-1.5 flex flex-col z-[9999]"
+            triggerStyle={styles.contextButton}
+            popupStyle={styles.actionsPopup}
             onOpenChange={setIsMenuOpen}
             {...(onRename != null ? { onRename } : {})}
             {...(isActive

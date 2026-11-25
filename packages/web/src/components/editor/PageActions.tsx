@@ -1,4 +1,5 @@
 import type { PageDetailPayload, SharePermission } from '@metakip/shared';
+import * as stylex from '@stylexjs/stylex';
 import { Maximize2, MessageSquare, Minimize2, Share, Star } from 'lucide-react';
 import { useState } from 'react';
 import { useShareContext } from '../../contexts/ShareContext';
@@ -6,12 +7,14 @@ import { useStars } from '../../hooks/use-stars';
 import { useEntityActions } from '../../hooks/useEntityActions';
 import { usePageActionEligibility } from '../../hooks/usePageActionEligibility';
 import { Tooltip } from '../Tooltip';
-import { KebabMenu } from '../ui/KebabMenu';
+import { KebabMenu, type KebabMenuItem } from '../ui/KebabMenu';
+import { styles } from './PageActions.stylex';
 
 interface PageActionsProps {
   page: PageDetailPayload;
   permission: SharePermission | null;
   onDeleted: () => void;
+  isDesktopLayout: boolean;
   fullWidth: boolean;
   onToggleFullWidth: () => void;
   canComment: boolean;
@@ -24,6 +27,7 @@ export function PageActions({
   page,
   permission,
   onDeleted,
+  isDesktopLayout,
   fullWidth,
   onToggleFullWidth,
   canComment,
@@ -57,86 +61,79 @@ export function PageActions({
 
   if (isAnonymous) return null;
 
+  const menuItems: KebabMenuItem[] = [];
+  if (!isDesktopLayout) {
+    menuItems.push(actions.star);
+    if (canComment) {
+      menuItems.push({
+        label: commentsOpen ? 'Close comments' : 'Comments',
+        icon: <MessageSquare size={14} />,
+        onClick: onToggleComments,
+      });
+    }
+    menuItems.push(actions.share);
+  }
+  menuItems.push(
+    {
+      label: fullWidth ? 'Default width' : 'Full width',
+      icon: fullWidth ? <Minimize2 size={14} /> : <Maximize2 size={14} />,
+      onClick: onToggleFullWidth,
+    },
+    ...actions.items,
+  );
+
   return (
     <>
-      <div className="hidden shrink-0 items-center gap-1 md:flex">
-        <Tooltip label={actions.star.label} position="bottom">
-          <button
-            type="button"
-            onClick={actions.star.onClick}
-            aria-label={starLabel}
-            className={`rounded-md p-2 transition-colors cursor-pointer ${
-              isStarred
-                ? 'text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20'
-                : 'text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800'
-            }`}
-          >
-            <Star size={16} fill={isStarred ? 'currentColor' : 'none'} />
-          </button>
-        </Tooltip>
-        {canComment && (
-          <Tooltip
-            label={`Comments${commentsCount > 0 ? ` · ${commentsCount} open` : ''}`}
-            position="bottom"
-          >
+      {isDesktopLayout && (
+        <div {...stylex.props(styles.toolbarActions)}>
+          <Tooltip label={actions.star.label} position="bottom">
             <button
               type="button"
-              onClick={onToggleComments}
-              aria-label={commentsOpen ? 'Close comments' : 'Open comments'}
-              aria-pressed={commentsOpen}
-              className={`relative cursor-pointer rounded-md p-2 transition-colors ${
-                commentsOpen
-                  ? 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200'
-                  : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800'
-              }`}
+              onClick={actions.star.onClick}
+              aria-label={starLabel}
+              {...stylex.props(styles.button, isStarred ? styles.starred : styles.unstarred)}
             >
-              <MessageSquare size={16} />
+              <Star size={16} fill={isStarred ? 'currentColor' : 'none'} />
             </button>
           </Tooltip>
-        )}
-        <Tooltip label="Share" position="bottom">
-          <button
-            type="button"
-            onClick={actions.share.onClick}
-            aria-label="Share page"
-            data-testid="page-share-btn"
-            className="cursor-pointer rounded-md p-2 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800"
-          >
-            <Share size={16} />
-          </button>
-        </Tooltip>
-      </div>
+          {canComment && (
+            <Tooltip
+              label={`Comments${commentsCount > 0 ? ` · ${commentsCount} open` : ''}`}
+              position="bottom"
+            >
+              <button
+                type="button"
+                onClick={onToggleComments}
+                aria-label={commentsOpen ? 'Close comments' : 'Open comments'}
+                aria-pressed={commentsOpen}
+                {...stylex.props(
+                  styles.button,
+                  commentsOpen ? styles.commentsOpen : styles.commentsClosed,
+                )}
+              >
+                <MessageSquare size={16} />
+              </button>
+            </Tooltip>
+          )}
+          <Tooltip label="Share" position="bottom">
+            <button
+              type="button"
+              onClick={actions.share.onClick}
+              aria-label="Share page"
+              data-testid="page-share-btn"
+              {...stylex.props(styles.button, styles.share)}
+            >
+              <Share size={16} />
+            </button>
+          </Tooltip>
+        </div>
+      )}
       <KebabMenu
         ariaLabel="Page actions"
-        triggerClassName="flex h-8 w-8 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800"
-        menuClassName="w-48 rounded-xl border border-black/5 bg-white p-1.5 shadow-xl dark:border-white/5 dark:bg-zinc-900"
+        triggerStyle={styles.menuTrigger}
+        popupWidth="12rem"
         onOpenChange={setMenuOpen}
-        items={[
-          {
-            ...actions.star,
-            className: 'md:hidden',
-          },
-          ...(canComment
-            ? [
-                {
-                  label: commentsOpen ? 'Close comments' : 'Comments',
-                  icon: <MessageSquare size={14} />,
-                  className: 'md:hidden',
-                  onClick: onToggleComments,
-                },
-              ]
-            : []),
-          {
-            ...actions.share,
-            className: 'md:hidden',
-          },
-          {
-            label: fullWidth ? 'Default width' : 'Full width',
-            icon: fullWidth ? <Minimize2 size={14} /> : <Maximize2 size={14} />,
-            onClick: onToggleFullWidth,
-          },
-          ...actions.items,
-        ]}
+        items={menuItems}
       />
       {actions.dialogs}
     </>

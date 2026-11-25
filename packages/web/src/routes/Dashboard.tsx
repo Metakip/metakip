@@ -1,10 +1,11 @@
 import type { FolderTreeNode } from '@metakip/shared';
+import * as stylex from '@stylexjs/stylex';
 import { FileText } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { DashboardItemSections } from '../components/workspace/DashboardItemSections';
 import type { ExplorerItemData } from '../components/workspace/ExplorerItem';
+import { ExplorerItemSections } from '../components/workspace/ExplorerItemSections';
 import { ExplorerLoadingState } from '../components/workspace/ExplorerLoadingState';
 import { ExplorerToolbar } from '../components/workspace/ExplorerToolbar';
 import { MoveDialog } from '../components/workspace/MoveDialog';
@@ -56,12 +57,14 @@ import {
   resolveDashboardShiftSelection,
   retainVisibleDashboardSelection,
 } from './dashboardSelectionModel';
+import { styles } from './ExplorerRoute.stylex';
 
-const FILTERS: { value: DashboardFilter; label: string }[] = [
-  { value: 'all', label: 'All' },
-  { value: 'owned-by-me', label: 'Owned By Me' },
-  { value: 'shared-with-me', label: 'Shared With Me' },
-];
+const FILTER_LABELS = {
+  all: 'All',
+  'owned-by-me': 'Owned By Me',
+  'shared-with-me': 'Shared With Me',
+} satisfies Record<DashboardFilter, string>;
+const FILTERS: readonly DashboardFilter[] = ['all', 'owned-by-me', 'shared-with-me'];
 
 const normalizeFilter = (value: string | null): DashboardFilter => {
   if (value === 'owned-by-me' || value === 'shared-with-me') return value;
@@ -405,8 +408,8 @@ export default function HomeView() {
     item: ExplorerItemData,
     index: number,
     e: React.MouseEvent | React.KeyboardEvent,
-    rangeItems: readonly ExplorerItemData[] = allItems,
-    section: DashboardSection = 'all-items',
+    rangeItems: readonly ExplorerItemData[],
+    section: DashboardSection,
   ) => {
     if (e.ctrlKey || e.metaKey) {
       selection.toggle({ id: item.id, type: item.type });
@@ -637,24 +640,23 @@ export default function HomeView() {
     workspaceMembershipsQuery,
     starsQuery,
   ]);
-  const heading = FILTERS.find((filter) => filter.value === activeFilter)?.label ?? 'All';
   const emptyMessage =
     activeFilter === 'shared-with-me'
       ? 'Nothing has been shared with you yet.'
       : activeFilter === 'owned-by-me'
         ? 'Create a new page or folder to get started.'
         : 'Create or open a page to get started.';
-
   return (
-    <div className="app-shell-full-width explorer-page flex w-full min-w-0 flex-col">
+    <div {...stylex.props(styles.route)}>
       <ExplorerToolbar
         breadcrumbs={[]}
         filter={{
-          label: heading,
-          options: FILTERS.map((filter) => ({
-            label: filter.label,
-            selected: activeFilter === filter.value,
-            onSelect: () => setFilter(filter.value),
+          label: FILTER_LABELS[activeFilter],
+          value: activeFilter,
+          options: FILTERS.map((value) => ({
+            value,
+            label: FILTER_LABELS[value],
+            onSelect: () => setFilter(value),
           })),
         }}
         viewMode={viewMode}
@@ -664,9 +666,9 @@ export default function HomeView() {
         onCreateFolder={handleCreateFolder}
       />
 
-      <div className="explorer-content mx-auto mt-4 w-full max-w-4xl space-y-4 px-6 md:px-12">
+      <div className={`explorer-content ${stylex.props(styles.content).className ?? ''}`}>
         {initialQueriesState.status === 'error' || initialQueriesState.status === 'paused' ? (
-          <div className="p-4 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-md flex items-center justify-between">
+          <div {...stylex.props(styles.loadError)}>
             <span>
               {initialQueriesState.status === 'paused'
                 ? 'Loading is paused. Check your connection.'
@@ -683,7 +685,7 @@ export default function HomeView() {
                   refetchStars(),
                 ]);
               }}
-              className="px-3 py-1 bg-red-100 dark:bg-red-900/40 hover:bg-red-200 dark:hover:bg-red-900/60 rounded text-sm transition-colors cursor-pointer"
+              {...stylex.props(styles.retryErrorButton)}
             >
               Retry
             </button>
@@ -691,32 +693,34 @@ export default function HomeView() {
         ) : initialQueriesState.status === 'loading' ? (
           <ExplorerLoadingState />
         ) : allItems.length === 0 && starredItems.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <FileText size={48} className="text-zinc-300 dark:text-zinc-600 mb-4" />
-            <h3 className="text-lg font-medium text-zinc-900 dark:text-zinc-50 mb-2">
-              No items yet
-            </h3>
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm">{emptyMessage}</p>
+          <div {...stylex.props(styles.emptyState)}>
+            <FileText size={48} {...stylex.props(styles.emptyIcon)} />
+            <h3 {...stylex.props(styles.emptyTitle)}>No items yet</h3>
+            <p {...stylex.props(styles.emptyDescription)}>{emptyMessage}</p>
           </div>
         ) : (
-          <DashboardItemSections
-            allItems={allItems}
-            starredItems={starredItems}
+          <ExplorerItemSections
+            sections={[
+              { id: 'starred', title: 'Starred', items: starredItems },
+              {
+                id: 'all-items',
+                ...(starredItems.length > 0 ? { title: 'All Items' } : {}),
+                items: allItems,
+              },
+            ]}
             viewMode={viewMode}
+            {...(viewMode === 'card' ? { animation: 'standard' as const } : {})}
             currentUserId={currentUserId}
             canSelect={!bulkRemoveMutation.isPending}
             hasSelection={hasSelection}
-            isEditingAllowed={canRenameEditingTarget}
-            editingTarget={editingTarget}
+            editingTarget={canRenameEditingTarget ? editingTarget : null}
             isStarred={isStarred}
             isSelected={selection.isSelected}
             onSelect={(item, event) => {
               event.stopPropagation();
               selection.toggle({ id: item.id, type: item.type });
             }}
-            onNavigate={(item, index, event, rangeItems, section) =>
-              handleItemClick(item, index, event, rangeItems, section)
-            }
+            onNavigate={handleItemClick}
             onRename={handleRenameItem}
             onEditChange={(value) =>
               setEditingTarget((previous) => (previous ? { ...previous, value } : null))

@@ -1,8 +1,16 @@
-import { expect, type Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
 
 export const API_URL = process.env.API_URL ?? 'http://localhost:3001';
 export const WEB_URL = process.env.BASE_URL ?? 'http://localhost:5173';
 export const WEB_HOSTNAME = new URL(WEB_URL).hostname;
+
+export function editorFormattingToolbar(page: Page): Locator {
+  return page.getByRole('toolbar', { name: 'Editor formatting' });
+}
+
+export async function waitForLiveCollaboration(page: Page, timeout = 15_000): Promise<void> {
+  await expect(page.locator('[data-status="connected"]')).toBeVisible({ timeout });
+}
 
 export async function focusEditor(page: Page): Promise<void> {
   const editor = page.locator('.codemirror-editor .cm-content').first();
@@ -12,10 +20,7 @@ export async function focusEditor(page: Page): Promise<void> {
   // its initial document. Typing during that window can be overwritten by the
   // initial Yjs sync. Wait for the live status, then ensure the same editable
   // node remains mounted while that sync settles.
-  await page.locator('main .bg-emerald-500').first().waitFor({
-    state: 'visible',
-    timeout: 15_000,
-  });
+  await waitForLiveCollaboration(page);
 
   await expect
     .poll(

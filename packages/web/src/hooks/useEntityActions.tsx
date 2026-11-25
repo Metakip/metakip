@@ -1,4 +1,5 @@
 import type { ShareEntityType, SharePermission } from '@metakip/shared';
+import * as stylex from '@stylexjs/stylex';
 import { Copy, Download, Edit2, EyeOff, FolderInput, Share, Star, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { ConfirmDialog } from '../components/ConfirmDialog';
@@ -22,6 +23,7 @@ import { useFolderTree } from './use-folders';
 import { useToggleStar } from './use-stars';
 import { useWorkspaceMemberships } from './use-workspace';
 import { useAuth } from './useAuth';
+import { styles } from './useEntityActions.stylex';
 
 export type EntityActionOptions = {
   item: {
@@ -175,13 +177,13 @@ export function useEntityActions({
     isAdmin && {
       label: 'Move to Trash',
       icon: <Trash2 size={14} />,
-      className: '!text-red-600 dark:!text-red-400 data-highlighted:!bg-red-500/10',
+      variant: 'destructive' as const,
       onClick: () => setPendingRemovalAction('trash'),
     },
     canRemoveFromView && {
       label: 'Remove for me',
       icon: <EyeOff size={14} />,
-      className: '!text-red-600 dark:!text-red-400 data-highlighted:!bg-red-500/10',
+      variant: 'destructive' as const,
       onClick: () => setPendingRemovalAction('remove'),
     },
   ].filter((item) => !!item);
@@ -236,7 +238,12 @@ export function useEntityActions({
   return {
     star: {
       label: isStarred ? 'Unstar' : 'Star',
-      icon: <Star size={14} className={isStarred ? 'text-yellow-500 fill-yellow-500' : ''} />,
+      icon: (
+        <Star
+          size={14}
+          className={isStarred ? stylex.props(styles.starredIcon).className : undefined}
+        />
+      ),
       onClick: handleToggleStar,
     },
     rename:

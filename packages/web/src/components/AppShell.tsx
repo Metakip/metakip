@@ -1,4 +1,4 @@
-import clsx from 'clsx';
+import * as stylex from '@stylexjs/stylex';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { type CSSProperties, type ReactElement, useCallback, useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
@@ -10,6 +10,7 @@ import { usePwaLaunchAction } from '../hooks/usePwaLaunchAction';
 import { useSidebarCollapsed } from '../hooks/useSidebarCollapsed';
 import { useTheme } from '../hooks/useTheme';
 import { formatShortcut, SHORTCUT_PATTERNS } from '../utils/keyboardShortcuts';
+import { styles } from './AppShell.stylex';
 import { CommandPalette } from './CommandPalette';
 import { ProfilePill } from './ProfilePill';
 import { Sidebar } from './Sidebar';
@@ -21,23 +22,36 @@ export type AppShellContentState =
 
 export function AppShell({
   contentState = { status: 'ready' },
+  fullWidth = false,
+  hasToolbar = false,
 }: {
   contentState?: AppShellContentState | undefined;
+  fullWidth?: boolean;
+  hasToolbar?: boolean;
 } = {}) {
   return (
     <EntityCommandProvider>
-      <AppShellContent contentState={contentState} />
+      <AppShellContent contentState={contentState} fullWidth={fullWidth} hasToolbar={hasToolbar} />
     </EntityCommandProvider>
   );
 }
 
-function AppShellContent({ contentState }: { contentState: AppShellContentState }) {
+function AppShellContent({
+  contentState,
+  fullWidth,
+  hasToolbar,
+}: {
+  contentState: AppShellContentState;
+  fullWidth: boolean;
+  hasToolbar: boolean;
+}) {
   const { collapsed, toggleCollapsed } = useSidebarCollapsed();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [toolbarContainer] = useState<HTMLDivElement | null>(() => {
     if (typeof document === 'undefined') return null;
     const container = document.createElement('div');
-    container.className = 'app-shell-toolbar-portal';
+    container.setAttribute('data-app-shell-toolbar-portal', '');
+    container.className = stylex.props(styles.toolbarPortal).className ?? '';
     return container;
   });
   const [contentContainer, setContentContainer] = useState<HTMLDivElement | null>(null);
@@ -50,6 +64,7 @@ function AppShellContent({ contentState }: { contentState: AppShellContentState 
   const entityCommands = useEntityCommands();
   const openSearch = usePwaLaunchAction();
   const isLoading = contentState.status === 'loading';
+  const showToolbar = !isAnonymous || hasToolbar;
   const mobileMenuVisible = isMobileMenuOpen && !isDesktopLayout;
   const sidebarTakesSpace = !isAnonymous && !collapsed;
   const sidebarOpen = isDesktopLayout ? !collapsed : mobileMenuVisible;
@@ -116,7 +131,8 @@ function AppShellContent({ contentState }: { contentState: AppShellContentState 
 
   return (
     <div
-      className="app-shell-layout grid h-screen w-full grid-cols-1 overflow-hidden bg-zinc-50 font-sans text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50"
+      {...stylex.props(styles.root)}
+      data-app-shell-root=""
       style={
         {
           '--sidebar-column-width': sidebarTakesSpace ? 'var(--sidebar-width)' : '0px',
@@ -124,12 +140,15 @@ function AppShellContent({ contentState }: { contentState: AppShellContentState 
       }
     >
       <div
-        className="app-shell-toolbar-slot"
-        data-sidebar-toggle={!isAnonymous ? 'true' : 'false'}
-        data-sidebar-open={mobileMenuVisible ? 'true' : 'false'}
+        {...stylex.props(
+          styles.toolbarSlot,
+          showToolbar && styles.toolbarSlotVisible,
+          showToolbar && isAnonymous && styles.toolbarSlotWithoutSidebar,
+        )}
+        data-app-shell-toolbar-slot=""
       >
         {!isAnonymous && (
-          <div className="app-shell-mobile-sidebar-toggle">
+          <div {...stylex.props(styles.toolbarToggle)}>
             <Tooltip
               label={`${sidebarOpen ? 'Close' : 'Open'} Sidebar (${sidebarShortcut})`}
               position="bottom-left"
@@ -137,12 +156,7 @@ function AppShellContent({ contentState }: { contentState: AppShellContentState 
               <button
                 type="button"
                 onClick={toggleSidebar}
-                className={clsx(
-                  'flex h-8 w-8 cursor-pointer items-center justify-center rounded-md p-2 transition-colors',
-                  sidebarOpen
-                    ? 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200'
-                    : 'text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-200',
-                )}
+                {...stylex.props(styles.sidebarToggle, sidebarOpen && styles.sidebarToggleOpen)}
                 aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
                 aria-expanded={sidebarOpen}
                 aria-controls="app-sidebar"
@@ -152,13 +166,21 @@ function AppShellContent({ contentState }: { contentState: AppShellContentState 
             </Tooltip>
           </div>
         )}
-        <div className="app-shell-toolbar-content-slot" ref={attachToolbarContainer} />
+        <div
+          {...stylex.props(
+            styles.toolbarContentSlot,
+            showToolbar && styles.toolbarContentSlotVisible,
+            showToolbar && isAnonymous && styles.toolbarContentSlotWithoutSidebar,
+          )}
+          data-app-shell-toolbar-content-slot=""
+          ref={attachToolbarContainer}
+        />
       </div>
 
       {!isAnonymous && mobileMenuVisible && (
         <button
           type="button"
-          className="fixed inset-x-0 bottom-0 top-[var(--app-toolbar-height)] z-50 cursor-pointer animate-fade-in border-none bg-zinc-900/50 p-0 backdrop-blur-sm md:hidden"
+          {...stylex.props(styles.mobileOverlay)}
           onClick={() => setIsMobileMenuOpen(false)}
           onKeyDown={(e) => {
             if (e.key === 'Escape') setIsMobileMenuOpen(false);
@@ -173,42 +195,33 @@ function AppShellContent({ contentState }: { contentState: AppShellContentState 
           aria-label="Sidebar"
           aria-hidden={!sidebarOpen}
           inert={!sidebarOpen}
-          className={clsx(
-            'fixed bottom-0 left-0 top-[var(--app-toolbar-height)] z-[51] flex w-[80vw] max-w-[var(--sidebar-width)] flex-shrink-0 flex-col items-center gap-3 p-3 transition-[transform,opacity] duration-200 ease-in-out',
-            'md:col-start-1 md:row-start-2 md:static md:z-40 md:h-full md:w-[var(--sidebar-width)] md:max-w-none md:overflow-hidden md:pl-4 md:py-3 md:pr-0',
-            sidebarOpen
-              ? 'pointer-events-auto translate-x-0 opacity-100'
-              : 'pointer-events-none -translate-x-full opacity-0',
-            'md:transition-[transform,opacity] md:duration-200 md:ease-in-out',
-          )}
+          {...stylex.props(styles.sidebar, sidebarOpen ? styles.sidebarOpen : styles.sidebarClosed)}
         >
-          <Sidebar className="flex-1" />
-          <ProfilePill className="flex-shrink-0" />
+          <Sidebar fill />
+          <ProfilePill className={stylex.props(styles.profile).className ?? ''} />
         </section>
       )}
 
-      <main className="relative col-start-1 row-start-2 flex h-full min-w-0 flex-col overflow-hidden md:col-start-2 md:row-start-2">
-        <div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto scroll-smooth pb-8">
+      <main {...stylex.props(styles.main)} data-app-shell-main="">
+        <div {...stylex.props(styles.scrollContent)} data-app-shell-scroll="">
           <div
-            className={clsx(
-              'app-shell-content mx-auto w-full min-w-0 max-w-4xl',
-              isLoading
-                ? isAnonymous
-                  ? 'flex min-h-[100dvh] flex-col p-6 md:p-12'
-                  : 'flex min-h-[calc(100dvh-3.5rem)] flex-col p-6 md:min-h-[100dvh] md:p-12'
-                : 'min-h-full p-6 md:p-12',
+            {...stylex.props(
+              styles.content,
+              fullWidth ? styles.contentFullWidth : styles.contentConstrained,
+              isLoading ? styles.contentLoading : styles.contentReady,
+              isLoading && isAnonymous && styles.contentLoadingAnonymous,
             )}
+            data-app-shell-content=""
             ref={setContentContainer}
           >
             {contentState.status === 'loading' ? (
-              <div className="flex min-h-0 flex-1 items-center justify-center">
-                {contentState.content}
-              </div>
+              <div {...stylex.props(styles.loadingContent)}>{contentState.content}</div>
             ) : (
               <Outlet
                 context={{
                   toolbarContainer,
                   contentContainer,
+                  isDesktopLayout,
                 }}
               />
             )}

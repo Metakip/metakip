@@ -1,6 +1,10 @@
+import * as stylex from '@stylexjs/stylex';
 import type { ReactNode } from 'react';
 import { type OnboardingStatus, useOnboardingStatus } from '../../hooks/useOnboarding';
+import { actionColors } from '../ui/ActionColors.stylex';
 import { LoadingIndicator } from '../ui/LoadingIndicator';
+import { styles } from './AuthBoundary.stylex';
+import { styles as loadingStyles } from './RouteLoading.stylex';
 
 type OnboardingStatusBoundaryProps = {
   children: (status: OnboardingStatus) => ReactNode;
@@ -11,7 +15,7 @@ export function OnboardingStatusBoundary({ children }: OnboardingStatusBoundaryP
 
   if (onboardingStatus.isPending) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white dark:bg-zinc-950">
+      <div {...stylex.props(loadingStyles.root)}>
         <LoadingIndicator label="Preparing your workspace" size="md" />
       </div>
     );
@@ -19,18 +23,16 @@ export function OnboardingStatusBoundary({ children }: OnboardingStatusBoundaryP
 
   if (onboardingStatus.isError) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white px-6 dark:bg-zinc-950">
-        <div className="max-w-sm text-center">
-          <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-            We could not prepare your workspace
-          </h1>
-          <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+      <div {...stylex.props(styles.centered, styles.onboardingErrorRoot)}>
+        <div {...stylex.props(styles.onboardingErrorPanel)}>
+          <h1 {...stylex.props(styles.errorTitle)}>We could not prepare your workspace</h1>
+          <p {...stylex.props(styles.errorCopy, styles.onboardingErrorCopy)}>
             Check your connection and try again.
           </p>
           <button
             type="button"
             onClick={() => void onboardingStatus.refetch()}
-            className="mt-5 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200 cursor-pointer"
+            {...stylex.props(actionColors.contrast, styles.tryAgainButton)}
           >
             Try again
           </button>

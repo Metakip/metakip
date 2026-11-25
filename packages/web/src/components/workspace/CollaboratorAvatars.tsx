@@ -1,8 +1,10 @@
 import type { CollaboratorDisplay } from '@metakip/shared';
+import * as stylex from '@stylexjs/stylex';
 import { useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { getInitial } from '../../utils/avatar';
 import { formatCollaboratorLabel } from '../../utils/formatCollaboratorLabel';
+import { styles } from './CollaboratorAvatars.stylex';
 
 interface CollaboratorAvatarsProps {
   collaborators: CollaboratorDisplay[];
@@ -31,32 +33,26 @@ function Avatar({ collab, label }: { collab: CollaboratorDisplay; label: string 
   return (
     <div
       ref={anchorRef}
-      className="relative group/collab"
+      {...stylex.props(styles.avatar)}
       role="tooltip"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={() => setShowTooltip(false)}
     >
-      <div
-        className="relative w-6 h-6 rounded-full border-[1.5px] border-white dark:border-zinc-900 overflow-hidden flex items-center justify-center"
-        style={{ backgroundColor: collab.avatarUrl ? undefined : '#71717a' }}
-      >
+      <div {...stylex.props(styles.imageAvatar, !collab.avatarUrl && styles.imageAvatarFallback)}>
         {collab.avatarUrl ? (
           <img
             src={collab.avatarUrl}
             alt={collab.name ?? 'User'}
-            className="w-full h-full object-cover"
+            {...stylex.props(styles.image)}
             referrerPolicy="no-referrer"
           />
         ) : (
-          <span className="text-[9px] font-bold text-white">{getInitial(collab.name ?? 'U')}</span>
+          <span {...stylex.props(styles.initial)}>{getInitial(collab.name ?? 'U')}</span>
         )}
       </div>
       {showTooltip &&
         createPortal(
-          <span
-            className="fixed z-[99999] whitespace-nowrap rounded-md bg-zinc-900 dark:bg-zinc-700 px-2 py-1 text-xs font-medium text-white pointer-events-none"
-            style={tooltipStyle}
-          >
+          <span {...stylex.props(styles.tooltip)} style={tooltipStyle}>
             {label}
           </span>,
           document.body,
@@ -87,20 +83,15 @@ function OverflowBadge({ count }: { count: number }) {
   return (
     <div
       ref={anchorRef}
-      className="relative group/collab"
+      {...stylex.props(styles.avatar)}
       role="tooltip"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={() => setShowTooltip(false)}
     >
-      <div className="w-6 h-6 rounded-full border-[1.5px] border-white dark:border-zinc-900 bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-[8px] font-bold text-zinc-500 dark:text-zinc-400">
-        +{count}
-      </div>
+      <div {...stylex.props(styles.overflowAvatar)}>+{count}</div>
       {showTooltip &&
         createPortal(
-          <span
-            className="fixed z-[99999] whitespace-nowrap rounded-md bg-zinc-900 dark:bg-zinc-700 px-2 py-1 text-xs font-medium text-white pointer-events-none"
-            style={tooltipStyle}
-          >
+          <span {...stylex.props(styles.tooltip)} style={tooltipStyle}>
             {`${count} more`}
           </span>,
           document.body,
@@ -116,7 +107,7 @@ export function CollaboratorAvatars({ collaborators, max = 3 }: CollaboratorAvat
   const overflow = collaborators.length - max;
 
   return (
-    <div className="flex items-center -space-x-1.5">
+    <div {...stylex.props(styles.avatarStack)}>
       {visible.map((collab) => (
         <Avatar key={collab.userId} collab={collab} label={formatCollaboratorLabel(collab)} />
       ))}

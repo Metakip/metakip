@@ -1,9 +1,12 @@
 import { Dialog } from '@base-ui/react/dialog';
 import { extractInlineTags, parseMarkdownFrontmatter } from '@metakip/shared';
+import * as stylex from '@stylexjs/stylex';
 import { directoryOpen } from 'browser-fs-access';
 import { AlertCircle, CheckCircle, FileText, FolderOpen, Image, Loader2, X } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useIdentityLifecycle } from '../../contexts/IdentityLifecycleContext';
+import { actionColors } from '../ui/ActionColors.stylex';
+import { styles } from './ObsidianImportDialog.stylex';
 
 interface VaultFile {
   path: string;
@@ -218,33 +221,33 @@ export function ObsidianImportDialog({ onClose, variant = 'obsidian' }: Obsidian
       }}
     >
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 z-50 bg-zinc-950/45 backdrop-blur-sm" />
-        <Dialog.Viewport className="fixed inset-0 z-50 flex items-center justify-center px-4">
-          <Dialog.Popup className="w-full max-w-lg overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-2xl outline-none dark:border-zinc-800 dark:bg-zinc-900">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
-              <Dialog.Title className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+        <Dialog.Backdrop className={stylex.props(styles.backdrop).className} />
+        <Dialog.Viewport className={stylex.props(styles.viewport).className}>
+          <Dialog.Popup {...stylex.props(styles.dialog)} data-import-dialog="">
+            <div {...stylex.props(styles.header)}>
+              <Dialog.Title className={stylex.props(styles.title).className}>
                 {importCopy.title}
               </Dialog.Title>
-              <Dialog.Description className="sr-only">{importCopy.description}</Dialog.Description>
+              <Dialog.Description className={stylex.props(styles.visuallyHidden).className}>
+                {importCopy.description}
+              </Dialog.Description>
               <Dialog.Close
                 disabled={step === 'uploading'}
-                className="cursor-pointer rounded-lg p-1 text-zinc-500 transition-colors hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-40 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                {...stylex.props(styles.closeButton)}
                 aria-label={`Close ${importCopy.title}`}
               >
                 <X size={20} />
               </Dialog.Close>
             </div>
 
-            <div className="px-6 py-6">
+            <div {...stylex.props(styles.body)}>
               {step === 'select' && (
-                <div className="space-y-4">
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                    {importCopy.description}
-                  </p>
+                <div {...stylex.props(styles.step)}>
+                  <p {...stylex.props(styles.description)}>{importCopy.description}</p>
                   <button
                     type="button"
                     onClick={scanVault}
-                    className="w-full flex items-center justify-center gap-2 rounded-xl bg-zinc-900 dark:bg-zinc-100 px-4 py-3 text-sm font-medium text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
+                    {...stylex.props(actionColors.contrast, styles.primaryButton)}
                   >
                     <FolderOpen size={18} />
                     {importCopy.selectAction}
@@ -253,59 +256,40 @@ export function ObsidianImportDialog({ onClose, variant = 'obsidian' }: Obsidian
               )}
 
               {step === 'preview' && preview && (
-                <div className="space-y-4">
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                    {importCopy.previewDescription}
-                  </p>
+                <div {...stylex.props(styles.step)}>
+                  <p {...stylex.props(styles.description)}>{importCopy.previewDescription}</p>
 
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 p-3 text-center">
-                      <FileText
-                        size={20}
-                        className="mx-auto text-zinc-500 dark:text-zinc-400 mb-1"
-                      />
-                      <div className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                        {preview.notes}
-                      </div>
-                      <div className="text-xs text-zinc-500 dark:text-zinc-400">Notes</div>
+                  <div {...stylex.props(styles.previewGrid)}>
+                    <div {...stylex.props(styles.previewCard)}>
+                      <FileText size={20} {...stylex.props(styles.previewIcon)} />
+                      <div {...stylex.props(styles.previewValue)}>{preview.notes}</div>
+                      <div {...stylex.props(styles.previewLabel)}>Notes</div>
                     </div>
-                    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 p-3 text-center">
-                      <Image size={20} className="mx-auto text-zinc-500 dark:text-zinc-400 mb-1" />
-                      <div className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                        {preview.images}
-                      </div>
-                      <div className="text-xs text-zinc-500 dark:text-zinc-400">Images</div>
+                    <div {...stylex.props(styles.previewCard)}>
+                      <Image size={20} {...stylex.props(styles.previewIcon)} />
+                      <div {...stylex.props(styles.previewValue)}>{preview.images}</div>
+                      <div {...stylex.props(styles.previewLabel)}>Images</div>
                     </div>
-                    <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 p-3 text-center">
-                      <FolderOpen
-                        size={20}
-                        className="mx-auto text-zinc-500 dark:text-zinc-400 mb-1"
-                      />
-                      <div className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
-                        {preview.folders}
-                      </div>
-                      <div className="text-xs text-zinc-500 dark:text-zinc-400">Folders</div>
+                    <div {...stylex.props(styles.previewCard)}>
+                      <FolderOpen size={20} {...stylex.props(styles.previewIcon)} />
+                      <div {...stylex.props(styles.previewValue)}>{preview.folders}</div>
+                      <div {...stylex.props(styles.previewLabel)}>Folders</div>
                     </div>
                   </div>
 
                   {preview.tags.size > 0 && (
                     <div>
-                      <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2">
-                        Tags found:
-                      </p>
-                      <div className="flex flex-wrap gap-1.5">
+                      <p {...stylex.props(styles.tagsHeading)}>Tags found:</p>
+                      <div {...stylex.props(styles.tags)}>
                         {Array.from(preview.tags)
                           .slice(0, 20)
                           .map((tag) => (
-                            <span
-                              key={tag}
-                              className="inline-flex items-center rounded-md bg-zinc-100 dark:bg-zinc-800 px-2 py-0.5 text-xs text-zinc-700 dark:text-zinc-300"
-                            >
+                            <span key={tag} {...stylex.props(styles.tag)}>
                               #{tag}
                             </span>
                           ))}
                         {preview.tags.size > 20 && (
-                          <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                          <span {...stylex.props(styles.moreTags)}>
                             +{preview.tags.size - 20} more
                           </span>
                         )}
@@ -313,18 +297,22 @@ export function ObsidianImportDialog({ onClose, variant = 'obsidian' }: Obsidian
                     </div>
                   )}
 
-                  <div className="flex gap-3 pt-2">
+                  <div {...stylex.props(styles.actions)}>
                     <button
                       type="button"
                       onClick={() => setStep('select')}
-                      className="flex-1 rounded-xl border border-zinc-200 dark:border-zinc-700 px-4 py-2.5 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+                      {...stylex.props(styles.secondaryButton)}
                     >
                       Back
                     </button>
                     <button
                       type="button"
                       onClick={startImport}
-                      className="flex-1 rounded-xl bg-zinc-900 dark:bg-zinc-100 px-4 py-2.5 text-sm font-medium text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
+                      {...stylex.props(
+                        actionColors.contrast,
+                        styles.primaryButton,
+                        styles.actionPrimaryButton,
+                      )}
                     >
                       {importCopy.importAction}
                     </button>
@@ -333,99 +321,87 @@ export function ObsidianImportDialog({ onClose, variant = 'obsidian' }: Obsidian
               )}
 
               {step === 'uploading' && (
-                <div className="py-8 text-center space-y-4">
-                  <Loader2
-                    size={32}
-                    className="mx-auto animate-spin text-zinc-500 dark:text-zinc-400"
-                  />
+                <div {...stylex.props(styles.uploading)}>
+                  <Loader2 size={32} {...stylex.props(styles.spinner)} />
                   <div>
-                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
-                      {importCopy.progressTitle}
-                    </p>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-                      {files.length} files
-                    </p>
+                    <p {...stylex.props(styles.progressTitle)}>{importCopy.progressTitle}</p>
+                    <p {...stylex.props(styles.progressDescription)}>{files.length} files</p>
                   </div>
-                  <div className="w-full h-2 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-zinc-900 dark:bg-zinc-100 transition-all duration-300"
-                      style={{ width: `${progress}%` }}
-                    />
+                  <div {...stylex.props(styles.progressTrack)}>
+                    <div {...stylex.props(styles.progressBar)} style={{ width: `${progress}%` }} />
                   </div>
                 </div>
               )}
 
               {step === 'done' && result && (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 text-green-600 dark:text-green-400">
+                <div {...stylex.props(styles.step)}>
+                  <div {...stylex.props(styles.successHeading)}>
                     <CheckCircle size={24} />
-                    <span className="font-medium">Import complete!</span>
+                    <span>Import complete!</span>
                   </div>
 
-                  <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 p-4 space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-zinc-600 dark:text-zinc-400">Folders created</span>
-                      <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                        {result.foldersCreated}
-                      </span>
+                  <div {...stylex.props(styles.resultCard)}>
+                    <div {...stylex.props(styles.resultRow)}>
+                      <span {...stylex.props(styles.resultLabel)}>Folders created</span>
+                      <span {...stylex.props(styles.resultValue)}>{result.foldersCreated}</span>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-zinc-600 dark:text-zinc-400">Pages created</span>
-                      <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                        {result.pagesCreated}
-                      </span>
+                    <div {...stylex.props(styles.resultRow)}>
+                      <span {...stylex.props(styles.resultLabel)}>Pages created</span>
+                      <span {...stylex.props(styles.resultValue)}>{result.pagesCreated}</span>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-zinc-600 dark:text-zinc-400">Images uploaded</span>
-                      <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                        {result.imagesUploaded}
-                      </span>
+                    <div {...stylex.props(styles.resultRow)}>
+                      <span {...stylex.props(styles.resultLabel)}>Images uploaded</span>
+                      <span {...stylex.props(styles.resultValue)}>{result.imagesUploaded}</span>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-zinc-600 dark:text-zinc-400">Tags created</span>
-                      <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                        {result.tagsCreated}
-                      </span>
+                    <div {...stylex.props(styles.resultRow)}>
+                      <span {...stylex.props(styles.resultLabel)}>Tags created</span>
+                      <span {...stylex.props(styles.resultValue)}>{result.tagsCreated}</span>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-zinc-600 dark:text-zinc-400">Backlinks indexed</span>
-                      <span className="font-medium text-zinc-900 dark:text-zinc-100">
-                        {result.backlinksCreated}
-                      </span>
+                    <div {...stylex.props(styles.resultRow)}>
+                      <span {...stylex.props(styles.resultLabel)}>Backlinks indexed</span>
+                      <span {...stylex.props(styles.resultValue)}>{result.backlinksCreated}</span>
                     </div>
                   </div>
 
                   {result.errors.length > 0 && (
-                    <div className="rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 p-3">
-                      <p className="text-xs font-medium text-amber-800 dark:text-amber-300 mb-1">
+                    <div {...stylex.props(styles.warnings)}>
+                      <p {...stylex.props(styles.warningHeading)}>
                         {result.errors.length} warning{result.errors.length > 1 ? 's' : ''}
                       </p>
-                      <ul className="text-xs text-amber-700 dark:text-amber-400 space-y-0.5 max-h-24 overflow-y-auto">
+                      <ul {...stylex.props(styles.warningList)}>
                         {result.errors.slice(0, 5).map((err) => (
-                          <li key={err}>{err}</li>
+                          <li key={err} {...stylex.props(styles.warningItem)}>
+                            {err}
+                          </li>
                         ))}
-                        {result.errors.length > 5 && <li>+{result.errors.length - 5} more</li>}
+                        {result.errors.length > 5 && (
+                          <li {...stylex.props(styles.warningItem)}>
+                            +{result.errors.length - 5} more
+                          </li>
+                        )}
                       </ul>
                     </div>
                   )}
 
-                  <Dialog.Close className="w-full rounded-xl bg-zinc-900 dark:bg-zinc-100 px-4 py-2.5 text-sm font-medium text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors">
+                  <Dialog.Close
+                    className={stylex.props(actionColors.contrast, styles.primaryButton).className}
+                  >
                     Done
                   </Dialog.Close>
                 </div>
               )}
 
               {step === 'error' && (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3 text-red-600 dark:text-red-400">
+                <div {...stylex.props(styles.step)}>
+                  <div {...stylex.props(styles.errorHeading)}>
                     <AlertCircle size={24} />
-                    <span className="font-medium">Import failed</span>
+                    <span>Import failed</span>
                   </div>
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">{error}</p>
+                  <p {...stylex.props(styles.description)}>{error}</p>
                   <button
                     type="button"
                     onClick={() => setStep('select')}
-                    className="w-full rounded-xl bg-zinc-900 dark:bg-zinc-100 px-4 py-2.5 text-sm font-medium text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 transition-colors"
+                    {...stylex.props(actionColors.contrast, styles.primaryButton)}
                   >
                     Try Again
                   </button>

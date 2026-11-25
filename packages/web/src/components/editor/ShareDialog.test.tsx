@@ -315,7 +315,7 @@ describe('ShareDialog admin self-removal', () => {
       <ShareDialog entityType="page" entityId="page-1" title="Shared page" onClose={vi.fn()} />,
     );
 
-    expect(screen.getByText('Public access')).toBeInTheDocument();
+    expect(screen.getByText('Public Access')).toBeInTheDocument();
     expect(screen.queryByTestId('inherited-public-access')).not.toBeInTheDocument();
     expect(screen.queryByText('Inherited public access')).not.toBeInTheDocument();
     expect(screen.queryByText('Anyone can edit')).not.toBeInTheDocument();

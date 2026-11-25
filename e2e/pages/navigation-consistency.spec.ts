@@ -1,4 +1,5 @@
 import { expect, type Page, test } from '@playwright/test';
+import { waitForLiveCollaboration } from '../fixtures';
 
 type EntityType = 'page' | 'folder';
 
@@ -55,7 +56,7 @@ test.describe('Dashboard and sidebar consistency', () => {
       .click();
     const created = (await (await createResponse).json()) as { id: string };
     await page.waitForURL(new RegExp(`/untitled-${created.id}$`));
-    await expect(page.locator('main .bg-emerald-500')).toBeVisible({ timeout: 10_000 });
+    await waitForLiveCollaboration(page, 10_000);
 
     const sidebarPage = page
       .getByRole('region', { name: 'Sidebar' })
@@ -98,7 +99,7 @@ test.describe('Dashboard and sidebar consistency', () => {
     const created = (await pageResponse.json()) as { id: string };
 
     await page.goto(`/page-${created.id}`);
-    await expect(page.locator('main .bg-emerald-500')).toBeVisible({ timeout: 10_000 });
+    await waitForLiveCollaboration(page, 10_000);
     const sidebarPage = page
       .getByRole('region', { name: 'Sidebar' })
       .locator(entitySelector('page', created.id))

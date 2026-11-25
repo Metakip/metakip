@@ -15,7 +15,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { clsx } from 'clsx';
+import * as stylex from '@stylexjs/stylex';
 import {
   Calendar,
   Check,
@@ -39,6 +39,7 @@ import { useUpdatePage } from '../../hooks/use-pages';
 import { usePropertyMetadata } from '../../hooks/usePropertyMetadata';
 import { cleanTagName, tagIdentity } from '../../utils/tags';
 import { showErrorToast } from '../../utils/toast';
+import { addPropertyButtonMarker, propertyRowMarker, styles } from './PropertiesPanel.stylex';
 
 interface PropertiesPanelProps {
   pageId: string;
@@ -172,12 +173,9 @@ const TagValueEditor = forwardRef<HTMLInputElement, TagValueEditorProps>(
     };
 
     return (
-      <div className="flex flex-wrap items-center gap-1.5 min-h-[1.75rem] py-0.5">
+      <div {...stylex.props(styles.tagList)}>
         {tags.map((tag) => (
-          <span
-            key={tag}
-            className="flex items-center gap-1 px-2 py-0.5 bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 text-[12px] rounded-full font-medium leading-none group/tag transition-colors"
-          >
+          <span key={tag} {...stylex.props(styles.tagChip)}>
             {tag}
             {!readOnly && (
               <button
@@ -186,7 +184,7 @@ const TagValueEditor = forwardRef<HTMLInputElement, TagValueEditorProps>(
                   e.stopPropagation();
                   removeTag(tag);
                 }}
-                className="p-0.5 rounded-full hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+                {...stylex.props(styles.removeTagButton)}
               >
                 <X size={11} />
               </button>
@@ -194,7 +192,7 @@ const TagValueEditor = forwardRef<HTMLInputElement, TagValueEditorProps>(
           </span>
         ))}
         {!readOnly && (
-          <div className="relative flex-1 min-w-[80px]">
+          <div {...stylex.props(styles.tagInputWrapper)}>
             <input
               ref={ref}
               type="text"
@@ -214,7 +212,7 @@ const TagValueEditor = forwardRef<HTMLInputElement, TagValueEditorProps>(
                 if (onBlur) onBlur();
               }}
               placeholder={tags.length === 0 ? 'Empty' : 'Add tag...'}
-              className="w-full !bg-transparent !border-0 !border-none !shadow-none !outline-none text-[15px] py-0 px-1 placeholder:text-zinc-400 text-zinc-800 dark:text-zinc-200 caret-zinc-800 dark:caret-zinc-200 !focus:ring-0 !focus-visible:ring-0 !focus:outline-none !ring-0 !ring-offset-0 appearance-none"
+              {...stylex.props(styles.inputReset, styles.tagInput)}
               style={{
                 border: 'none',
                 outline: 'none',
@@ -223,7 +221,7 @@ const TagValueEditor = forwardRef<HTMLInputElement, TagValueEditorProps>(
               }}
             />
             {isFocused && filteredSuggestions.length > 0 && (
-              <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-xl z-50 overflow-hidden py-1">
+              <div {...stylex.props(styles.suggestionList)}>
                 {filteredSuggestions.map((s, i) => (
                   <button
                     key={s}
@@ -232,11 +230,9 @@ const TagValueEditor = forwardRef<HTMLInputElement, TagValueEditorProps>(
                       e.preventDefault();
                       addTag(s);
                     }}
-                    className={clsx(
-                      'w-full text-left px-3 py-1.5 text-[13px] transition-colors !outline-none !ring-0 !ring-offset-0 !focus:ring-0',
-                      i === selectedIndex
-                        ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100'
-                        : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50',
+                    {...stylex.props(
+                      styles.suggestionButton,
+                      i === selectedIndex && styles.suggestionSelected,
                     )}
                   >
                     {s}
@@ -356,20 +352,19 @@ function PropertyKeySelector({
       <button
         type="button"
         onClick={() => !readOnly && setIsEditing(true)}
-        className={clsx(
-          'flex items-center gap-2 text-[13px] font-medium text-zinc-500 dark:text-zinc-400 truncate px-1.5 py-0.5 rounded transition-colors text-left w-36 shrink-0 group/key !outline-none !ring-0 !ring-offset-0 !focus:ring-0 !focus-visible:ring-0 !focus:outline-none !border-0 selection:bg-zinc-200 selection:text-zinc-800 dark:selection:bg-zinc-700 dark:selection:text-zinc-200',
-          readOnly ? 'cursor-default' : 'cursor-text',
-        )}
+        {...stylex.props(styles.propertyKey, readOnly ? styles.keyReadOnly : styles.keyEditable)}
         style={{ border: 'none', outline: 'none', boxShadow: 'none', background: 'transparent' }}
       >
-        {IconComponent && <IconComponent size={15} className="text-zinc-400 shrink-0" />}
-        <span className="truncate">{currentKey || 'New Property'}</span>
+        {IconComponent && (
+          <IconComponent size={15} className={stylex.props(styles.propertyIcon).className ?? ''} />
+        )}
+        <span {...stylex.props(styles.keyLabel)}>{currentKey || 'New Property'}</span>
       </button>
     );
   }
 
   return (
-    <div className="relative w-36 shrink-0">
+    <div {...stylex.props(styles.keySelector)}>
       <input
         ref={inputRef}
         type="text"
@@ -389,11 +384,11 @@ function PropertyKeySelector({
             }
           }, 150);
         }}
-        className="w-full text-[13px] font-medium !bg-transparent !border-0 !border-none !shadow-none !outline-none !focus:ring-0 !focus-visible:ring-0 !ring-0 !ring-offset-0 text-zinc-500 dark:text-zinc-400 px-1.5 py-0.5 rounded appearance-none"
+        {...stylex.props(styles.inputReset, styles.keyInput)}
         style={{ border: 'none', outline: 'none', boxShadow: 'none', background: 'transparent' }}
         placeholder="Property name..."
       />
-      <div className="absolute top-full left-0 mt-1 w-48 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg shadow-xl z-50 overflow-hidden py-1">
+      <div {...stylex.props(styles.suggestionList)}>
         {showCreateOption && (
           <button
             type="button"
@@ -401,14 +396,12 @@ function PropertyKeySelector({
               e.preventDefault();
               handleSelect(inputValue);
             }}
-            className={clsx(
-              'w-full text-left px-3 py-2 text-[13px] transition-colors flex items-center gap-2 !outline-none !ring-0 !ring-offset-0 !focus:ring-0',
-              selectedIndex === 0
-                ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100'
-                : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50',
+            {...stylex.props(
+              styles.suggestionButton,
+              selectedIndex === 0 && styles.suggestionSelected,
             )}
           >
-            <Plus size={13} className="text-zinc-400 shrink-0" />
+            <Plus size={13} className={stylex.props(styles.propertyIcon).className ?? ''} />
             <span>Create &ldquo;{inputValue}&rdquo;</span>
           </button>
         )}
@@ -424,16 +417,18 @@ function PropertyKeySelector({
                 e.preventDefault();
                 handleSelect(s);
               }}
-              className={clsx(
-                'w-full text-left px-3 py-2 text-[13px] transition-colors flex items-center gap-2 !outline-none !ring-0 !ring-offset-0 !focus:ring-0',
-                idx === selectedIndex
-                  ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100'
-                  : 'text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/50',
+              {...stylex.props(
+                styles.suggestionButton,
+                idx === selectedIndex && styles.suggestionSelected,
               )}
             >
-              {Svg && <Svg size={13} className="text-zinc-400 shrink-0" />}
-              <span className="flex-1 truncate">{s}</span>
-              {isCurrent && <Check size={13} className="text-zinc-400 shrink-0" />}
+              {Svg && (
+                <Svg size={13} className={stylex.props(styles.propertyIcon).className ?? ''} />
+              )}
+              <span {...stylex.props(styles.suggestionText)}>{s}</span>
+              {isCurrent && (
+                <Check size={13} className={stylex.props(styles.propertyIcon).className ?? ''} />
+              )}
             </button>
           );
         })}
@@ -542,18 +537,15 @@ function SortablePropertyRow({
       ref={setNodeRef}
       style={style}
       data-property-key={item.key}
-      className={clsx(
-        'group flex items-center gap-2 px-2 py-1.5 rounded-lg transition-all duration-200 border border-transparent',
-        isDragging
-          ? 'bg-white dark:bg-zinc-800 shadow-xl border-zinc-200 dark:border-zinc-700'
-          : 'hover:bg-zinc-100/50 dark:hover:bg-zinc-800/40',
-      )}
+      {...stylex.props(styles.propertyRow, isDragging && styles.dragging, propertyRowMarker)}
+      data-property-row=""
     >
       {!readOnly && (
         <div
           {...attributes}
           {...listeners}
-          className="opacity-0 group-hover:opacity-100 cursor-grab active:cursor-grabbing p-1 -ml-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-opacity"
+          {...stylex.props(styles.dragHandle)}
+          data-property-drag-handle=""
         >
           <GripVertical size={15} />
         </div>
@@ -567,7 +559,7 @@ function SortablePropertyRow({
         setIsEditing={setIsEditingKey}
       />
 
-      <div className="flex-1 min-w-0 flex items-center gap-2">
+      <div {...stylex.props(styles.valueWrapper)}>
         {isTagsProperty ? (
           <TagValueEditor
             ref={tagEditorRef}
@@ -587,7 +579,7 @@ function SortablePropertyRow({
             ref={valueInputRef}
             type="text"
             data-testid="value-input"
-            className="flex-1 text-[15px] !bg-transparent !border-0 !border-none !shadow-none !outline-none !focus:ring-0 !focus-visible:ring-0 !ring-0 !ring-offset-0 text-zinc-800 dark:text-zinc-200 caret-zinc-800 dark:caret-zinc-200 px-2 py-0.5 min-h-[1.75rem] rounded truncate appearance-none"
+            {...stylex.props(styles.inputReset, styles.valueInput)}
             style={{
               border: 'none',
               outline: 'none',
@@ -611,9 +603,9 @@ function SortablePropertyRow({
           <button
             type="button"
             onClick={() => !readOnly && setIsEditingValue(true)}
-            className={clsx(
-              'flex-1 text-[15px] text-zinc-800 dark:text-zinc-200 truncate px-2 py-0.5 rounded min-h-[1.75rem] flex items-center transition-colors text-left !outline-none !ring-0 !ring-offset-0 !focus:ring-0 !focus-visible:ring-0 !focus:outline-none !border-0 selection:bg-zinc-200 selection:text-zinc-800 dark:selection:bg-zinc-700 dark:selection:text-zinc-200',
-              readOnly ? 'cursor-default' : 'cursor-text',
+            {...stylex.props(
+              styles.valueButton,
+              readOnly ? styles.valueReadOnly : styles.valueEditable,
             )}
             style={{
               border: 'none',
@@ -628,13 +620,13 @@ function SortablePropertyRow({
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
-                className="text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1.5"
+                {...stylex.props(styles.urlValue)}
               >
-                <span className="truncate">{String(item.value)}</span>
-                <ExternalLink size={11} className="shrink-0" />
+                <span {...stylex.props(styles.urlText)}>{String(item.value)}</span>
+                <ExternalLink size={11} {...stylex.props(styles.externalLinkIcon)} />
               </a>
             ) : (
-              <span className={clsx(!item.value && 'text-zinc-400 dark:text-zinc-600')}>
+              <span {...stylex.props(!item.value && styles.emptyValue)}>
                 {String(item.value || 'Empty')}
               </span>
             )}
@@ -647,7 +639,8 @@ function SortablePropertyRow({
           type="button"
           data-testid="delete-property"
           onClick={() => onDelete(item.id)}
-          className="opacity-0 group-hover:opacity-100 p-1.5 text-zinc-400 hover:text-red-500 transition-all cursor-pointer rounded-md hover:bg-red-50 dark:hover:bg-red-500/10 shrink-0 !outline-none !ring-0 !ring-offset-0 !focus:ring-0"
+          {...stylex.props(styles.deleteButton)}
+          data-property-delete-button=""
           title="Delete property"
         >
           <Trash2 size={15} />
@@ -830,22 +823,25 @@ export function PropertiesPanel({ pageId, properties }: PropertiesPanelProps) {
   if (items.length === 0 && !isCollapsed) {
     if (readOnly) {
       return (
-        <div className="mb-6 animate-fade-in px-2">
-          <span className="flex items-center gap-2 px-3 py-1.5 text-[13px] font-medium text-zinc-400 dark:text-zinc-500">
-            No properties
-          </span>
+        <div {...stylex.props(styles.emptyProperties)}>
+          <span {...stylex.props(styles.emptyLabel)}>No properties</span>
         </div>
       );
     }
     return (
-      <div className="mb-6 animate-fade-in px-2">
+      <div {...stylex.props(styles.emptyProperties)}>
         <button
           type="button"
           data-testid="add-property"
           onClick={addProperty}
-          className="flex items-center gap-2 px-3 py-1.5 text-[13px] font-medium text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-all cursor-pointer group border border-dashed border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 !outline-none !focus:outline-none !focus:ring-0 !focus-visible:ring-0 !ring-0 !ring-offset-0"
+          {...stylex.props(
+            styles.addPropertyCommon,
+            styles.addFirstPropertyButton,
+            addPropertyButtonMarker,
+          )}
+          data-add-first-property=""
         >
-          <Plus size={15} className="group-hover:scale-110 transition-transform" />
+          <Plus size={15} {...stylex.props(styles.addPropertyIcon)} data-add-property-icon="" />
           Add a property
         </button>
       </div>
@@ -853,29 +849,26 @@ export function PropertiesPanel({ pageId, properties }: PropertiesPanelProps) {
   }
 
   return (
-    <div className="mb-10 select-none animate-fade-in">
-      <div className="flex items-center justify-between mb-3 px-2">
+    <div {...stylex.props(styles.propertiesPanel)}>
+      <div {...stylex.props(styles.propertiesHeader)}>
         <button
           type="button"
           data-testid="properties-heading"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-zinc-600 dark:text-zinc-300 cursor-pointer group !outline-none !focus:outline-none !focus:ring-0 !focus-visible:ring-0 !ring-0 !ring-offset-0"
+          {...stylex.props(styles.propertiesHeading)}
         >
-          <div className="p-0.5 rounded">
+          <div {...stylex.props(styles.collapseIcon)}>
             {isCollapsed ? <ChevronRight size={14} /> : <ChevronDown size={14} />}
           </div>
           <span>Properties</span>
-          <span
-            data-testid="property-count"
-            className="bg-zinc-100 dark:bg-zinc-800/80 px-2 py-0.5 rounded-full text-[11px] normal-case tracking-normal font-black"
-          >
+          <span data-testid="property-count" {...stylex.props(styles.propertyCount)}>
             {items.length}
           </span>
         </button>
       </div>
 
       {!isCollapsed && (
-        <div className="space-y-1">
+        <div {...stylex.props(styles.propertyList)}>
           <DndContext
             key={readOnly ? 'read-only' : 'editable'}
             sensors={readOnly ? [] : sensors}
@@ -904,9 +897,14 @@ export function PropertiesPanel({ pageId, properties }: PropertiesPanelProps) {
               type="button"
               data-testid="add-property"
               onClick={addProperty}
-              className="w-full flex items-center gap-2 px-2 py-2 mt-2 text-[13px] font-medium text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-100/50 dark:hover:bg-zinc-800/40 rounded-lg transition-all cursor-pointer group border border-dashed border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 !outline-none !focus:outline-none !focus:ring-0 !focus-visible:ring-0 !ring-0 !ring-offset-0"
+              {...stylex.props(
+                styles.addPropertyCommon,
+                styles.addPropertyButton,
+                addPropertyButtonMarker,
+              )}
+              data-add-property-button=""
             >
-              <Plus size={15} className="group-hover:scale-110 transition-transform" />
+              <Plus size={15} {...stylex.props(styles.addPropertyIcon)} data-add-property-icon="" />
               <span>Add a property</span>
             </button>
           )}

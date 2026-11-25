@@ -1,9 +1,11 @@
 import { MAX_PAGE_TITLE_LENGTH, truncateUnicodeCodePoints } from '@metakip/shared';
+import * as stylex from '@stylexjs/stylex';
 import type React from 'react';
 import { useCallback, useRef } from 'react';
 import type * as Y from 'yjs';
 import { useIsReadOnly } from '../../contexts/EditorReadOnlyContext';
 import { usePageTitle } from '../../hooks/usePageTitle';
+import { styles } from './PageTitle.stylex';
 
 interface PageTitleProps {
   pageId: string;
@@ -47,7 +49,7 @@ export function PageTitle({
       }
       onBlur={handleBlurOrEnter}
       onKeyDown={handleBlurOrEnter}
-      className="w-full font-bold leading-tight text-zinc-900 dark:text-zinc-50 bg-transparent outline-none placeholder:text-zinc-300 dark:placeholder:text-zinc-700 focus:ring-0 focus:border-transparent transition-colors break-words font-serif"
+      {...stylex.props(styles.input)}
       placeholder="Page Title"
       autoComplete="off"
       maxLength={MAX_PAGE_TITLE_LENGTH * 2}

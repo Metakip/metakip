@@ -1,3 +1,4 @@
+import * as stylex from '@stylexjs/stylex';
 import { FileText, Folder as FolderIcon, RotateCcw, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { ConfirmDialog } from '../components/ConfirmDialog';
@@ -6,6 +7,7 @@ import { WorkspacePageToolbar } from '../components/workspace/WorkspacePageToolb
 import { usePermanentDeleteFolder, useRestoreFolder, useTrashFolders } from '../hooks/use-folders';
 import { usePermanentDeletePage, useRestorePage, useTrashPages } from '../hooks/use-pages';
 import { useEmptyAllTrash } from '../hooks/use-trash';
+import { styles } from './Trash.stylex';
 
 type TrashItem = {
   id: string;
@@ -93,7 +95,7 @@ export default function Trash() {
   };
 
   return (
-    <div className="max-w-3xl space-y-8">
+    <div {...stylex.props(styles.trash)}>
       <WorkspacePageToolbar
         title="Trash"
         actions={
@@ -102,7 +104,7 @@ export default function Trash() {
               type="button"
               onClick={() => setShowEmptyAllConfirm(true)}
               disabled={emptyAllPending}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 dark:hover:border-red-800 transition-colors disabled:opacity-50 cursor-pointer"
+              {...stylex.props(styles.button, styles.destructiveButton)}
             >
               <Trash2 size={14} />
               <span>Empty all</span>
@@ -111,64 +113,61 @@ export default function Trash() {
         }
       />
       <div>
-        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Trash</h1>
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+        <h1 {...stylex.props(styles.pageTitle)}>Trash</h1>
+        <p {...stylex.props(styles.pageDescription)}>
           Deleted pages and folders appear here. Restore them or delete permanently.
         </p>
       </div>
 
-      <section className="rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 p-6">
+      <section {...stylex.props(styles.card)}>
         {isLoading ? (
-          <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-zinc-900 dark:border-zinc-100" />
+          <div {...stylex.props(styles.loadingState)}>
+            <div {...stylex.props(styles.spinner)} />
           </div>
         ) : hasError ? (
-          <div className="py-8 text-center" role="alert">
-            <p className="text-sm text-red-600 dark:text-red-400">Could not load Trash.</p>
+          <div {...stylex.props(styles.errorState)} role="alert">
+            <p {...stylex.props(styles.errorMessage)}>Could not load Trash.</p>
             <button
               type="button"
               onClick={() => {
                 void refetchPages();
                 void refetchFolders();
               }}
-              className="mt-3 px-3 py-1.5 text-sm font-medium text-zinc-700 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-800 cursor-pointer"
+              {...stylex.props(styles.retryButton)}
             >
               Retry
             </button>
           </div>
         ) : trashItems.length > 0 ? (
-          <div className="space-y-2">
+          <div {...stylex.props(styles.itemList)}>
             {trashItems.map((item) => (
-              <div
-                key={`${item.type}:${item.id}`}
-                className="flex items-center justify-between p-3 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="flex-shrink-0 text-zinc-400 dark:text-zinc-500">
+              <div key={`${item.type}:${item.id}`} {...stylex.props(styles.trashItem)}>
+                <div {...stylex.props(styles.itemContent)}>
+                  <div {...stylex.props(styles.itemIcon)}>
                     {item.icon ? (
-                      <span className="text-lg leading-none">{item.icon}</span>
+                      <span {...stylex.props(styles.itemEmoji)}>{item.icon}</span>
                     ) : item.type === 'folder' ? (
                       <FolderIcon size={18} />
                     ) : (
                       <FileText size={18} />
                     )}
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
+                  <div {...stylex.props(styles.itemText)}>
+                    <p {...stylex.props(styles.itemTitle)}>
                       {item.title || (item.type === 'folder' ? 'Untitled folder' : 'Untitled')}
                     </p>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    <p {...stylex.props(styles.itemMeta)}>
                       {item.type === 'folder' ? 'Folder' : 'Page'} · Deleted{' '}
                       {item.deletedAt ? new Date(item.deletedAt).toLocaleDateString() : 'Unknown'}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0 ml-4">
+                <div {...stylex.props(styles.itemActions)}>
                   <button
                     type="button"
                     onClick={() => handleRestore(item)}
                     disabled={restorePending}
-                    className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors disabled:opacity-50 cursor-pointer"
+                    {...stylex.props(styles.button, styles.restoreButton)}
                     title={`Restore ${item.type}`}
                   >
                     <RotateCcw size={14} />
@@ -178,7 +177,7 @@ export default function Trash() {
                     type="button"
                     onClick={() => setItemToDelete(item)}
                     disabled={permanentDeletePending}
-                    className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 dark:hover:border-red-800 transition-colors disabled:opacity-50 cursor-pointer"
+                    {...stylex.props(styles.button, styles.destructiveButton)}
                     title={`Delete ${item.type} permanently`}
                   >
                     <Trash2 size={14} />

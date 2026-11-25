@@ -1,10 +1,7 @@
 import { COMMENT_BODY_MAX_LENGTH } from '@metakip/shared';
+import * as stylex from '@stylexjs/stylex';
 import { useEffect, useRef, useState } from 'react';
-import {
-  commentCancelButtonClass,
-  commentSubmitButtonClass,
-  commentTextareaFocusClass,
-} from './commentComposerStyles';
+import { styles } from './CommentComposer.stylex';
 
 type InlineCommentComposerProps = {
   position: { left: number; right: number; top: number; bottom: number };
@@ -33,7 +30,7 @@ export function InlineCommentComposer({
     <div
       role="dialog"
       aria-label="Add comment to selection"
-      className="fixed z-40 w-[320px] rounded-lg border border-zinc-200 bg-white p-3 shadow-xl dark:border-zinc-700 dark:bg-zinc-900"
+      className={stylex.props(styles.composer).className}
       style={{ left, top }}
       onKeyDown={(event) => {
         if (event.key === 'Escape') {
@@ -55,7 +52,7 @@ export function InlineCommentComposer({
             setSubmitting(false);
           }
         }}
-        className="space-y-2"
+        {...stylex.props(styles.form)}
       >
         <textarea
           ref={inputRef}
@@ -71,24 +68,24 @@ export function InlineCommentComposer({
           aria-label="New comment on selection"
           placeholder="Add a comment…"
           rows={2}
-          className={`w-full resize-y rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-500 ${commentTextareaFocusClass} dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100`}
+          {...stylex.props(styles.textarea, styles.textareaLarge)}
         />
-        <div className="flex items-center justify-between gap-3">
+        <div {...stylex.props(styles.composerActions)}>
           {error ? (
-            <p role="alert" className="min-w-0 truncate text-xs text-zinc-600 dark:text-zinc-400">
+            <p role="alert" {...stylex.props(styles.error)}>
               {error}
             </p>
           ) : (
             <span />
           )}
-          <div className="flex shrink-0 items-center gap-2">
-            <button type="button" onClick={onCancel} className={commentCancelButtonClass}>
+          <div {...stylex.props(styles.buttonGroup)}>
+            <button type="button" onClick={onCancel} {...stylex.props(styles.cancelButton)}>
               Cancel
             </button>
             <button
               type="submit"
               disabled={!body.trim() || submitting}
-              className={commentSubmitButtonClass}
+              {...stylex.props(styles.submitButton)}
             >
               {submitting ? 'Sending…' : 'Comment'}
             </button>

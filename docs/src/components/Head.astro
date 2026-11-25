@@ -1,7 +1,6 @@
 ---
 // biome-ignore lint/correctness/noUnusedImports: Used by the Astro template below.
 import appleTouchIcon from '../../../packages/shared/assets/app-favicon/apple-touch-icon.png';
-import darkIcon192 from '../../../packages/shared/assets/app-favicon/icon-dark-192.png';
 import lightIcon192 from '../../../packages/shared/assets/app-favicon/icon-light-192.png';
 import { getApiReferencePageMetadata } from '../lib/apiReferenceMarkdown';
 
@@ -101,9 +100,6 @@ const pageHead = head.map((item) => {
       attrs: {
         ...item.attrs,
         href: lightIcon192.src,
-        'data-theme-icon': '192',
-        'data-theme-icon-light': lightIcon192.src,
-        'data-theme-icon-dark': darkIcon192.src,
       },
     };
   }

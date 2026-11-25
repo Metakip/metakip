@@ -1,4 +1,14 @@
-import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
+import * as stylex from '@stylexjs/stylex';
+import {
+  BrowserRouter,
+  Navigate,
+  Outlet,
+  Route,
+  Routes,
+  useLocation,
+  useMatch,
+} from 'react-router-dom';
+import { styles } from './App.stylex';
 import { AppShell } from './components/AppShell';
 import { AuthIdentityBoundary } from './components/auth/AuthIdentityBoundary';
 import { OnboardingGate } from './components/auth/OnboardingGate';
@@ -34,6 +44,11 @@ function LegacyWorkspaceRedirect() {
       replace
     />
   );
+}
+
+function WorkspaceAppShell({ rootPath }: { rootPath: string }) {
+  const isDashboard = useMatch({ path: rootPath, end: true }) !== null;
+  return <AppShell fullWidth={isDashboard} hasToolbar />;
 }
 
 function ApplicationRoutes() {
@@ -74,7 +89,7 @@ function ApplicationRoutes() {
           path={workspaceRoot}
           element={
             <ProtectedRoute>
-              <AppShell />
+              <WorkspaceAppShell rootPath={workspaceRoot} />
             </ProtectedRoute>
           }
         >
@@ -109,7 +124,7 @@ function ApplicationRoutes() {
 function App() {
   return (
     <ErrorBoundary>
-      <div className="bg-white dark:bg-zinc-950 min-h-screen text-zinc-900 dark:text-zinc-50">
+      <div {...stylex.props(styles.root)}>
         <BrowserRouter>
           <PwaInstallProvider>
             <AuthSessionProvider>

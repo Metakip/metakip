@@ -1,3 +1,4 @@
+import * as stylex from '@stylexjs/stylex';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { StrictMode } from 'react';
@@ -11,6 +12,7 @@ import {
 } from '../../contexts/IdentityLifecycleContext';
 import { createTestQueryClient } from '../../test-utils/render';
 import { consumeSelfLeave, markSelfLeave, resetSelfLeaveState } from '../../utils/leave-page';
+import { styles } from './CodeMirrorEditor.stylex';
 
 const mocks = vi.hoisted(() => ({
   isAnonymous: true,
@@ -264,7 +266,8 @@ describe('CodeMirrorEditor anonymous uploads', () => {
     mocks.hasEditor = true;
     renderEditor();
 
-    expect(document.querySelector('.codemirror-editor')).toHaveClass('invisible');
+    const editorNotReadyClass = stylex.props(styles.editorNotReady).className ?? '';
+    expect(document.querySelector('.codemirror-editor')).toHaveClass(editorNotReadyClass);
     expect(screen.getByRole('status', { name: 'Loading page' })).toBeInTheDocument();
 
     act(() => {
@@ -272,7 +275,7 @@ describe('CodeMirrorEditor anonymous uploads', () => {
     });
 
     await waitFor(() => {
-      expect(document.querySelector('.codemirror-editor')).not.toHaveClass('invisible');
+      expect(document.querySelector('.codemirror-editor')).not.toHaveClass(editorNotReadyClass);
     });
     expect(screen.queryByRole('status', { name: 'Loading page' })).not.toBeInTheDocument();
   });
@@ -298,7 +301,9 @@ describe('CodeMirrorEditor anonymous uploads', () => {
 
       expect(screen.getByRole('alert')).toHaveTextContent("Couldn't load the page content.");
       expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
-      expect(document.querySelector('.codemirror-editor')).toHaveClass('invisible');
+      expect(document.querySelector('.codemirror-editor')).toHaveClass(
+        stylex.props(styles.editorNotReady).className ?? '',
+      );
     } finally {
       vi.useRealTimers();
     }

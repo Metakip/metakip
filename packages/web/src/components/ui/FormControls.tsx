@@ -1,9 +1,11 @@
 import { FloatingPortal } from '@floating-ui/react';
-import clsx from 'clsx';
+import type { StyleXStyles } from '@stylexjs/stylex';
+import * as stylex from '@stylexjs/stylex';
 import { Check, ChevronDown } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useFloatingMenu } from '../../hooks/useFloatingMenu';
+import { styles } from './FormControls.stylex';
 
 type TextBoxProps = Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
@@ -13,8 +15,8 @@ type TextBoxProps = Omit<
   onChange: (value: string) => void;
   leadingIcon?: React.ReactNode;
   rightSlot?: React.ReactNode;
-  className?: string;
-  inputClassName?: string;
+  rootStyle?: StyleXStyles;
+  inputStyle?: StyleXStyles;
   type?: React.HTMLInputTypeAttribute;
 };
 
@@ -25,15 +27,15 @@ export function TextBox({
   readOnly = false,
   leadingIcon,
   rightSlot,
-  className,
-  inputClassName,
+  rootStyle,
+  inputStyle,
   type = 'text',
   style,
   ...inputProps
 }: TextBoxProps) {
   return (
-    <div className={clsx('flex h-6 items-center gap-2', className)}>
-      {leadingIcon ? <div className="shrink-0 text-zinc-400">{leadingIcon}</div> : null}
+    <div {...stylex.props(styles.textBox, rootStyle)}>
+      {leadingIcon ? <div {...stylex.props(styles.leadingIcon)}>{leadingIcon}</div> : null}
       <input
         {...inputProps}
         type={type}
@@ -41,10 +43,7 @@ export function TextBox({
         readOnly={readOnly}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
-        className={clsx(
-          'min-w-0 flex-1 rounded bg-transparent px-1 py-0 text-[14px] leading-6 text-zinc-800 caret-zinc-800 outline-none placeholder:text-zinc-400 disabled:cursor-default dark:text-zinc-200 dark:caret-zinc-200',
-          inputClassName,
-        )}
+        {...stylex.props(styles.textInput, inputStyle)}
         style={{
           border: 'none',
           boxShadow: 'none',
@@ -53,7 +52,7 @@ export function TextBox({
           ...style,
         }}
       />
-      {rightSlot ? <div className="shrink-0">{rightSlot}</div> : null}
+      {rightSlot ? <div {...stylex.props(styles.rightSlot)}>{rightSlot}</div> : null}
     </div>
   );
 }
@@ -71,8 +70,8 @@ type DropdownProps<TValue extends string> = {
   onChange: (value: TValue) => void;
   ariaLabel: string;
   disabled?: boolean;
-  className?: string;
-  triggerClassName?: string;
+  rootStyle?: StyleXStyles;
+  triggerStyle?: StyleXStyles;
 };
 
 export function Dropdown<TValue extends string>({
@@ -81,8 +80,8 @@ export function Dropdown<TValue extends string>({
   onChange,
   ariaLabel,
   disabled = false,
-  className,
-  triggerClassName,
+  rootStyle,
+  triggerStyle,
 }: DropdownProps<TValue>) {
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -138,7 +137,7 @@ export function Dropdown<TValue extends string>({
   }, [open, highlightedIndex]);
 
   return (
-    <div className={clsx('inline-flex items-center', className)}>
+    <div {...stylex.props(styles.dropdown, rootStyle)}>
       <button
         ref={menu.refs.setReference}
         type="button"
@@ -167,15 +166,12 @@ export function Dropdown<TValue extends string>({
             }
           },
         })}
-        className={clsx(
-          'inline-flex h-6 w-fit items-center justify-between gap-1.5 rounded-lg border border-zinc-200 bg-white px-2 text-[11px] font-medium text-zinc-700 transition-colors hover:border-zinc-300 hover:bg-zinc-50 focus:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-200 dark:hover:border-zinc-700 dark:hover:bg-zinc-900 dark:focus:border-zinc-600 cursor-pointer disabled:cursor-default disabled:opacity-60',
-          triggerClassName,
-        )}
+        {...stylex.props(styles.dropdownTrigger, triggerStyle)}
       >
-        <span className="truncate">{currentLabel}</span>
+        <span {...stylex.props(styles.dropdownLabel)}>{currentLabel}</span>
         <ChevronDown
           size={14}
-          className={clsx('shrink-0 text-zinc-400 transition-transform', open && 'rotate-180')}
+          {...stylex.props(styles.dropdownChevron, open && styles.dropdownChevronOpen)}
         />
       </button>
 
@@ -188,7 +184,7 @@ export function Dropdown<TValue extends string>({
             aria-label="Choose an option"
             style={{ ...menu.floatingStyles, ...menu.transitionStyles }}
             {...menu.getFloatingProps()}
-            className="z-50 overflow-y-auto overflow-x-hidden rounded-lg border border-zinc-200 bg-white py-1 shadow-xl dark:border-zinc-800 dark:bg-zinc-900"
+            className={stylex.props(styles.dropdownMenu).className}
             onMouseDown={(event) => event.stopPropagation()}
           >
             {options.map((option, index) => {
@@ -229,15 +225,10 @@ export function Dropdown<TValue extends string>({
                       closeMenu();
                     }
                   }}
-                  className={clsx(
-                    'flex w-full items-center justify-between gap-3 px-3 py-1.5 text-left text-xs transition-colors cursor-pointer',
-                    active
-                      ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100'
-                      : 'text-zinc-700 hover:bg-zinc-50 dark:text-zinc-300 dark:hover:bg-zinc-800/50',
-                  )}
+                  {...stylex.props(styles.dropdownOption, active && styles.dropdownOptionActive)}
                 >
-                  <span className="truncate">{option.label}</span>
-                  {active ? <Check size={14} className="shrink-0 text-zinc-500" /> : null}
+                  <span {...stylex.props(styles.dropdownLabel)}>{option.label}</span>
+                  {active ? <Check size={14} {...stylex.props(styles.dropdownCheck)} /> : null}
                 </button>
               );
             })}
@@ -258,7 +249,7 @@ type ChoiceGroupProps<TValue extends string> = {
   options: Array<ChoiceGroupOption<TValue>>;
   onChange: (value: TValue) => void;
   disabled?: boolean;
-  className?: string;
+  rootStyle?: StyleXStyles;
   ariaLabel?: string;
 };
 
@@ -267,18 +258,14 @@ export function ChoiceGroup<TValue extends string>({
   options,
   onChange,
   disabled = false,
-  className,
+  rootStyle,
   ariaLabel = 'Choose an option',
 }: ChoiceGroupProps<TValue>) {
   return (
     <fieldset
       aria-label={ariaLabel}
       disabled={disabled}
-      className={clsx(
-        'inline-flex rounded-xl border border-zinc-200 bg-zinc-100 p-1 dark:border-zinc-800 dark:bg-zinc-900',
-        disabled && 'opacity-60',
-        className,
-      )}
+      {...stylex.props(styles.choiceGroup, disabled && styles.choiceGroupDisabled, rootStyle)}
     >
       {options.map((option) => {
         const active = option.value === value;
@@ -289,11 +276,9 @@ export function ChoiceGroup<TValue extends string>({
             aria-pressed={active}
             disabled={disabled}
             onClick={() => onChange(option.value)}
-            className={clsx(
-              'rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer disabled:cursor-default',
-              active
-                ? 'bg-white text-zinc-950 shadow-sm dark:bg-zinc-800 dark:text-zinc-50'
-                : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100',
+            {...stylex.props(
+              styles.choiceButton,
+              active ? styles.choiceActive : styles.choiceInactive,
             )}
           >
             {option.label}

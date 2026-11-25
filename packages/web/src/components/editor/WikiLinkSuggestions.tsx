@@ -1,7 +1,9 @@
+import * as stylex from '@stylexjs/stylex';
 import Fuse from 'fuse.js';
 import { FileText, Plus } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { styles } from './SuggestionMenu.stylex';
 
 type WikiLinkPage = {
   id: string;
@@ -162,21 +164,15 @@ export function WikiLinkSuggestions({
     <div
       ref={containerRef}
       data-testid="wikilink-suggestions"
-      className={`w-80 max-w-[calc(100vw-2rem)] rounded-xl border shadow-2xl overflow-hidden animate-in fade-in duration-100 ${
-        placement === 'bottom'
-          ? 'zoom-in-95 slide-in-from-top-2'
-          : 'zoom-in-95 slide-in-from-bottom-2'
-      } bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100`}
+      {...stylex.props(styles.menu, placement === 'bottom' ? styles.opensDown : styles.opensUp)}
       style={menuStyle}
     >
-      <div className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-500 border-b border-zinc-100 dark:border-zinc-800/50">
-        Link to page
-      </div>
-      <div className="max-h-[300px] overflow-y-auto p-1.5 space-y-0.5 scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-800">
+      <div {...stylex.props(styles.header)}>Link to page</div>
+      <div {...stylex.props(styles.list)}>
         {results.length === 0 && !trimmedQuery ? (
-          <div className="px-3 py-4 text-center text-sm text-zinc-500">Type to search...</div>
+          <div {...stylex.props(styles.emptyState)}>Type to search...</div>
         ) : results.length === 0 && trimmedQuery ? (
-          <div className="px-3 py-4 text-center text-sm text-zinc-500">No matches</div>
+          <div {...stylex.props(styles.emptyState)}>No matches</div>
         ) : (
           <>
             {results.map((page, index) => (
@@ -184,26 +180,19 @@ export function WikiLinkSuggestions({
                 key={page.id}
                 type="button"
                 onClick={() => onSelect(page)}
-                className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left text-sm transition-all ${
-                  index === selectedIndex
-                    ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 shadow-sm'
-                    : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-300'
-                }`}
+                {...stylex.props(
+                  styles.option,
+                  index === selectedIndex ? styles.optionSelected : styles.optionIdle,
+                )}
               >
-                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/50 text-base">
-                  {page.icon ? (
-                    page.icon
-                  ) : (
-                    <FileText className="h-3.5 w-3.5 text-zinc-500 dark:text-zinc-500" />
-                  )}
+                <span {...stylex.props(styles.optionIcon)}>
+                  {page.icon ? page.icon : <FileText {...stylex.props(styles.fileIcon)} />}
                 </span>
-                <span className="min-w-0 flex-1 truncate font-medium">{page.title}</span>
+                <span {...stylex.props(styles.optionText)}>{page.title}</span>
               </button>
             ))}
 
-            {results.length > 0 && onAddPage && (
-              <div className="h-px bg-zinc-100 dark:bg-zinc-800/50 my-1 mx-1" />
-            )}
+            {results.length > 0 && onAddPage && <div {...stylex.props(styles.divider)} />}
           </>
         )}
 
@@ -211,16 +200,15 @@ export function WikiLinkSuggestions({
           <button
             type="button"
             onClick={() => onAddPage(trimmedQuery)}
-            className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left text-sm transition-all ${
-              selectedIndex === results.length
-                ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 shadow-sm'
-                : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-300'
-            }`}
+            {...stylex.props(
+              styles.option,
+              selectedIndex === results.length ? styles.optionSelected : styles.optionIdle,
+            )}
           >
-            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/50">
-              <Plus className="h-4 w-4 text-zinc-500 dark:text-zinc-500" />
+            <span {...stylex.props(styles.optionIcon)}>
+              <Plus {...stylex.props(styles.actionIcon)} />
             </span>
-            <span className="min-w-0 flex-1 truncate">
+            <span {...stylex.props(styles.optionText)}>
               {trimmedQuery ? `New "${trimmedQuery}" page` : 'Add new page'}
             </span>
           </button>

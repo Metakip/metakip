@@ -161,6 +161,12 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Check generated brand colors
+        run: pnpm --filter @metakip/brand check:colors
+
+      - name: Check generated brand assets
+        run: pnpm --filter @metakip/brand check:brand-assets
+
   typecheck:
     name: Typecheck
     needs: changes

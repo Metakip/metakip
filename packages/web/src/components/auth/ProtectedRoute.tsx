@@ -1,7 +1,9 @@
+import * as stylex from '@stylexjs/stylex';
 import type React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { LoadingIndicator } from '../ui/LoadingIndicator';
+import { styles } from './RouteLoading.stylex';
 
 type ProtectedRouteProps = {
   children: React.ReactNode;
@@ -13,7 +15,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   if (isPending) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white dark:bg-zinc-950">
+      <div {...stylex.props(styles.root)}>
         <LoadingIndicator label="Loading application" size="md" />
       </div>
     );

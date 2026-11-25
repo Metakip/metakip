@@ -1,0 +1,94 @@
+/* Centralized page geometry: StyleX owns presentation; this file owns width and docking math. */
+[data-page-layout-root] {
+  --page-editor-gutter: 16px;
+  --page-content-width: 800px;
+  --page-comment-rail-space: 360px;
+  container: page-layout / inline-size;
+}
+
+[data-page-editor-container] {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 1rem;
+  justify-content: center;
+}
+
+[data-page-editor-content] {
+  --editor-max-width: var(--page-content-width);
+  --editor-half-width: calc(var(--editor-max-width) / 2);
+  width: 100%;
+  min-width: 0;
+  max-width: var(--editor-max-width);
+  padding-inline: 1.5rem;
+}
+
+[data-page-editor-container][data-comments-docked="true"] > [data-page-editor-content] {
+  flex: 1;
+}
+
+@media (min-width: 48rem) {
+  [data-page-editor-container][data-comments-docked="false"] {
+    justify-content: flex-start;
+  }
+
+  [data-page-layout-root][data-page-layout="default"]
+    [data-page-editor-container][data-comments-docked="false"]
+    > [data-page-editor-content] {
+    width: min(var(--editor-max-width), calc(100% - 2 * var(--page-editor-gutter)));
+    margin-left: max(
+      var(--page-editor-gutter),
+      calc(
+        50vw -
+        var(--editor-half-width) -
+        var(--scrollbar-half-width) -
+        var(--sidebar-column-width)
+      )
+    );
+    margin-right: 0;
+  }
+
+  [data-page-layout-root][data-page-layout="wide"]
+    [data-page-editor-container][data-comments-docked="false"]
+    > [data-page-editor-content] {
+    width: calc(100% - 2 * var(--page-editor-gutter));
+    margin-right: var(--page-editor-gutter);
+    margin-left: var(--page-editor-gutter);
+  }
+}
+
+[data-page-layout-root][data-page-layout="wide"] [data-page-editor-content] {
+  max-width: none;
+}
+
+[data-page-layout-root][data-page-layout="wide"]
+  [data-page-editor-container][data-comments-docked="true"]
+  > [data-page-editor-content] {
+  margin-inline: 0;
+}
+
+@container page-layout (min-width: 1100px) {
+  [data-page-layout-root][data-page-layout="default"]
+    [data-page-editor-content][data-comment-rail] {
+    --editor-max-width: calc(var(--page-content-width) + var(--page-comment-rail-space));
+  }
+}
+
+@media (min-width: 64rem) {
+  [data-page-editor-container][data-comments-docked="true"] {
+    display: grid;
+    width: calc(100% + var(--scrollbar-width));
+    grid-template-columns: minmax(0, 1fr) calc(
+        var(--comments-panel-width) +
+        var(--comments-panel-inset)
+      );
+    align-items: start;
+    padding-left: var(--page-editor-gutter);
+    column-gap: var(--page-editor-gutter);
+  }
+
+  [data-page-editor-container][data-comments-docked="true"] > [data-page-editor-content] {
+    justify-self: center;
+  }
+}

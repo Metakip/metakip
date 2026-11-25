@@ -1,10 +1,13 @@
+import * as stylex from '@stylexjs/stylex';
 import { Navigate, useLocation } from 'react-router-dom';
+import { styles as routeLoadingStyles } from '../components/auth/RouteLoading.stylex';
 import { HeaderActions } from '../components/HeaderActions';
 import { LoadingIndicator } from '../components/ui/LoadingIndicator';
 import { useIdentityLifecycle } from '../contexts/IdentityLifecycleContext';
 import { useAuth } from '../hooks/useAuth';
 import { authClient } from '../lib/auth-client';
 import { getMarketingWebsiteUrl, getWorkspaceRootPath } from '../utils/url';
+import { styles } from './Login.stylex';
 
 export default function Login() {
   const { data: session, isPending, isRefetching } = useAuth();
@@ -24,7 +27,7 @@ export default function Login() {
 
   if (isPending || isRefetching) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-white dark:bg-zinc-950">
+      <div {...stylex.props(routeLoadingStyles.root)}>
         <LoadingIndicator label="Loading application" size="md" />
       </div>
     );
@@ -52,24 +55,20 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 dark:bg-zinc-950">
-      <div className="absolute top-4 right-4">
+    <div {...stylex.props(styles.root)}>
+      <div {...stylex.props(styles.headerActions)}>
         <HeaderActions />
       </div>
-      <div className="w-full max-w-sm animate-fade-in rounded-lg border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <h1 className="mb-2 text-center text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-          Log In
-        </h1>
-        <p className="mb-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
-          Continue with your preferred provider.
-        </p>
-        <div className="space-y-3">
+      <div {...stylex.props(styles.card)}>
+        <h1 {...stylex.props(styles.title)}>Log In</h1>
+        <p {...stylex.props(styles.description)}>Continue with your preferred provider.</p>
+        <div {...stylex.props(styles.providers)}>
           <button
             type="button"
             onClick={handleSocialSignIn('google')}
-            className="flex w-full items-center justify-center gap-2 rounded-md border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-zinc-700 dark:hover:bg-zinc-800 cursor-pointer"
+            {...stylex.props(styles.providerButton, styles.googleButton)}
           >
-            <svg className="h-5 w-5" viewBox="0 0 24 24">
+            <svg {...stylex.props(styles.providerIcon)} viewBox="0 0 24 24">
               <title>Google</title>
               <path
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -93,9 +92,9 @@ export default function Login() {
           <button
             type="button"
             onClick={handleSocialSignIn('github')}
-            className="flex w-full items-center justify-center gap-2 rounded-md bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200 cursor-pointer"
+            {...stylex.props(styles.providerButton, styles.githubButton)}
           >
-            <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+            <svg {...stylex.props(styles.providerIcon)} fill="currentColor" viewBox="0 0 24 24">
               <title>GitHub</title>
               <path
                 fillRule="evenodd"
@@ -106,13 +105,13 @@ export default function Login() {
             Continue with GitHub
           </button>
         </div>
-        <p className="mt-6 text-center text-xs leading-5 text-zinc-500 dark:text-zinc-400">
+        <p {...stylex.props(styles.legal)}>
           By continuing, you agree to our{' '}
           <a
             href={`${marketingWebsiteUrl}/terms`}
             target="_blank"
             rel="noopener noreferrer"
-            className="underline underline-offset-2 hover:text-zinc-900 dark:hover:text-zinc-100"
+            {...stylex.props(styles.legalLink)}
           >
             Terms of Service
           </a>{' '}
@@ -121,7 +120,7 @@ export default function Login() {
             href={`${marketingWebsiteUrl}/privacy`}
             target="_blank"
             rel="noopener noreferrer"
-            className="underline underline-offset-2 hover:text-zinc-900 dark:hover:text-zinc-100"
+            {...stylex.props(styles.legalLink)}
           >
             Privacy Policy
           </a>

@@ -5,8 +5,6 @@ import type { Plugin } from 'vite';
 const sharedFaviconDirectory = path.resolve(__dirname, '../../shared/assets/app-favicon');
 const appFaviconFileNames = [
   'apple-touch-icon.png',
-  'icon-dark-192.png',
-  'icon-dark-512.png',
   'icon-light-192.png',
   'icon-light-512.png',
 ] as const;

@@ -15,7 +15,7 @@ describe('useTheme', () => {
     document.head.append(themeColor);
     favicon = document.createElement('link');
     favicon.rel = 'icon';
-    favicon.dataset.themeIcon = '192';
+    favicon.href = '/icon-light-192.png';
     document.head.append(favicon);
     Object.defineProperty(window, 'localStorage', {
       value: {
@@ -106,11 +106,11 @@ describe('useTheme', () => {
     expect(themeColor.content).toBe('#ffffff');
   });
 
-  it('updates the favicon to match the selected theme', () => {
+  it('keeps the light favicon in both themes', () => {
     const { result } = renderHook(() => useTheme());
 
     act(() => result.current.setTheme('dark'));
-    expect(favicon.getAttribute('href')).toBe('/icon-dark-192.png');
+    expect(favicon.getAttribute('href')).toBe('/icon-light-192.png');
 
     act(() => result.current.setTheme('light'));
     expect(favicon.getAttribute('href')).toBe('/icon-light-192.png');

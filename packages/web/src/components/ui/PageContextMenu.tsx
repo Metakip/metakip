@@ -1,16 +1,17 @@
+import type { StyleXStyles } from '@stylexjs/stylex';
 import { useShareContext } from '../../contexts/ShareContext';
 import { type EntityActionOptions, useEntityActions } from '../../hooks/useEntityActions';
 import { KebabMenu } from './KebabMenu';
 
 type PageContextMenuProps = EntityActionOptions & {
-  triggerClassName?: string;
-  menuClassName?: string;
+  triggerStyle?: StyleXStyles;
+  popupStyle?: StyleXStyles;
   onOpenChange?: ((isOpen: boolean) => void) | undefined;
 };
 
 export function PageContextMenu({
-  triggerClassName,
-  menuClassName,
+  triggerStyle,
+  popupStyle,
   onOpenChange,
   ...options
 }: PageContextMenuProps) {
@@ -26,8 +27,8 @@ export function PageContextMenu({
   return (
     <>
       <KebabMenu
-        {...(triggerClassName != null ? { triggerClassName } : {})}
-        {...(menuClassName != null ? { menuClassName } : {})}
+        {...(triggerStyle != null ? { triggerStyle } : {})}
+        {...(popupStyle != null ? { popupStyle } : {})}
         {...(onOpenChange != null ? { onOpenChange } : {})}
         items={items}
       />

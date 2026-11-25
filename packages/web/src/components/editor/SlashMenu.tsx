@@ -1,6 +1,8 @@
+import * as stylex from '@stylexjs/stylex';
 import Fuse from 'fuse.js';
 import type React from 'react';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { styles } from './SuggestionMenu.stylex';
 
 export interface SlashCommandItem {
   id: string;
@@ -163,42 +165,28 @@ export function SlashMenu({ isOpen, query, position, commands, onClose }: SlashM
     <div
       ref={containerRef}
       data-testid="slash-menu"
-      className={`w-80 max-w-[calc(100vw-2rem)] rounded-xl border shadow-2xl overflow-hidden animate-in fade-in duration-100 ${
-        placement === 'bottom'
-          ? 'zoom-in-95 slide-in-from-top-2'
-          : 'zoom-in-95 slide-in-from-bottom-2'
-      } bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100`}
+      {...stylex.props(styles.menu, placement === 'bottom' ? styles.opensDown : styles.opensUp)}
     >
-      <div className="px-3 py-2 text-[11px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-500 border-b border-zinc-100 dark:border-zinc-800/50">
-        Insert block
-      </div>
+      <div {...stylex.props(styles.header)}>Insert block</div>
 
-      <div
-        ref={listRef}
-        className="max-h-[300px] overflow-y-auto p-1.5 space-y-0.5 scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-800"
-      >
+      <div ref={listRef} {...stylex.props(styles.list)}>
         {results.length === 0 ? (
-          <div className="px-3 py-4 text-center text-sm text-zinc-500">No matching commands</div>
+          <div {...stylex.props(styles.emptyState)}>No matching commands</div>
         ) : (
           results.map((command, index) => (
             <button
               key={command.id}
               type="button"
               onClick={command.onSelect}
-              className={`flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left text-sm transition-all cursor-pointer ${
-                index === selectedIndex
-                  ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 shadow-sm'
-                  : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-300'
-              }`}
+              {...stylex.props(
+                styles.option,
+                index === selectedIndex ? styles.optionSelected : styles.optionIdle,
+              )}
             >
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/50 text-xs font-semibold">
-                {command.icon}
-              </span>
-              <span className="min-w-0 flex-1 truncate font-medium">{command.label}</span>
+              <span {...stylex.props(styles.optionIcon)}>{command.icon}</span>
+              <span {...stylex.props(styles.optionText)}>{command.label}</span>
               {command.shortcut && (
-                <span className="text-xs text-zinc-500 dark:text-zinc-500 font-mono ml-auto pl-2">
-                  {command.shortcut}
-                </span>
+                <span {...stylex.props(styles.optionShortcut)}>{command.shortcut}</span>
               )}
             </button>
           ))

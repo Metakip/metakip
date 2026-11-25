@@ -24,12 +24,13 @@
     "@dnd-kit/sortable": "^8.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@floating-ui/react": "^0.27.19",
-    "@fontsource/inter": "^5.2.8",
     "@hocuspocus/provider": "4.6.0",
     "@lezer/highlight": "1.2.3",
     "@lezer/markdown": "1.7.2",
     "@logtape/logtape": "^2.0.5",
+    "@metakip/brand": "workspace:*",
     "@metakip/shared": "workspace:*",
+    "@stylexjs/stylex": "0.19.2",
     "@tabler/icons-react": "^3.37.1",
     "@tanstack/react-query": "^5.90.21",
     "better-auth": "^1.7.2",
@@ -49,7 +50,7 @@
     "yjs": "^13.6.29"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.0.0",
+    "@stylexjs/unplugin": "0.19.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
@@ -62,7 +63,7 @@
     "emojibase-data": "17.0.0",
     "jest-axe": "^10.0.0",
     "jsdom": "^29.1.1",
-    "tailwindcss": "^4.0.0",
+    "lightningcss": "1.33.0",
     "vite": "^6.4.1"
   }
 }

@@ -1,5 +1,7 @@
+import * as stylex from '@stylexjs/stylex';
 import clsx from 'clsx';
 import type React from 'react';
+import { styles } from './Tooltip.stylex';
 
 interface TooltipProps {
   label: string;
@@ -16,23 +18,23 @@ export function Tooltip({
   className,
   delay = 200,
 }: TooltipProps) {
-  const positionClasses = {
-    top: 'bottom-full left-1/2 -translate-x-1/2 mb-2',
-    bottom: 'top-full left-1/2 -translate-x-1/2 mt-2',
-    'bottom-left': 'top-full left-0 mt-2',
-    left: 'right-full top-1/2 -translate-y-1/2 mr-2',
-    right: 'left-full top-1/2 -translate-y-1/2 ml-2',
+  const positionStyles = {
+    top: styles.top,
+    bottom: styles.bottom,
+    'bottom-left': styles.bottomLeft,
+    left: styles.left,
+    right: styles.right,
   };
 
   return (
-    <div className="group relative inline-flex" style={{ transitionDelay: `${delay}ms` }}>
+    <div {...stylex.props(stylex.defaultMarker(), styles.root)}>
       {children}
       <span
         className={clsx(
-          'absolute z-50 whitespace-nowrap rounded-md bg-zinc-900 dark:bg-zinc-700 px-2 py-1 text-xs font-medium text-white opacity-0 invisible pointer-events-none transition-all duration-200 group-hover:opacity-100 group-hover:visible',
-          positionClasses[position],
+          stylex.props(styles.tooltip, positionStyles[position]).className,
           className,
         )}
+        style={{ transitionDelay: `${delay}ms` }}
       >
         {label}
       </span>

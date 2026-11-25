@@ -1,0 +1,186 @@
+import * as stylex from '@stylexjs/stylex';
+import { colors } from '../theme.stylex';
+
+export const styles = stylex.create({
+  options: {
+    maxHeight: '60vh',
+    minHeight: '6rem',
+    overflowY: 'auto',
+    padding: {
+      default: '0.5rem',
+      '@media (min-width: 40rem)': '0.75rem',
+    },
+  },
+  highlight: {
+    borderRadius: '0.125rem',
+    paddingInline: '0.125rem',
+    backgroundColor:
+      'light-dark(color-mix(in srgb, #fde68a 80%, transparent), color-mix(in srgb, #b45309 60%, transparent))',
+    color: colors.textStrong,
+  },
+  option: {
+    display: 'flex',
+    width: '100%',
+    alignItems: 'center',
+    gap: '0.75rem',
+    borderWidth: 0,
+    borderRadius: '0.75rem',
+    paddingInline: '0.75rem',
+    color: colors.textMuted,
+    textAlign: 'left',
+    transitionProperty: 'background-color',
+    transitionDuration: '150ms',
+    cursor: 'pointer',
+    ':hover': {
+      backgroundColor:
+        'light-dark(var(--metakip-neutral-zinc-50), color-mix(in srgb, var(--metakip-neutral-zinc-800) 60%, transparent))',
+    },
+  },
+  quickOption: {
+    paddingBlock: '0.625rem',
+  },
+  resultOption: {
+    paddingBlock: '0.75rem',
+  },
+  selectedOption: {
+    backgroundColor: colors.selection,
+    color: colors.textStrong,
+    ':hover': {
+      backgroundColor: colors.selection,
+      color: colors.textStrong,
+    },
+  },
+  sectionHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '0.25rem 0.75rem 0.5rem',
+  },
+  sectionTitle: {
+    color: colors.textFaint,
+    fontSize: '0.75rem',
+    fontWeight: 600,
+    letterSpacing: '0.025em',
+    textTransform: 'uppercase',
+  },
+  quickSectionTitle: {
+    padding: '0.25rem 0.75rem 0.5rem',
+    color: colors.textFaint,
+    fontSize: '0.75rem',
+    fontWeight: 600,
+    letterSpacing: '0.025em',
+    textTransform: 'uppercase',
+  },
+  clearButton: {
+    borderWidth: 0,
+    borderRadius: '0.25rem',
+    padding: '0.25rem 0.375rem',
+    backgroundColor: 'transparent',
+    color: 'var(--metakip-neutral-zinc-400)',
+    fontSize: '0.75rem',
+    cursor: 'pointer',
+    ':hover': {
+      backgroundColor: colors.selection,
+      color: colors.controlText,
+    },
+  },
+  recentIcon: {
+    width: '1rem',
+    height: '1rem',
+    flexShrink: 0,
+    color: 'var(--metakip-neutral-zinc-400)',
+  },
+  recentText: {
+    minWidth: 0,
+    flex: 1,
+    overflow: 'hidden',
+    fontSize: '0.875rem',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+  quickActionIcon: {
+    display: 'flex',
+    width: '2.25rem',
+    height: '2.25rem',
+    flexShrink: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: '0.5rem',
+    backgroundColor:
+      'light-dark(color-mix( in srgb, var(--metakip-product-light-surface-raised) 60%, transparent ), color-mix(in srgb, var(--metakip-product-dark-border) 60%, transparent))',
+    color: 'light-dark(var(--metakip-neutral-zinc-600), var(--metakip-neutral-zinc-300))',
+  },
+  smallIcon: {
+    width: '1rem',
+    height: '1rem',
+  },
+  optionText: {
+    minWidth: 0,
+    flex: 1,
+    overflow: 'hidden',
+  },
+  actionTitle: {
+    display: 'block',
+    overflow: 'hidden',
+    fontSize: '0.875rem',
+    fontWeight: 500,
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+  resultTitle: {
+    display: 'block',
+    overflow: 'hidden',
+    fontSize: '0.875rem',
+    fontWeight: 500,
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+  actionDescription: {
+    display: 'block',
+    overflow: 'hidden',
+    marginTop: '0.125rem',
+    color: colors.textSubtle,
+    fontSize: '0.75rem',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+  breadcrumb: {
+    display: 'block',
+    overflow: 'hidden',
+    marginTop: '0.25rem',
+    color: colors.textFaint,
+    fontSize: '0.75rem',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+  },
+  searching: {
+    padding: '2rem 1rem',
+    color: colors.textSubtle,
+    fontSize: '0.875rem',
+    textAlign: 'center',
+  },
+  emptyResults: {
+    padding: '2.5rem 1rem',
+    textAlign: 'center',
+  },
+  emptyTitle: {
+    color: colors.textStrong,
+    fontSize: '0.875rem',
+    fontWeight: 500,
+  },
+  emptyDescription: {
+    marginTop: '0.25rem',
+    color: colors.textSubtle,
+    fontSize: '0.875rem',
+  },
+  resultSnippet: {
+    display: '-webkit-box',
+    overflow: 'hidden',
+    marginTop: '0.25rem',
+    color: colors.textSubtle,
+    fontSize: '0.75rem',
+    lineHeight: '1.25rem',
+    WebkitBoxOrient: 'vertical',
+    WebkitLineClamp: 2,
+  },
+});

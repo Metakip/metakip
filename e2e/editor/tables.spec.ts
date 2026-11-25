@@ -1,5 +1,10 @@
 import { expect, test } from '@playwright/test';
-import { createNewPage, focusEditor, pasteClipboardText } from '../fixtures';
+import {
+  createNewPage,
+  editorFormattingToolbar,
+  focusEditor,
+  pasteClipboardText,
+} from '../fixtures';
 
 test.describe('Table operations', () => {
   test('inserts rows and columns repeatedly at an empty cell and keeps it editable', async ({
@@ -116,14 +121,15 @@ test.describe('Table operations', () => {
     await focusEditor(page);
     await page.keyboard.type('a');
     await page.keyboard.press('Control+a');
-    await page.locator('.floating-toolbar button[title="Insert Table"]').click({ timeout: 5000 });
+    const toolbar = editorFormattingToolbar(page);
+    await toolbar.getByRole('button', { name: 'Insert Table' }).click({ timeout: 5000 });
     await expect(page.locator('.cm-md-table')).toBeVisible();
 
     // Click inside the table to show table manipulation buttons
     await page.locator('.cm-md-table-cell').first().click();
 
     // Add a row below
-    const addRowBtn = page.locator('.floating-toolbar button[title="Add Row Below"]');
+    const addRowBtn = toolbar.getByRole('button', { name: 'Add Row Below' });
     await addRowBtn.waitFor({ state: 'visible', timeout: 3000 });
     const rowCountBefore = await page.locator('.cm-md-table > .cm-line').count();
     await addRowBtn.click();
@@ -136,12 +142,13 @@ test.describe('Table operations', () => {
     await focusEditor(page);
     await page.keyboard.type('a');
     await page.keyboard.press('Control+a');
-    await page.locator('.floating-toolbar button[title="Insert Table"]').click({ timeout: 5000 });
+    const toolbar = editorFormattingToolbar(page);
+    await toolbar.getByRole('button', { name: 'Insert Table' }).click({ timeout: 5000 });
     await expect(page.locator('.cm-md-table')).toBeVisible();
 
     await page.locator('.cm-md-table-cell').first().click();
 
-    const deleteBtn = page.locator('.floating-toolbar button[title="Delete Table"]');
+    const deleteBtn = toolbar.getByRole('button', { name: 'Delete Table' });
     await deleteBtn.waitFor({ state: 'visible', timeout: 3000 });
     await deleteBtn.click();
     await expect(page.locator('.cm-md-table')).not.toBeVisible();
